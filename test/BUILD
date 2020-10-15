@@ -14,7 +14,6 @@ filegroup(
         "//test/cmd:all-srcs",
         "//test/e2e:all-srcs",
         "//test/e2e_kubeadm:all-srcs",
-        "//test/e2e_node:all-srcs",
         "//test/fixtures:all-srcs",
         "//test/images:all-srcs",
         "//test/integration:all-srcs",

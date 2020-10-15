@@ -28,7 +28,6 @@ filegroup(
         "//cmd/kube-scheduler:all-srcs",
         "//cmd/kubeadm:all-srcs",
         "//cmd/kubectl:all-srcs",
-        "//cmd/kubelet:all-srcs",
         "//cmd/kubemark:all-srcs",
         "//cmd/linkcheck:all-srcs",
     ],
