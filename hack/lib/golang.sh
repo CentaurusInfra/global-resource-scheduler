@@ -72,7 +72,6 @@ kube::golang::server_targets() {
     cmd/kube-proxy
     cmd/kube-apiserver
     cmd/kube-controller-manager
-    cmd/kubeadm
     cmd/hyperkube
     cmd/kube-scheduler
     vendor/k8s.io/apiextensions-apiserver
@@ -120,7 +119,6 @@ readonly KUBE_CONFORMANCE_IMAGE_TARGETS
 kube::golang::node_targets() {
   local targets=(
     cmd/kube-proxy
-    cmd/kubeadm
   )
   echo "${targets[@]}"
 }
