@@ -21,8 +21,8 @@ import (
 	"errors"
 	goflag "flag"
 	"fmt"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/client-go/datapartition"
+	// "k8s.io/apimachinery/pkg/util/wait"
+	// "k8s.io/client-go/datapartition"
 	"math/rand"
 	"os"
 	"time"
@@ -33,7 +33,7 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
-	utilfeature "k8s.io/apiserver/pkg/util/feature"
+	// utilfeature "k8s.io/apiserver/pkg/util/feature"
 	clientset "k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -42,11 +42,11 @@ import (
 	"k8s.io/component-base/logs"
 	"k8s.io/kubernetes/pkg/api/legacyscheme"
 	_ "k8s.io/kubernetes/pkg/client/metrics/prometheus" // for client metric registration
-	"k8s.io/kubernetes/pkg/features"
-	cadvisortest "k8s.io/kubernetes/pkg/kubelet/cadvisor/testing"
-	"k8s.io/kubernetes/pkg/kubelet/cm"
-	"k8s.io/kubernetes/pkg/kubelet/dockershim"
-	"k8s.io/kubernetes/pkg/kubelet/dockershim/libdocker"
+	// "k8s.io/kubernetes/pkg/features"
+	// cadvisortest "k8s.io/kubernetes/pkg/kubelet/cadvisor/testing"
+	// "k8s.io/kubernetes/pkg/kubelet/cm"
+	// "k8s.io/kubernetes/pkg/kubelet/dockershim"
+	// "k8s.io/kubernetes/pkg/kubelet/dockershim/libdocker"
 	"k8s.io/kubernetes/pkg/kubemark"
 	"k8s.io/kubernetes/pkg/master/ports"
 	fakeiptables "k8s.io/kubernetes/pkg/util/iptables/testing"
@@ -111,17 +111,6 @@ func (c *hollowNodeConfig) createClientConfigFromFile() (*restclient.Config, err
 	return configs, nil
 }
 
-func (c *hollowNodeConfig) createHollowKubeletOptions() *kubemark.HollowKubletOptions {
-	return &kubemark.HollowKubletOptions{
-		NodeName:            c.NodeName,
-		KubeletPort:         c.KubeletPort,
-		KubeletReadOnlyPort: c.KubeletReadOnlyPort,
-		MaxPods:             maxPods,
-		PodsPerCore:         podsPerCore,
-		NodeLabels:          c.NodeLabels,
-	}
-}
-
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
@@ -170,56 +159,6 @@ func run(config *hollowNodeConfig) {
 	clientConfigs, err := config.createClientConfigFromFile()
 	if err != nil {
 		klog.Fatalf("Failed to create a ClientConfig: %v. Exiting.", err)
-	}
-
-	client, err := clientset.NewForConfig(clientConfigs)
-	if err != nil {
-		klog.Fatalf("Failed to create a ClientSet: %v. Exiting.", err)
-	}
-
-	if config.Morph == "kubelet" {
-		// Start APIServerConfigManager
-		go datapartition.StartAPIServerConfigManagerAndInformerFactory(client, wait.NeverStop)
-
-		f, c := kubemark.GetHollowKubeletConfig(config.createHollowKubeletOptions())
-
-		heartbeatClientConfigs := restclient.CopyConfigs(clientConfigs)
-		for _, heartbeatClientConfig := range heartbeatClientConfigs.GetAllConfigs() {
-			heartbeatClientConfig.Timeout = c.NodeStatusUpdateFrequency.Duration
-			// if the NodeLease feature is enabled, the timeout is the minimum of the lease duration and status update frequency
-			if utilfeature.DefaultFeatureGate.Enabled(features.NodeLease) {
-				leaseTimeout := time.Duration(c.NodeLeaseDurationSeconds) * time.Second
-				if heartbeatClientConfig.Timeout > leaseTimeout {
-					heartbeatClientConfig.Timeout = leaseTimeout
-				}
-			}
-			heartbeatClientConfig.QPS = float32(-1)
-		}
-		heartbeatClient, err := clientset.NewForConfig(heartbeatClientConfigs)
-		if err != nil {
-			klog.Fatalf("Failed to create a ClientSet: %v. Exiting.", err)
-		}
-
-		cadvisorInterface := &cadvisortest.Fake{
-			NodeName: config.NodeName,
-		}
-		containerManager := cm.NewStubContainerManager()
-
-		fakeDockerClientConfig := &dockershim.ClientConfig{
-			DockerEndpoint:    libdocker.FakeDockerEndpoint,
-			EnableSleep:       true,
-			WithTraceDisabled: true,
-		}
-
-		hollowKubelet := kubemark.NewHollowKubelet(
-			f, c,
-			client,
-			heartbeatClient,
-			cadvisorInterface,
-			fakeDockerClientConfig,
-			containerManager,
-		)
-		hollowKubelet.Run()
 	}
 
 	if config.Morph == "proxy" {

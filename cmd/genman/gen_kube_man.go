@@ -33,7 +33,6 @@ import (
 	proxyapp "k8s.io/kubernetes/cmd/kube-proxy/app"
 	schapp "k8s.io/kubernetes/cmd/kube-scheduler/app"
 	kubeadmapp "k8s.io/kubernetes/cmd/kubeadm/app/cmd"
-	kubeletapp "k8s.io/kubernetes/cmd/kubelet/app"
 	kubectlcmd "k8s.io/kubernetes/pkg/kubectl/cmd"
 )
 
@@ -87,13 +86,6 @@ func main() {
 		genMarkdown(scheduler, "", outDir)
 		for _, c := range scheduler.Commands() {
 			genMarkdown(c, "kube-scheduler", outDir)
-		}
-	case "kubelet":
-		// generate manpage for kubelet
-		kubelet := kubeletapp.NewKubeletCommand()
-		genMarkdown(kubelet, "", outDir)
-		for _, c := range kubelet.Commands() {
-			genMarkdown(c, "kubelet", outDir)
 		}
 	case "kubectl":
 		// generate manpage for kubectl

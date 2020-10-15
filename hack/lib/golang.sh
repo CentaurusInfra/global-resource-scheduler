@@ -72,7 +72,6 @@ kube::golang::server_targets() {
     cmd/kube-proxy
     cmd/kube-apiserver
     cmd/kube-controller-manager
-    cmd/kubelet
     cmd/kubeadm
     cmd/hyperkube
     cmd/kube-scheduler
@@ -122,7 +121,6 @@ kube::golang::node_targets() {
   local targets=(
     cmd/kube-proxy
     cmd/kubeadm
-    cmd/kubelet
   )
   echo "${targets[@]}"
 }
@@ -291,9 +289,9 @@ kube::golang::server_test_targets() {
     vendor/github.com/onsi/ginkgo/ginkgo
   )
 
-  if [[ "${OSTYPE:-}" == "linux"* ]]; then
-    targets+=( test/e2e_node/e2e_node.test )
-  fi
+  # if [[ "${OSTYPE:-}" == "linux"* ]]; then
+  #   targets+=( test/e2e_node/e2e_node.test )
+  # fi
 
   echo "${targets[@]}"
 }
@@ -331,7 +329,6 @@ readonly KUBE_COVERAGE_INSTRUMENTED_PACKAGES=(
   k8s.io/kubernetes/cmd/kube-controller-manager
   k8s.io/kubernetes/cmd/kube-scheduler
   k8s.io/kubernetes/cmd/kube-proxy
-  k8s.io/kubernetes/cmd/kubelet
 )
 
 # KUBE_CGO_OVERRIDES is a space-separated list of binaries which should be built

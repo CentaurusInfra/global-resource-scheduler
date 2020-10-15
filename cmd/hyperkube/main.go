@@ -39,7 +39,6 @@ import (
 	kubecontrollermanager "k8s.io/kubernetes/cmd/kube-controller-manager/app"
 	kubeproxy "k8s.io/kubernetes/cmd/kube-proxy/app"
 	kubescheduler "k8s.io/kubernetes/cmd/kube-scheduler/app"
-	kubelet "k8s.io/kubernetes/cmd/kubelet/app"
 	_ "k8s.io/kubernetes/pkg/client/metrics/prometheus" // for client metric registration
 	kubectl "k8s.io/kubernetes/pkg/kubectl/cmd"
 	_ "k8s.io/kubernetes/pkg/version/prometheus" // for version metric registration
@@ -91,7 +90,6 @@ func NewHyperKubeCommand() (*cobra.Command, []func() *cobra.Command) {
 	proxy := func() *cobra.Command { return kubeproxy.NewProxyCommand() }
 	scheduler := func() *cobra.Command { return kubescheduler.NewSchedulerCommand() }
 	kubectlCmd := func() *cobra.Command { return kubectl.NewDefaultKubectlCommand() }
-	kubelet := func() *cobra.Command { return kubelet.NewKubeletCommand() }
 
 	commandFns := []func() *cobra.Command{
 		apiserver,
@@ -99,7 +97,6 @@ func NewHyperKubeCommand() (*cobra.Command, []func() *cobra.Command) {
 		proxy,
 		scheduler,
 		kubectlCmd,
-		kubelet,
 	}
 
 	makeSymlinksFlag := false

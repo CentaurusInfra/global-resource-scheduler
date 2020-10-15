@@ -29,7 +29,6 @@ import (
 	proxyapp "k8s.io/kubernetes/cmd/kube-proxy/app"
 	schapp "k8s.io/kubernetes/cmd/kube-scheduler/app"
 	kubeadmapp "k8s.io/kubernetes/cmd/kubeadm/app/cmd"
-	kubeletapp "k8s.io/kubernetes/cmd/kubelet/app"
 )
 
 func main() {
@@ -67,10 +66,6 @@ func main() {
 		// generate docs for kube-scheduler
 		scheduler := schapp.NewSchedulerCommand()
 		doc.GenMarkdownTree(scheduler, outDir)
-	case "kubelet":
-		// generate docs for kubelet
-		kubelet := kubeletapp.NewKubeletCommand()
-		doc.GenMarkdownTree(kubelet, outDir)
 	case "kubeadm":
 		// resets global flags created by kubelet or other commands e.g.
 		// --azure-container-registry-config from pkg/credentialprovider/azure
