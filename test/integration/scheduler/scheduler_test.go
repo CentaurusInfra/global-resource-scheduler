@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -112,7 +112,6 @@ func TestSchedulerCreationFromConfigMap(t *testing.T) {
 				]
 			}`,
 			expectedPredicates: sets.NewString(
-				"CheckNodeRuntimeReadiness",
 				"CheckNodeCondition", // mandatory predicate
 				"PredicateOne",
 				"PredicateTwo",
@@ -128,10 +127,8 @@ func TestSchedulerCreationFromConfigMap(t *testing.T) {
 				"apiVersion" : "v1"
 			}`,
 			expectedPredicates: sets.NewString(
-				"CheckNodeRuntimeReadiness",
 				"CheckNodeCondition", // mandatory predicate
 				"CheckNodeDiskPressure",
-				"CheckNodeMemoryPressure",
 				"CheckNodePIDPressure",
 				"CheckVolumeBinding",
 				"GeneralPredicates",
@@ -142,17 +139,10 @@ func TestSchedulerCreationFromConfigMap(t *testing.T) {
 				"MaxGCEPDVolumeCount",
 				"NoDiskConflict",
 				"NoVolumeZoneConflict",
-				"PodToleratesNodeTaints",
 			),
 			expectedPrioritizers: sets.NewString(
 				"BalancedResourceAllocation",
-				"InterPodAffinityPriority",
 				"LeastRequestedPriority",
-				"NodeAffinityPriority",
-				"NodePreferAvoidPodsPriority",
-				"SelectorSpreadPriority",
-				"TaintTolerationPriority",
-				"ImageLocalityPriority",
 			),
 		},
 		{
@@ -163,7 +153,6 @@ func TestSchedulerCreationFromConfigMap(t *testing.T) {
 				"priorities" : []
 			}`,
 			expectedPredicates: sets.NewString(
-				"CheckNodeRuntimeReadiness",
 				"CheckNodeCondition", // mandatory predicate
 			),
 			expectedPrioritizers: sets.NewString(),
@@ -181,7 +170,6 @@ priorities:
   weight: 5
 `,
 			expectedPredicates: sets.NewString(
-				"CheckNodeRuntimeReadiness",
 				"CheckNodeCondition", // mandatory predicate
 				"PredicateOne",
 				"PredicateTwo",
@@ -196,10 +184,8 @@ priorities:
 kind: Policy
 `,
 			expectedPredicates: sets.NewString(
-				"CheckNodeRuntimeReadiness",
 				"CheckNodeCondition", // mandatory predicate
 				"CheckNodeDiskPressure",
-				"CheckNodeMemoryPressure",
 				"CheckNodePIDPressure",
 				"CheckVolumeBinding",
 				"GeneralPredicates",
@@ -210,17 +196,10 @@ kind: Policy
 				"MaxGCEPDVolumeCount",
 				"NoDiskConflict",
 				"NoVolumeZoneConflict",
-				"PodToleratesNodeTaints",
 			),
 			expectedPrioritizers: sets.NewString(
 				"BalancedResourceAllocation",
-				"InterPodAffinityPriority",
 				"LeastRequestedPriority",
-				"NodeAffinityPriority",
-				"NodePreferAvoidPodsPriority",
-				"SelectorSpreadPriority",
-				"TaintTolerationPriority",
-				"ImageLocalityPriority",
 			),
 		},
 		{
@@ -230,7 +209,6 @@ predicates: []
 priorities: []
 `,
 			expectedPredicates: sets.NewString(
-				"CheckNodeRuntimeReadiness",
 				"CheckNodeCondition", // mandatory predicate
 			),
 			expectedPrioritizers: sets.NewString(),

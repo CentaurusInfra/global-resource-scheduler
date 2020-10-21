@@ -23,7 +23,7 @@ import (
 	"reflect"
 	"testing"
 
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/sets"
@@ -48,22 +48,19 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 		// A failure indicates backwards compatibility with the specified release was broken.
 		"1.0": {
 			JSON: `{
-  "kind": "Policy",
-  "apiVersion": "v1",
-  "predicates": [
-    {"name": "MatchNodeSelector"},
-    {"name": "PodFitsResources"},
-    {"name": "PodFitsPorts"},
-    {"name": "NoDiskConflict"},
-    {"name": "TestServiceAffinity", "argument": {"serviceAffinity" : {"labels" : ["region"]}}},
-    {"name": "TestLabelsPresence",  "argument": {"labelsPresence"  : {"labels" : ["foo"], "presence":true}}}
-  ],"priorities": [
-    {"name": "LeastRequestedPriority",   "weight": 1},
-    {"name": "ServiceSpreadingPriority", "weight": 2},
-    {"name": "TestServiceAntiAffinity",  "weight": 3, "argument": {"serviceAntiAffinity": {"label": "zone"}}},
-    {"name": "TestLabelPreference",      "weight": 4, "argument": {"labelPreference": {"label": "bar", "presence":true}}}
-  ]
-}`,
+			"kind": "Policy",
+			"apiVersion": "v1",
+			"predicates": [
+				{"name": "MatchNodeSelector"},
+				{"name": "PodFitsResources"},
+				{"name": "PodFitsPorts"},
+				{"name": "NoDiskConflict"},
+				{"name": "TestServiceAffinity", "argument": {"serviceAffinity" : {"labels" : ["region"]}}},
+				{"name": "TestLabelsPresence",  "argument": {"labelsPresence"  : {"labels" : ["foo"], "presence":true}}}
+			],"priorities": [
+				{"name": "LeastRequestedPriority",   "weight": 1}
+			]
+			}`,
 			ExpectedPolicy: schedulerapi.Policy{
 				Predicates: []schedulerapi.PredicatePolicy{
 					{Name: "MatchNodeSelector"},
@@ -75,9 +72,6 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 				},
 				Priorities: []schedulerapi.PriorityPolicy{
 					{Name: "LeastRequestedPriority", Weight: 1},
-					{Name: "ServiceSpreadingPriority", Weight: 2},
-					{Name: "TestServiceAntiAffinity", Weight: 3, Argument: &schedulerapi.PriorityArgument{ServiceAntiAffinity: &schedulerapi.ServiceAntiAffinity{Label: "zone"}}},
-					{Name: "TestLabelPreference", Weight: 4, Argument: &schedulerapi.PriorityArgument{LabelPreference: &schedulerapi.LabelPreference{Label: "bar", Presence: true}}},
 				},
 			},
 		},
@@ -99,10 +93,7 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 		  ],"priorities": [
 			{"name": "EqualPriority",   "weight": 2},
 			{"name": "LeastRequestedPriority",   "weight": 2},
-			{"name": "BalancedResourceAllocation",   "weight": 2},
-			{"name": "SelectorSpreadPriority",   "weight": 2},
-			{"name": "TestServiceAntiAffinity",  "weight": 3, "argument": {"serviceAntiAffinity": {"label": "zone"}}},
-			{"name": "TestLabelPreference",      "weight": 4, "argument": {"labelPreference": {"label": "bar", "presence":true}}}
+			{"name": "BalancedResourceAllocation",   "weight": 2}
 		  ]
 		}`,
 			ExpectedPolicy: schedulerapi.Policy{
@@ -119,9 +110,6 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 					{Name: "EqualPriority", Weight: 2},
 					{Name: "LeastRequestedPriority", Weight: 2},
 					{Name: "BalancedResourceAllocation", Weight: 2},
-					{Name: "SelectorSpreadPriority", Weight: 2},
-					{Name: "TestServiceAntiAffinity", Weight: 3, Argument: &schedulerapi.PriorityArgument{ServiceAntiAffinity: &schedulerapi.ServiceAntiAffinity{Label: "zone"}}},
-					{Name: "TestLabelPreference", Weight: 4, Argument: &schedulerapi.PriorityArgument{LabelPreference: &schedulerapi.LabelPreference{Label: "bar", Presence: true}}},
 				},
 			},
 		},
@@ -146,13 +134,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 			{"name": "TestLabelsPresence",  "argument": {"labelsPresence"  : {"labels" : ["foo"], "presence":true}}}
 		  ],"priorities": [
 			{"name": "EqualPriority",   "weight": 2},
-			{"name": "NodeAffinityPriority",   "weight": 2},
-			{"name": "ImageLocalityPriority",   "weight": 2},
 			{"name": "LeastRequestedPriority",   "weight": 2},
-			{"name": "BalancedResourceAllocation",   "weight": 2},
-			{"name": "SelectorSpreadPriority",   "weight": 2},
-			{"name": "TestServiceAntiAffinity",  "weight": 3, "argument": {"serviceAntiAffinity": {"label": "zone"}}},
-			{"name": "TestLabelPreference",      "weight": 4, "argument": {"labelPreference": {"label": "bar", "presence":true}}}
+			{"name": "BalancedResourceAllocation",   "weight": 2}
 		  ]
 		}`,
 			ExpectedPolicy: schedulerapi.Policy{
@@ -171,13 +154,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 				},
 				Priorities: []schedulerapi.PriorityPolicy{
 					{Name: "EqualPriority", Weight: 2},
-					{Name: "NodeAffinityPriority", Weight: 2},
-					{Name: "ImageLocalityPriority", Weight: 2},
 					{Name: "LeastRequestedPriority", Weight: 2},
 					{Name: "BalancedResourceAllocation", Weight: 2},
-					{Name: "SelectorSpreadPriority", Weight: 2},
-					{Name: "TestServiceAntiAffinity", Weight: 3, Argument: &schedulerapi.PriorityArgument{ServiceAntiAffinity: &schedulerapi.ServiceAntiAffinity{Label: "zone"}}},
-					{Name: "TestLabelPreference", Weight: 4, Argument: &schedulerapi.PriorityArgument{LabelPreference: &schedulerapi.LabelPreference{Label: "bar", Presence: true}}},
 				},
 			},
 		},
@@ -195,8 +173,6 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 			{"name": "HostName"},
 			{"name": "NoDiskConflict"},
 			{"name": "NoVolumeZoneConflict"},
-			{"name": "PodToleratesNodeTaints"},
-			{"name": "CheckNodeMemoryPressure"},
 			{"name": "MaxEBSVolumeCount"},
 			{"name": "MaxGCEPDVolumeCount"},
 			{"name": "MaxAzureDiskVolumeCount"},
@@ -206,13 +182,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 			{"name": "TestLabelsPresence",  "argument": {"labelsPresence"  : {"labels" : ["foo"], "presence":true}}}
 		  ],"priorities": [
 			{"name": "EqualPriority",   "weight": 2},
-			{"name": "ImageLocalityPriority",   "weight": 2},
 			{"name": "LeastRequestedPriority",   "weight": 2},
-			{"name": "BalancedResourceAllocation",   "weight": 2},
-			{"name": "SelectorSpreadPriority",   "weight": 2},
-			{"name": "NodeAffinityPriority",   "weight": 2},
-			{"name": "TaintTolerationPriority",   "weight": 2},
-			{"name": "InterPodAffinityPriority",   "weight": 2}
+			{"name": "BalancedResourceAllocation",   "weight": 2}
 		  ]
 		}`,
 			ExpectedPolicy: schedulerapi.Policy{
@@ -223,8 +194,6 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 					{Name: "HostName"},
 					{Name: "NoDiskConflict"},
 					{Name: "NoVolumeZoneConflict"},
-					{Name: "PodToleratesNodeTaints"},
-					{Name: "CheckNodeMemoryPressure"},
 					{Name: "MaxEBSVolumeCount"},
 					{Name: "MaxGCEPDVolumeCount"},
 					{Name: "MaxAzureDiskVolumeCount"},
@@ -235,13 +204,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 				},
 				Priorities: []schedulerapi.PriorityPolicy{
 					{Name: "EqualPriority", Weight: 2},
-					{Name: "ImageLocalityPriority", Weight: 2},
 					{Name: "LeastRequestedPriority", Weight: 2},
 					{Name: "BalancedResourceAllocation", Weight: 2},
-					{Name: "SelectorSpreadPriority", Weight: 2},
-					{Name: "NodeAffinityPriority", Weight: 2},
-					{Name: "TaintTolerationPriority", Weight: 2},
-					{Name: "InterPodAffinityPriority", Weight: 2},
 				},
 			},
 		},
@@ -259,8 +223,6 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 			{"name": "HostName"},
 			{"name": "NoDiskConflict"},
 			{"name": "NoVolumeZoneConflict"},
-			{"name": "PodToleratesNodeTaints"},
-			{"name": "CheckNodeMemoryPressure"},
 			{"name": "CheckNodeDiskPressure"},
 			{"name": "MaxEBSVolumeCount"},
 			{"name": "MaxGCEPDVolumeCount"},
@@ -271,15 +233,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 			{"name": "TestLabelsPresence",  "argument": {"labelsPresence"  : {"labels" : ["foo"], "presence":true}}}
 		  ],"priorities": [
 			{"name": "EqualPriority",   "weight": 2},
-			{"name": "ImageLocalityPriority",   "weight": 2},
 			{"name": "LeastRequestedPriority",   "weight": 2},
-			{"name": "BalancedResourceAllocation",   "weight": 2},
-			{"name": "SelectorSpreadPriority",   "weight": 2},
-			{"name": "NodePreferAvoidPodsPriority",   "weight": 2},
-			{"name": "NodeAffinityPriority",   "weight": 2},
-			{"name": "TaintTolerationPriority",   "weight": 2},
-			{"name": "InterPodAffinityPriority",   "weight": 2},
-			{"name": "MostRequestedPriority",   "weight": 2}
+			{"name": "BalancedResourceAllocation",   "weight": 2}
 		  ]
 		}`,
 			ExpectedPolicy: schedulerapi.Policy{
@@ -290,8 +245,6 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 					{Name: "HostName"},
 					{Name: "NoDiskConflict"},
 					{Name: "NoVolumeZoneConflict"},
-					{Name: "PodToleratesNodeTaints"},
-					{Name: "CheckNodeMemoryPressure"},
 					{Name: "CheckNodeDiskPressure"},
 					{Name: "MaxEBSVolumeCount"},
 					{Name: "MaxGCEPDVolumeCount"},
@@ -303,15 +256,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 				},
 				Priorities: []schedulerapi.PriorityPolicy{
 					{Name: "EqualPriority", Weight: 2},
-					{Name: "ImageLocalityPriority", Weight: 2},
 					{Name: "LeastRequestedPriority", Weight: 2},
 					{Name: "BalancedResourceAllocation", Weight: 2},
-					{Name: "SelectorSpreadPriority", Weight: 2},
-					{Name: "NodePreferAvoidPodsPriority", Weight: 2},
-					{Name: "NodeAffinityPriority", Weight: 2},
-					{Name: "TaintTolerationPriority", Weight: 2},
-					{Name: "InterPodAffinityPriority", Weight: 2},
-					{Name: "MostRequestedPriority", Weight: 2},
 				},
 			},
 		},
@@ -328,8 +274,6 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 			{"name": "HostName"},
 			{"name": "NoDiskConflict"},
 			{"name": "NoVolumeZoneConflict"},
-			{"name": "PodToleratesNodeTaints"},
-			{"name": "CheckNodeMemoryPressure"},
 			{"name": "CheckNodeDiskPressure"},
 			{"name": "MaxEBSVolumeCount"},
 			{"name": "MaxGCEPDVolumeCount"},
@@ -340,15 +284,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 			{"name": "TestLabelsPresence",  "argument": {"labelsPresence"  : {"labels" : ["foo"], "presence":true}}}
 		  ],"priorities": [
 			{"name": "EqualPriority",   "weight": 2},
-			{"name": "ImageLocalityPriority",   "weight": 2},
 			{"name": "LeastRequestedPriority",   "weight": 2},
-			{"name": "BalancedResourceAllocation",   "weight": 2},
-			{"name": "SelectorSpreadPriority",   "weight": 2},
-			{"name": "NodePreferAvoidPodsPriority",   "weight": 2},
-			{"name": "NodeAffinityPriority",   "weight": 2},
-			{"name": "TaintTolerationPriority",   "weight": 2},
-			{"name": "InterPodAffinityPriority",   "weight": 2},
-			{"name": "MostRequestedPriority",   "weight": 2}
+			{"name": "BalancedResourceAllocation",   "weight": 2}
 		  ],"extenders": [{
 			"urlPrefix":        "/prefix",
 			"filterVerb":       "filter",
@@ -369,8 +306,6 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 					{Name: "HostName"},
 					{Name: "NoDiskConflict"},
 					{Name: "NoVolumeZoneConflict"},
-					{Name: "PodToleratesNodeTaints"},
-					{Name: "CheckNodeMemoryPressure"},
 					{Name: "CheckNodeDiskPressure"},
 					{Name: "MaxEBSVolumeCount"},
 					{Name: "MaxGCEPDVolumeCount"},
@@ -382,15 +317,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 				},
 				Priorities: []schedulerapi.PriorityPolicy{
 					{Name: "EqualPriority", Weight: 2},
-					{Name: "ImageLocalityPriority", Weight: 2},
 					{Name: "LeastRequestedPriority", Weight: 2},
 					{Name: "BalancedResourceAllocation", Weight: 2},
-					{Name: "SelectorSpreadPriority", Weight: 2},
-					{Name: "NodePreferAvoidPodsPriority", Weight: 2},
-					{Name: "NodeAffinityPriority", Weight: 2},
-					{Name: "TaintTolerationPriority", Weight: 2},
-					{Name: "InterPodAffinityPriority", Weight: 2},
-					{Name: "MostRequestedPriority", Weight: 2},
 				},
 				ExtenderConfigs: []schedulerapi.ExtenderConfig{{
 					URLPrefix:        "/prefix",
@@ -418,8 +346,6 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 			{"name": "HostName"},
 			{"name": "NoDiskConflict"},
 			{"name": "NoVolumeZoneConflict"},
-			{"name": "PodToleratesNodeTaints"},
-			{"name": "CheckNodeMemoryPressure"},
 			{"name": "CheckNodeDiskPressure"},
 			{"name": "CheckNodeCondition"},
 			{"name": "MaxEBSVolumeCount"},
@@ -431,15 +357,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 			{"name": "TestLabelsPresence",  "argument": {"labelsPresence"  : {"labels" : ["foo"], "presence":true}}}
 		  ],"priorities": [
 			{"name": "EqualPriority",   "weight": 2},
-			{"name": "ImageLocalityPriority",   "weight": 2},
 			{"name": "LeastRequestedPriority",   "weight": 2},
-			{"name": "BalancedResourceAllocation",   "weight": 2},
-			{"name": "SelectorSpreadPriority",   "weight": 2},
-			{"name": "NodePreferAvoidPodsPriority",   "weight": 2},
-			{"name": "NodeAffinityPriority",   "weight": 2},
-			{"name": "TaintTolerationPriority",   "weight": 2},
-			{"name": "InterPodAffinityPriority",   "weight": 2},
-			{"name": "MostRequestedPriority",   "weight": 2}
+			{"name": "BalancedResourceAllocation",   "weight": 2}
 		  ],"extenders": [{
 			"urlPrefix":        "/prefix",
 			"filterVerb":       "filter",
@@ -460,8 +379,6 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 					{Name: "HostName"},
 					{Name: "NoDiskConflict"},
 					{Name: "NoVolumeZoneConflict"},
-					{Name: "PodToleratesNodeTaints"},
-					{Name: "CheckNodeMemoryPressure"},
 					{Name: "CheckNodeDiskPressure"},
 					{Name: "CheckNodeCondition"},
 					{Name: "MaxEBSVolumeCount"},
@@ -474,15 +391,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 				},
 				Priorities: []schedulerapi.PriorityPolicy{
 					{Name: "EqualPriority", Weight: 2},
-					{Name: "ImageLocalityPriority", Weight: 2},
 					{Name: "LeastRequestedPriority", Weight: 2},
 					{Name: "BalancedResourceAllocation", Weight: 2},
-					{Name: "SelectorSpreadPriority", Weight: 2},
-					{Name: "NodePreferAvoidPodsPriority", Weight: 2},
-					{Name: "NodeAffinityPriority", Weight: 2},
-					{Name: "TaintTolerationPriority", Weight: 2},
-					{Name: "InterPodAffinityPriority", Weight: 2},
-					{Name: "MostRequestedPriority", Weight: 2},
 				},
 				ExtenderConfigs: []schedulerapi.ExtenderConfig{{
 					URLPrefix:        "/prefix",
@@ -510,8 +420,6 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 			{"name": "HostName"},
 			{"name": "NoDiskConflict"},
 			{"name": "NoVolumeZoneConflict"},
-			{"name": "PodToleratesNodeTaints"},
-			{"name": "CheckNodeMemoryPressure"},
 			{"name": "CheckNodeDiskPressure"},
 			{"name": "CheckNodeCondition"},
 			{"name": "MaxEBSVolumeCount"},
@@ -524,15 +432,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 			{"name": "TestLabelsPresence",  "argument": {"labelsPresence"  : {"labels" : ["foo"], "presence":true}}}
 		  ],"priorities": [
 			{"name": "EqualPriority",   "weight": 2},
-			{"name": "ImageLocalityPriority",   "weight": 2},
 			{"name": "LeastRequestedPriority",   "weight": 2},
-			{"name": "BalancedResourceAllocation",   "weight": 2},
-			{"name": "SelectorSpreadPriority",   "weight": 2},
-			{"name": "NodePreferAvoidPodsPriority",   "weight": 2},
-			{"name": "NodeAffinityPriority",   "weight": 2},
-			{"name": "TaintTolerationPriority",   "weight": 2},
-			{"name": "InterPodAffinityPriority",   "weight": 2},
-			{"name": "MostRequestedPriority",   "weight": 2}
+			{"name": "BalancedResourceAllocation",   "weight": 2}
 		  ],"extenders": [{
 			"urlPrefix":        "/prefix",
 			"filterVerb":       "filter",
@@ -553,8 +454,6 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 					{Name: "HostName"},
 					{Name: "NoDiskConflict"},
 					{Name: "NoVolumeZoneConflict"},
-					{Name: "PodToleratesNodeTaints"},
-					{Name: "CheckNodeMemoryPressure"},
 					{Name: "CheckNodeDiskPressure"},
 					{Name: "CheckNodeCondition"},
 					{Name: "MaxEBSVolumeCount"},
@@ -568,15 +467,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 				},
 				Priorities: []schedulerapi.PriorityPolicy{
 					{Name: "EqualPriority", Weight: 2},
-					{Name: "ImageLocalityPriority", Weight: 2},
 					{Name: "LeastRequestedPriority", Weight: 2},
 					{Name: "BalancedResourceAllocation", Weight: 2},
-					{Name: "SelectorSpreadPriority", Weight: 2},
-					{Name: "NodePreferAvoidPodsPriority", Weight: 2},
-					{Name: "NodeAffinityPriority", Weight: 2},
-					{Name: "TaintTolerationPriority", Weight: 2},
-					{Name: "InterPodAffinityPriority", Weight: 2},
-					{Name: "MostRequestedPriority", Weight: 2},
 				},
 				ExtenderConfigs: []schedulerapi.ExtenderConfig{{
 					URLPrefix:        "/prefix",
@@ -605,8 +497,6 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 			{"name": "HostName"},
 			{"name": "NoDiskConflict"},
 			{"name": "NoVolumeZoneConflict"},
-			{"name": "PodToleratesNodeTaints"},
-			{"name": "CheckNodeMemoryPressure"},
 			{"name": "CheckNodeDiskPressure"},
 			{"name": "CheckNodePIDPressure"},
 			{"name": "CheckNodeCondition"},
@@ -620,15 +510,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 			{"name": "TestLabelsPresence",  "argument": {"labelsPresence"  : {"labels" : ["foo"], "presence":true}}}
 		  ],"priorities": [
 			{"name": "EqualPriority",   "weight": 2},
-			{"name": "ImageLocalityPriority",   "weight": 2},
 			{"name": "LeastRequestedPriority",   "weight": 2},
-			{"name": "BalancedResourceAllocation",   "weight": 2},
-			{"name": "SelectorSpreadPriority",   "weight": 2},
-			{"name": "NodePreferAvoidPodsPriority",   "weight": 2},
-			{"name": "NodeAffinityPriority",   "weight": 2},
-			{"name": "TaintTolerationPriority",   "weight": 2},
-			{"name": "InterPodAffinityPriority",   "weight": 2},
-			{"name": "MostRequestedPriority",   "weight": 2}
+			{"name": "BalancedResourceAllocation",   "weight": 2}
 		  ],"extenders": [{
 			"urlPrefix":        "/prefix",
 			"filterVerb":       "filter",
@@ -651,8 +534,6 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 					{Name: "HostName"},
 					{Name: "NoDiskConflict"},
 					{Name: "NoVolumeZoneConflict"},
-					{Name: "PodToleratesNodeTaints"},
-					{Name: "CheckNodeMemoryPressure"},
 					{Name: "CheckNodeDiskPressure"},
 					{Name: "CheckNodePIDPressure"},
 					{Name: "CheckNodeCondition"},
@@ -667,15 +548,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 				},
 				Priorities: []schedulerapi.PriorityPolicy{
 					{Name: "EqualPriority", Weight: 2},
-					{Name: "ImageLocalityPriority", Weight: 2},
 					{Name: "LeastRequestedPriority", Weight: 2},
 					{Name: "BalancedResourceAllocation", Weight: 2},
-					{Name: "SelectorSpreadPriority", Weight: 2},
-					{Name: "NodePreferAvoidPodsPriority", Weight: 2},
-					{Name: "NodeAffinityPriority", Weight: 2},
-					{Name: "TaintTolerationPriority", Weight: 2},
-					{Name: "InterPodAffinityPriority", Weight: 2},
-					{Name: "MostRequestedPriority", Weight: 2},
 				},
 				ExtenderConfigs: []schedulerapi.ExtenderConfig{{
 					URLPrefix:        "/prefix",
@@ -705,8 +579,6 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 			{"name": "HostName"},
 			{"name": "NoDiskConflict"},
 			{"name": "NoVolumeZoneConflict"},
-			{"name": "PodToleratesNodeTaints"},
-			{"name": "CheckNodeMemoryPressure"},
 			{"name": "CheckNodeDiskPressure"},
 			{"name": "CheckNodePIDPressure"},
 			{"name": "CheckNodeCondition"},
@@ -720,15 +592,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 			{"name": "TestLabelsPresence",  "argument": {"labelsPresence"  : {"labels" : ["foo"], "presence":true}}}
 		  ],"priorities": [
 			{"name": "EqualPriority",   "weight": 2},
-			{"name": "ImageLocalityPriority",   "weight": 2},
 			{"name": "LeastRequestedPriority",   "weight": 2},
 			{"name": "BalancedResourceAllocation",   "weight": 2},
-			{"name": "SelectorSpreadPriority",   "weight": 2},
-			{"name": "NodePreferAvoidPodsPriority",   "weight": 2},
-			{"name": "NodeAffinityPriority",   "weight": 2},
-			{"name": "TaintTolerationPriority",   "weight": 2},
-			{"name": "InterPodAffinityPriority",   "weight": 2},
-			{"name": "MostRequestedPriority",   "weight": 2},
 			{
 				"name": "RequestedToCapacityRatioPriority",
 				"weight": 2,
@@ -762,8 +627,6 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 					{Name: "HostName"},
 					{Name: "NoDiskConflict"},
 					{Name: "NoVolumeZoneConflict"},
-					{Name: "PodToleratesNodeTaints"},
-					{Name: "CheckNodeMemoryPressure"},
 					{Name: "CheckNodeDiskPressure"},
 					{Name: "CheckNodePIDPressure"},
 					{Name: "CheckNodeCondition"},
@@ -778,15 +641,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 				},
 				Priorities: []schedulerapi.PriorityPolicy{
 					{Name: "EqualPriority", Weight: 2},
-					{Name: "ImageLocalityPriority", Weight: 2},
 					{Name: "LeastRequestedPriority", Weight: 2},
 					{Name: "BalancedResourceAllocation", Weight: 2},
-					{Name: "SelectorSpreadPriority", Weight: 2},
-					{Name: "NodePreferAvoidPodsPriority", Weight: 2},
-					{Name: "NodeAffinityPriority", Weight: 2},
-					{Name: "TaintTolerationPriority", Weight: 2},
-					{Name: "InterPodAffinityPriority", Weight: 2},
-					{Name: "MostRequestedPriority", Weight: 2},
 					{
 						Name:   "RequestedToCapacityRatioPriority",
 						Weight: 2,
@@ -827,8 +683,6 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 			{"name": "HostName"},
 			{"name": "NoDiskConflict"},
 			{"name": "NoVolumeZoneConflict"},
-			{"name": "PodToleratesNodeTaints"},
-			{"name": "CheckNodeMemoryPressure"},
 			{"name": "CheckNodeDiskPressure"},
 			{"name": "CheckNodePIDPressure"},
 			{"name": "CheckNodeCondition"},
@@ -843,15 +697,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 			{"name": "TestLabelsPresence",  "argument": {"labelsPresence"  : {"labels" : ["foo"], "presence":true}}}
 		  ],"priorities": [
 			{"name": "EqualPriority",   "weight": 2},
-			{"name": "ImageLocalityPriority",   "weight": 2},
 			{"name": "LeastRequestedPriority",   "weight": 2},
 			{"name": "BalancedResourceAllocation",   "weight": 2},
-			{"name": "SelectorSpreadPriority",   "weight": 2},
-			{"name": "NodePreferAvoidPodsPriority",   "weight": 2},
-			{"name": "NodeAffinityPriority",   "weight": 2},
-			{"name": "TaintTolerationPriority",   "weight": 2},
-			{"name": "InterPodAffinityPriority",   "weight": 2},
-			{"name": "MostRequestedPriority",   "weight": 2},
 			{
 				"name": "RequestedToCapacityRatioPriority",
 				"weight": 2,
@@ -885,8 +732,6 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 					{Name: "HostName"},
 					{Name: "NoDiskConflict"},
 					{Name: "NoVolumeZoneConflict"},
-					{Name: "PodToleratesNodeTaints"},
-					{Name: "CheckNodeMemoryPressure"},
 					{Name: "CheckNodeDiskPressure"},
 					{Name: "CheckNodePIDPressure"},
 					{Name: "CheckNodeCondition"},
@@ -902,15 +747,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 				},
 				Priorities: []schedulerapi.PriorityPolicy{
 					{Name: "EqualPriority", Weight: 2},
-					{Name: "ImageLocalityPriority", Weight: 2},
 					{Name: "LeastRequestedPriority", Weight: 2},
 					{Name: "BalancedResourceAllocation", Weight: 2},
-					{Name: "SelectorSpreadPriority", Weight: 2},
-					{Name: "NodePreferAvoidPodsPriority", Weight: 2},
-					{Name: "NodeAffinityPriority", Weight: 2},
-					{Name: "TaintTolerationPriority", Weight: 2},
-					{Name: "InterPodAffinityPriority", Weight: 2},
-					{Name: "MostRequestedPriority", Weight: 2},
 					{
 						Name:   "RequestedToCapacityRatioPriority",
 						Weight: 2,
@@ -943,15 +781,12 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 		  "kind": "Policy",
 		  "apiVersion": "v1",
 		  "predicates": [
-            {"name": "CheckNodeRuntimeReadiness"},
 			{"name": "MatchNodeSelector"},
 			{"name": "PodFitsResources"},
 			{"name": "PodFitsHostPorts"},
 			{"name": "HostName"},
 			{"name": "NoDiskConflict"},
 			{"name": "NoVolumeZoneConflict"},
-			{"name": "PodToleratesNodeTaints"},
-			{"name": "CheckNodeMemoryPressure"},
 			{"name": "CheckNodeDiskPressure"},
 			{"name": "CheckNodePIDPressure"},
 			{"name": "CheckNodeCondition"},
@@ -967,15 +802,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 			{"name": "TestLabelsPresence",  "argument": {"labelsPresence"  : {"labels" : ["foo"], "presence":true}}}
 		  ],"priorities": [
 			{"name": "EqualPriority",   "weight": 2},
-			{"name": "ImageLocalityPriority",   "weight": 2},
 			{"name": "LeastRequestedPriority",   "weight": 2},
 			{"name": "BalancedResourceAllocation",   "weight": 2},
-			{"name": "SelectorSpreadPriority",   "weight": 2},
-			{"name": "NodePreferAvoidPodsPriority",   "weight": 2},
-			{"name": "NodeAffinityPriority",   "weight": 2},
-			{"name": "TaintTolerationPriority",   "weight": 2},
-			{"name": "InterPodAffinityPriority",   "weight": 2},
-			{"name": "MostRequestedPriority",   "weight": 2},
 			{
 				"name": "RequestedToCapacityRatioPriority",
 				"weight": 2,
@@ -1003,15 +831,12 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 		}`,
 			ExpectedPolicy: schedulerapi.Policy{
 				Predicates: []schedulerapi.PredicatePolicy{
-					{Name: "CheckNodeRuntimeReadiness"},
 					{Name: "MatchNodeSelector"},
 					{Name: "PodFitsResources"},
 					{Name: "PodFitsHostPorts"},
 					{Name: "HostName"},
 					{Name: "NoDiskConflict"},
 					{Name: "NoVolumeZoneConflict"},
-					{Name: "PodToleratesNodeTaints"},
-					{Name: "CheckNodeMemoryPressure"},
 					{Name: "CheckNodeDiskPressure"},
 					{Name: "CheckNodePIDPressure"},
 					{Name: "CheckNodeCondition"},
@@ -1028,15 +853,8 @@ func TestCompatibility_v1_Scheduler(t *testing.T) {
 				},
 				Priorities: []schedulerapi.PriorityPolicy{
 					{Name: "EqualPriority", Weight: 2},
-					{Name: "ImageLocalityPriority", Weight: 2},
 					{Name: "LeastRequestedPriority", Weight: 2},
 					{Name: "BalancedResourceAllocation", Weight: 2},
-					{Name: "SelectorSpreadPriority", Weight: 2},
-					{Name: "NodePreferAvoidPodsPriority", Weight: 2},
-					{Name: "NodeAffinityPriority", Weight: 2},
-					{Name: "TaintTolerationPriority", Weight: 2},
-					{Name: "InterPodAffinityPriority", Weight: 2},
-					{Name: "MostRequestedPriority", Weight: 2},
 					{
 						Name:   "RequestedToCapacityRatioPriority",
 						Weight: 2,

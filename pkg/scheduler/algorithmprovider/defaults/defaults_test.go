@@ -55,14 +55,8 @@ func TestCopyAndReplace(t *testing.T) {
 
 func TestDefaultPriorities(t *testing.T) {
 	result := sets.NewString(
-		priorities.SelectorSpreadPriority,
-		priorities.InterPodAffinityPriority,
 		priorities.LeastRequestedPriority,
 		priorities.BalancedResourceAllocation,
-		priorities.NodePreferAvoidPodsPriority,
-		priorities.NodeAffinityPriority,
-		priorities.TaintTolerationPriority,
-		priorities.ImageLocalityPriority,
 	)
 	if expected := defaultPriorities(); !result.Equal(expected) {
 		t.Errorf("expected %v got %v", expected, result)
@@ -79,13 +73,10 @@ func TestDefaultPredicates(t *testing.T) {
 		predicates.MatchInterPodAffinityPred,
 		predicates.NoDiskConflictPred,
 		predicates.GeneralPred,
-		predicates.CheckNodeMemoryPressurePred,
 		predicates.CheckNodeDiskPressurePred,
 		predicates.CheckNodePIDPressurePred,
 		predicates.CheckNodeConditionPred,
-		predicates.PodToleratesNodeTaintsPred,
 		predicates.CheckVolumeBindingPred,
-		predicates.CheckNodeRuntimeReadinessPred,
 	)
 
 	if expected := defaultPredicates(); !result.Equal(expected) {
