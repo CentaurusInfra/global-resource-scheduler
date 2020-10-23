@@ -21,6 +21,14 @@ with the global resource scheduling platform..
     object with the global scheduling platform. When a cluster CRD object is created/deleted,
     the cluster CRD object controller should execute the logic listed in section 2.3.
 
+-   The cluster CRD object should be created/deleted by an admin user, not an end user.
+    Permission must be set properly when implementing the API.
+
+-   The cluster object holds cluster static information, such as the cluster's geolocation
+    and resource profile attributes. These information will be used in the partition code
+    flow and could also be used in the scheduling algorithm
+    
+
 ## 2. Requirements
 
 -   In milestone1, The global-scheduler can interface with different types of
