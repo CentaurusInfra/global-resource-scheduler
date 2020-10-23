@@ -46,6 +46,7 @@ type SchedulersGetter interface {
 type SchedulerInterface interface {
 	Create(*v1.Scheduler) (*v1.Scheduler, error)
 	Update(*v1.Scheduler) (*v1.Scheduler, error)
+	UpdateStatus(*v1.Scheduler) (*v1.Scheduler, error)
 	Delete(name string, options *metav1.DeleteOptions) error
 	DeleteCollection(options *metav1.DeleteOptions, listOptions metav1.ListOptions) error
 	Get(name string, options metav1.GetOptions) (*v1.Scheduler, error)
@@ -283,6 +284,30 @@ func (c *schedulers) Update(scheduler *v1.Scheduler) (result *v1.Scheduler, err 
 		Namespace(c.ns).
 		Resource("schedulers").
 		Name(scheduler.Name).
+		Body(scheduler).
+		Do().
+		Into(result)
+
+	return
+}
+
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+
+func (c *schedulers) UpdateStatus(scheduler *v1.Scheduler) (result *v1.Scheduler, err error) {
+	result = &v1.Scheduler{}
+
+	objectTenant := scheduler.ObjectMeta.Tenant
+	if objectTenant == "" {
+		objectTenant = c.te
+	}
+
+	err = c.client.Put().
+		Tenant(objectTenant).
+		Namespace(c.ns).
+		Resource("schedulers").
+		Name(scheduler.Name).
+		SubResource("status").
 		Body(scheduler).
 		Do().
 		Into(result)
