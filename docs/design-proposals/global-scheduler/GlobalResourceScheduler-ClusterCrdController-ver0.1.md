@@ -4,20 +4,30 @@ Oct-20-2020, Hong Zhang, Eunju Kim
 
 ## 1. Module Description
 
-This module allows global resource scheduler register, deregister (or
-unregister), get and list existing clusters.
+This module allows an admin user to register, unregister, list, get an existing cluster
+with the global resource scheduling platform..
 
 -   Cluster consists of a group of nodes and nodes are host machines for
     hosting/running VM/Container PODs.
 
--   Namespace is a virtual cluster inside a Kubernetes cluster. There can be
-    multiple namespaces inside a single Kubernetes cluster, and they are all
-    logically isolated from each other.
+-   The cluster, whether it is an openstack cluster or a kubernetes cluster,
+    should have been deployed before this cluster object is created.
+    But in order for the global scheduling platform to know that such a cluster exists or
+    is removed, the cluster needs to be registered or unregistered with the platform.
 
--   Relationship among objects:
+-   This can be done through this cluster CRD object registration/unregistration API.
+    Note that this cluster registration/unregistration API does not actually deploy
+    a cluster or undeploy a cluster. It just registers and unregisters a cluster
+    object with the global scheduling platform. When a cluster CRD object is created/deleted,
+    the cluster CRD object controller should execute the logic listed in section 2.3.
 
-    Cluster \> Namespace (multiple name space in a cluster) \> Node (Host or VM)
-    \> Pod \> Container
+-   The cluster CRD object should be created/deleted by an admin user, not an end user.
+    Permission must be set properly when implementing the API.
+
+-   The cluster object holds cluster static information, such as the cluster's geolocation
+    and resource profile attributes. These information will be used in the partition code
+    flow and could also be used in the scheduling algorithm
+    
 
 ## 2. Requirements
 
@@ -51,13 +61,51 @@ code-generator](https://github.com/futurewei-cloud/global-resource-scheduler/iss
 
 **2.3** [Implement the controller
 logic](https://github.com/futurewei-cloud/global-resource-scheduler/issues/27)
+(1) cluster creation: 
 
--   List/watch the cluster object and scheduler object through Informer.
+-   List/watch the cluster object creation through Informer.
 
--   Run consistent hashing algorithm to set the scheduler-cluster
-    binding/association.
+-   Run consistent hashing algorithm to select the home scheduler for this cluster.
 
--   Save the binding to ETCD
+-   Save the cluster-scheduler binding to ETCD. That is, update the selected scheduler object to add the binding of this cluster to the scheduler.  
+
+-   Add the cluster's geolocation and resource profile information to the selected scheduler object. 
+
+(2) cluster deletion:
+
+-   List/watch the cluster object deletion through Informer.
+
+-   Run consistent hashing algorithm to retrieve the home scheduler for this cluster.
+
+-   Remove the cluster-scheduler binding in ETCD. That is, update the selected scheduler object to remove the binding of this cluster to the scheduler.   
+
+-   Remove the cluster's geolocation and resource profile information from the selected scheduler object. Since a scheduler could be tagged with multiple geolocations and many resoruce attributes, care must be taken not to remove a geolocation or resource attribute that is shared by another cluster bound to that scheduler object.
+
+(3) scheduler process creation: 
+
+-   List/watch the completion status of the scheduler object, which means the scheduler process creation is completed, through Informer. Note that the scheduler controller should list/watch the "scheduler CRD object creation" and run the scheduler process and then set the scheduler object status to completion. 
+
+-   Update the consistent hashing ring range assignment to assign a range of clusters to this new scheduler.
+
+-   reset the binding of this range of clusters, whose hash keys fall into this new scheduler's range, to this new scheduler object, i.e. this new scheduler becomes the new home scheduler for this range of clusters. 
+
+-   Add the geolocation and resource profile attributes of this range of clusters to the new scheduler object in ETCD
+
+-   Update the geolocation and resource profile attributes of the other scheduler which was previously bound to this range of clusters.
+
+
+(4) Scheduler CRD deletion: 
+
+-   List/watch the "scheduler CRD deletion" through Informer. It is this scheduler-cluster CRD controller, not the scheduler controller, that list/watch the "scheduler CRD deletion"
+
+-   Update the consistent hashing ring range assignment to reassign this scheduler's range of clusters to the other schedulers. 
+
+-   Update the binding of the range of clusters to the other schedulers accordingly. Add the geolocation and resource profile attributes of the range of clusters to their new Home scheduler objects in ETCD. Once this is done, the distributor will not forward any more POD requests to this scheduler. 
+
+-   Remove the scheduler object from ETCD.  
+
+-   Note that the scheduler controller should list/watch the "scheduler object removal from ETCD". WHen this happens, the scheduler controller should wait until all POD requests in its scheduling queue is scheduled and then delete the scheduler process. 
+
 
 ## 3. Cluster CRD Definition & Data Structure
 
