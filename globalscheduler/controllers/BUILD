@@ -5,6 +5,24 @@ go_library(
     srcs = ["scheduler_controller.go"],
     importpath = "k8s.io/kubernetes/globalscheduler/controllers",
     visibility = ["//visibility:public"],
+    deps = [
+        "//globalscheduler/pkg/apis/scheduler/client/clientset/versioned:go_default_library",
+        "//globalscheduler/pkg/apis/scheduler/client/clientset/versioned/scheme:go_default_library",
+        "//globalscheduler/pkg/apis/scheduler/client/informers/externalversions/scheduler/v1:go_default_library",
+        "//globalscheduler/pkg/apis/scheduler/client/listers/scheduler/v1:go_default_library",
+        "//globalscheduler/pkg/apis/scheduler/v1:go_default_library",
+        "//staging/src/k8s.io/api/core/v1:go_default_library",
+        "//staging/src/k8s.io/apimachinery/pkg/api/errors:go_default_library",
+        "//staging/src/k8s.io/apimachinery/pkg/util/runtime:go_default_library",
+        "//staging/src/k8s.io/apimachinery/pkg/util/wait:go_default_library",
+        "//staging/src/k8s.io/client-go/kubernetes:go_default_library",
+        "//staging/src/k8s.io/client-go/kubernetes/scheme:go_default_library",
+        "//staging/src/k8s.io/client-go/kubernetes/typed/core/v1:go_default_library",
+        "//staging/src/k8s.io/client-go/tools/cache:go_default_library",
+        "//staging/src/k8s.io/client-go/tools/record:go_default_library",
+        "//staging/src/k8s.io/client-go/util/workqueue:go_default_library",
+        "//vendor/k8s.io/klog:go_default_library",
+    ],
 )
 
 filegroup(
