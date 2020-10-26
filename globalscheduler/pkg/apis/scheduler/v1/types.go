@@ -19,14 +19,14 @@ package v1
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 // +genclient
+// +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type Scheduler struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   SchedulerSpec `json:"spec"`
-	Status string        `json:"status"`
+	Spec SchedulerSpec `json:"spec"`
 }
 
 type SchedulerSpec struct {
