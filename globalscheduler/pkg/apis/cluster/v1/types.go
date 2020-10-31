@@ -37,7 +37,7 @@ type Cluster struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 	Spec              ClusterSpec `json:"spec"`
-	Status            string      `json:"status"`
+	State             string      `json:"state"`
 }
 
 // ClusterSpec is the spec for a Cluster resource.
