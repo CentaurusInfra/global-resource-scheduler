@@ -89,6 +89,7 @@ filegroup(
         "//cmd:all-srcs",
         "//docs:all-srcs",
         "//globalscheduler/controllers/scheduler:all-srcs",
+        "//globalscheduler/pkg/apis/cluster:all-srcs",
         "//globalscheduler/pkg/apis/scheduler:all-srcs",
         "//hack:all-srcs",
         "//perf-tests/clusterloader2/api:all-srcs",
