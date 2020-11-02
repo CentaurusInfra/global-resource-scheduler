@@ -94,7 +94,7 @@ func NewSchedulerController(
 
 	klog.Info("Setting up scheduler event handlers")
 	schedulerInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: controller.addScheduler,
+		AddFunc:    controller.addScheduler,
 		UpdateFunc: controller.updateScheduler,
 		DeleteFunc: controller.deleteScheduler,
 	})
