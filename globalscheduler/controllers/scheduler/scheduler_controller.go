@@ -94,17 +94,9 @@ func NewSchedulerController(
 
 	klog.Info("Setting up scheduler event handlers")
 	schedulerInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: controller.enqueueScheduler,
-		UpdateFunc: func(old, new interface{}) {
-			oldScheduler := old.(*samplecrdv1.Scheduler)
-			newScheduler := new.(*samplecrdv1.Scheduler)
-			if oldScheduler.ResourceVersion == newScheduler.ResourceVersion {
-				return
-			}
-			controller.enqueueScheduler(new)
-		},
-		//TODO
-		//DeleteFunc:
+		AddFunc: controller.addScheduler,
+		UpdateFunc: controller.updateScheduler,
+		DeleteFunc: controller.deleteScheduler,
 	})
 
 	return controller
@@ -119,7 +111,7 @@ func (sc *SchedulerController) Run(threadiness int, stopCh <-chan struct{}) erro
 	defer sc.workqueue.ShutDown()
 
 	// Start the informer factories to begin populating the informer caches
-	klog.Info("Starting Mydemo control loop")
+	klog.Info("Starting Scheduler control loop")
 
 	// Wait for the caches to be synced before starting workers
 	klog.Info("Waiting for informer caches to sync")
@@ -144,7 +136,6 @@ func (sc *SchedulerController) Run(threadiness int, stopCh <-chan struct{}) erro
 // workqueue.
 func (sc *SchedulerController) runWorker() {
 	for sc.processNextWorkItem() {
-		fmt.Println("Run processNextWorkItem function")
 	}
 }
 
@@ -182,7 +173,7 @@ func (sc *SchedulerController) processNextWorkItem() bool {
 			return nil
 		}
 		// Run the syncHandler, passing it the namespace/name string of the
-		// Mydemo resource to be synced.
+		// Scheduler resource to be synced.
 		if err := sc.syncHandler(key); err != nil {
 			return fmt.Errorf("error syncing '%s': %s", key, err.Error())
 		}
@@ -202,7 +193,7 @@ func (sc *SchedulerController) processNextWorkItem() bool {
 }
 
 // syncHandler compares the actual state with the desired, and attempts to
-// converge the two. It then updates the Status block of the Mydemo resource
+// converge the two. It then updates the Status block of the Scheduler resource
 // with the current status of the resource.
 func (sc *SchedulerController) syncHandler(key string) error {
 	// Convert the namespace/name string into a distinct namespace and name
@@ -212,16 +203,16 @@ func (sc *SchedulerController) syncHandler(key string) error {
 		return nil
 	}
 
-	// Get the Mydemo resource with this namespace/name
+	// Get the Scheduler resource with this namespace/name
 	scheduler, err := sc.schedulerInformer.Schedulers(namespace).Get(name)
 	if err != nil {
-		// The Mydemo resource may no longer exist, in which case we stop
+		// The Scheduler resource may no longer exist, in which case we stop
 		// processing.
 		if errors.IsNotFound(err) {
 			klog.Warningf("SchedulerCRD: %s/%s does not exist in local cache, will delete it from Scheduler ...",
 				namespace, name)
 
-			klog.Infof("[DemoCRD] Deleting scheduler: %s/%s ...", namespace, name)
+			klog.Infof("[SchedulerCRD] Deleting scheduler: %s/%s ...", namespace, name)
 
 			return nil
 		}
@@ -235,6 +226,33 @@ func (sc *SchedulerController) syncHandler(key string) error {
 
 	sc.recorder.Event(scheduler, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	return nil
+}
+
+func (sc *SchedulerController) addScheduler(obj interface{}) {
+	sc.enqueueScheduler(obj)
+}
+
+func (sc *SchedulerController) updateScheduler(old, new interface{}) {
+	oldScheduler := old.(*samplecrdv1.Scheduler)
+	newScheduler := new.(*samplecrdv1.Scheduler)
+	if oldScheduler.ResourceVersion == newScheduler.ResourceVersion {
+		return
+	}
+	sc.enqueueScheduler(new)
+}
+
+// deleteScheduler takes a deleted Scheduler resource and converts it into a namespace/name
+// string which is then put onto the work queue. This method should *not* be
+// passed resources of any type other than Scheduler.
+func (sc *SchedulerController) deleteScheduler(obj interface{}) {
+	var key string
+	var err error
+	key, err = cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
+	if err != nil {
+		runtime.HandleError(err)
+		return
+	}
+	sc.workqueue.AddRateLimited(key)
 }
 
 // enqueueScheduler takes a Scheduler resource and converts it into a namespace/name
