@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"k8s.io/kubernetes/globalscheduler/controllers/scheduler"
+	client "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client"
 	clientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
 	informers "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/informers/externalversions"
 )
@@ -39,6 +40,8 @@ var (
 	onlyOneSignalHandler = make(chan struct{})
 	shutdownSignals      = []os.Signal{os.Interrupt, syscall.SIGTERM}
 )
+
+const defaultNamespace = "default"
 
 // setup stop signal
 func setupSignalHandler() (stopCh <-chan struct{}) {
@@ -77,9 +80,15 @@ func StartSchedulerController() {
 		klog.Fatalf("Error building example clientset: %s", err.Error())
 	}
 
+	// Create scheduler client
+	schedulerClient, err := client.NewClient(schedulerClientset, defaultNamespace)
+	if err != nil {
+		klog.Fatalf("Error creating scheduler client: %s", err.Error())
+	}
+
 	schedulerInformerFactory := informers.NewSharedInformerFactory(schedulerClientset, time.Second*30)
 
-	schedulerController := scheduler.NewSchedulerController(kubeClientset, schedulerClientset, schedulerInformerFactory.Globalscheduler().V1().Schedulers())
+	schedulerController := scheduler.NewSchedulerController(kubeClientset, schedulerClient, schedulerInformerFactory.Globalscheduler().V1().Schedulers())
 
 	go schedulerInformerFactory.Start(stopCh)
 

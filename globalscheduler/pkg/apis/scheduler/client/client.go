@@ -22,26 +22,26 @@ import (
 )
 
 // Create post an instance of CRD into Kubernetes.
-func (c *Client) Create(obj *schedulerv1.Scheduler) (*schedulerv1.Scheduler, error) {
-	return c.clientset.GlobalschedulerV1().Schedulers(c.namespace).Create(obj)
+func (sc *SchedulerClient) Create(obj *schedulerv1.Scheduler) (*schedulerv1.Scheduler, error) {
+	return sc.clientset.GlobalschedulerV1().Schedulers(sc.namespace).Create(obj)
 }
 
 // Update puts new instance of CRD to replace the old one.
-func (c *Client) Update(obj *schedulerv1.Scheduler) (*schedulerv1.Scheduler, error) {
-	return c.clientset.GlobalschedulerV1().Schedulers(c.namespace).Update(obj)
+func (sc *SchedulerClient) Update(obj *schedulerv1.Scheduler) (*schedulerv1.Scheduler, error) {
+	return sc.clientset.GlobalschedulerV1().Schedulers(sc.namespace).Update(obj)
 }
 
 // Delete removes the CRD instance by given name and delete options.
-func (c *Client) Delete(name string, opts *metav1.DeleteOptions) error {
-	return c.clientset.GlobalschedulerV1().Schedulers(c.namespace).Delete(name, opts)
+func (sc *SchedulerClient) Delete(name string, opts *metav1.DeleteOptions) error {
+	return sc.clientset.GlobalschedulerV1().Schedulers(sc.namespace).Delete(name, opts)
 }
 
 // Get returns a pointer to the CRD instance.
-func (c *Client) Get(name string, opts metav1.GetOptions) (*schedulerv1.Scheduler, error) {
-	return c.clientset.GlobalschedulerV1().Schedulers(c.namespace).Get(name, opts)
+func (sc *SchedulerClient) Get(name string, opts metav1.GetOptions) (*schedulerv1.Scheduler, error) {
+	return sc.clientset.GlobalschedulerV1().Schedulers(sc.namespace).Get(name, opts)
 }
 
 // List returns a list of CRD instances by given list options.
-func (c *Client) List(opts metav1.ListOptions) (*schedulerv1.SchedulerList, error) {
-	return c.clientset.GlobalschedulerV1().Schedulers(c.namespace).List(opts)
+func (sc *SchedulerClient) List(opts metav1.ListOptions) (*schedulerv1.SchedulerList, error) {
+	return sc.clientset.GlobalschedulerV1().Schedulers(sc.namespace).List(opts)
 }

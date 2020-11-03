@@ -21,14 +21,14 @@ import (
 )
 
 // Client is an API client to help perform CRUD for CRD instances.
-type Client struct {
+type SchedulerClient struct {
 	clientset *clientset.Clientset
 	namespace string
 }
 
 // NewClient accepts kubeconfig path and namespace. Return the API client interface for CRD Jinghzhu v1.
-func NewClient(schedulerClientset *clientset.Clientset, namespace string) (*Client, error) {
-	c := &Client{
+func NewClient(schedulerClientset *clientset.Clientset, namespace string) (*SchedulerClient, error) {
+	c := &SchedulerClient{
 		clientset: schedulerClientset,
 		namespace: namespace,
 	}

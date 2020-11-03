@@ -35,7 +35,6 @@ import (
 	"k8s.io/client-go/util/workqueue"
 
 	client "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client"
-	clientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
 	schedulerscheme "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned/scheme"
 	informers "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/informers/externalversions/scheduler/v1"
 	listers "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/listers/scheduler/v1"
@@ -46,13 +45,12 @@ const (
 	controllerAgentName   = "scheduler-controller"
 	SuccessSynced         = "Synced"
 	MessageResourceSynced = "scheduler synced successfully"
-	defaultNamespace      = "default"
 )
 
 type SchedulerController struct {
 	// kubeclientset is a standard kubernetes clientset
-	kubeclientset      *kubernetes.Clientset
-	schedulerclientset *clientset.Clientset
+	kubeclientset   *kubernetes.Clientset
+	schedulerclient *client.SchedulerClient
 
 	schedulerInformer listers.SchedulerLister
 	schedulerSynced   cache.InformerSynced
@@ -71,7 +69,7 @@ type SchedulerController struct {
 // NewSchedulerController returns a new scheduler controller
 func NewSchedulerController(
 	kubeclientset *kubernetes.Clientset,
-	schedulerclientset *clientset.Clientset,
+	schedulerclient *client.SchedulerClient,
 	schedulerInformer informers.SchedulerInformer) *SchedulerController {
 
 	// Create event broadcaster
@@ -85,12 +83,12 @@ func NewSchedulerController(
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 
 	controller := &SchedulerController{
-		kubeclientset:      kubeclientset,
-		schedulerclientset: schedulerclientset,
-		schedulerInformer:  schedulerInformer.Lister(),
-		schedulerSynced:    schedulerInformer.Informer().HasSynced,
-		workqueue:          workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Scheduler"),
-		recorder:           recorder,
+		kubeclientset:     kubeclientset,
+		schedulerclient:   schedulerclient,
+		schedulerInformer: schedulerInformer.Lister(),
+		schedulerSynced:   schedulerInformer.Informer().HasSynced,
+		workqueue:         workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Scheduler"),
+		recorder:          recorder,
 	}
 
 	klog.Info("Setting up scheduler event handlers")
@@ -127,11 +125,6 @@ func (sc *SchedulerController) Run(threadiness int, stopCh <-chan struct{}) erro
 
 	klog.Info("Started workers")
 
-	// Create scheduler client
-	schedulerClient, err := client.NewClient(sc.schedulerclientset, defaultNamespace)
-	if err != nil {
-		return fmt.Errorf("Error creating scheduler client: %s", err.Error())
-	}
 	// Create an instance of Scheduler CRD
 	instanceName := "sample-scheduler"
 	exampleInstance := &schedulercrdv1.Scheduler{
@@ -142,11 +135,10 @@ func (sc *SchedulerController) Run(threadiness int, stopCh <-chan struct{}) erro
 			Name: "scheduler-1",
 		},
 	}
-	schedulerCRDInstance, err := schedulerClient.Create(exampleInstance)
+	_, err := sc.schedulerclient.Create(exampleInstance)
 	if err != nil {
 		return fmt.Errorf("Error creating scheduler CRD instance: %s", err.Error())
 	}
-	klog.Info("Scheduler CRD instance create successfully: %v", schedulerCRDInstance)
 
 	<-stopCh
 	klog.Info("Shutting down workers")
