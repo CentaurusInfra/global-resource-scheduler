@@ -26,7 +26,8 @@ type Scheduler struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec SchedulerSpec `json:"spec"`
+	Spec   SchedulerSpec   `json:"spec"`
+	Status SchedulerStatus `json:"status"`
 }
 
 type SchedulerSpec struct {
@@ -35,6 +36,10 @@ type SchedulerSpec struct {
 
 	// Cluster is an array that stores the name of clusters
 	Cluster []string `json:"cluster"`
+}
+
+type SchedulerStatus struct {
+	State string `json:"state"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

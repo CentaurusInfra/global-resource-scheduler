@@ -67,19 +67,19 @@ func StartSchedulerController() {
 		klog.Fatalf("Error building kubeconfig: %s", err.Error())
 	}
 
-	kubeClient, err := kubernetes.NewForConfig(cfg)
+	kubeClientset, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
 		klog.Fatalf("Error building kubernetes clientset: %s", err.Error())
 	}
 
-	schedulerClient, err := clientset.NewForConfig(cfg)
+	schedulerClientset, err := clientset.NewForConfig(cfg)
 	if err != nil {
 		klog.Fatalf("Error building example clientset: %s", err.Error())
 	}
 
-	schedulerInformerFactory := informers.NewSharedInformerFactory(schedulerClient, time.Second*30)
+	schedulerInformerFactory := informers.NewSharedInformerFactory(schedulerClientset, time.Second*30)
 
-	schedulerController := scheduler.NewSchedulerController(kubeClient, schedulerClient, schedulerInformerFactory.Globalscheduler().V1().Schedulers())
+	schedulerController := scheduler.NewSchedulerController(kubeClientset, schedulerClientset, schedulerInformerFactory.Globalscheduler().V1().Schedulers())
 
 	go schedulerInformerFactory.Start(stopCh)
 

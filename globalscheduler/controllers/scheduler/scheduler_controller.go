@@ -19,6 +19,7 @@ package scheduler
 import (
 	"fmt"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/klog"
@@ -33,25 +34,25 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 
+	client "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client"
 	clientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
 	schedulerscheme "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned/scheme"
 	informers "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/informers/externalversions/scheduler/v1"
 	listers "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/listers/scheduler/v1"
-	samplecrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
+	schedulercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
 )
 
-const controllerAgentName = "scheduler-controller"
-
 const (
-	SuccessSynced = "Synced"
-
+	controllerAgentName   = "scheduler-controller"
+	SuccessSynced         = "Synced"
 	MessageResourceSynced = "scheduler synced successfully"
+	defaultNamespace      = "default"
 )
 
 type SchedulerController struct {
 	// kubeclientset is a standard kubernetes clientset
-	kubeclientset      kubernetes.Interface
-	schedulerclientset clientset.Interface
+	kubeclientset      *kubernetes.Clientset
+	schedulerclientset *clientset.Clientset
 
 	schedulerInformer listers.SchedulerLister
 	schedulerSynced   cache.InformerSynced
@@ -69,8 +70,8 @@ type SchedulerController struct {
 
 // NewSchedulerController returns a new scheduler controller
 func NewSchedulerController(
-	kubeclientset kubernetes.Interface,
-	schedulerclientset clientset.Interface,
+	kubeclientset *kubernetes.Clientset,
+	schedulerclientset *clientset.Clientset,
 	schedulerInformer informers.SchedulerInformer) *SchedulerController {
 
 	// Create event broadcaster
@@ -125,6 +126,28 @@ func (sc *SchedulerController) Run(threadiness int, stopCh <-chan struct{}) erro
 	}
 
 	klog.Info("Started workers")
+
+	// Create scheduler client
+	schedulerClient, err := client.NewClient(sc.schedulerclientset, defaultNamespace)
+	if err != nil {
+		return fmt.Errorf("Error creating scheduler client: %s", err.Error())
+	}
+	// Create an instance of Scheduler CRD
+	instanceName := "sample-scheduler"
+	exampleInstance := &schedulercrdv1.Scheduler{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: instanceName,
+		},
+		Spec: schedulercrdv1.SchedulerSpec{
+			Name: "scheduler-1",
+		},
+	}
+	schedulerCRDInstance, err := schedulerClient.Create(exampleInstance)
+	if err != nil {
+		return fmt.Errorf("Error creating scheduler CRD instance: %s", err.Error())
+	}
+	klog.Info("Scheduler CRD instance create successfully: %v", schedulerCRDInstance)
+
 	<-stopCh
 	klog.Info("Shutting down workers")
 
@@ -233,8 +256,8 @@ func (sc *SchedulerController) addScheduler(obj interface{}) {
 }
 
 func (sc *SchedulerController) updateScheduler(old, new interface{}) {
-	oldScheduler := old.(*samplecrdv1.Scheduler)
-	newScheduler := new.(*samplecrdv1.Scheduler)
+	oldScheduler := old.(*schedulercrdv1.Scheduler)
+	newScheduler := new.(*schedulercrdv1.Scheduler)
 	if oldScheduler.ResourceVersion == newScheduler.ResourceVersion {
 		return
 	}
@@ -242,7 +265,7 @@ func (sc *SchedulerController) updateScheduler(old, new interface{}) {
 }
 
 // deleteScheduler takes a deleted Scheduler resource and converts it into a namespace/name
-// string which is then put onto the work queue. This method should *not* be
+// string which is then put into the work queue. This method should *not* be
 // passed resources of any type other than Scheduler.
 func (sc *SchedulerController) deleteScheduler(obj interface{}) {
 	var key string
@@ -256,7 +279,7 @@ func (sc *SchedulerController) deleteScheduler(obj interface{}) {
 }
 
 // enqueueScheduler takes a Scheduler resource and converts it into a namespace/name
-// string which is then put onto the work queue. This method should *not* be
+// string which is then put into the work queue. This method should *not* be
 // passed resources of any type other than Scheduler.
 func (sc *SchedulerController) enqueueScheduler(obj interface{}) {
 	var key string
