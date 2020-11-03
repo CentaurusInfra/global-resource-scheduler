@@ -73,7 +73,7 @@ func validNewPod() *api.Pod {
 			DNSPolicy:     api.DNSClusterFirst,
 
 			TerminationGracePeriodSeconds: &grace,
-			ResourceType: "container",
+			ResourceType:                  "container",
 			Containers: []api.Container{
 				{
 					Name:            "foo",
@@ -85,10 +85,10 @@ func validNewPod() *api.Pod {
 					SecurityContext:          securitycontext.ValidInternalSecurityContextWithContainerDefaults(),
 					ResourceCommonInfo: api.ResourceCommonInfo{
 						Selector: api.ResourceSelector{
-							GeoLocation: api.ResourceGeoLocation{City:"Bellevue", Province:"WA", Area: "NW", Country:"USA"},
-							Regions: []api.ResourceRegion{ api.ResourceRegion{Region: "NW", AvailablityZone:[]string{}}},
-							Operator: "chinatelecom",
-							Strategy: api.ResourceStrategy{LocalStrategy: "centralize"},
+							GeoLocation: api.ResourceGeoLocation{City: "Bellevue", Province: "WA", Area: "NW", Country: "USA"},
+							Regions:     []api.ResourceRegion{{Region: "NW", AvailablityZone: []string{}}},
+							Operator:    "chinatelecom",
+							Strategy:    api.ResourceStrategy{LocalStrategy: "centralize"},
 						},
 					},
 				},
