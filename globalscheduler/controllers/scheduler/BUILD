@@ -7,7 +7,6 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//globalscheduler/pkg/apis/scheduler/client:go_default_library",
-        "//globalscheduler/pkg/apis/scheduler/client/clientset/versioned:go_default_library",
         "//globalscheduler/pkg/apis/scheduler/client/clientset/versioned/scheme:go_default_library",
         "//globalscheduler/pkg/apis/scheduler/client/informers/externalversions/scheduler/v1:go_default_library",
         "//globalscheduler/pkg/apis/scheduler/client/listers/scheduler/v1:go_default_library",
