@@ -23,7 +23,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
@@ -534,7 +534,7 @@ func TestHashContainer(t *testing.T) {
 				ResizePolicy: []v1.ResizePolicy{cpuPolicyRestart, memPolicyNoRestart},
 			},
 			false,
-			0xa76b1795,
+			0x8f232301,
 		},
 		{
 			&v1.Container{
@@ -547,7 +547,7 @@ func TestHashContainer(t *testing.T) {
 				ResizePolicy: []v1.ResizePolicy{cpuPolicyNoRestart, memPolicyRestart},
 			},
 			false,
-			0xbbee80f5,
+			0xf8e6921,
 		},
 		{
 			&v1.Container{
@@ -560,7 +560,7 @@ func TestHashContainer(t *testing.T) {
 				ResizePolicy: []v1.ResizePolicy{cpuPolicyRestart, memPolicyNoRestart},
 			},
 			false,
-			0x4e3159f3,
+			0xacb5e21f,
 		},
 		{
 			&v1.Container{
@@ -573,7 +573,7 @@ func TestHashContainer(t *testing.T) {
 				ResizePolicy: []v1.ResizePolicy{cpuPolicyNoRestart, memPolicyRestart},
 			},
 			false,
-			0x2fe27743,
+			0xec52dfef,
 		},
 		{
 			&v1.Container{
@@ -586,7 +586,7 @@ func TestHashContainer(t *testing.T) {
 				ResizePolicy: []v1.ResizePolicy{cpuPolicyRestart, memPolicyNoRestart},
 			},
 			true,
-			0x962f988f,
+			0xf7d736c3,
 		},
 		{
 			&v1.Container{
@@ -599,7 +599,7 @@ func TestHashContainer(t *testing.T) {
 				ResizePolicy: []v1.ResizePolicy{cpuPolicyNoRestart, memPolicyRestart},
 			},
 			true,
-			0x12dbe2ef,
+			0xcdcd563,
 		},
 		{
 			&v1.Container{
@@ -612,7 +612,7 @@ func TestHashContainer(t *testing.T) {
 				ResizePolicy: []v1.ResizePolicy{cpuPolicyRestart, memPolicyNoRestart},
 			},
 			true,
-			0x962f988f,
+			0xf7d736c3,
 		},
 		{
 			&v1.Container{
@@ -625,7 +625,7 @@ func TestHashContainer(t *testing.T) {
 				ResizePolicy: []v1.ResizePolicy{cpuPolicyNoRestart, memPolicyRestart},
 			},
 			true,
-			0x12dbe2ef,
+			0xcdcd563,
 		},
 	}
 

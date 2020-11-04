@@ -1,5 +1,6 @@
 /*
 Copyright 2017 The Kubernetes Authors.
+Copyright 2020 Authors of Arktos - file modified.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -75,6 +76,10 @@ spec:
       initialDelaySeconds: 15
       timeoutSeconds: 15
     name: kube-apiserver
+    resourceCommonInfo:
+      selector:
+        geoLocation: {}
+        strategy: {}
     resources:
       requests:
         cpu: 250m
@@ -163,6 +168,10 @@ spec:
           initialDelaySeconds: 15
           timeoutSeconds: 15
         name: kube-apiserver
+        resourceCommonInfo:
+          selector:
+            geoLocation: {}
+            strategy: {}
         resources:
           requests:
             cpu: 250m
@@ -235,6 +244,10 @@ spec:
       initialDelaySeconds: 15
       timeoutSeconds: 15
     name: kube-controller-manager
+    resourceCommonInfo:
+      selector:
+        geoLocation: {}
+        strategy: {}
     resources:
       requests:
         cpu: 200m
@@ -312,6 +325,10 @@ spec:
           initialDelaySeconds: 15
           timeoutSeconds: 15
         name: kube-controller-manager
+        resourceCommonInfo:
+          selector:
+            geoLocation: {}
+            strategy: {}
         resources:
           requests:
             cpu: 200m
@@ -384,6 +401,10 @@ spec:
       initialDelaySeconds: 15
       timeoutSeconds: 15
     name: kube-scheduler
+    resourceCommonInfo:
+      selector:
+        geoLocation: {}
+        strategy: {}
     resources:
       requests:
         cpu: 100m
@@ -436,6 +457,10 @@ spec:
           initialDelaySeconds: 15
           timeoutSeconds: 15
         name: kube-scheduler
+        resourceCommonInfo:
+          selector:
+            geoLocation: {}
+            strategy: {}
         resources:
           requests:
             cpu: 100m
