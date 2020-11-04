@@ -104,7 +104,7 @@ do
 done
 
 if [ "x${GO_OUT}" == "x" ]; then
-    make -C "${KUBE_ROOT}" WHAT="cmd/kubectl cmd/hyperkube cmd/kube-apiserver cmd/kube-controller-manager cmd/kubelet cmd/kube-proxy cmd/kube-scheduler"
+    make -C "${KUBE_ROOT}" WHAT="cmd/kubectl cmd/hyperkube cmd/kube-apiserver cmd/kube-controller-manager cmd/kubelet cmd/kube-proxy"
 else
     echo "skipped the build."
 fi
@@ -450,7 +450,7 @@ if [[ "${START_MODE}" != "kubeletonly" ]]; then
   if [[ "${START_MODE}" != "nokubeproxy" ]]; then
     kube::common::start_kubeproxy
   fi
-  kube::common::start_kubescheduler
+  # kube::common::start_kubescheduler
   start_kubedns
   if [[ "${ENABLE_NODELOCAL_DNS:-}" == "true" ]]; then
     start_nodelocaldns
