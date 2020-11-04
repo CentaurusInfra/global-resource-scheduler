@@ -426,7 +426,8 @@ func ClusterRoles() []rbacv1.ClusterRole {
 				// Needed for all shared informers
 				rbacv1helpers.NewRule("list", "watch").Groups("*").Resources("*").RuleOrDie(),
 				rbacv1helpers.NewRule("create").Groups(legacyGroup).Resources("serviceaccounts/token").RuleOrDie(),
-				rbacv1helpers.NewRule("create").Groups("globalscheduler.com").Resources("schedulers").RuleOrDie(),
+				// Give system:kube-controller-manager access to SchedulerCRD
+				rbacv1helpers.NewRule("create", "update", "delete", "get", "list").Groups("globalscheduler.com").Resources("schedulers").RuleOrDie(),
 			},
 		},
 		{
