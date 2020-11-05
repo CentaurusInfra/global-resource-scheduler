@@ -218,6 +218,18 @@ require (
 	github.com/xanzy/go-cloudstack v0.0.0-20160728180336-1e2cbf647e57
 	github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2
 	github.com/xlab/handysort v0.0.0-20150421192137-fb3537ed64a1
+	github.com/Knetic/govaluate v3.0.0+incompatible // indirect
+	github.com/Shopify/sarama v1.27.2 // indirect
+	github.com/apache/thrift v0.13.0 // indirect
+	github.com/casbin/casbin v1.7.0
+	github.com/deckarep/golang-set v1.7.1
+	github.com/go-chassis/go-archaius v0.20.0
+	github.com/go-logfmt/logfmt v0.5.0 // indirect
+	github.com/opentracing-contrib/go-observer v0.0.0-20170622124052-a52f23424492 // indirect
+	github.com/opentracing/opentracing-go v1.1.0
+	github.com/openzipkin-contrib/zipkin-go-opentracing v0.3.5
+	github.com/spf13/cast v1.3.1
+	golang.org/x/sys v0.0.0-20201022201747-fb209a7c41cd // indirect
 	go.etcd.io/bbolt v1.3.3
 	go.etcd.io/etcd v0.5.0-alpha.5.0.20200224211402-c65a9e2dd1fd
 	go.uber.org/atomic v1.3.2

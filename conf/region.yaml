@@ -1,0 +1,4 @@
+openstack_debug: false
+regions:
+- region: global
+  endpoint:

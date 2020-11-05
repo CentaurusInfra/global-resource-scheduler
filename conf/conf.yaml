@@ -1,0 +1,11 @@
+#scheduler info
+address: 0.0.0.0
+port: 13443
+
+scheduler_policy: edgecloud
+scheduler_policy_file: /root/work/src/global-resource-scheduler/conf/edgecloud_policy.yaml
+
+spot_region_mapping:
+  - region: region1
+    spot_region: region1
+    
