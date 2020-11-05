@@ -74,9 +74,9 @@ function start_scheduler {
 
   kube::common::set_service_accounts
 
-  kube::common::start_kubescheduler
+  kube::common::start_kubescheduler $1
   
-  echo "Done Starting Scheduler"
+  echo "Done Starting Scheduler $1"
 }
 
-start_scheduler
+start_scheduler $@
