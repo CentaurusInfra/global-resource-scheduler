@@ -1,39 +1,22 @@
-/*
-Copyright 2018 The Kubernetes Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package cache
 
 import (
 	"fmt"
-	"sync"
 
-	"k8s.io/api/core/v1"
-	utilnode "k8s.io/kubernetes/pkg/util/node"
-
-	"k8s.io/klog"
+	"k8s.io/kubernetes/pkg/scheduler/common/logger"
+	"k8s.io/kubernetes/pkg/scheduler/types"
+	"k8s.io/kubernetes/pkg/scheduler/utils"
 )
 
-// NodeTree is a tree-like data structure that holds node names in each zone. Zone names are
+// nodeTree is a tree-like data structure that holds node names in each zone. Zone names are
 // keys to "NodeTree.tree" and values of "NodeTree.tree" are arrays of node names.
-type NodeTree struct {
+// NodeTree is NOT thread-safe, any concurrent updates/reads from it must be synchronized by the caller.
+// It is used only by schedulerCache, and should stay as such.
+type nodeTree struct {
 	tree      map[string]*nodeArray // a map from zone (region-zone) to an array of nodes in the zone.
 	zones     []string              // a list of all the zones in the tree (keys)
 	zoneIndex int
 	numNodes  int
-	mu        sync.RWMutex
 }
 
 // nodeArray is a struct that has nodes that are in a zone.
@@ -46,7 +29,7 @@ type nodeArray struct {
 
 func (na *nodeArray) next() (nodeName string, exhausted bool) {
 	if len(na.nodes) == 0 {
-		klog.Error("The nodeArray is empty. It should have been deleted from NodeTree.")
+		logger.Errorf("The nodeArray is empty. It should have been deleted from NodeTree.")
 		return "", false
 	}
 	if na.lastIndex >= len(na.nodes) {
@@ -58,71 +41,58 @@ func (na *nodeArray) next() (nodeName string, exhausted bool) {
 }
 
 // newNodeTree creates a NodeTree from nodes.
-func newNodeTree(nodes []*v1.Node) *NodeTree {
-	nt := &NodeTree{
+func newNodeTree(nodes []*types.SiteNode) *nodeTree {
+	nt := &nodeTree{
 		tree: make(map[string]*nodeArray),
 	}
 	for _, n := range nodes {
-		nt.AddNode(n)
+		nt.addNode(n)
 	}
 	return nt
 }
 
-// AddNode adds a node and its corresponding zone to the tree. If the zone already exists, the node
+// addNode adds a node and its corresponding zone to the tree. If the zone already exists, the node
 // is added to the array of nodes in that zone.
-func (nt *NodeTree) AddNode(n *v1.Node) {
-	nt.mu.Lock()
-	defer nt.mu.Unlock()
-	nt.addNode(n)
-}
-
-func (nt *NodeTree) addNode(n *v1.Node) {
-	zone := utilnode.GetZoneKey(n)
+func (nt *nodeTree) addNode(n *types.SiteNode) {
+	zone := utils.GetZoneKey(n)
 	if na, ok := nt.tree[zone]; ok {
 		for _, nodeName := range na.nodes {
-			if nodeName == n.Name {
-				klog.Warningf("node %v already exist in the NodeTree", n.Name)
+			if nodeName == n.SiteID {
 				return
 			}
 		}
-		na.nodes = append(na.nodes, n.Name)
+		na.nodes = append(na.nodes, n.SiteID)
 	} else {
 		nt.zones = append(nt.zones, zone)
-		nt.tree[zone] = &nodeArray{nodes: []string{n.Name}, lastIndex: 0}
+		nt.tree[zone] = &nodeArray{nodes: []string{n.SiteID}, lastIndex: 0}
 	}
-	klog.V(5).Infof("Added node %v in group %v to NodeTree", n.Name, zone)
+	logger.Infof("Added node %q in group %q to NodeTree", n.SiteID, zone)
 	nt.numNodes++
 }
 
-// RemoveNode removes a node from the NodeTree.
-func (nt *NodeTree) RemoveNode(n *v1.Node) error {
-	nt.mu.Lock()
-	defer nt.mu.Unlock()
-	return nt.removeNode(n)
-}
-
-func (nt *NodeTree) removeNode(n *v1.Node) error {
-	zone := utilnode.GetZoneKey(n)
+// removeNode removes a node from the NodeTree.
+func (nt *nodeTree) removeNode(n *types.SiteNode) error {
+	zone := utils.GetZoneKey(n)
 	if na, ok := nt.tree[zone]; ok {
 		for i, nodeName := range na.nodes {
-			if nodeName == n.Name {
+			if nodeName == n.SiteID {
 				na.nodes = append(na.nodes[:i], na.nodes[i+1:]...)
 				if len(na.nodes) == 0 {
 					nt.removeZone(zone)
 				}
-				klog.V(5).Infof("Removed node %v in group %v from NodeTree", n.Name, zone)
+				logger.Infof("Removed node %q in group %q from NodeTree", n.SiteID, zone)
 				nt.numNodes--
 				return nil
 			}
 		}
 	}
-	klog.Errorf("Node %v in group %v was not found", n.Name, zone)
-	return fmt.Errorf("node %v in group %v was not found", n.Name, zone)
+	logger.Errorf("Node %q in group %q was not found", n.SiteID, zone)
+	return fmt.Errorf("node %q in group %q was not found", n.SiteID, zone)
 }
 
 // removeZone removes a zone from tree.
 // This function must be called while writer locks are hold.
-func (nt *NodeTree) removeZone(zone string) {
+func (nt *nodeTree) removeZone(zone string) {
 	delete(nt.tree, zone)
 	for i, z := range nt.zones {
 		if z == zone {
@@ -132,36 +102,35 @@ func (nt *NodeTree) removeZone(zone string) {
 	}
 }
 
-// UpdateNode updates a node in the NodeTree.
-func (nt *NodeTree) UpdateNode(old, new *v1.Node) {
+// updateNode updates a node in the NodeTree.
+func (nt *nodeTree) updateNode(old, new *types.SiteNode) {
 	var oldZone string
 	if old != nil {
-		oldZone = utilnode.GetZoneKey(old)
+		oldZone = utils.GetZoneKey(old)
 	}
-	newZone := utilnode.GetZoneKey(new)
+	newZone := utils.GetZoneKey(new)
 	// If the zone ID of the node has not changed, we don't need to do anything. Name of the node
 	// cannot be changed in an update.
 	if oldZone == newZone {
 		return
 	}
-	nt.mu.Lock()
-	defer nt.mu.Unlock()
-	nt.removeNode(old) // No error checking. We ignore whether the old node exists or not.
+	err := nt.removeNode(old) // No error checking. We ignore whether the old node exists or not.
+	if err != nil {
+		logger.Errorf("removeNode failed! err: %s", err)
+	}
 	nt.addNode(new)
 }
 
-func (nt *NodeTree) resetExhausted() {
+func (nt *nodeTree) resetExhausted() {
 	for _, na := range nt.tree {
 		na.lastIndex = 0
 	}
 	nt.zoneIndex = 0
 }
 
-// Next returns the name of the next node. NodeTree iterates over zones and in each zone iterates
+// next returns the name of the next node. NodeTree iterates over zones and in each zone iterates
 // over nodes in a round robin fashion.
-func (nt *NodeTree) Next() string {
-	nt.mu.Lock()
-	defer nt.mu.Unlock()
+func (nt *nodeTree) next() string {
 	if len(nt.zones) == 0 {
 		return ""
 	}
@@ -184,11 +153,4 @@ func (nt *NodeTree) Next() string {
 			return nodeName
 		}
 	}
-}
-
-// NumNodes returns the number of nodes.
-func (nt *NodeTree) NumNodes() int {
-	nt.mu.RLock()
-	defer nt.mu.RUnlock()
-	return nt.numNodes
 }
