@@ -45,3 +45,13 @@ func (sc *SchedulerClient) Get(name string, opts metav1.GetOptions) (*schedulerv
 func (sc *SchedulerClient) List(opts metav1.ListOptions) (*schedulerv1.SchedulerList, error) {
 	return sc.clientset.GlobalschedulerV1().Schedulers(sc.namespace).List(opts)
 }
+
+func (c *Client) SchedulerNums() int {
+	schedulerList, err := c.List(metav1.ListOptions{})
+	if err != nil {
+		panic(err)
+	}
+	length := len(schedulerList.Items)
+
+	return length
+}
