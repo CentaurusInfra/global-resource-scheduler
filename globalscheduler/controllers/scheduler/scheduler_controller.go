@@ -19,7 +19,6 @@ package scheduler
 import (
 	"fmt"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/klog"
@@ -124,22 +123,6 @@ func (sc *SchedulerController) Run(threadiness int, stopCh <-chan struct{}) erro
 	}
 
 	klog.Info("Started workers")
-
-	// Create an instance of Scheduler CRD
-	instanceName := "sample-scheduler"
-	exampleInstance := &schedulercrdv1.Scheduler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: instanceName,
-		},
-		Spec: schedulercrdv1.SchedulerSpec{
-			Name: "scheduler-1",
-		},
-	}
-	_, err := sc.schedulerclient.Create(exampleInstance)
-	if err != nil {
-		return fmt.Errorf("Error creating scheduler CRD instance: %s", err.Error())
-	}
-
 	<-stopCh
 	klog.Info("Shutting down workers")
 
