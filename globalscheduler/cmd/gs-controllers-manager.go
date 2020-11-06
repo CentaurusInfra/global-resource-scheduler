@@ -67,6 +67,10 @@ func StartClusterController() {
 
 	clusterInformer := informerFactory.Globalscheduler().V1().Clusters()
 	controller := cluster.NewClusterController(kubeClient, clusterClient, clusterInformer)
+	err := controller.CreateCRD()
+	if err != nil {
+		klog.Fatalf("error register cluster crd: %s", err.Error())
+	}
 
 	informerFactory.Start(stopCh)
 	controller.Run(workers, stopCh)

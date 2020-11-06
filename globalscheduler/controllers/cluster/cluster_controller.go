@@ -99,60 +99,67 @@ func NewClusterController(
 	//KeyFunc : controller.lookup_cache.go
 	klog.Infof("Setting up event handlers")
 	clusterInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: func(object interface{}) {
-			key, err := controller.KeyFunc(object)
-			if err != nil {
-				utilruntime.HandleError(fmt.Errorf("couldn't get key for object %#v: %v", object, err))
-				return
-			}
-			c.Enqueue(key, EventType_Create)
-			klog.Infof("Create cluster -%v ", key)
-		},
-		UpdateFunc: func(oldObject, newObject interface{}) {
-			key1, err1 := controller.KeyFunc(oldObject)
-			key2, err2 := controller.KeyFunc(newObject)
-			if key1 == "" || key2 == "" || err1 != nil || err2 != nil {
-				klog.Errorf("Unexpected string in queue; discarding - %v", key2)
-				return
-			}
-			oldResource := oldObject.(*clusterv1.Cluster)
-			newResource := newObject.(*clusterv1.Cluster)
-			eventType, err := c.determineEventType(oldResource, newResource)
-			if err != nil {
-				klog.Errorf("Unexpected string in queue; discarding - %v ", key2)
-				return
-			}
-			switch eventType {
-			case ClusterUpdateNo:
-				{
-					klog.Infof("No actual change in clusters, discarding -%v ", newResource.Name)
-					break
-				}
-			case ClusterUpdateYes:
-				{
-					c.Enqueue(key2, EventType_Update)
-					klog.Infof("Update Cluster - %v", key2)
-					break
-				}
-			default:
-				{
-					klog.Errorf("Unexpected cluster update event; discarding - %v", key2)
-					return
-				}
-			}
-		},
-		DeleteFunc: func(object interface{}) {
-			key, err := controller.KeyFunc(object)
-			if err != nil {
-				utilruntime.HandleError(fmt.Errorf("couldn't get key for object %#v: %v", object, err))
-				return
-			}
-			c.Enqueue(key, EventType_Delete)
-			klog.Infof("Delete Cluster - %v", key)
-		},
+		AddFunc: 	c.addCluster,
+		UpdateFunc: c.updateCluster,
+		DeleteFunc: c.deleteCluster,
 	})
 	return c
 }
+
+func (c *ClusterController) addCluster(object interface{}) {
+	key, err := controller.KeyFunc(object)
+	if err != nil {
+		utilruntime.HandleError(fmt.Errorf("couldn't get key for object %#v: %v", object, err))
+		return
+	}
+	c.Enqueue(key, EventType_Create)
+	klog.Infof("Create cluster -%v ", key)
+}
+
+func (c *ClusterController) updateCluster(oldObject, newObject interface{}) {
+	key1, err1 := controller.KeyFunc(oldObject)
+	key2, err2 := controller.KeyFunc(newObject)
+	if key1 == "" || key2 == "" || err1 != nil || err2 != nil {
+		klog.Errorf("Unexpected string in queue; discarding - %v", key2)
+		return
+	}
+	oldResource := oldObject.(*clusterv1.Cluster)
+	newResource := newObject.(*clusterv1.Cluster)
+	eventType, err := c.determineEventType(oldResource, newResource)
+	if err != nil {
+		klog.Errorf("Unexpected string in queue; discarding - %v ", key2)
+		return
+	}
+	switch eventType {
+	case ClusterUpdateNo:
+		{
+			klog.Infof("No actual change in clusters, discarding -%v ", newResource.Name)
+			break
+		}
+	case ClusterUpdateYes:
+		{
+			c.Enqueue(key2, EventType_Update)
+			klog.Infof("Update Cluster - %v", key2)
+			break
+		}
+	default:
+		{
+			klog.Errorf("Unexpected cluster update event; discarding - %v", key2)
+			return
+		}
+	}
+}
+
+func (c *ClusterController) deleteCluster(object interface{}) {
+	key, err := controller.KeyFunc(object)
+	if err != nil {
+		utilruntime.HandleError(fmt.Errorf("couldn't get key for object %#v: %v", object, err))
+		return
+	}
+	c.Enqueue(key, EventType_Delete)
+	klog.Infof("Delete Cluster - %v", key)
+}
+
 
 // Run starts an asynchronous loop that detects events of cluster clusters.
 func (c *ClusterController) Run(workers int, stopCh <-chan struct{}) error {
