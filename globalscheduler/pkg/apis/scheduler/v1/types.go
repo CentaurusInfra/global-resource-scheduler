@@ -34,7 +34,10 @@ type SchedulerSpec struct {
 	// Name is the name of the scheduler
 	Name string `json:"name"`
 
-	// Tag respresent the Nth scheduler object
+	// Location represent which geo location the scheduler is responsable for
+	Location string `json:"location"`
+
+	// Tag represent the Nth scheduler object
 	Tag string `json:"tag"`
 
 	// Cluster is an array that stores the name of clusters
