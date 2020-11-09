@@ -88,6 +88,8 @@ filegroup(
         "//cluster:all-srcs",
         "//cmd:all-srcs",
         "//docs:all-srcs",
+        "//globalscheduler/cmd:all-srcs",
+        "//globalscheduler/controllers/cluster:all-srcs",
         "//globalscheduler/controllers/scheduler:all-srcs",
         "//globalscheduler/pkg/apis/cluster:all-srcs",
         "//globalscheduler/pkg/apis/scheduler:all-srcs",
