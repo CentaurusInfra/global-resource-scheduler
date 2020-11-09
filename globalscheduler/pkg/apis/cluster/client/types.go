@@ -15,18 +15,31 @@ package client
 
 import (
 	clientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	clusterv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 )
 
 // Client is an API client to help perform CRUD for CRD instances.
 type ClusterClient struct {
 	clientset *clientset.Clientset
 	namespace string
+	plural    string
 }
 
-func NewClient(clusterClientset *clientset.Clientset, namespace string) (*ClusterClient, error) {
+// GetNamespace returns the namespace the client talks to.
+func (c *ClusterClient) GetNamespace() string {
+	return c.namespace
+}
+
+// GetPlural returns the plural the client is managing.
+func (c *ClusterClient) GetPlural() string {
+	return c.plural
+}
+
+func NewClusterClient(clusterClientset *clientset.Clientset, namespace string) (*ClusterClient, error) {
 	c := &ClusterClient{
 		clientset: clusterClientset,
 		namespace: namespace,
+		plural:    clusterv1.Plural,
 	}
 	return c, nil
 }

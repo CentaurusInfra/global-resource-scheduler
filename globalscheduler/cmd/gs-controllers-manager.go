@@ -26,14 +26,17 @@ import (
 	"k8s.io/kubernetes/globalscheduler/controllers/cluster"
 	clusterclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
 	"k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/informers/externalversions"
+	clusterclient "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client"
 )
 
-const defaultWorkers = 4
+const (
+	defaultWorkers = 4
+	defaultNamespace = "default"
+)
 
 var (
 	masterURL  string
 	kubeconfig string
-	domainName string
 	workers    int
 )
 
@@ -51,25 +54,31 @@ func StartClusterController() {
 		klog.Fatalf("error getting client config: %s", err.Error())
 	}
 
-	clusterClient, err := clusterclientset.NewForConfig(cfg)
-	if err != nil {
-		klog.Fatalf("error building global scheduler cluster client: %s", err.Error())
-	}
-
 	kubeClient, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
 		klog.Fatalf("error building Kubernetes client: %s", err.Error())
 	}
 
-	informerFactory := externalversions.NewSharedInformerFactory(clusterClient, 10*time.Minute)
+	clusterClientset, err := clusterclientset.NewForConfig(cfg)
+	if err != nil {
+		klog.Fatalf("error building global scheduler cluster client: %s", err.Error())
+	}
+
+	informerFactory := externalversions.NewSharedInformerFactory(clusterClientset, 10*time.Minute)
 	stopCh := make(chan struct{})
 	defer close(stopCh)
 
 	clusterInformer := informerFactory.Globalscheduler().V1().Clusters()
-	controller := cluster.NewClusterController(kubeClient, clusterClient, clusterInformer)
+	controller := cluster.NewClusterController(kubeClient, clusterClientset, clusterInformer)
 	err := controller.CreateCRD()
 	if err != nil {
 		klog.Fatalf("error register cluster crd: %s", err.Error())
+	}
+
+	// Create a cluster api client interface for cluster v1.
+	clusterClient, err := clusterclient.NewClusterClient(kubeConfigPath, defaultNamespace)
+	if err != nil {
+		panic(err)
 	}
 
 	informerFactory.Start(stopCh)
@@ -81,5 +90,16 @@ func init() {
 	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	flag.IntVar(&workers, "concurrent-workers", defaultWorkers, "The number of workers that are allowed to process concurrently.")
-	flag.StringVar(&domainName, "cluster-domain", "cluster.local", "the cluster-internal domain name for Services.")
 }
+
+
+	// Init a CRD kind.
+	if _, err = crdjinghzhuv1.CreateCustomResourceDefinition("crd-ns", apiextensionsClientSet); err != nil {
+		panic(err)
+	}
+
+	// Create a CRD client interface for Jinghzhu v1.
+	crdClient, err := jinghzhuv1client.NewClient(kubeConfigPath, types.DefaultCRDNamespace)
+	if err != nil {
+		panic(err)
+	}
