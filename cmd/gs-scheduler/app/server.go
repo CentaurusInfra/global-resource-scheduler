@@ -15,6 +15,7 @@ func Run(serverOptions *options.ServerRunOptions, stopCh <-chan struct{}) error 
 	// init scheduler cache
 	scheduler.InitSchedulerCache(stopCh)
 
+	
 	// init scheduler informer 
 	scheduler.InitSchedulerInformer(stopCh)
 
