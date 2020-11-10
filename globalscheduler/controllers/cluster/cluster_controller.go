@@ -99,7 +99,7 @@ func NewClusterController(
 	//KeyFunc : controller.lookup_cache.go
 	klog.Infof("Setting up event handlers")
 	clusterInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: 	c.addCluster,
+		AddFunc:    c.addCluster,
 		UpdateFunc: c.updateCluster,
 		DeleteFunc: c.deleteCluster,
 	})
@@ -159,7 +159,6 @@ func (c *ClusterController) deleteCluster(object interface{}) {
 	c.Enqueue(key, EventType_Delete)
 	klog.Infof("Delete Cluster - %v", key)
 }
-
 
 // Run starts an asynchronous loop that detects events of cluster clusters.
 func (c *ClusterController) Run(workers int, stopCh <-chan struct{}) error {

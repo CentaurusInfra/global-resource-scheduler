@@ -73,7 +73,7 @@ func (c *ClusterController) CreateCRD() error {
 										"area":     {Type: "string"},
 										"country":  {Type: "string"},
 									},
-									Required: []string{"city", "province", "area", "country"},
+									Required: []string{"area", "country"},
 								},
 								"region": {
 									Type: "object",
@@ -92,23 +92,24 @@ func (c *ClusterController) CreateCRD() error {
 								"flavors": {
 									Type: "array",
 									Items: &apiextensions.JSONSchemaPropsOrArray{
-									    Schema: &apiextensions.JSONSchemaProps{
-										   Type: "object",
-										   Properties: map[string]apiextensions.JSONSchemaProps{
-											"flavorid":      {Type: "string"},
-											"totalcapacity": {Type: "int64"},
-										   },
+										Schema: &apiextensions.JSONSchemaProps{
+											Type: "object",
+											Properties: map[string]apiextensions.JSONSchemaProps{
+												"flavorid":      {Type: "string"},
+												"totalcapacity": {Type: "int64"},
+											},
 										},
 									},
 								},
 								"storage": {
 									Type: "array",
 									Items: &apiextensions.JSONSchemaPropsOrArray{
-									    Schema: &apiextensions.JSONSchemaProps{
-										   Type: "object",
-										   Properties: map[string]apiextensions.JSONSchemaProps{
-											"typeid":          {Type: "string"},
-											"storagecapacity": {Type: "int64"},
+										Schema: &apiextensions.JSONSchemaProps{
+											Type: "object",
+											Properties: map[string]apiextensions.JSONSchemaProps{
+												"typeid":          {Type: "string"},
+												"storagecapacity": {Type: "int64"},
+											},
 										},
 									},
 								},
@@ -131,27 +132,27 @@ func (c *ClusterController) CreateCRD() error {
 				},
 				{
 					Name:     "region",
-					Type:     "object",
+					Type:     "string",
 					JSONPath: ".spec.region",
 				},
 				{
 					Name:     "eipcapacity",
-					Type:     "integer",
+					Type:     "int64",
 					JSONPath: ".spec.eipcapacity",
 				},
 				{
 					Name:     "cpucapacity",
-					Type:     "integer",
+					Type:     "int64",
 					JSONPath: ".spec.cpucapacity",
 				},
 				{
 					Name:     "memcapacity",
-					Type:     "integer",
+					Type:     "int64",
 					JSONPath: ".spec.memcapacity",
 				},
 				{
 					Name:     "serverprice",
-					Type:     "integer",
+					Type:     "int64",
 					JSONPath: ".spec.serverprice",
 				},
 				{
@@ -162,7 +163,7 @@ func (c *ClusterController) CreateCRD() error {
 				{
 					Name:     "age",
 					Type:     "date",
-					JSONPath: ".metadata.createTimeStamp",
+					JSONPath: ".metadata.createTimestamp",
 				},
 			},
 		},
