@@ -74,6 +74,10 @@ function start_scheduler {
 
   kube::common::set_service_accounts
   for ((i = $(($1 - 1)) ; i >= 0 ; i--)); do
+    # TODO:
+    # Lightweight scheduler component has not been reviewed and approved,
+    # so currently use kube-scheduler instead.
+    # Will change the scheduler start method in the future.
     kube::common::start_kubescheduler $i
   done
   
