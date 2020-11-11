@@ -16,12 +16,12 @@ limitations under the License.
 package v1
 
 import (
-        metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // DistributorSpec defines the desired state of Distributor
 type DistributorSpec struct {
-        Policy DistributorPolicy `json:"policy,omitempty"`
+	Policy DistributorPolicy `json:"policy,omitempty"`
 }
 
 // DistributorPolicy describes how the job will be handled.
@@ -32,29 +32,29 @@ type DistributorSpec struct {
 type DistributorPolicy string
 
 const (
-        // GeoLocation  allows distributors to assign schedulers to pods based on geoLocation
-        GeoLocation DistributorPolicy = "GeoLocation"
+	// GeoLocation  allows distributors to assign schedulers to pods based on geoLocation
+	GeoLocation DistributorPolicy = "GeoLocation"
 )
 
 // DistributorStatus defines the observed state of Distributor
 type DistributorStatus struct {
-        // Information when was the last time the job was successfully scheduled.
-        // +optional
-        Active *bool `json:"active,omitempty"`
-        // Information when was the last time the job was successfully scheduled.
-        // +optional
-        StartTime *metav1.Time `json:"startTime,omitempty"`
+	// Information when was the last time the job was successfully scheduled.
+	// +optional
+	Active *bool `json:"active,omitempty"`
+	// Information when was the last time the job was successfully scheduled.
+	// +optional
+	StartTime *metav1.Time `json:"startTime,omitempty"`
 }
 
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // Distributor is the Schema for the distributors API
 type Distributor struct {
-        metav1.TypeMeta   `json:",inline"`
-        metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-        Spec   DistributorSpec   `json:"spec,omitempty"`
-        Status DistributorStatus `json:"status,omitempty"`
+	Spec   DistributorSpec   `json:"spec,omitempty"`
+	Status DistributorStatus `json:"status,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -65,4 +65,3 @@ type DistributorList struct {
 
 	Items []Distributor `json:"items"`
 }
-
