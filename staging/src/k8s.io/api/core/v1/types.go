@@ -6190,4 +6190,3 @@ type ResourceScheduler struct {
 	// +optional
 	StartTime *metav1.Time `json:"startTime,omitempty" protobuf:"bytes,3,opt,name=startTime"`
 }
-
