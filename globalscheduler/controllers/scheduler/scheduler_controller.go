@@ -33,25 +33,23 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 
-	clientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
+	client "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client"
 	schedulerscheme "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned/scheme"
 	informers "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/informers/externalversions/scheduler/v1"
 	listers "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/listers/scheduler/v1"
-	samplecrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
+	schedulercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
 )
 
-const controllerAgentName = "scheduler-controller"
-
 const (
-	SuccessSynced = "Synced"
-
+	controllerAgentName   = "scheduler-controller"
+	SuccessSynced         = "Synced"
 	MessageResourceSynced = "scheduler synced successfully"
 )
 
 type SchedulerController struct {
 	// kubeclientset is a standard kubernetes clientset
-	kubeclientset      kubernetes.Interface
-	schedulerclientset clientset.Interface
+	kubeclientset   *kubernetes.Clientset
+	schedulerclient *client.SchedulerClient
 
 	schedulerInformer listers.SchedulerLister
 	schedulerSynced   cache.InformerSynced
@@ -69,8 +67,8 @@ type SchedulerController struct {
 
 // NewSchedulerController returns a new scheduler controller
 func NewSchedulerController(
-	kubeclientset kubernetes.Interface,
-	schedulerclientset clientset.Interface,
+	kubeclientset *kubernetes.Clientset,
+	schedulerclient *client.SchedulerClient,
 	schedulerInformer informers.SchedulerInformer) *SchedulerController {
 
 	// Create event broadcaster
@@ -84,27 +82,19 @@ func NewSchedulerController(
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 
 	controller := &SchedulerController{
-		kubeclientset:      kubeclientset,
-		schedulerclientset: schedulerclientset,
-		schedulerInformer:  schedulerInformer.Lister(),
-		schedulerSynced:    schedulerInformer.Informer().HasSynced,
-		workqueue:          workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Scheduler"),
-		recorder:           recorder,
+		kubeclientset:     kubeclientset,
+		schedulerclient:   schedulerclient,
+		schedulerInformer: schedulerInformer.Lister(),
+		schedulerSynced:   schedulerInformer.Informer().HasSynced,
+		workqueue:         workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Scheduler"),
+		recorder:          recorder,
 	}
 
 	klog.Info("Setting up scheduler event handlers")
 	schedulerInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: controller.enqueueScheduler,
-		UpdateFunc: func(old, new interface{}) {
-			oldScheduler := old.(*samplecrdv1.Scheduler)
-			newScheduler := new.(*samplecrdv1.Scheduler)
-			if oldScheduler.ResourceVersion == newScheduler.ResourceVersion {
-				return
-			}
-			controller.enqueueScheduler(new)
-		},
-		//TODO
-		//DeleteFunc:
+		AddFunc:    controller.addScheduler,
+		UpdateFunc: controller.updateScheduler,
+		DeleteFunc: controller.deleteScheduler,
 	})
 
 	return controller
@@ -119,7 +109,7 @@ func (sc *SchedulerController) Run(threadiness int, stopCh <-chan struct{}) erro
 	defer sc.workqueue.ShutDown()
 
 	// Start the informer factories to begin populating the informer caches
-	klog.Info("Starting Mydemo control loop")
+	klog.Info("Starting Scheduler control loop")
 
 	// Wait for the caches to be synced before starting workers
 	klog.Info("Waiting for informer caches to sync")
@@ -144,7 +134,6 @@ func (sc *SchedulerController) Run(threadiness int, stopCh <-chan struct{}) erro
 // workqueue.
 func (sc *SchedulerController) runWorker() {
 	for sc.processNextWorkItem() {
-		fmt.Println("Run processNextWorkItem function")
 	}
 }
 
@@ -166,30 +155,30 @@ func (sc *SchedulerController) processNextWorkItem() bool {
 		// put back on the workqueue and attempted again after a back-off
 		// period.
 		defer sc.workqueue.Done(obj)
-		var key string
+		var key *KeyWithEventType
 		var ok bool
 		// We expect strings to come off the workqueue. These are of the
 		// form namespace/name. We do this as the delayed nature of the
 		// workqueue means the items in the informer cache may actually be
 		// more up to date that when the item was initially put onto the
 		// workqueue.
-		if key, ok = obj.(string); !ok {
+		if key, ok = obj.(*KeyWithEventType); !ok {
 			// As the item in the workqueue is actually invalid, we call
 			// Forget here else we'd go into a loop of attempting to
 			// process a work item that is invalid.
 			sc.workqueue.Forget(obj)
-			runtime.HandleError(fmt.Errorf("expected string in workqueue but got %#v", obj))
+			runtime.HandleError(fmt.Errorf("expected *KeyWithEventType in workqueue but got %#v", obj))
 			return nil
 		}
 		// Run the syncHandler, passing it the namespace/name string of the
-		// Mydemo resource to be synced.
+		// Scheduler resource to be synced.
 		if err := sc.syncHandler(key); err != nil {
-			return fmt.Errorf("error syncing '%s': %s", key, err.Error())
+			return fmt.Errorf("error syncing '%s': %s", key.Value, err.Error())
 		}
 		// Finally, if no error occurs we Forget this item so it does not
 		// get queued again until another change happens.
 		sc.workqueue.Forget(obj)
-		klog.Infof("Successfully synced '%s'", key)
+		klog.Infof("Successfully synced '%s'", key.Value)
 		return nil
 	}(obj)
 
@@ -202,26 +191,29 @@ func (sc *SchedulerController) processNextWorkItem() bool {
 }
 
 // syncHandler compares the actual state with the desired, and attempts to
-// converge the two. It then updates the Status block of the Mydemo resource
+// converge the two. It then updates the Status block of the Scheduler resource
 // with the current status of the resource.
-func (sc *SchedulerController) syncHandler(key string) error {
+func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
+
+	klog.Infof("Event Type '%s'", key.EventType)
+
 	// Convert the namespace/name string into a distinct namespace and name
-	namespace, name, err := cache.SplitMetaNamespaceKey(key)
+	namespace, name, err := cache.SplitMetaNamespaceKey(key.Value)
 	if err != nil {
-		runtime.HandleError(fmt.Errorf("invalid resource key: %s", key))
+		runtime.HandleError(fmt.Errorf("invalid resource key: %s", key.Value))
 		return nil
 	}
 
-	// Get the Mydemo resource with this namespace/name
+	// Get the Scheduler resource with this namespace/name
 	scheduler, err := sc.schedulerInformer.Schedulers(namespace).Get(name)
 	if err != nil {
-		// The Mydemo resource may no longer exist, in which case we stop
+		// The Scheduler resource may no longer exist, in which case we stop
 		// processing.
 		if errors.IsNotFound(err) {
 			klog.Warningf("SchedulerCRD: %s/%s does not exist in local cache, will delete it from Scheduler ...",
 				namespace, name)
 
-			klog.Infof("[DemoCRD] Deleting scheduler: %s/%s ...", namespace, name)
+			klog.Infof("[SchedulerCRD] Deleting scheduler: %s/%s ...", namespace, name)
 
 			return nil
 		}
@@ -237,15 +229,44 @@ func (sc *SchedulerController) syncHandler(key string) error {
 	return nil
 }
 
-// enqueueScheduler takes a Scheduler resource and converts it into a namespace/name
-// string which is then put onto the work queue. This method should *not* be
+func (sc *SchedulerController) addScheduler(obj interface{}) {
+	sc.enqueueScheduler(obj, EventTypeCreate)
+}
+
+func (sc *SchedulerController) updateScheduler(old, new interface{}) {
+	oldScheduler := old.(*schedulercrdv1.Scheduler)
+	newScheduler := new.(*schedulercrdv1.Scheduler)
+	if oldScheduler.ResourceVersion == newScheduler.ResourceVersion {
+		return
+	}
+	sc.enqueueScheduler(new, EventTypeUpdate)
+}
+
+// deleteScheduler takes a deleted Scheduler resource and converts it into a namespace/name
+// string which is then put into the work queue. This method should *not* be
 // passed resources of any type other than Scheduler.
-func (sc *SchedulerController) enqueueScheduler(obj interface{}) {
+func (sc *SchedulerController) deleteScheduler(obj interface{}) {
+	var key string
+	var err error
+	key, err = cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
+	if err != nil {
+		runtime.HandleError(err)
+		return
+	}
+	keyWithEventType := NewKeyWithEventType(EventTypeDelete, key)
+	sc.workqueue.AddRateLimited(keyWithEventType)
+}
+
+// enqueueScheduler takes a Scheduler resource and converts it into a namespace/name
+// string which is then put into the work queue. This method should *not* be
+// passed resources of any type other than Scheduler.
+func (sc *SchedulerController) enqueueScheduler(obj interface{}, eventType EventType) {
 	var key string
 	var err error
 	if key, err = cache.MetaNamespaceKeyFunc(obj); err != nil {
 		runtime.HandleError(err)
 		return
 	}
-	sc.workqueue.AddRateLimited(key)
+	keyWithEventType := NewKeyWithEventType(eventType, key)
+	sc.workqueue.AddRateLimited(keyWithEventType)
 }
