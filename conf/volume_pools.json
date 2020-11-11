@@ -8,7 +8,7 @@
             "pool_name": "pool1",
             "provisioned_capacity_gb": 0,
             "allocated_capacity_gb": 10,
-            "free_capacity_gb": 1000,
+            "free_capacity_gb": 2000,
             "total_capacity_gb": 2000,
             "volume_type": "SAS",
             "max_over_subscription_ratio": 1.0,
