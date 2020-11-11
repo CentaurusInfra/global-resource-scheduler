@@ -3536,6 +3536,9 @@ type PodStatus struct {
 	// NIC status
 	// +optional
 	NICStatuses []NICStatus `json:"nicStatuses,omitempty" protobuf:"bytes,13,opt,name=nicStatuses"`
+	// Assigned Scheduler
+	// +optional
+	AssignedScheduler ResourceScheduler `json:"assignedScheduler,omitempty" protobuf:"bytes,14,opt,name=assignedScheduler"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -6177,3 +6180,14 @@ type ResourceSpot struct {
 	// +optional
 	InterruptionPolicy string `json:"interruptionPolicy,omitempty" protobuf:"bytes,4,opt,name=interruptionPolicy"`
 }
+
+// ResourceScheduler contains resource scheduler information assigned to pods
+type ResourceScheduler struct {
+	// +optional
+	Name string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
+	// +optional
+	Tag string `json:"tag,omitempty" protobuf:"bytes,2,opt,name=tag"`
+	// +optional
+	StartTime *metav1.Time `json:"startTime,omitempty" protobuf:"bytes,3,opt,name=startTime"`
+}
+
