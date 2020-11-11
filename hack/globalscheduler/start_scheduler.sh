@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-KUBE_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+KUBE_ROOT=$(dirname "${BASH_SOURCE[0]}")/../..
 
 source "${KUBE_ROOT}/hack/lib/common-var-init.sh"
 
@@ -73,10 +73,11 @@ function start_scheduler {
   kube::util::ensure-gnu-sed
 
   kube::common::set_service_accounts
-
-  kube::common::start_kubescheduler $1
+  for ((i = $(($1 - 1)) ; i >= 0 ; i--)); do
+    kube::common::start_kubescheduler $i
+  done
   
-  echo "Done Starting Scheduler $1"
+  echo "Done Starting Scheduler"
 }
 
 start_scheduler $@

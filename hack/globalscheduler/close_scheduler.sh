@@ -14,21 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+KUBE_ROOT=$(dirname "${BASH_SOURCE[0]}")/../..
+source "${KUBE_ROOT}/hack/lib/common-var-init.sh"
+
 function kill_scheduler_process {
     if [[ $# -eq 0 ]]; then
         echo "The process to kill is not specified."
     else
-        if "$1" == "all"; then # kill all schedulers related processes
-            process=$(ps aux|grep " ${process_name} "| wc -l)
-            if [[ $process > 1 ]]; then
-                process=$(ps aux|grep " ${process_name} "| grep arktos |awk '{print $2}')
-                for i in ${process[@]}; do
-                    sudo kill -9 $i
-                done
-            fi
-        else # kill a scheduler process listened on a specific port number
-            sudo fuser -k $1/tcp
-        fi
+        port_arg=$((${INSECURE_SCHEDULER_PORT}))
+        # kill a scheduler process listened on a specific port number
+        sudo fuser -k $(($port_arg + $1))/tcp
     fi
 }
 

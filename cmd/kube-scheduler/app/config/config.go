@@ -51,6 +51,9 @@ type Config struct {
 
 	// LeaderElection is optional.
 	LeaderElection *leaderelection.LeaderElectionConfig
+
+	// SchedulerTag represents the Nth scheduler
+	SchedulerTag string
 }
 
 type completedConfig struct {
