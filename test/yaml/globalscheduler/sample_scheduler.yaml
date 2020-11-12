@@ -1,0 +1,11 @@
+apiVersion: globalscheduler.com/v1
+kind: Scheduler
+metadata:
+  name: sample-scheduler
+spec:
+  name: "scheduler-1"
+  cluster:
+    - "cluster-1"
+    - "cluster-2"
+    - "cluster-3"
+    - "cluster-4"
