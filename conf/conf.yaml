@@ -2,6 +2,10 @@
 address: 0.0.0.0
 port: 13443
 
+#api server info
+master: 0.0.0.0
+kubeconfig: /root/.kube/config
+
 scheduler_policy: edgecloud
 scheduler_policy_file: /root/work/src/global-resource-scheduler/conf/edgecloud_policy.yaml
 

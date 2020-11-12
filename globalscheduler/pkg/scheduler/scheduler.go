@@ -19,12 +19,17 @@ package scheduler
 import (
 	"context"
 	"fmt"
+	uuid "github.com/satori/go.uuid"
 	"math/rand"
 	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	internalinformers "k8s.io/client-go/informers"
+	coreinformers "k8s.io/client-go/informers/core/v1"
+	clientset "k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/algorithmprovider"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
@@ -32,9 +37,11 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/factory"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	frameworkplugins "k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins"
 	internalcache "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache"
+	internalqueue "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/queue"
 	schedulernodeinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/nodeinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
@@ -42,16 +49,21 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/workqueue"
 )
 
-var schedulerCache internalcache.Cache
+// single scheduler instance
+var scheduler *Scheduler
+var once sync.Once
 
-func GetScheduler() *Scheduler {
-	sched, err := NewScheduler(schedulerCache)
-	if err != nil {
-		fmt.Printf("NewScheduler failed!, err: %s", err)
-		return nil
-	}
-
-	return sched
+// GetScheduler gets single scheduler instance. New Scheduler will only run once,
+// if it runs failed, nil will be return.
+func GetScheduler(stopCh <-chan struct{}) *Scheduler {
+	once.Do(func() {
+		var err error
+		scheduler, err = NewScheduler(stopCh)
+		if err != nil {
+			logger.Errorf("NewScheduler failed! error: %v", err)
+		}
+	})
+	return scheduler
 }
 
 // ScheduleResult represents the result of one pod scheduled. It will contain
@@ -81,6 +93,18 @@ type Scheduler struct {
 	Plugins *types.Plugins
 	// policy are the scheduling policy.
 	SchedFrame interfaces.Framework
+
+	// queue for stacks that need scheduling
+	stackQueue      internalqueue.SchedulingQueue
+	PodInformer     coreinformers.PodInformer
+	Client          clientset.Interface
+	InformerFactory internalinformers.SharedInformerFactory
+
+	// NextStack should be a function that blocks until the next stack
+	// is available. We don't use a channel for this, because scheduling
+	// a stack may take some amount of time and we don't want pods to get
+	// stale while they sit in a channel.
+	NextStack func() *types.Stack
 }
 
 // Cache returns the cache in scheduler for test to check the data in scheduler.
@@ -88,17 +112,47 @@ func (sched *Scheduler) Cache() internalcache.Cache {
 	return sched.SchedulerCache
 }
 
+// scheduleOne does the entire scheduling workflow for a single pod.
+func (sched *Scheduler) scheduleOne() {
+	stack := sched.NextStack()
+
+	// generate allocation from stack
+	allocation, err := sched.generateAllocationFromStack(stack)
+
+	// do scheduling process
+	result, err := sched.Schedule2(nil, allocation)
+	if err != nil {
+		logger.Errorf("Schedule failed!, err: %s", err)
+	}
+
+	// do api server update here
+	// TODO(nkwangjun)
+	logger.Infof("Scheduler result: %v", result)
+}
+
+// generateAllocationFromStack generate a new allocation obj from one single stack
+func (sched *Scheduler) generateAllocationFromStack(stack *types.Stack) (*types.Allocation, error) {
+	allocation := &types.Allocation{
+		ID:       uuid.NewV4().String(),
+		Stack:    *stack,
+		Replicas: 1,
+		Selector: stack.Selector,
+	}
+
+	return allocation, nil
+}
+
 // Run begins watching and scheduling. It waits for cache to be synced, then starts scheduling
 // and blocked until the context is done.
-func (sched *Scheduler) Run(ctx context.Context) {
-
+func (sched *Scheduler) Run() {
+	go wait.Until(sched.scheduleOne, 0, sched.StopEverything)
 }
 
 // snapshot snapshots scheduler cache and node infos for all fit and priority
 // functions.
 func (sched *Scheduler) snapshot() error {
 	// Used for all fit and priority funcs.
-	return sched.SchedulerCache.UpdateSnapshot(sched.nodeInfoSnapshot)
+	return sched.Cache().UpdateSnapshot(sched.nodeInfoSnapshot)
 }
 
 // stackPassesFiltersOnNode checks whether a node given by NodeInfo satisfies the
@@ -476,38 +530,58 @@ func (sched *Scheduler) buildFramework() error {
 	return nil
 }
 
-func InitSchedulerCache(stopCh <-chan struct{}) internalcache.Cache {
+func NewScheduler(stopCh <-chan struct{}) (*Scheduler, error) {
 	stopEverything := stopCh
 	if stopEverything == nil {
 		stopEverything = wait.NeverStop
 	}
 
-	schedulerCache = internalcache.New(30*time.Second, stopEverything)
-	return schedulerCache
-}
-
-func NewScheduler(cache internalcache.Cache) (*Scheduler, error) {
-
-	if cache == nil {
-		logger.Errorf("cache not init, please wait...")
-		return nil, fmt.Errorf("cache not init, please wait")
-	}
 	sched := &Scheduler{
-		SchedulerCache:   cache,
+		SchedulerCache:   internalcache.New(30*time.Second, stopEverything),
 		nodeInfoSnapshot: internalcache.NewEmptySnapshot(),
 	}
 
 	err := sched.buildFramework()
 	if err != nil {
-		logger.Errorf("buildFramework by %s failed! err: %s", types.SchedulerDefaultProviderName, err)
+		return nil, fmt.Errorf("buildFramework by %s failed! err: %v", types.SchedulerDefaultProviderName, err)
+	}
+
+	// init pod informers for scheduler
+	err = sched.initPodInformers(stopEverything)
+	if err != nil {
 		return nil, err
 	}
+
+	// add event handler TODO
 
 	return sched, nil
 }
 
-// Init resource cache informer
-func InitSchedulerInformer(stopCh <-chan struct{}) {
+// initPodInformers init scheduler with podInformer
+func (sched *Scheduler) initPodInformers(stopCh <-chan struct{}) error {
+	masterURL := config.DefaultString("master", "0.0.0.0")
+	kubeconfig := config.DefaultString("kubeconfig", "/root/.kube/config")
+
+	// init client
+	cfg, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
+	if err != nil {
+		return err
+	}
+
+	client, err := clientset.NewForConfig(cfg)
+	if err != nil {
+		return err
+	}
+
+	sched.stackQueue = internalqueue.NewSchedulingQueue(stopCh, sched.SchedFrame)
+	sched.InformerFactory = internalinformers.NewSharedInformerFactory(client, 0)
+	sched.PodInformer = factory.NewPodInformer(client, 0)
+	sched.NextStack = internalqueue.MakeNextStackFunc(sched.stackQueue)
+	return nil
+}
+
+// start resource cache informer and run
+func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
 	go func(stopCh2 <-chan struct{}) {
 		// init informer
 		informers.InformerFac = informers.NewSharedInformerFactory(nil, 60*time.Second)
@@ -568,6 +642,19 @@ func InitSchedulerInformer(stopCh <-chan struct{}) {
 		// need sync once before start
 		volumePoolInformer.SyncOnce()
 		eipPoolInformer.SyncOnce()
+
+		// start pod informers
+		if sched.PodInformer != nil && sched.InformerFactory != nil {
+			go sched.PodInformer.Informer().Run(stopCh2)
+			sched.InformerFactory.Start(stopCh2)
+
+			// Wait for all caches to sync before scheduling.
+			sched.InformerFactory.WaitForCacheSync(stopCh2)
+
+			// Do scheduling
+			sched.Run()
+		}
+
 	}(stopCh)
 }
 
@@ -584,7 +671,7 @@ func updateEipPools(obj []interface{}) {
 			continue
 		}
 
-		err := schedulerCache.UpdateEipPool(&eipPool)
+		err := scheduler.Cache().UpdateEipPool(&eipPool)
 		if err != nil {
 			logger.Infof("UpdateEipPool failed! err: %s", err)
 		}
@@ -604,7 +691,7 @@ func updateVolumePools(obj []interface{}) {
 			continue
 		}
 
-		err := schedulerCache.UpdateVolumePool(&volumePool)
+		err := scheduler.Cache().UpdateVolumePool(&volumePool)
 		if err != nil {
 			logger.Infof("updateVolumePools failed! err: %s", err)
 		}
@@ -635,7 +722,7 @@ func addSiteNodesToCache(obj []interface{}) {
 
 			if siteInfo.Region == siteNode.Region && siteInfo.Az == siteNode.AvailabilityZone {
 				info := convertToSiteNode(siteInfo, siteNode)
-				err := schedulerCache.AddNode(info)
+				err := scheduler.Cache().AddNode(info)
 				if err != nil {
 					logger.Infof("add node to cache failed! err: %s", err)
 				}
@@ -656,14 +743,14 @@ func addSiteNodesToCache(obj []interface{}) {
 			}
 
 			site.Nodes = append(site.Nodes, siteNode.Nodes...)
-			err := schedulerCache.AddNode(site)
+			err := scheduler.Cache().AddNode(site)
 			if err != nil {
 				logger.Infof("add node to cache failed! err: %s", err)
 			}
 		}
 	}
 
-	schedulerCache.PrintString()
+	scheduler.Cache().PrintString()
 }
 
 func convertToSiteNode(site typed.Site, node typed.SiteNode) *types.SiteNode {

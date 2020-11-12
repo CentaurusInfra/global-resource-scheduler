@@ -119,6 +119,8 @@ type Stack struct {
 	Selector  Selector          `json:"-"`
 	Selected  Selected          `json:"-"`
 	UID       string            `json:"uid,omitempty"`
+	Tenant    string
+	Namespace string
 }
 
 func (in *Stack) DeepCopy() *Stack {

@@ -87,7 +87,7 @@ func Allocations(req *restful.Request, resp *restful.Response) {
 	}
 
 	allocationResult := types.AllocationResult{ID: allocation.ID, Stack: []types.RespStack{}}
-	sched := scheduler.GetScheduler()
+	sched := scheduler.GetScheduler(nil)
 	if sched == nil {
 		logger.Errorf("Scheduler is not init, please wait...")
 		utils.WriteFailedJSONResponse(resp, http.StatusInternalServerError, utils.InternalServerError())
