@@ -23,11 +23,13 @@ import (
 
 // These const variables are used in our custom controller.
 const (
+	GroupName string = "globalscheduler.com"
 	Kind      string = "Cluster"
+	Version   string = "v1"
 	Plural    string = "clusters"
 	Singluar  string = "cluster"
 	ShortName string = "cluster"
-	Name      string = Plural + "." + cluster.GroupName
+	Name      string = Plural + "." + GroupName
 )
 
 // +genclient

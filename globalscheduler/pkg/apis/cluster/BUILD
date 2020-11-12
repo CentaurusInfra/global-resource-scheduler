@@ -18,9 +18,7 @@ filegroup(
     name = "all-srcs",
     srcs = [
         ":package-srcs",
-        "//globalscheduler/pkg/apis/cluster/client/clientset/versioned:all-srcs",
-        "//globalscheduler/pkg/apis/cluster/client/informers/externalversions:all-srcs",
-        "//globalscheduler/pkg/apis/cluster/client/listers/cluster/v1:all-srcs",
+        "//globalscheduler/pkg/apis/cluster/client:all-srcs",
         "//globalscheduler/pkg/apis/cluster/v1:all-srcs",
     ],
     tags = ["automanaged"],
