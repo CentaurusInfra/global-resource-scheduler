@@ -60,6 +60,7 @@ scheduler_policy_file: /root/work/src/k8s.io/kubernetes/conf/edgecloud_policy.ya
 spot_region_mapping:
   - region: region1
     spot_region: region1
+
 ```
 
 ## 3. Build and run gs-scheduler
