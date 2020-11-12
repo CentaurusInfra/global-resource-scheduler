@@ -17,6 +17,7 @@ limitations under the License.
 package app
 
 import (
+	"fmt"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/apiserver"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
@@ -28,10 +29,11 @@ import (
 func Run(serverOptions *options.ServerRunOptions, stopCh <-chan struct{}) error {
 	logger.Infof("Global Scheduler Running...")
 
-	// init scheduler cache
-	scheduler.InitSchedulerCache(stopCh)
-
-
+	// init scheduler
+	sched := scheduler.GetScheduler(stopCh)
+	if sched == nil {
+		return fmt.Errorf("get new scheduler failed")
+	}
 	// init scheduler informer 
 	scheduler.InitSchedulerInformer(stopCh)
 

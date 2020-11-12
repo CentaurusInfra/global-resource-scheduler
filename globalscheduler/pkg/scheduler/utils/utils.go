@@ -35,6 +35,10 @@ import (
 const (
 	// UUIDCheckPattern uses to check server name
 	UUIDCheckPattern = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+	// DefaultPriorityWhenNoDefaultClassExists is used to set priority of pods
+	// that do not specify any priority class and there is no priority class
+	// marked as default.
+	DefaultPriorityWhenNoDefaultClassExists = 0
 )
 
 // AssertIntEqual triggers testing error if the expect and actual int value are not the same.
@@ -232,4 +236,23 @@ func IsUUIDValid(uuid string) error {
 		return fmt.Errorf("uuid (%s) is invalid", uuid)
 	}
 	return nil
+}
+
+// LessFunc is a function that receives two items and returns true if the first
+// item should be placed before the second one when the list is sorted.
+type LessFunc func(item1, item2 interface{}) bool
+
+// GetStackPriority returns priority of the given stack.
+func GetStackPriority(stack *types.Stack) int32 {
+	// When priority of a running pod is nil, it means it was created at a time
+	// that there was no global default priority class and the priority class
+	// name of the pod was empty. So, we resolve to the static default priority.
+	return DefaultPriorityWhenNoDefaultClassExists
+}
+
+// GetPodFullName returns a name that uniquely identifies a stack.
+func GetStackFullName(stack *types.Stack) string {
+	// Use underscore as the delimiter because it is not allowed in stack name
+	// (DNS subdomain format).
+	return stack.Name + "_" + stack.Namespace
 }
