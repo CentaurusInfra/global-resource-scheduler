@@ -206,3 +206,6 @@ REUSE_CERTS=${REUSE_CERTS:-false}
 # --------------------------------------------------------------------------------------------
 # End of 2nd Common environment variables used in arktos-up.sh& arktos-apiserver-partition.sh
 # --------------------------------------------------------------------------------------------
+
+INSECURE_SCHEDULER_PORT=${INSECURE_SCHEDULER_PORT:-"10261"}
+KUBE_SCHEDULER_PORT=${KUBE_SCHEDULER_PORT:-"11259"}
