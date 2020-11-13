@@ -89,7 +89,6 @@ func (c *ClusterController) CreateCRD() error {
 										"area":     {Type: "string"},
 										"country":  {Type: "string"},
 									},
-									Required: []string{"area", "country"},
 								},
 								"region": {
 									Type: "object",
@@ -108,7 +107,6 @@ func (c *ClusterController) CreateCRD() error {
 									Properties: map[string]apiextensions.JSONSchemaProps{
 										"operator": {Type: "string"},
 									},
-									Required: []string{"operator"},
 								},
 								"flavors": {
 									Type: "array",
@@ -140,7 +138,6 @@ func (c *ClusterController) CreateCRD() error {
 								"serverprice":   {Type: "integer"},
 								"homescheduler": {Type: "string"},
 							},
-							Required: []string{"ipaddress", "region", "storage"},
 						},
 					},
 				},

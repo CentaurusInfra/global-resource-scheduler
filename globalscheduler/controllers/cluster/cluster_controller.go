@@ -68,17 +68,17 @@ const (
 
 // Cluster Controller Struct
 type ClusterController struct {
-	kubeclientset    kubernetes.Interface
+	kubeclientset          kubernetes.Interface
 	apiextensionsclientset apiextensionsclientset.Interface
-	clusterclientset clienteset.Interface
-	clusterlister    listers.ClusterLister
-	clusterSynced    cache.InformerSynced
-	workqueue        workqueue.RateLimitingInterface
-	recorder         record.EventRecorder
+	clusterclientset       clienteset.Interface
+	clusterlister          listers.ClusterLister
+	clusterSynced          cache.InformerSynced
+	workqueue              workqueue.RateLimitingInterface
+	recorder               record.EventRecorder
 }
 
 func NewClusterController(
-	kubeclientset kubernetes.Interface,	
+	kubeclientset kubernetes.Interface,
 	apiextensionsclientset apiextensionsclientset.Interface,
 	clusterclientset clienteset.Interface,
 	clusterInformer informers.ClusterInformer) *ClusterController {
@@ -91,13 +91,13 @@ func NewClusterController(
 	recorder := eventBroadcaster.NewRecorder(clusterscheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 	workqueue := workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Cluster")
 	c := &ClusterController{
-		kubeclientset:    kubeclientset,
+		kubeclientset:          kubeclientset,
 		apiextensionsclientset: apiextensionsclientset,
-		clusterclientset: clusterclientset,
-		clusterlister:    clusterInformer.Lister(),
-		clusterSynced:    clusterInformer.Informer().HasSynced,
-		workqueue:        workqueue,
-		recorder:         recorder,
+		clusterclientset:       clusterclientset,
+		clusterlister:          clusterInformer.Lister(),
+		clusterSynced:          clusterInformer.Informer().HasSynced,
+		workqueue:              workqueue,
+		recorder:               recorder,
 	}
 
 	//KeyFunc : controller.lookup_cache.go
