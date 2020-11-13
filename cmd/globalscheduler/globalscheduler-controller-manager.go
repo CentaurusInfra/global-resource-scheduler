@@ -40,9 +40,7 @@ var (
 	workers    int
 )
 
-//func StartClusterController() {
 func main() {
-	//klog.InitFlags(nil)
 	flag.Parse()
 	if workers <= 0 {
 		workers = defaultWorkers
@@ -85,11 +83,17 @@ func main() {
 		klog.Fatalf("error - register cluster crd: %s", err.Error())
 	}
 
-	// cluster rest client - create a cluster api client interface for cluster v1.
-	//clusterClient, err := clusterclient.NewClusterClient(clusterClientset, defaultNamespace)
-	//if err != nil {
-	//	klog.Fatalf("error - create a cluster client: %s", err.Error())
-	//}
+	err = controller.CreateObject()
+	if err != nil {
+		klog.Fatalf("error - register cluster object: %s", err.Error())
+	}
+
+	//cluster rest client - create a cluster api client interface for cluster v1.
+	clusterClient, err := clusterclient.NewClusterClient(clusterClientset, defaultNamespace)
+	if err != nil {
+	 	klog.Fatalf("error - create a cluster client: %s", err.Error())
+	 }
+	klog.Info("created cluster client: %s", clusterClient.)
 
 	informerFactory.Start(stopCh)
 	controller.Run(workers, stopCh)
