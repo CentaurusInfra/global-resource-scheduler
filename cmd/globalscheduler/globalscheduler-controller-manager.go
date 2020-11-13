@@ -20,11 +20,11 @@ import (
 	"flag"
 	"time"
 
+	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/controllers/cluster"
-	clusterclient "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client"
 	clusterclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
 	"k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/informers/externalversions"
 )
@@ -40,7 +40,8 @@ var (
 	workers    int
 )
 
-func StartClusterController() {
+//func StartClusterController() {
+func main() {
 	//klog.InitFlags(nil)
 	flag.Parse()
 	if workers <= 0 {
@@ -66,23 +67,29 @@ func StartClusterController() {
 		klog.Fatalf("error - building global scheduler cluster client: %s", err.Error())
 	}
 
+	//3. apiextensions clientset to create crd programmatically
+	apiextensionsClient, err := apiextensionsclientset.NewForConfig(cfg)
+	if err != nil {
+		klog.Fatalf("error - building global scheduler cluster apiextensions client: %s", err.Error())
+	}
+
 	informerFactory := externalversions.NewSharedInformerFactory(clusterClientset, 10*time.Minute)
 	stopCh := make(chan struct{})
 	defer close(stopCh)
 
 	// register crd
 	clusterInformer := informerFactory.Globalscheduler().V1().Clusters()
-	controller := cluster.NewClusterController(kubeClient, clusterClientset, clusterInformer)
+	controller := cluster.NewClusterController(kubeClient, apiextensionsClient, clusterClientset, clusterInformer)
 	err = controller.CreateCRD()
 	if err != nil {
 		klog.Fatalf("error - register cluster crd: %s", err.Error())
 	}
 
 	// cluster rest client - create a cluster api client interface for cluster v1.
-	clusterClient, err := clusterclient.NewClusterClient(clusterClientset, defaultNamespace)
-	if err != nil {
-		klog.Fatalf("error - create a cluster client: %s", err.Error())
-	}
+	//clusterClient, err := clusterclient.NewClusterClient(clusterClientset, defaultNamespace)
+	//if err != nil {
+	//	klog.Fatalf("error - create a cluster client: %s", err.Error())
+	//}
 
 	informerFactory.Start(stopCh)
 	controller.Run(workers, stopCh)

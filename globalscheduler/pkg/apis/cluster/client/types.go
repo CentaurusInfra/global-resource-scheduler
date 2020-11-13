@@ -14,7 +14,7 @@ limitations under the License.
 package client
 
 import (
-	clientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	clientset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
 	clusterv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 )
 

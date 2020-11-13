@@ -2,8 +2,8 @@ load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 
 go_library(
     name = "go_default_library",
-    srcs = ["gs-controllers-manager.go"],
-    importpath = "k8s.io/kubernetes/globalscheduler/cmd",
+    srcs = ["globalscheduler-controller-manager.go"],
+    importpath = "k8s.io/kubernetes/cmd/globalscheduler",
     visibility = ["//visibility:private"],
     deps = [
         "//globalscheduler/controllers/cluster:go_default_library",
@@ -17,7 +17,7 @@ go_library(
 )
 
 go_binary(
-    name = "cmd",
+    name = "globalscheduler",
     embed = [":go_default_library"],
     visibility = ["//visibility:public"],
 )

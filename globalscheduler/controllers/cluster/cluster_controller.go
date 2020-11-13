@@ -21,6 +21,7 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
@@ -68,6 +69,7 @@ const (
 // Cluster Controller Struct
 type ClusterController struct {
 	kubeclientset    kubernetes.Interface
+	apiextensionsclientset apiextensionsclientset.Interface
 	clusterclientset clienteset.Interface
 	clusterlister    listers.ClusterLister
 	clusterSynced    cache.InformerSynced
@@ -76,7 +78,8 @@ type ClusterController struct {
 }
 
 func NewClusterController(
-	kubeclientset kubernetes.Interface,
+	kubeclientset kubernetes.Interface,	
+	apiextensionsclientset apiextensionsclientset.Interface,
 	clusterclientset clienteset.Interface,
 	clusterInformer informers.ClusterInformer) *ClusterController {
 	utilruntime.Must(clusterscheme.AddToScheme(clusterscheme.Scheme))
@@ -89,6 +92,7 @@ func NewClusterController(
 	workqueue := workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Cluster")
 	c := &ClusterController{
 		kubeclientset:    kubeclientset,
+		apiextensionsclientset: apiextensionsclientset,
 		clusterclientset: clusterclientset,
 		clusterlister:    clusterInformer.Lister(),
 		clusterSynced:    clusterInformer.Informer().HasSynced,
