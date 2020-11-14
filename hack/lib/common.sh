@@ -466,9 +466,16 @@ function kube::common::start_kubescheduler {
     if [[ $# -gt 1 ]] ; then
        kubeconfigfilepaths=$@
     fi
-    SCHEDULER_LOG=${LOG_DIR}/kube-scheduler.log
+
+    port_arg=$((${INSECURE_SCHEDULER_PORT}))
+    secure_port_arg=$((${KUBE_SCHEDULER_PORT}))
+
+    SCHEDULER_LOG=${LOG_DIR}/kube-scheduler$1.log
     ${CONTROLPLANE_SUDO} "${GO_OUT}/hyperkube" kube-scheduler \
       --v="${LOG_LEVEL}" \
+      --port="$(($port_arg + $1))" \
+      --scheduler-tag="$1" \
+      --secure-port="$(($secure_port_arg + $1))" \
       --leader-elect=false \
       --kubeconfig "${kubeconfigfilepaths}" \
       --feature-gates="${FEATURE_GATES}" \
