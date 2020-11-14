@@ -213,7 +213,7 @@ func (c *ClusterController) syncHandler(keyWithEventType KeyWithEventType) error
 	key := keyWithEventType.Key
 	startTime := time.Now()
 	defer func() {
-		klog.V(4).Infof("Finished syncing service %q (%v)", key, time.Since(startTime))
+		klog.V(4).Infof("Finished syncing  %q (%v)", key, time.Since(startTime))
 	}()
 	namespace, clusterName, err := cache.SplitMetaNamespaceKey(key)
 	cluster, err := c.clusterlister.Clusters(namespace).Get(clusterName)
@@ -221,6 +221,7 @@ func (c *ClusterController) syncHandler(keyWithEventType KeyWithEventType) error
 		klog.Errorf("Failed to retrieve cluster in local cache by cluster name - %s", clusterName)
 		return err
 	}
+	fmt.Printf("Cluster Handled: %#v, Event: %#v\n", clusterName, key)
 	c.recorder.Event(cluster, corev1.EventTypeNormal, SuccessSynched, MessageResourceSynched)
 	return nil
 }

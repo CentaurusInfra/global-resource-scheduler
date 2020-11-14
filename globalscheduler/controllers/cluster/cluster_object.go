@@ -17,11 +17,9 @@ limitations under the License.
 package cluster
 
 import (
-	"fmt"
-	"log"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog"
 	clusterv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 )
 
@@ -67,9 +65,8 @@ func (c *ClusterController) CreateObject() error {
 	_, err := c.clusterclientset.GlobalschedulerV1().Clusters(corev1.NamespaceDefault).Create(object)
 	errorMessage := err
 	if err != nil {
-		log.Fatalf("could not create: %v", errorMessage)
+		klog.Fatalf("could not create: %v", errorMessage)
 	}
-	log.Printf("Created Vpc: %s", object.Name)
-	fmt.Printf("Created Vpc %s", object.Name)
+	klog.Infof("Created a cluster: %s", object.Name)
 	return err
 }

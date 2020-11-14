@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "cluster_controller.go",
         "cluster_crd.go",
+        "cluster_object.go",
     ],
     importpath = "k8s.io/kubernetes/globalscheduler/controllers/cluster",
     visibility = ["//visibility:public"],

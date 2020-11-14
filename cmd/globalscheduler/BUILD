@@ -7,6 +7,7 @@ go_library(
     visibility = ["//visibility:private"],
     deps = [
         "//globalscheduler/controllers/cluster:go_default_library",
+        "//globalscheduler/pkg/apis/cluster/client:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/clientset/versioned:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/informers/externalversions:go_default_library",
         "//staging/src/k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset:go_default_library",

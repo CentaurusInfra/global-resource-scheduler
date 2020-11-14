@@ -53,7 +53,7 @@ func (c *ClusterController) waitCRDAccepted() error {
 	return err
 }
 
-// CreateCRD creates a custom resource definition, Vpc.
+// CreateCRD creates a custom resource definition, Cluster.
 func (c *ClusterController) CreateCRD() error {
 	if result, _ := c.doesCRDExist(); result {
 		return nil

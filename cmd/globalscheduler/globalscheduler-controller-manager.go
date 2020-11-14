@@ -25,6 +25,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/controllers/cluster"
+	clusterclient "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client"
 	clusterclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
 	"k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/informers/externalversions"
 )
@@ -91,9 +92,9 @@ func main() {
 	//cluster rest client - create a cluster api client interface for cluster v1.
 	clusterClient, err := clusterclient.NewClusterClient(clusterClientset, defaultNamespace)
 	if err != nil {
-	 	klog.Fatalf("error - create a cluster client: %s", err.Error())
-	 }
-	klog.Info("created cluster client: %s", clusterClient.)
+		klog.Fatalf("error - create a cluster client: %s", err.Error())
+	}
+	klog.Info("created cluster client: %s", clusterClient.GetNamespace())
 
 	informerFactory.Start(stopCh)
 	controller.Run(workers, stopCh)
