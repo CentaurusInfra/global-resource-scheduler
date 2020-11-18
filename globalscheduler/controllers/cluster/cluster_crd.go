@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controller
+package cluster
 
 import (
 	"fmt"
@@ -28,7 +28,7 @@ import (
 )
 
 func (c *ClusterController) doesCRDExist() (bool, error) {
-	crd, err := c.apiextensionsclientset.ApiextensionsV1beta1().CustomResourceDefinitions().Get(vpcv1.Name, metav1.GetOptions{})
+	crd, err := c.apiextensionsclientset.ApiextensionsV1beta1().CustomResourceDefinitions().Get(clusterv1.Name, metav1.GetOptions{})
 
 	if err != nil {
 		return false, err
@@ -53,7 +53,7 @@ func (c *ClusterController) waitCRDAccepted() error {
 	return err
 }
 
-// CreateCRD creates a custom resource definition, Vpc.
+// CreateCRD creates a custom resource definition, Cluster.
 func (c *ClusterController) CreateCRD() error {
 	if result, _ := c.doesCRDExist(); result {
 		return nil
@@ -89,13 +89,17 @@ func (c *ClusterController) CreateCRD() error {
 										"area":     {Type: "string"},
 										"country":  {Type: "string"},
 									},
-									Required: []string{"area", "country"},
 								},
 								"region": {
 									Type: "object",
 									Properties: map[string]apiextensions.JSONSchemaProps{
-										"region":           {Type: "string"},
-										"availabilityzone": {Type: "[]string"},
+										"region": {Type: "string"},
+										"availabilityzone": {
+											Type: "array",
+											Items: &apiextensions.JSONSchemaPropsOrArray{
+												Schema: &apiextensions.JSONSchemaProps{Type: "string"},
+											},
+										},
 									},
 								},
 								"operator": {
@@ -103,7 +107,6 @@ func (c *ClusterController) CreateCRD() error {
 									Properties: map[string]apiextensions.JSONSchemaProps{
 										"operator": {Type: "string"},
 									},
-									Required: []string{"operator"},
 								},
 								"flavors": {
 									Type: "array",
@@ -112,7 +115,7 @@ func (c *ClusterController) CreateCRD() error {
 											Type: "object",
 											Properties: map[string]apiextensions.JSONSchemaProps{
 												"flavorid":      {Type: "string"},
-												"totalcapacity": {Type: "int64"},
+												"totalcapacity": {Type: "integer"},
 											},
 										},
 									},
@@ -124,18 +127,17 @@ func (c *ClusterController) CreateCRD() error {
 											Type: "object",
 											Properties: map[string]apiextensions.JSONSchemaProps{
 												"typeid":          {Type: "string"},
-												"storagecapacity": {Type: "int64"},
+												"storagecapacity": {Type: "integer"},
 											},
 										},
 									},
 								},
-								"eipcapacity":   {Type: "int64"},
-								"cpucapacity":   {Type: "int64"},
-								"memcapacity":   {Type: "int64"},
-								"serverprice":   {Type: "int64"},
+								"eipcapacity":   {Type: "integer"},
+								"cpucapacity":   {Type: "integer"},
+								"memcapacity":   {Type: "integer"},
+								"serverprice":   {Type: "integer"},
 								"homescheduler": {Type: "string"},
 							},
-							Required: []string{"ipaddress", "region", "storage"},
 						},
 					},
 				},
@@ -153,22 +155,22 @@ func (c *ClusterController) CreateCRD() error {
 				},
 				{
 					Name:     "eipcapacity",
-					Type:     "int64",
+					Type:     "integer",
 					JSONPath: ".spec.eipcapacity",
 				},
 				{
 					Name:     "cpucapacity",
-					Type:     "int64",
+					Type:     "integer",
 					JSONPath: ".spec.cpucapacity",
 				},
 				{
 					Name:     "memcapacity",
-					Type:     "int64",
+					Type:     "integer",
 					JSONPath: ".spec.memcapacity",
 				},
 				{
 					Name:     "serverprice",
-					Type:     "int64",
+					Type:     "integer",
 					JSONPath: ".spec.serverprice",
 				},
 				{
