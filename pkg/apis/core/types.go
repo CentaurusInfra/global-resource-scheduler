@@ -5418,6 +5418,8 @@ type DataPartitionConfigList struct {
 type ResourceCommonInfo struct {
 	// +optional
 	Selector ResourceSelector
+	// +optional
+	Count int32
 }
 
 // ResourceSelector holds the resource selector information

@@ -6121,6 +6121,8 @@ type DataPartitionConfigList struct {
 type ResourceCommonInfo struct {
 	// +optional
 	Selector ResourceSelector `json:"selector,omitempty" protobuf:"bytes,1,opt,name=selector"`
+	// +optional
+	Count int32 `json:"count,omitempty" protobuf:"bytes,2,opt,name=count"`
 }
 
 // ResourceSelector contains resource selector information
