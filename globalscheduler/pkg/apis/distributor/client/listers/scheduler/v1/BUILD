@@ -6,7 +6,7 @@ go_library(
         "expansion_generated.go",
         "scheduler.go",
     ],
-    importpath = "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/listers/scheduler/v1",
+    importpath = "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/client/listers/scheduler/v1",
     visibility = ["//visibility:public"],
     deps = [
         "//globalscheduler/pkg/apis/scheduler/v1:go_default_library",

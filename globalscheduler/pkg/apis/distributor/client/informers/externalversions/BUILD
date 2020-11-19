@@ -33,6 +33,7 @@ filegroup(
         ":package-srcs",
         "//globalscheduler/pkg/apis/distributor/client/informers/externalversions/distributor:all-srcs",
         "//globalscheduler/pkg/apis/distributor/client/informers/externalversions/internalinterfaces:all-srcs",
+        "//globalscheduler/pkg/apis/distributor/client/informers/externalversions/scheduler:all-srcs",
     ],
     tags = ["automanaged"],
     visibility = ["//visibility:public"],

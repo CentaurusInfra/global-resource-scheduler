@@ -7123,6 +7123,7 @@ func autoConvert_v1_ResourceCommonInfo_To_core_ResourceCommonInfo(in *v1.Resourc
 	if err := Convert_v1_ResourceSelector_To_core_ResourceSelector(&in.Selector, &out.Selector, s); err != nil {
 		return err
 	}
+	out.Count = in.Count
 	return nil
 }
 
@@ -7135,6 +7136,7 @@ func autoConvert_core_ResourceCommonInfo_To_v1_ResourceCommonInfo(in *core.Resou
 	if err := Convert_core_ResourceSelector_To_v1_ResourceSelector(&in.Selector, &out.Selector, s); err != nil {
 		return err
 	}
+	out.Count = in.Count
 	return nil
 }
 

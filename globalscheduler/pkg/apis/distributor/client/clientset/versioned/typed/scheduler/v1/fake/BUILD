@@ -7,7 +7,7 @@ go_library(
         "fake_scheduler.go",
         "fake_scheduler_client.go",
     ],
-    importpath = "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned/typed/scheduler/v1/fake",
+    importpath = "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/client/clientset/versioned/typed/scheduler/v1/fake",
     visibility = ["//visibility:public"],
     deps = [
         "//globalscheduler/pkg/apis/scheduler/client/clientset/versioned/typed/scheduler/v1:go_default_library",

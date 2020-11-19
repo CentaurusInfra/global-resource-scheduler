@@ -4009,6 +4009,9 @@ message ResizePolicy {
 message ResourceCommonInfo {
   // +optional
   optional ResourceSelector selector = 1;
+
+  // +optional
+  optional int32 count = 2;
 }
 
 // ResourceFieldSelector represents container resources (cpu, memory) and their output format

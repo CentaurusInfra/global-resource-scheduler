@@ -21,6 +21,7 @@ filegroup(
         "//globalscheduler/pkg/apis/distributor/client/clientset/versioned:all-srcs",
         "//globalscheduler/pkg/apis/distributor/client/informers/externalversions:all-srcs",
         "//globalscheduler/pkg/apis/distributor/client/listers/distributor/v1:all-srcs",
+        "//globalscheduler/pkg/apis/distributor/client/listers/scheduler/v1:all-srcs",
         "//globalscheduler/pkg/apis/distributor/v1:all-srcs",
     ],
     tags = ["automanaged"],

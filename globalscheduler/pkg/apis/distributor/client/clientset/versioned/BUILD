@@ -30,6 +30,7 @@ filegroup(
         "//globalscheduler/pkg/apis/distributor/client/clientset/versioned/fake:all-srcs",
         "//globalscheduler/pkg/apis/distributor/client/clientset/versioned/scheme:all-srcs",
         "//globalscheduler/pkg/apis/distributor/client/clientset/versioned/typed/distributor/v1:all-srcs",
+        "//globalscheduler/pkg/apis/distributor/client/clientset/versioned/typed/scheduler/v1:all-srcs",
     ],
     tags = ["automanaged"],
     visibility = ["//visibility:public"],
