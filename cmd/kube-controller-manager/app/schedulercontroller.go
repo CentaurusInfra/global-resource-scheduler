@@ -21,15 +21,18 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
+	clusterclient "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client"
+	clusterclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"k8s.io/kubernetes/globalscheduler/controllers/scheduler"
-	client "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client"
-	clientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
-	informers "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/informers/externalversions"
+	clusterinformers "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/informers/externalversions"
+	schedulerclient "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client"
+	schedulerclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
+	schedulerinformers "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/informers/externalversions"
 )
 
 // client config
@@ -70,27 +73,44 @@ func StartSchedulerController() {
 		klog.Fatalf("Error building kubeconfig: %s", err.Error())
 	}
 
+	// Create kubeClientset
 	kubeClientset, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
 		klog.Fatalf("Error building kubernetes clientset: %s", err.Error())
 	}
 
-	schedulerClientset, err := clientset.NewForConfig(cfg)
+	// Create schedulerClientset
+	schedulerClientset, err := schedulerclientset.NewForConfig(cfg)
 	if err != nil {
-		klog.Fatalf("Error building example clientset: %s", err.Error())
+		klog.Fatalf("Error building scheduler clientset: %s", err.Error())
 	}
-
 	// Create scheduler client
-	schedulerClient, err := client.NewClient(schedulerClientset, defaultNamespace)
+	schedulerClient, err := schedulerclient.NewClient(schedulerClientset, defaultNamespace)
 	if err != nil {
 		klog.Fatalf("Error creating scheduler client: %s", err.Error())
 	}
 
-	schedulerInformerFactory := informers.NewSharedInformerFactory(schedulerClientset, time.Second*30)
+	// Create clusterClientset
+	clusterClientset, err := clusterclientset.NewForConfig(cfg)
+	if err != nil {
+		klog.Fatalf("Error building clusterclientset: %s", err.Error())
+	}
+	// Create clusterClient
+	clusterClient, err := clusterclient.NewClusterClient(clusterClientset, defaultNamespace)
+	if err != nil {
+		klog.Fatalf("Error creating cluster client: %s", err.Error())
+	}
 
-	schedulerController := scheduler.NewSchedulerController(kubeClientset, schedulerClient, schedulerInformerFactory.Globalscheduler().V1().Schedulers())
+	schedulerInformerFactory := schedulerinformers.NewSharedInformerFactory(schedulerClientset, time.Second*30)
+	schedulerInformer := schedulerInformerFactory.Globalscheduler().V1().Schedulers()
+
+	clusterInformerFactory := clusterinformers.NewSharedInformerFactory(clusterClientset, time.Second*30)
+	clusterInformer := clusterInformerFactory.Globalscheduler().V1().Clusters()
+
+	schedulerController := scheduler.NewSchedulerController(kubeClientset, schedulerClient, clusterClient, schedulerInformer, clusterInformer)
 
 	go schedulerInformerFactory.Start(stopCh)
+	go clusterInformerFactory.Start(stopCh)
 
 	if err = schedulerController.Run(1, stopCh); err != nil {
 		klog.Fatalf("Error running controller: %s", err.Error())
