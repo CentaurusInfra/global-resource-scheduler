@@ -75,6 +75,23 @@ type SchedulerSpec struct {
 
 	// Cluster is an array that stores the name of clusters
 	Cluster [][]*clustercrdv1.Cluster `json:"cluster"`
+
+	// ClusterUnion is the union of all cluster spec
+	Union ClusterUnion `json:"union"`
+}
+
+type ClusterUnion struct {
+	IpAddress     []string                        `json:"ipaddress"`
+	GeoLocation   []*clustercrdv1.GeolocationInfo `json:"geolocation"`
+	Region        []*clustercrdv1.RegionInfo      `json:"region"`
+	Operator      []*clustercrdv1.OperatorInfo    `json:"operator"`
+	Flavors       [][]*clustercrdv1.FlavorInfo    `json:"flavors"`
+	Storage       [][]*clustercrdv1.StorageSpec   `json:"storage"`
+	EipCapacity   []int64                         `json:"eipcapacity"`
+	CPUCapacity   []int64                         `json:"cpucapacity"`
+	MemCapacity   []int64                         `json:"memcapacity"`
+	ServerPrice   []int64                         `json:"serverprice"`
+	HomeScheduler []string                        `json:"homescheduler"`
 }
 
 type SchedulerStatus struct {
