@@ -19,9 +19,11 @@ package scheduler
 import (
 	"fmt"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/klog"
+	"reflect"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -33,10 +35,14 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 
-	client "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client"
+	clusterclient "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client"
+	clusterinformers "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/informers/externalversions/cluster/v1"
+	clusterlisters "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/listers/cluster/v1"
+	clustercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
+	schedulerclient "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client"
 	schedulerscheme "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned/scheme"
-	informers "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/informers/externalversions/scheduler/v1"
-	listers "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/listers/scheduler/v1"
+	schedulerinformers "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/informers/externalversions/scheduler/v1"
+	schedulerlisters "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/listers/scheduler/v1"
 	schedulercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
 )
 
@@ -49,9 +55,11 @@ const (
 type SchedulerController struct {
 	// kubeclientset is a standard kubernetes clientset
 	kubeclientset   *kubernetes.Clientset
-	schedulerclient *client.SchedulerClient
+	schedulerclient *schedulerclient.SchedulerClient
+	clusterclient   *clusterclient.ClusterClient
 
-	schedulerInformer listers.SchedulerLister
+	schedulerInformer schedulerlisters.SchedulerLister
+	clusterInformer   clusterlisters.ClusterLister
 	schedulerSynced   cache.InformerSynced
 
 	// workqueue is a rate limited work queue. This is used to queue work to be
@@ -68,8 +76,10 @@ type SchedulerController struct {
 // NewSchedulerController returns a new scheduler controller
 func NewSchedulerController(
 	kubeclientset *kubernetes.Clientset,
-	schedulerclient *client.SchedulerClient,
-	schedulerInformer informers.SchedulerInformer) *SchedulerController {
+	schedulerclient *schedulerclient.SchedulerClient,
+	clusterclient *clusterclient.ClusterClient,
+	schedulerInformer schedulerinformers.SchedulerInformer,
+	clusterInformer clusterinformers.ClusterInformer) *SchedulerController {
 
 	// Create event broadcaster
 	// Add sample-controller types to the default Kubernetes Scheme so Events can be
@@ -84,7 +94,9 @@ func NewSchedulerController(
 	controller := &SchedulerController{
 		kubeclientset:     kubeclientset,
 		schedulerclient:   schedulerclient,
+		clusterclient:     clusterclient,
 		schedulerInformer: schedulerInformer.Lister(),
+		clusterInformer:   clusterInformer.Lister(),
 		schedulerSynced:   schedulerInformer.Informer().HasSynced,
 		workqueue:         workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Scheduler"),
 		recorder:          recorder,
@@ -95,6 +107,12 @@ func NewSchedulerController(
 		AddFunc:    controller.addScheduler,
 		UpdateFunc: controller.updateScheduler,
 		DeleteFunc: controller.deleteScheduler,
+	})
+
+	clusterInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc:    controller.addClusterToScheduler,
+		UpdateFunc: controller.updateClusterFromScheduler,
+		DeleteFunc: controller.deleteClusterFromScheduler,
 	})
 
 	return controller
@@ -229,8 +247,64 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 	return nil
 }
 
-func (sc *SchedulerController) addScheduler(obj interface{}) {
-	sc.enqueueScheduler(obj, EventTypeCreate)
+func (sc *SchedulerController) addClusterToScheduler(clusterObj interface{}) {
+	fmt.Println("Watching Cluster Create")
+	cluster := clusterObj.(*clustercrdv1.Cluster)
+
+	schedulerList, err := sc.schedulerclient.List(metav1.ListOptions{})
+	if err != nil {
+		klog.Infof("Error listing all schedulers")
+		return
+	}
+
+	for i := 0; i < len(schedulerList.Items); i++ {
+		scheduler := schedulerList.Items[i]
+		clusterArray := scheduler.Spec.Cluster
+		if cluster.Spec.GeoLocation.Area == scheduler.Spec.Location.Area {
+			scheduler.Spec.Cluster = append(clusterArray, cluster)
+			_, err = sc.schedulerclient.Update(&scheduler)
+			if err != nil {
+				klog.Infof("Fail to update scheduler")
+			}
+			break
+		}
+	}
+}
+
+func (sc *SchedulerController) updateClusterFromScheduler(old, new interface{}) {
+	oldCluster := old.(*clustercrdv1.Cluster)
+	newCluster := new.(*clustercrdv1.Cluster)
+	if oldCluster.ResourceVersion == newCluster.ResourceVersion {
+		return
+	}
+	fmt.Println("Watching Cluster Update")
+}
+
+func (sc *SchedulerController) deleteClusterFromScheduler(clusterObj interface{}) {
+	fmt.Println("Watching Cluster Delete")
+	cluster := clusterObj.(*clustercrdv1.Cluster)
+
+	schedulerList, err := sc.schedulerclient.List(metav1.ListOptions{})
+	if err != nil {
+		klog.Infof("Error listing all schedulers")
+		return
+	}
+
+	for i := 0; i < len(schedulerList.Items); i++ {
+		scheduler := schedulerList.Items[i]
+		if cluster.Spec.GeoLocation.Area == scheduler.Spec.Location.Area {
+			scheduler.Spec.Cluster = removeCluster(scheduler.Spec.Cluster, cluster)
+			_, err = sc.schedulerclient.Update(&scheduler)
+			if err != nil {
+				klog.Infof("Fail to update scheduler")
+			}
+			break
+		}
+	}
+}
+
+func (sc *SchedulerController) addScheduler(schedulerObj interface{}) {
+	sc.enqueueScheduler(schedulerObj, EventTypeCreate)
 }
 
 func (sc *SchedulerController) updateScheduler(old, new interface{}) {
@@ -245,10 +319,10 @@ func (sc *SchedulerController) updateScheduler(old, new interface{}) {
 // deleteScheduler takes a deleted Scheduler resource and converts it into a namespace/name
 // string which is then put into the work queue. This method should *not* be
 // passed resources of any type other than Scheduler.
-func (sc *SchedulerController) deleteScheduler(obj interface{}) {
+func (sc *SchedulerController) deleteScheduler(schedulerObj interface{}) {
 	var key string
 	var err error
-	key, err = cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
+	key, err = cache.DeletionHandlingMetaNamespaceKeyFunc(schedulerObj)
 	if err != nil {
 		runtime.HandleError(err)
 		return
@@ -269,4 +343,14 @@ func (sc *SchedulerController) enqueueScheduler(obj interface{}, eventType Event
 	}
 	keyWithEventType := NewKeyWithEventType(eventType, key)
 	sc.workqueue.AddRateLimited(keyWithEventType)
+}
+
+func removeCluster(clusterArray []*clustercrdv1.Cluster, cluster *clustercrdv1.Cluster) []*clustercrdv1.Cluster {
+	for idx, val := range clusterArray {
+		if reflect.DeepEqual(val, cluster) {
+			return append(clusterArray[:idx], clusterArray[idx+1:]...)
+		}
+	}
+
+	return clusterArray
 }

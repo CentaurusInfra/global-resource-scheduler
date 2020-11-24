@@ -16,7 +16,10 @@ limitations under the License.
 
 package v1
 
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	clustercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
+)
 
 // +genclient
 // +genclient:noStatus
@@ -35,17 +38,24 @@ type SchedulerSpec struct {
 	Name string `json:"name"`
 
 	// Location represent which geo location the scheduler is responsable for
-	Location string `json:"location"`
+	Location GeolocationInfo `json:"location"`
 
 	// Tag represent the Nth scheduler object
 	Tag string `json:"tag"`
 
 	// Cluster is an array that stores the name of clusters
-	Cluster []string `json:"cluster"`
+	Cluster []*clustercrdv1.Cluster `json:"cluster"`
 }
 
 type SchedulerStatus struct {
 	State string `json:"state"`
+}
+
+type GeolocationInfo struct {
+	City     string `json:"city"`
+	Province string `json:"province"`
+	Area     string `json:"area"`
+	Country  string `json:"country"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
