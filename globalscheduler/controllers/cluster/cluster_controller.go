@@ -21,6 +21,7 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
@@ -67,16 +68,18 @@ const (
 
 // Cluster Controller Struct
 type ClusterController struct {
-	kubeclientset    kubernetes.Interface
-	clusterclientset clienteset.Interface
-	clusterlister    listers.ClusterLister
-	clusterSynced    cache.InformerSynced
-	workqueue        workqueue.RateLimitingInterface
-	recorder         record.EventRecorder
+	kubeclientset          kubernetes.Interface
+	apiextensionsclientset apiextensionsclientset.Interface
+	clusterclientset       clienteset.Interface
+	clusterlister          listers.ClusterLister
+	clusterSynced          cache.InformerSynced
+	workqueue              workqueue.RateLimitingInterface
+	recorder               record.EventRecorder
 }
 
 func NewClusterController(
 	kubeclientset kubernetes.Interface,
+	apiextensionsclientset apiextensionsclientset.Interface,
 	clusterclientset clienteset.Interface,
 	clusterInformer informers.ClusterInformer) *ClusterController {
 	utilruntime.Must(clusterscheme.AddToScheme(clusterscheme.Scheme))
@@ -88,12 +91,13 @@ func NewClusterController(
 	recorder := eventBroadcaster.NewRecorder(clusterscheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 	workqueue := workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Cluster")
 	c := &ClusterController{
-		kubeclientset:    kubeclientset,
-		clusterclientset: clusterclientset,
-		clusterlister:    clusterInformer.Lister(),
-		clusterSynced:    clusterInformer.Informer().HasSynced,
-		workqueue:        workqueue,
-		recorder:         recorder,
+		kubeclientset:          kubeclientset,
+		apiextensionsclientset: apiextensionsclientset,
+		clusterclientset:       clusterclientset,
+		clusterlister:          clusterInformer.Lister(),
+		clusterSynced:          clusterInformer.Informer().HasSynced,
+		workqueue:              workqueue,
+		recorder:               recorder,
 	}
 
 	//KeyFunc : controller.lookup_cache.go
@@ -209,7 +213,7 @@ func (c *ClusterController) syncHandler(keyWithEventType KeyWithEventType) error
 	key := keyWithEventType.Key
 	startTime := time.Now()
 	defer func() {
-		klog.V(4).Infof("Finished syncing service %q (%v)", key, time.Since(startTime))
+		klog.V(4).Infof("Finished syncing  %q (%v)", key, time.Since(startTime))
 	}()
 	namespace, clusterName, err := cache.SplitMetaNamespaceKey(key)
 	cluster, err := c.clusterlister.Clusters(namespace).Get(clusterName)
@@ -217,6 +221,7 @@ func (c *ClusterController) syncHandler(keyWithEventType KeyWithEventType) error
 		klog.Errorf("Failed to retrieve cluster in local cache by cluster name - %s", clusterName)
 		return err
 	}
+	fmt.Printf("Cluster Handled: %#v, Event: %#v\n", clusterName, key)
 	c.recorder.Event(cluster, corev1.EventTypeNormal, SuccessSynched, MessageResourceSynched)
 	return nil
 }
