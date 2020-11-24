@@ -1,14 +1,14 @@
 # Global Resource Scheduler – Scheduler CRD
 
-## 1. Module Description
+## 1. Description
 
-The scheduler module allows the global resource scheduler to add, delete, get, and list existing clusters.
+The scheduler controller will list/watch the API server for scheduler creation/deletion/get/list API calls and then execute the controller logic documented in https://github.com/futurewei-cloud/global-resource-scheduler/blob/master/docs/design-proposals/global-scheduler/GlobalResourceScheduler-ClusterCrdController-ver0.1.md
 
 -   The scheduler runs the scheduling algorithm to select the best cluster for the incoming VM/Container Request.
 
--   Each scheduler is running as an individual process.
+-   HA will be enabled on each active scheduler via endpoint/configmap object lock based leader election mechanism.
 
--   Different schedulers are responsible for different clusters.
+-   Each scheduler is responsible for a group/partition of clusters.
 
 ## 2. Requirements
 
@@ -74,7 +74,7 @@ type SchedulerSpec struct {
 	Tag string `json:"tag"`
 
 	// Cluster is an array that stores the name of clusters
-	Cluster []string `json:"cluster"`
+	Cluster [][]*clustercrdv1.Cluster `json:"cluster"`
 }
 
 type SchedulerStatus struct {
