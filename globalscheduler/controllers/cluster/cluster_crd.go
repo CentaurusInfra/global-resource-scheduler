@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
 	apiextensions "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -58,7 +59,6 @@ func (c *ClusterController) CreateCRD() error {
 	if result, _ := c.doesCRDExist(); result {
 		return nil
 	}
-
 	crd := &apiextensions.CustomResourceDefinition{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: clusterv1.Name,
@@ -193,4 +193,29 @@ func (c *ClusterController) CreateCRD() error {
 		klog.Fatalf(err.Error())
 	}
 	return c.waitCRDAccepted()
+}
+
+// Create a cluster object.
+func (c *ClusterController) CreateObject(object *clusterv1.Cluster) error {
+	_, err := c.clusterclientset.GlobalschedulerV1().Clusters(corev1.NamespaceDefault).Create(object)
+	errorMessage := err
+	if err != nil {
+		klog.Fatalf("could not create: %v", errorMessage)
+	}
+	klog.Infof("Created a cluster: %s", object.Name)
+	return err
+}
+
+// Delete a cluster object.
+func (c *ClusterController) DeleteObject(name string) error {
+	deletePolicy := metav1.DeletePropagationForeground
+	deleteOptions := metav1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	}
+	err := c.clusterclientset.GlobalschedulerV1().Clusters(corev1.NamespaceDefault).Delete(name, &deleteOptions)
+	if err != nil {
+		klog.Errorf("could not delete: %v", err)
+	}
+	klog.Infof("Deleted a cluster: %s", name)
+	return err
 }
