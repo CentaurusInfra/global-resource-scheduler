@@ -84,11 +84,6 @@ func main() {
 		klog.Fatalf("error - register cluster crd: %s", err.Error())
 	}
 
-	err = controller.CreateObject()
-	if err != nil {
-		klog.Fatalf("error - register cluster object: %s", err.Error())
-	}
-
 	//cluster rest client - create a cluster api client interface for cluster v1.
 	clusterClient, err := clusterclient.NewClusterClient(clusterClientset, defaultNamespace)
 	if err != nil {
