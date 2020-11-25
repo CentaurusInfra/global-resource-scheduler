@@ -15,8 +15,11 @@ service ClusterProtocol {
         rpc SendClusterProfile(ClusterProfile) returns (ReturnMessage) {}
 }
 
+//message from ClusterController to ResourceCollector
 message ClusterProfile {
-   message ClusterSpecInfo {
+    string ClusterNameSpace = 1
+    string ClusterName = 2
+    message ClusterSpecInfo {
         string ClusterIpAddress = 1;
         message GeoLocationInfo{
             string City = 1;
@@ -32,8 +35,7 @@ message ClusterProfile {
             string Operator = 1;
         }
         message FlavorInfo {
-            int32 FlavorID = 1;  //1:Small, 2:Medium, 3:Large, 4:Xlarge,   
-                                 //5:2xLarge
+            int32 FlavorID = 1;  //1:Small, 2:Medium, 3:Large, 4:Xlarge, 5:2xLarge 
             int32 TotalCapacity = 2;
         }
         enum StorageType {
@@ -56,33 +58,14 @@ message ClusterProfile {
         int32 ServerPrice = 10;    
         string HomeScheduler = 11; 
    }
-   ClusterSpecInfo ClusterSpec = 2;
+   ClusterSpecInfo ClusterSpec = 3;
 }
 
-//response
-message ReturnMessage {  // Cluster Controller should get response from ResourceCollector
-       int32  ReturnCode = 1;	//0: Error, 1: OK 
-}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-- Cluster2ResourceCollector.Proto (Version: Proto2)
-  If Golang version 1.12.9 and Proto2 does not support nested structure, json format is used.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// service
-service ClusterProtocol { 
-rpc SendClusterProfile(ClusterProfile) returns (ReturnCode) {ReturnMessage}
-}
-message ClusterName {
- 	string NameSpace = 1;  
-string Name = 2;
-}
-
-message ClusterProfile {
-string ClusterProfile = 2;	//json format 
-}
-
-message ReturnMessage {
-              int32 ReturnCode = 1;	//0: Error, 1: OK 
+//Message from ResourceCollector, Cluster Controller should get response from ResourceCollector.
+message ReturnMessage {               
+        string ClusterNameSpace = 1;
+        string ClusterName = 2;
+        int32  ReturnCode = 3;	     //0: Error, 1: OK
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -93,53 +76,58 @@ message ReturnMessage {
 service ClusterProtocol { 
 rpc SendClusterProfile(ClusterProfile) returns (ReturnCode) {ReturnMessage}
 }
-message ClusterName {
- 	string NameSpace = 1;  
-string Name = 2;
-}
 
+//message from ClusterController to ResourceCollector
 message ClusterProfile {
-string ClusterProfile = 2;	//json format 
+        string ClusterNameSpace = 1;
+        string ClusterName = 2;
+        string ClusterProfile = 3;	//json format 
 }
 
+//message from ResourceCollector
 message ReturnMessage {
-              int32 ReturnCode = 1;	//0: Error, 1: OK 
+        string ClusterNameSpace = 1;
+        string ClusterName = 2;
+        int32 ReturnCode = 3;	   //0: Error, 1: OK 
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## ClusterProfile example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 "clusterprofile": { 
-        "clustername": "cluster1", 
-        “ipaddress”: “10.0.0.3”, 
-        “geolocation”: { 
+        "clusternamespace": "default",
+        "clustername": "cluster1",
+        "clusterspec": 
+            “ipaddress”: “10.0.0.3”, 
+            “geolocation”: { 
                 “city”: “Bellevue”, 
                 “province”: “Washington”, 
                 “area”: “West”, 
                 “country”: “US”
-        }, 
-        “region”: { 
+            }, 
+            “region”: { 
                 “region”: “us-west”,
                 “availabilityzone”: “us-west-1” 
-        }, 
-        “operator”: { 
+            }, 
+            “operator”: { 
                 “operator”: “globalscheduler” }, 
-        “flavors”: [ {“flavorid”: 1, “TotalCapacity”: 5}, 
+            “flavors”: [ {“flavorid”: 1, “TotalCapacity”: 5}, 
                      {“flavorid”: 2, “TotalCapacity”: 10}, 
                      {“flavorid”: 3, “TotalCapacity”: 20}, 
                      {“flavorid”: 4, “TotalCapacity”: 10}, 
                      {“flavorid”: 5, “TotalCapacity”: 5 }
                      ], 
-         “storage”: [ { “typeid”: “sata”, “StorageCapacity”: 2000}, 
+            “storage”: [ { “typeid”: “sata”, “StorageCapacity”: 2000}, 
                       { “typeid”: “sas”, “StorageCapacity”: 1000}, 
                       { “typeid”: “ssd”, “StorageCapacity”: 3000}
                     ], 
-         “eipcapacity”: 3, 
-         “cpucapacity”: 8, 
-         “memcapacity”: 256, 
-         “serverprice”: 10, 
-         “homescheduler”: “scheduler1” 
-      } 
+            “eipcapacity”: 3, 
+            “cpucapacity”: 8, 
+            “memcapacity”: 256, 
+            “serverprice”: 10, 
+            “homescheduler”: “scheduler1” 
+        }   
+    } 
 } 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -193,15 +181,19 @@ type OperatorInfo struct {
 // service
 service ResourceCollectorProtocol { 
 rpc UpdateClusterStatus(ClusterState) returns (return code) {}  
-                                                                                               
+
+//message from ResourceCollector
 message ClusterState {
-              string NameSpace = 1;  
-              string Name = 2;
-              int32 State = 3; 	     //1: ready, 2: down, 3: unreachable…
+        string NameSpace = 1;  
+        string Name = 2;
+        int32 State = 3; 	     //1: ready, 2: down
 }
-//response
+
+//message from ClusterController
 message ReturnMessage {
-              int32 ReturnCode = 1;	//0: Error, 1: OK 
+        string NameSpace = 1;  
+        string Name = 2;
+        int32 ReturnCode = 3;	 //0: Error, 1: OK 
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
