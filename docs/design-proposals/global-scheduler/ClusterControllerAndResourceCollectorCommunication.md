@@ -107,7 +107,7 @@ message ReturnMessage {
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-•	ClusterProfile example
+## ClusterProfile example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 "clusterprofile": { 
         "clustername": "cluster1", 
@@ -143,7 +143,7 @@ message ReturnMessage {
 } 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-•	Cluster Data Structure
+## Cluster Data Structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     NameSpace     string          `json:"namespace"`
     Name          string          `json:"name"`
@@ -188,7 +188,7 @@ type OperatorInfo struct {
 ## Protocol 2. ResourceCollector  ClusterController 
 - Issue #75 - Cluster status update APIs from Resource Collector to Cluster Controller
 - When there is a change in a cluster status (e.g., crash), ResourceCollector will detect the change. Then ResourceCollector will pass the cluster's status to Cluster Controller. The Cluster Controller should update the cluster object in the ETCD with the latest cluster status. If the status is "down" or "unreachable" (this depends on how we define the status enum values), the cluster controller should detach the association of the cluster with its scheduler (i.e., remove the cluster from the scheduler's partition pool) so that the scheduler will not schedule any POD to this cluster. Note that registration and unregistration of a cluster will only come from one entry, i.e. through the API server by an admin.
-•	ResourceCollector2ClusterController.Proto 
+- ResourceCollector2ClusterController.Proto 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // service
 service ResourceCollectorProtocol { 
