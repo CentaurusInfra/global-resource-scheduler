@@ -55,7 +55,8 @@ address: 0.0.0.0
 port: 13443
 
 scheduler_policy: edgecloud
-scheduler_policy_file: /root/work/src/k8s.io/kubernetes/conf/edgecloud_policy.yaml
+# ${PWD} should be replaced to real path
+scheduler_policy_file: ${PWD}/conf/edgecloud_policy.yaml
 
 spot_region_mapping:
   - region: region1
