@@ -180,7 +180,7 @@ type OperatorInfo struct {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // service
 service ResourceCollectorProtocol { 
-rpc UpdateClusterStatus(ClusterState) returns (return code) {}  
+rpc UpdateClusterStatus(ClusterState) returns (ReturnMessage) {}  
 
 //message from ResourceCollector
 message ClusterState {
