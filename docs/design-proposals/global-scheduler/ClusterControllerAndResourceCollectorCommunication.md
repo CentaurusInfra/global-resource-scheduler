@@ -4,7 +4,7 @@ Nov-20-2020, Cathy Hong Zhang, Eunju Kim
 
 Both Cluster Controller and Resource Collector should implement and support gRPC server and client interface. 
 
-## Protocol 1. ClusterController ResourceCollector  
+## Protocol 1. ClusterController to ResourceCollector  
 - Issue #74 - API for handling requests from ClusterController to ResourceCollector, and corresponding responses from ResourceCollector.
 - When a cluster is registered/unregistered, the ClusterController should relay/remove the cluster's registration information, such as the cluster's geolocation, to/from the resource collector through this API. The ResourceCollector, which implements this API, will save/remove the cluster's static information in its local cache so that the scheduling algorithm can use this info. If the response is failure, should retry maximum times (5 times). If it still fails, set the cluster status to unvailable and detach the cluster from the Home scheduler. 
 - ClusterController triggers ResourceCollector to collect status of a registered cluster. To illustrate, when ClusterController registers a cluster and send the cluster information to ResourceCollector using this API,  ResourceCollects starts to collect status information of the cluster.
@@ -173,7 +173,7 @@ type OperatorInfo struct {
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## Protocol 2. ResourceCollector  ClusterController 
+## Protocol 2. ResourceCollector to ClusterController 
 - Issue #75 - Cluster status update APIs from Resource Collector to Cluster Controller
 - When there is a change in a cluster status (e.g., crash), ResourceCollector will detect the change. Then ResourceCollector will pass the cluster's status to Cluster Controller. The Cluster Controller should update the cluster object in the ETCD with the latest cluster status. If the status is "down" or "unreachable" (this depends on how we define the status enum values), the cluster controller should detach the association of the cluster with its scheduler (i.e., remove the cluster from the scheduler's partition pool) so that the scheduler will not schedule any POD to this cluster. Note that registration and unregistration of a cluster will only come from one entry, i.e. through the API server by an admin.
 - ResourceCollector2ClusterController.Proto 
