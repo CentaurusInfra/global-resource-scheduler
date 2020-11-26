@@ -32,7 +32,6 @@ import (
 
 	ktypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog"
 	framework "k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
@@ -760,5 +759,7 @@ func MakeNextStackFunc(queue SchedulingQueue) func() *types.Stack {
 }
 
 func stackInfoKeyFunc(obj interface{}) (string, error) {
-	return cache.MetaNamespaceKeyFunc(obj.(*framework.StackInfo).Stack)
+	stack := obj.(*framework.StackInfo).Stack
+	// return tenant + namespace + name as keyFunc
+	return stack.Tenant + "/" + stack.Namespace + "/" + stack.Name, nil
 }
