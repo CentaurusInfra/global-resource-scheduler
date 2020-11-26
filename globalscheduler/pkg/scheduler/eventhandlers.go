@@ -1,0 +1,330 @@
+package scheduler
+
+import (
+	"fmt"
+	"reflect"
+
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apitypes "k8s.io/apimachinery/pkg/types"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/client-go/tools/cache"
+	"k8s.io/klog"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
+)
+
+// AddAllEventHandlers is a helper function used in tests and in Scheduler
+// to add event handlers for various informers.
+func AddAllEventHandlers(sched *Scheduler) {
+	// scheduled pod cache
+	sched.PodInformer.Informer().AddEventHandler(
+		cache.FilteringResourceEventHandler{
+			FilterFunc: func(obj interface{}) bool {
+				switch t := obj.(type) {
+				case *v1.Pod:
+					return assignedPod(t)
+				case cache.DeletedFinalStateUnknown:
+					if pod, ok := t.Obj.(*v1.Pod); ok {
+						return assignedPod(pod)
+					}
+					utilruntime.HandleError(fmt.Errorf("unable to convert object %T to *v1.Pod in %T", obj, sched))
+					return false
+				default:
+					utilruntime.HandleError(fmt.Errorf("unable to handle object in %T: %T", sched, obj))
+					return false
+				}
+
+			},
+			Handler: cache.ResourceEventHandlerFuncs{
+				AddFunc:    sched.addPodToCache,
+				UpdateFunc: sched.updatePodInCache,
+				DeleteFunc: sched.deletePodFromCache,
+			},
+		})
+	// unscheduled pod queue
+	sched.PodInformer.Informer().AddEventHandler(
+		cache.FilteringResourceEventHandler{
+			FilterFunc: func(obj interface{}) bool {
+				switch t := obj.(type) {
+				case *v1.Pod:
+					return !assignedPod(t) && !vmPodShouldSleep(t)
+				case cache.DeletedFinalStateUnknown:
+					if pod, ok := t.Obj.(*v1.Pod); ok {
+						return !assignedPod(pod)
+					}
+					utilruntime.HandleError(fmt.Errorf("unable to convert object %T to *v1.Pod in %T", obj, sched))
+					return false
+				default:
+					utilruntime.HandleError(fmt.Errorf("unable to handle object in %T: %T", sched, obj))
+					return false
+				}
+			},
+			Handler: cache.ResourceEventHandlerFuncs{
+				AddFunc:    sched.addPodToSchedulingQueue,
+				UpdateFunc: sched.updatePodInSchedulingQueue,
+				DeleteFunc: sched.deletePodFromSchedulingQueue,
+			},
+		},
+	)
+}
+
+// assignedPod selects pods that are assigned (scheduled and running).
+func assignedPod(pod *v1.Pod) bool {
+	return pod.Spec.VirtualMachine != nil && len(pod.Spec.NodeName) != 0
+}
+
+// responsibleForPod returns true if the pod has asked to be scheduled by the given scheduler.
+func responsibleForPod(pod *v1.Pod, schedulerName string) bool {
+	return schedulerName == pod.Spec.SchedulerName
+}
+
+// vmPodShouldSleep returns true if the pod status is set ot PodNoSchedule
+func vmPodShouldSleep(pod *v1.Pod) bool {
+	return pod.Status.Phase == v1.PodNoSchedule
+}
+
+// addPodToCache add pod to the stack cache of the scheduler
+func (sched *Scheduler) addPodToCache(obj interface{}) {
+	pod, ok := obj.(*v1.Pod)
+	if !ok {
+		klog.Errorf("cannot convert to *v1.Pod: %v", obj)
+		return
+	}
+
+	// add pod resource to a stack
+	stack := getStackFromPod(pod)
+
+	// add stack to cache
+	if err := sched.SchedulerCache.AddStack(stack); err != nil {
+		klog.Errorf("scheduler cache AddStack failed: %v", err)
+	}
+}
+
+func (sched *Scheduler) updatePodInCache(oldObj, newObj interface{}) {
+	oldPod, ok := oldObj.(*v1.Pod)
+	if !ok {
+		klog.Errorf("cannot convert oldObj to *v1.Pod: %v", oldObj)
+		return
+	}
+	newPod, ok := newObj.(*v1.Pod)
+	if !ok {
+		klog.Errorf("cannot convert newObj to *v1.Pod: %v", newObj)
+		return
+	}
+
+	oldStack := getStackFromPod(oldPod)
+	newStack := getStackFromPod(newPod)
+	if err := sched.SchedulerCache.UpdateStack(oldStack, newStack); err != nil {
+		klog.Errorf("scheduler cache UpdatePod failed: %v", err)
+	}
+}
+
+func (sched *Scheduler) deletePodFromCache(obj interface{}) {
+	var pod *v1.Pod
+	switch t := obj.(type) {
+	case *v1.Pod:
+		pod = t
+	case cache.DeletedFinalStateUnknown:
+		var ok bool
+		pod, ok = t.Obj.(*v1.Pod)
+		if !ok {
+			klog.Errorf("cannot convert to *v1.Pod: %v", t.Obj)
+			return
+		}
+	default:
+		klog.Errorf("cannot convert to *v1.Pod: %v", t)
+		return
+	}
+
+	// get stack from pod
+	stack := getStackFromPod(pod)
+
+	// NOTE: Updates must be written to scheduler cache before invalidating
+	// equivalence cache, because we could snapshot equivalence cache after the
+	// invalidation and then snapshot the cache itself. If the cache is
+	// snapshotted before updates are written, we would update equivalence
+	// cache with stale information which is based on snapshot of old cache.
+	if err := sched.SchedulerCache.RemoveStack(stack); err != nil {
+		klog.Errorf("scheduler cache RemoveStack failed: %v", err)
+	}
+}
+
+func getStackFromPod(pod *v1.Pod) *types.Stack {
+	stack := &types.Stack{
+		Name:      pod.Name,
+		Tenant:    pod.Tenant,
+		Namespace: pod.Namespace,
+		UID:       string(pod.UID),
+		Selector:  getStackSelector(&pod.Spec.VirtualMachine.ResourceCommonInfo.Selector),
+		Resources: getStackResources(pod),
+	}
+
+	return stack
+}
+
+// getStackResources change pod resources to stack Resource
+func getStackResources(pod *v1.Pod) []*types.Resource {
+	vmSpec := pod.Spec.VirtualMachine
+	flavors := make([]types.Flavor, 0)
+	for _, value := range vmSpec.Flavors {
+		flavors = append(flavors, types.Flavor{
+			FlavorID: value.FlavorID,
+			// TODO(nkwangjun): nee to add spot value
+			Spot: nil,
+		})
+	}
+
+	resource := &types.Resource{
+		Name: pod.Name,
+		// currently we just support resource type is vm
+		ResourceType: "vm",
+		// TODO(nkwangjun): need to add storage in vmSpec
+		Storage: nil,
+		Flavors: flavors,
+		NeedEip: vmSpec.NeedEIP,
+		Count:   1,
+	}
+
+	return []*types.Resource{resource}
+}
+
+// getStackSelector change vm selector to stack selector
+func getStackSelector(selector *v1.ResourceSelector) types.Selector {
+	// depress empty slice warning
+	newRegions := make([]types.CloudRegion, 0)
+	for _, value := range selector.Regions {
+		newRegions = append(newRegions, types.CloudRegion{
+			Region:           value.Region,
+			AvailabilityZone: value.AvailablityZone,
+		})
+	}
+
+	newSelector := types.Selector{
+		GeoLocation: types.GeoLocation{
+			Country:  selector.GeoLocation.Country,
+			Area:     selector.GeoLocation.Area,
+			Province: selector.GeoLocation.Province,
+			City:     selector.GeoLocation.City,
+		},
+		Regions:  newRegions,
+		Operator: selector.Operator,
+	}
+
+	return newSelector
+}
+
+func (sched *Scheduler) addPodToSchedulingQueue(obj interface{}) {
+	pod, ok := obj.(*v1.Pod)
+	if !ok {
+		klog.Errorf("cannot convert to *v1.Pod: %v", obj)
+		return
+	}
+
+	// add pod resource to a stack
+	stack := getStackFromPod(pod)
+
+	if err := sched.StackQueue.Add(stack); err != nil {
+		utilruntime.HandleError(fmt.Errorf("unable to queue %T: %v", obj, err))
+	}
+}
+
+func (sched *Scheduler) updatePodInSchedulingQueue(oldObj, newObj interface{}) {
+	oldPod, ok := oldObj.(*v1.Pod)
+	if !ok {
+		klog.Errorf("cannot convert oldObj to *v1.Pod: %v", oldObj)
+		return
+	}
+	newPod, ok := newObj.(*v1.Pod)
+	if !ok {
+		klog.Errorf("cannot convert newObj to *v1.Pod: %v", newObj)
+		return
+	}
+
+	oldStack := getStackFromPod(oldPod)
+	newStack := getStackFromPod(newPod)
+
+	if sched.skipStackUpdate(newStack) {
+		return
+	}
+	if err := sched.StackQueue.Update(oldStack, newStack); err != nil {
+		utilruntime.HandleError(fmt.Errorf("unable to update %T: %v", newObj, err))
+	}
+}
+
+func (sched *Scheduler) deletePodFromSchedulingQueue(obj interface{}) {
+	var pod *v1.Pod
+	switch t := obj.(type) {
+	case *v1.Pod:
+		pod = obj.(*v1.Pod)
+	case cache.DeletedFinalStateUnknown:
+		var ok bool
+		pod, ok = t.Obj.(*v1.Pod)
+		if !ok {
+			utilruntime.HandleError(fmt.Errorf("unable to convert object %T to *v1.Pod in %T", obj, sched))
+			return
+		}
+	default:
+		utilruntime.HandleError(fmt.Errorf("unable to handle object in %T: %T", sched, obj))
+		return
+	}
+
+	stack := getStackFromPod(pod)
+	if err := sched.StackQueue.Delete(stack); err != nil {
+		utilruntime.HandleError(fmt.Errorf("unable to dequeue %T: %v", obj, err))
+	}
+}
+
+// skipStackUpdate checks whether the specified pod update should be ignored.
+// This function will return true if
+//   - The pod has already been assumed, AND
+//   - The pod has only its ResourceVersion, Spec.NodeName and/or Annotations
+//     updated.
+func (sched *Scheduler) skipStackUpdate(stack *types.Stack) bool {
+	// Non-assumed stacks should never be skipped.
+	isAssumed, err := sched.SchedulerCache.IsAssumedStack(stack)
+	if err != nil {
+		utilruntime.HandleError(fmt.Errorf("failed to check whether stack %s/%s/%s is assumed: %v", stack.Tenant, stack.Namespace, stack.Name, err))
+		return false
+	}
+	if !isAssumed {
+		return false
+	}
+
+	// Gets the assumed stack from the cache.
+	assumedStack, err := sched.SchedulerCache.GetStack(stack)
+	if err != nil {
+		utilruntime.HandleError(fmt.Errorf("failed to get assumed stack %s/%s/%s from cache: %v", stack.Tenant, stack.Namespace, stack.Name, err))
+		return false
+	}
+
+	assumedStackCopy, stackCopy := assumedStack.DeepCopy(), stack.DeepCopy()
+	if !reflect.DeepEqual(assumedStackCopy, stackCopy) {
+		return false
+	}
+	klog.V(3).Infof("Skipping stack %s/%s/%s update", stack.Tenant, stack.Namespace, stack.Name)
+	return true
+}
+
+func (sched *Scheduler) bindToNode(nodeName string, assumedStack *types.Stack) error {
+	binding := &v1.Binding{
+		ObjectMeta: metav1.ObjectMeta{Tenant: assumedStack.Tenant, Namespace: assumedStack.Namespace, Name: assumedStack.Name, UID: apitypes.UID(assumedStack.UID)},
+		Target: v1.ObjectReference{
+			Kind: "Node",
+			Name: nodeName,
+		},
+	}
+
+	// do api server update here
+	klog.V(3).Infof("Attempting to bind %v to %v", binding.Name, binding.Target.Name)
+	err := sched.Client.CoreV1().PodsWithMultiTenancy(binding.Namespace, binding.Tenant).Bind(binding)
+	if err != nil {
+		klog.V(1).Infof("Failed to bind stack: %v/%v/%v", assumedStack.Tenant, assumedStack.Namespace,
+			assumedStack.Name)
+		if err := sched.SchedulerCache.ForgetStack(assumedStack); err != nil {
+			klog.Errorf("scheduler cache ForgetStack failed: %v", err)
+		}
+
+		return err
+	}
+	return nil
+}

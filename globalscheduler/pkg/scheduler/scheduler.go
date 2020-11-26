@@ -95,7 +95,7 @@ type Scheduler struct {
 	SchedFrame interfaces.Framework
 
 	// queue for stacks that need scheduling
-	stackQueue      internalqueue.SchedulingQueue
+	StackQueue      internalqueue.SchedulingQueue
 	PodInformer     coreinformers.PodInformer
 	Client          clientset.Interface
 	InformerFactory internalinformers.SharedInformerFactory
@@ -122,12 +122,13 @@ func (sched *Scheduler) scheduleOne() {
 	// do scheduling process
 	result, err := sched.Schedule2(nil, allocation)
 	if err != nil {
-		logger.Errorf("Schedule failed!, err: %s", err)
+		logger.Errorf("Schedule failed, err: %s", err)
 	}
 
-	// do api server update here
-	// TODO(nkwangjun)
 	logger.Infof("Scheduler result: %v", result)
+
+	// bind scheduler result to pod
+	sched.bindToNode(result.SuggestedHost, stack)
 }
 
 // generateAllocationFromStack generate a new allocation obj from one single stack
@@ -552,7 +553,8 @@ func NewScheduler(stopCh <-chan struct{}) (*Scheduler, error) {
 		return nil, err
 	}
 
-	// add event handler TODO
+	// add event handler
+	AddAllEventHandlers(sched)
 
 	return sched, nil
 }
@@ -573,10 +575,10 @@ func (sched *Scheduler) initPodInformers(stopCh <-chan struct{}) error {
 		return err
 	}
 
-	sched.stackQueue = internalqueue.NewSchedulingQueue(stopCh, sched.SchedFrame)
+	sched.StackQueue = internalqueue.NewSchedulingQueue(stopCh, sched.SchedFrame)
 	sched.InformerFactory = internalinformers.NewSharedInformerFactory(client, 0)
 	sched.PodInformer = factory.NewPodInformer(client, 0)
-	sched.NextStack = internalqueue.MakeNextStackFunc(sched.stackQueue)
+	sched.NextStack = internalqueue.MakeNextStackFunc(sched.StackQueue)
 	return nil
 }
 

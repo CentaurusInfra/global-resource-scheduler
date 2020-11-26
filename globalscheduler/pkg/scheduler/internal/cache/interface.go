@@ -28,27 +28,30 @@ import (
 type Cache interface {
 	schedulerlisters.StackLister
 
-	// AssumeStack assumes a pod scheduled and aggregates the pod's information into its node.
+	// AssumeStack assumes a stack scheduled and aggregates the pod's information into its node.
 	// The implementation also decides the policy to expire pod before being confirmed (receiving Add event).
 	// After expiration, its information would be subtracted.
-	AssumeStack(pod *types.Stack) error
+	AssumeStack(stack *types.Stack) error
 
-	// AddStack either confirms a pod if it's assumed, or adds it back if it's expired.
+	// ForgetStack removes an assumed stack from cache.
+	ForgetStack(stack *types.Stack) error
+
+	// AddStack either confirms a stack if it's assumed, or adds it back if it's expired.
 	// If added back, the pod's information would be added again.
-	AddStack(pod *types.Stack) error
+	AddStack(stack *types.Stack) error
 
 	// UpdateStack removes oldStack's information and adds newStack's information.
 	UpdateStack(oldStack, newStack *types.Stack) error
 
-	// RemoveStack removes a pod. The pod's information would be subtracted from assigned node.
-	RemoveStack(pod *types.Stack) error
+	// RemoveStack removes a stack. The stack's information would be subtracted from assigned node.
+	RemoveStack(stack *types.Stack) error
 
 	// GetStack returns the pod from the cache with the same namespace and the
 	// same name of the specified pod.
-	GetStack(pod *types.Stack) (*types.Stack, error)
+	GetStack(stack *types.Stack) (*types.Stack, error)
 
-	// IsAssumedStack returns true if the pod is assumed and not expired.
-	IsAssumedStack(pod *types.Stack) (bool, error)
+	// IsAssumedStack returns true if the stack is assumed and not expired.
+	IsAssumedStack(stack *types.Stack) (bool, error)
 
 	// AddNode adds overall information about node.
 	AddNode(node *types.SiteNode) error

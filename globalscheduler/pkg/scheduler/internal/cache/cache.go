@@ -277,6 +277,32 @@ func (cache *schedulerCache) removeDeletedNodesFromSnapshot(snapshot *Snapshot) 
 	}
 }
 
+// ForgetStack removes an assumed stack from cache.
+func (cache *schedulerCache) ForgetStack(stack *types.Stack) error {
+	key, err := schedulernodeinfo.GetStackKey(stack)
+	if err != nil {
+		return err
+	}
+
+	cache.mu.Lock()
+	defer cache.mu.Unlock()
+
+	_, ok := cache.stackStates[key]
+	switch {
+	// Only assumed stack can be forgotten.
+	case ok && cache.assumedStacks[key]:
+		err := cache.removeStack(stack)
+		if err != nil {
+			return err
+		}
+		delete(cache.assumedStacks, key)
+		delete(cache.stackStates, key)
+	default:
+		return fmt.Errorf("stack %v wasn't assumed so cannot be forgotten", key)
+	}
+	return nil
+}
+
 //AssumeStack assume stack to node
 func (cache *schedulerCache) AssumeStack(stack *types.Stack) error {
 	key, err := schedulernodeinfo.GetStackKey(stack)
