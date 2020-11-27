@@ -565,8 +565,8 @@ func NewScheduler(stopCh <-chan struct{}) (*Scheduler, error) {
 
 // initPodInformers init scheduler with podInformer
 func (sched *Scheduler) initPodInformers(stopCh <-chan struct{}) error {
-	masterURL := config.DefaultString("master", "0.0.0.0")
-	kubeconfig := config.DefaultString("kubeconfig", "/root/.kube/config")
+	masterURL := config.DefaultString("master", "127.0.0.1:8080")
+	kubeconfig := config.DefaultString("kubeconfig", "/var/run/kubernetes/admin.kubeconfig")
 
 	// init client
 	cfg, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
@@ -583,6 +583,7 @@ func (sched *Scheduler) initPodInformers(stopCh <-chan struct{}) error {
 	sched.InformerFactory = internalinformers.NewSharedInformerFactory(client, 0)
 	sched.PodInformer = factory.NewPodInformer(client, 0)
 	sched.NextStack = internalqueue.MakeNextStackFunc(sched.StackQueue)
+	sched.Client = client
 	return nil
 }
 
