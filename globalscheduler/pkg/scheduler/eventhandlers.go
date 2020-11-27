@@ -225,6 +225,9 @@ func getStackSelector(selector *v1.ResourceSelector) types.Selector {
 		},
 		Regions:  newRegions,
 		Operator: selector.Operator,
+		Strategy: types.Strategy{
+			LocationStrategy: selector.Strategy.LocalStrategy,
+		},
 	}
 
 	return newSelector
@@ -320,6 +323,13 @@ func (sched *Scheduler) skipStackUpdate(stack *types.Stack) bool {
 	}
 	klog.V(3).Infof("Skipping stack %s/%s/%s update", stack.Tenant, stack.Namespace, stack.Name)
 	return true
+}
+
+func (sched *Scheduler) bindStacks(assumedStacks []types.Stack) {
+	for _, newStack := range assumedStacks {
+		nodeName := newStack.Selected.AvailabilityZone
+		sched.bindToNode(nodeName, &newStack)
+	}
 }
 
 func (sched *Scheduler) bindToNode(nodeName string, assumedStack *types.Stack) error {

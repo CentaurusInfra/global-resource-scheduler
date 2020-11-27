@@ -119,16 +119,20 @@ func (sched *Scheduler) scheduleOne() {
 	// generate allocation from stack
 	allocation, err := sched.generateAllocationFromStack(stack)
 
+	tmpContext := context.Background()
+
 	// do scheduling process
-	result, err := sched.Schedule2(nil, allocation)
+	result, err := sched.Schedule2(tmpContext, allocation)
 	if err != nil {
 		logger.Errorf("Schedule failed, err: %s", err)
+		return
 	}
 
 	logger.Infof("Scheduler result: %v", result)
 
 	// bind scheduler result to pod
-	sched.bindToNode(result.SuggestedHost, stack)
+	logger.Infof("Try to bind to node, stacks:%v", result.Stacks)
+	sched.bindStacks(result.Stacks)
 }
 
 // generateAllocationFromStack generate a new allocation obj from one single stack
