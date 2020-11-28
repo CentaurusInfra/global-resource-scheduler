@@ -6,26 +6,11 @@ Nov-28-2020, Wang jun
 This doc is used for understanding how the global scheduler works with API Server, with a usage instruction and implementation process description.
 
 ## 2. Usage Instruction
-#### 1) Build and run API Server
+#### 1) Build and run API Server and gs-scheduler
 ```
 # NOTE: Envionment must be configured. For details, please see the GlobalScheduler develop guide.
 # go into the base repo directory
 cd src/k8s.io/kubernetes
-
-# get the latest code
-git pull
-
-# build and run API Server
-
-```
-
-#### 2) Build and run gs-scheduler
-```
-# go into the base repo directory
-cd src/k8s.io/kubernetes
-
-# build gs-scheduler
-make WHAT=cmd/gs-scheduler
 
 # export config base directory for gs-scheduler
 export CONFIG_BASE=${PWD}/conf
@@ -36,11 +21,11 @@ export CONFIG_BASE=${PWD}/conf
 # kubeconfig: config of the API Server
 # scheduler_policy_file: the scheduler policy file path, the default file path is also in ${PWD}/conf/conf.yaml
 
-# run gs-scheduler
-./_output/bin/gs-scheduler
+# build and run
+hack/gs-scheduler-up.sh
 ```
 
-#### 3) Create VM and check the schedule result
+#### 2) Create VM and check the schedule result
 ```
 # prepare the vm define yaml as follows
 root@arktos-wj-dev:~/yaml# cat vm.yaml
