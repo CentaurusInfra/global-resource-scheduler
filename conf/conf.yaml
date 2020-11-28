@@ -7,7 +7,7 @@ master: 127.0.0.1:8080
 kubeconfig: /var/run/kubernetes/admin.kubeconfig
 
 scheduler_policy: edgecloud
-scheduler_policy_file: /root/work/src/global-resource-scheduler/conf/edgecloud_policy.yaml
+scheduler_policy_file: /root/work/src/k8s.io/kubernetes/conf/edgecloud_policy.yaml
 
 spot_region_mapping:
   - region: region1
