@@ -796,6 +796,12 @@ EOF
     PROXY_PID=$!
 }
 
+function start_gs_scheduler {
+    GS_SCHEDULER_LOG=${LOG_DIR}/gs-scheduler.log
+    ${CONTROLPLANE_SUDO} "${GO_OUT}/gs-scheduler" > "${GS_SCHEDULER_LOG}" 2>&1 &
+    GS_SCHEDULER_PID=$!
+}
+
 function start_kubescheduler {
 
     SCHEDULER_LOG=${LOG_DIR}/kube-scheduler.log

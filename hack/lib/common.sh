@@ -476,6 +476,13 @@ function kube::common::start_kubescheduler {
     SCHEDULER_PID=$!
 }
 
+function kube::common::start_gs_scheduler {
+    GS_SCHEDULER_LOG=${LOG_DIR}/gs-scheduler.log
+    ${CONTROLPLANE_SUDO} "${GO_OUT}/gs-scheduler" > "${GS_SCHEDULER_LOG}" 2>&1 &
+    GS_SCHEDULER_PID=$!
+}
+
+
 function kube::common::start_kubelet {
     KUBELET_LOG=${LOG_DIR}/kubelet.log
     mkdir -p "${POD_MANIFEST_PATH}" &>/dev/null || sudo mkdir -p "${POD_MANIFEST_PATH}"
