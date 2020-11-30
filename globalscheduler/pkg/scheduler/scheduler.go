@@ -53,16 +53,21 @@ import (
 var scheduler *Scheduler
 var once sync.Once
 
+// InitScheduler
+func InitScheduler(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}) error {
+	var err error
+	scheduler, err = NewScheduler(config, stopCh)
+	return err
+}
+
 // GetScheduler gets single scheduler instance. New Scheduler will only run once,
 // if it runs failed, nil will be return.
-func GetScheduler(stopCh <-chan struct{}) *Scheduler {
-	once.Do(func() {
-		var err error
-		scheduler, err = NewScheduler(stopCh)
-		if err != nil {
-			logger.Errorf("NewScheduler failed! error: %v", err)
-		}
-	})
+func GetScheduler() *Scheduler {
+	if scheduler == nil {
+		logger.Errorf("Scheduler need to be init correctly")
+		return scheduler
+	}
+
 	return scheduler
 }
 
@@ -81,6 +86,9 @@ type ScheduleResult struct {
 // Scheduler watches for new unscheduled pods. It attempts to find
 // nodes that they fit on and writes bindings back to the api server.
 type Scheduler struct {
+	// Name of the current scheduler
+	SchedulerName string
+
 	// It is expected that changes made via SchedulerCache will be observed
 	// by NodeLister and Algorithm.
 	SchedulerCache internalcache.Cache
@@ -535,7 +543,7 @@ func (sched *Scheduler) buildFramework() error {
 	return nil
 }
 
-func NewScheduler(stopCh <-chan struct{}) (*Scheduler, error) {
+func NewScheduler(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}) (*Scheduler, error) {
 	stopEverything := stopCh
 	if stopEverything == nil {
 		stopEverything = wait.NeverStop
@@ -544,6 +552,7 @@ func NewScheduler(stopCh <-chan struct{}) (*Scheduler, error) {
 	sched := &Scheduler{
 		SchedulerCache:   internalcache.New(30*time.Second, stopEverything),
 		nodeInfoSnapshot: internalcache.NewEmptySnapshot(),
+		SchedulerName:    config.SchedulerName,
 	}
 
 	err := sched.buildFramework()

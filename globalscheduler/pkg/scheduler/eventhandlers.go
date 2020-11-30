@@ -28,6 +28,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
+	statusutil "k8s.io/kubernetes/pkg/util/pod"
 )
 
 // AddAllEventHandlers is a helper function used in tests and in Scheduler
@@ -39,10 +40,10 @@ func AddAllEventHandlers(sched *Scheduler) {
 			FilterFunc: func(obj interface{}) bool {
 				switch t := obj.(type) {
 				case *v1.Pod:
-					return assignedPod(t)
+					return assignedPod(t) && responsibleForPod(t, sched.SchedulerName)
 				case cache.DeletedFinalStateUnknown:
 					if pod, ok := t.Obj.(*v1.Pod); ok {
-						return assignedPod(pod)
+						return assignedPod(pod) && responsibleForPod(pod, sched.SchedulerName)
 					}
 					utilruntime.HandleError(fmt.Errorf("unable to convert object %T to *v1.Pod in %T", obj, sched))
 					return false
@@ -64,10 +65,10 @@ func AddAllEventHandlers(sched *Scheduler) {
 			FilterFunc: func(obj interface{}) bool {
 				switch t := obj.(type) {
 				case *v1.Pod:
-					return !assignedPod(t) && !vmPodShouldSleep(t)
+					return needToSchedule(t) && responsibleForPod(t, sched.SchedulerName)
 				case cache.DeletedFinalStateUnknown:
 					if pod, ok := t.Obj.(*v1.Pod); ok {
-						return !assignedPod(pod)
+						return !assignedPod(pod) && responsibleForPod(pod, sched.SchedulerName)
 					}
 					utilruntime.HandleError(fmt.Errorf("unable to convert object %T to *v1.Pod in %T", obj, sched))
 					return false
@@ -85,9 +86,14 @@ func AddAllEventHandlers(sched *Scheduler) {
 	)
 }
 
+// needToSchedule selects pods that need to be scheduled
+func needToSchedule(pod *v1.Pod) bool {
+	return pod.Spec.VirtualMachine != nil && pod.Status.Phase == v1.PodPending
+}
+
 // assignedPod selects pods that are assigned (scheduled and running).
 func assignedPod(pod *v1.Pod) bool {
-	return pod.Spec.VirtualMachine != nil && len(pod.Spec.NodeName) != 0
+	return pod.Spec.VirtualMachine != nil && pod.Status.Phase == v1.PodBinded
 }
 
 // responsibleForPod returns true if the pod has asked to be scheduled by the given scheduler.
@@ -317,6 +323,9 @@ func (sched *Scheduler) skipStackUpdate(stack *types.Stack) bool {
 		return false
 	}
 
+	// TODO(wangjun): We should re-define stack as pods, and implement the DeepCopy function.
+	//                Here if stack is changed, we just go the stack update process without compare
+	//                node name or something else.
 	assumedStackCopy, stackCopy := assumedStack.DeepCopy(), stack.DeepCopy()
 	if !reflect.DeepEqual(assumedStackCopy, stackCopy) {
 		return false
@@ -342,10 +351,10 @@ func (sched *Scheduler) bindToNode(nodeName string, assumedStack *types.Stack) e
 	}
 
 	// do api server update here
-	klog.V(3).Infof("Attempting to bind %v to %v", binding.Name, binding.Target.Name)
+	klog.Infof("Attempting to bind %v to %v", binding.Name, binding.Target.Name)
 	err := sched.Client.CoreV1().PodsWithMultiTenancy(binding.Namespace, binding.Tenant).Bind(binding)
 	if err != nil {
-		klog.V(1).Infof("Failed to bind stack: %v/%v/%v", assumedStack.Tenant, assumedStack.Namespace,
+		klog.Infof("Failed to bind stack: %v/%v/%v", assumedStack.Tenant, assumedStack.Namespace,
 			assumedStack.Name)
 		if err := sched.SchedulerCache.ForgetStack(assumedStack); err != nil {
 			klog.Errorf("scheduler cache ForgetStack failed: %v", err)
@@ -353,5 +362,28 @@ func (sched *Scheduler) bindToNode(nodeName string, assumedStack *types.Stack) e
 
 		return err
 	}
+
+	// get pod first
+	pod, err := sched.Client.CoreV1().PodsWithMultiTenancy(assumedStack.Namespace, assumedStack.Tenant).Get(assumedStack.Name, metav1.GetOptions{})
+	if err != nil {
+		klog.Warningf("Failed to get status for pod %q: %v", assumedStack.Name+"/"+assumedStack.Namespace+"/"+
+			assumedStack.Tenant+"/"+assumedStack.UID, err)
+		return err
+	}
+
+	newStatus := v1.PodStatus{
+		Phase: v1.PodBinded,
+	}
+
+	// update pod status to Binded
+	klog.Infof("Attempting to update pod status from %v to %v", pod.Status, newStatus)
+	_, _, err = statusutil.PatchPodStatus(sched.Client, assumedStack.Tenant, assumedStack.Namespace, assumedStack.Name, pod.Status, newStatus)
+	if err != nil {
+		klog.Warningf("PatchPodStatus for pod %q: %v", assumedStack.Name+"/"+assumedStack.Namespace+"/"+
+			assumedStack.Tenant+"/"+assumedStack.UID, err)
+		return err
+	}
+
+	klog.Infof("Update pod status from %v to %v success", pod.Status, newStatus)
 	return nil
 }

@@ -83,7 +83,7 @@ func (pl *Volume) Filter(ctx context.Context, cycleState *interfaces.CycleState,
 		}
 
 		if allocatableSize < requestedSize+size {
-			msg := fmt.Sprintf("Node (%s) do not support required volume(%s-%d).Support volume(%v)",
+			msg := fmt.Sprintf("Node (%s) do not support required volume(%s-%f).Support volume(%v)",
 				nodeInfo.Node().SiteID, volType, size, nodeInfo.TotalStorage)
 			logger.Debug(ctx, msg)
 			return interfaces.NewStatus(interfaces.Unschedulable, msg)

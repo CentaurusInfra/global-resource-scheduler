@@ -478,7 +478,7 @@ function kube::common::start_kubescheduler {
 
 function kube::common::start_gs_scheduler {
     GS_SCHEDULER_LOG=${LOG_DIR}/gs-scheduler.log
-    ${CONTROLPLANE_SUDO} "${GO_OUT}/gs-scheduler" > "${GS_SCHEDULER_LOG}" 2>&1 &
+    ${CONTROLPLANE_SUDO} "${GO_OUT}/gs-scheduler" --schedulername="scheduler1"  > "${GS_SCHEDULER_LOG}" 2>&1 &
     GS_SCHEDULER_PID=$!
 }
 

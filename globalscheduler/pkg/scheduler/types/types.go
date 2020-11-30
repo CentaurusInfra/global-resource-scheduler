@@ -391,3 +391,9 @@ type ListSiteOpts struct {
 	//Operator query by operator
 	Operator string `q:"operator"`
 }
+
+// GSSchedulerConfiguration contains the configuration for the gs-scheduler
+type GSSchedulerConfiguration struct {
+	// Scheduler Name Differentiating Schedulers
+	SchedulerName       string
+}
