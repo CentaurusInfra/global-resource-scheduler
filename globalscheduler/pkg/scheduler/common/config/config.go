@@ -35,7 +35,7 @@ import (
 
 var conf archaius.ConfigurationFactory
 
-func init() {
+func Init() {
 	err := archaius.Init()
 	if err != nil {
 		fmt.Printf("[ERROR]archaius init failed\n")

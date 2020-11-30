@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"k8s.io/kubernetes/cmd/gs-scheduler/app"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/options"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 )
@@ -28,6 +29,8 @@ import (
 func main() {
 	s := options.NewServerRunOptions()
 	stopCh := utils.SetupSignalHandler()
+	// Init config with go-chassis
+	config.Init()
 	if err := app.Run(s, stopCh); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		os.Exit(1)
