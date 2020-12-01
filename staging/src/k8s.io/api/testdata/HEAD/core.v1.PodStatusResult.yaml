@@ -35,6 +35,9 @@ metadata:
   tenant: "4"
   uid: ą飋īqJ枊a8衍`Ĩɘ.蘯6ċV夸e
 status:
+  assignedScheduler:
+    name: "67"
+    tag: "68"
   conditions:
   - lastProbeTime: "2942-12-08T14:55:02Z"
     lastTransitionTime: "2763-08-05T14:40:52Z"

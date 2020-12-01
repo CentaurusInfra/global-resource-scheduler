@@ -3206,6 +3206,9 @@ type PodStatus struct {
 	// NIC status
 	// +optional
 	NICStatuses []NICStatus
+	// Assigned scheduler
+	// +optional
+	AssignedScheduler ResourceScheduler
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -5415,6 +5418,8 @@ type DataPartitionConfigList struct {
 type ResourceCommonInfo struct {
 	// +optional
 	Selector ResourceSelector
+	// +optional
+	Count int32
 }
 
 // ResourceSelector holds the resource selector information
@@ -5456,4 +5461,17 @@ type ResourceSpot struct {
 	SpotDurationHours  int32   //1(default,0-6)
 	SpotDurationCount  int32   //2(default)
 	InterruptionPolicy string  //immediate(default)
+}
+
+// ResourceScheduler holds the scheduler information assigned to the pod
+type ResourceScheduler struct {
+	// Name of scheduler
+	// +optional
+	Name string
+	// Tag of scheduler
+	// +optional
+	Tag string
+	// Date and time at which the pod was assigned
+	// +optional
+	StartTime *metav1.Time
 }
