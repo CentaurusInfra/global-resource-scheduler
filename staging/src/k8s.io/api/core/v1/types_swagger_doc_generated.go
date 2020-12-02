@@ -1703,6 +1703,7 @@ var map_PodStatus = map[string]string{
 	"qosClass":              "The Quality of Service (QOS) classification assigned to the pod based on resource requirements See PodQOSClass type for available QOS classes More info: https://git.k8s.io/community/contributors/design-proposals/node/resource-qos.md",
 	"virtualMachineStatus":  "Virtual machine status currently a pod can only have one virtual machine",
 	"nicStatuses":           "NIC status",
+	"assignedScheduler":     "Assigned Scheduler",
 }
 
 func (PodStatus) SwaggerDoc() map[string]string {
@@ -2035,6 +2036,14 @@ var map_ResourceRequirements = map[string]string{
 
 func (ResourceRequirements) SwaggerDoc() map[string]string {
 	return map_ResourceRequirements
+}
+
+var map_ResourceScheduler = map[string]string{
+	"": "ResourceScheduler contains resource scheduler information assigned to pods",
+}
+
+func (ResourceScheduler) SwaggerDoc() map[string]string {
+	return map_ResourceScheduler
 }
 
 var map_ResourceSelector = map[string]string{
