@@ -1,12 +1,9 @@
 /*
 Copyright 2020 Authors of Arktos.
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -117,7 +114,7 @@ func (c *ClusterController) addCluster(object interface{}) {
 		return
 	}
 	c.Enqueue(key, EventType_Create)
-	klog.Infof("Create cluster - %v ", key)
+	klog.Infof("Create cluster -%v ", key)
 }
 
 func (c *ClusterController) updateCluster(oldObject, newObject interface{}) {
@@ -157,7 +154,7 @@ func (c *ClusterController) updateCluster(oldObject, newObject interface{}) {
 func (c *ClusterController) deleteCluster(object interface{}) {
 	key, err := controller.KeyFunc(object)
 	if err != nil {
-		utilruntime.HandleError(fmt.Errorf("couldn't get key for object %v: %v", object, err))
+		utilruntime.HandleError(fmt.Errorf("couldn't get key for object %#v: %v", object, err))
 		return
 	}
 	c.Enqueue(key, EventType_Delete)
@@ -228,11 +225,11 @@ func (c *ClusterController) syncHandler(keyWithEventType KeyWithEventType) error
 		klog.V(4).Infof("Finished syncing  %q (%v)", key, time.Since(startTime))
 	}()
 	namespace, clusterName, err := cache.SplitMetaNamespaceKey(key)
-	//fmt.Println("key, namespace, clusterName: %v,%v,%v", key, namespace, clusterName)
+	fmt.Println("key, namespace, clusterName: %v,%v,%v", key, namespace, clusterName)
 	cluster, err := c.clusterlister.Clusters(namespace).Get(clusterName)
 	if err != nil || cluster == nil {
-		klog.Errorf("Failed to retrieve cluster in local cache by cluster name - %s, %s, %s, %v, %v", key, namespace, clusterName, cluster, err)
-		//fmt.Println("Failed to retrieve cluster in local cache by cluster  - %v, %v", cluster, err)
+		klog.Errorf("Failed to retrieve cluster in local cache by cluster name - %s", clusterName)
+		fmt.Println("Failed to retrieve cluster in local cache by cluster  - %v, %v", cluster, err)
 		return err
 	}
 
