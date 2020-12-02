@@ -440,7 +440,6 @@ if [[ "${START_MODE}" != "kubeletonly" ]]; then
   #cluster/kubectl.sh create -f hack/runtime/workload-controller-manager-clusterrolebinding.yaml
 
   ${KUBECTL} --kubeconfig="${CERT_DIR}/admin.kubeconfig" apply -f "${KUBE_ROOT}/test/yaml/globalscheduler/scheduler.yaml"
-  kube::common::start_global_resource_scheduler
   kube::common::start_gs_distributor_controller
   if [[ "${START_MODE}" != "nokubeproxy" ]]; then
     kube::common::start_kubeproxy
@@ -452,6 +451,7 @@ if [[ "${START_MODE}" != "kubeletonly" ]]; then
   fi
   start_kubedashboard
 fi
+
 
 if [[ "${START_MODE}" != "nokubelet" ]]; then
   ## TODO remove this check if/when kubelet is supported on darwin
