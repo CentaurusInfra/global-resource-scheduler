@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+//This file and function is currently for unit testing.
 package cluster
 
 import (
@@ -206,16 +207,28 @@ func (c *ClusterController) CreateObject(object *clusterv1.Cluster) error {
 	return err
 }
 
+//Update cluster status
+func (c *ClusterController) UpdateClusterStatus(namespace, clustername string) error {
+	cluster, err := c.clusterlister.Clusters(namespace).Get(clustername)
+	clusterCopy := cluster.DeepCopy()
+	_, err = c.clusterclientset.GlobalschedulerV1().Clusters(cluster.Namespace).Update(clusterCopy)
+	if err != nil {
+		klog.Infof("cluster update error - %v", clustername)
+		return err
+	}
+	return err
+}
+
 // Delete a cluster object.
-func (c *ClusterController) DeleteObject(name string) error {
+func (c *ClusterController) DeleteObject(clustername string) error {
 	deletePolicy := metav1.DeletePropagationForeground
 	deleteOptions := metav1.DeleteOptions{
 		PropagationPolicy: &deletePolicy,
 	}
-	err := c.clusterclientset.GlobalschedulerV1().Clusters(corev1.NamespaceDefault).Delete(name, &deleteOptions)
+	err := c.clusterclientset.GlobalschedulerV1().Clusters(corev1.NamespaceDefault).Delete(clustername, &deleteOptions)
 	if err != nil {
 		klog.Errorf("could not delete: %v", err)
 	}
-	klog.Infof("Deleted a cluster: %s", name)
+	klog.Infof("Deleted a cluster: %s", clustername)
 	return err
 }

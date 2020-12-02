@@ -164,6 +164,12 @@ func (c *ClusterController) deleteCluster(object interface{}) {
 	klog.Infof("Delete Cluster - %v", key)
 }
 
+// Enqueue puts key of the cluster object in the work queue
+// EventType: Create=0, Update=1, Delete=2
+func (c *ClusterController) Enqueue(key string, eventType EventType) {
+	c.workqueue.Add(KeyWithEventType{Key: key, EventType: eventType})
+}
+
 // Run starts an asynchronous loop that detects events of cluster clusters.
 func (c *ClusterController) Run(workers int, stopCh <-chan struct{}) error {
 	defer utilruntime.HandleCrash()
@@ -226,10 +232,11 @@ func (c *ClusterController) syncHandler(keyWithEventType KeyWithEventType) error
 	cluster, err := c.clusterlister.Clusters(namespace).Get(clusterName)
 	if err != nil || cluster == nil {
 		klog.Errorf("Failed to retrieve cluster in local cache by cluster name - %s", clusterName)
-		fmt.Println("Failed to retrieve cluster in local cache by cluster name - %s, %s", namespace, clusterName)
 		fmt.Println("Failed to retrieve cluster in local cache by cluster  - %v, %v", cluster, err)
 		return err
 	}
+
+	//This performs controller logic such as gRPC handling
 	result, err := c.perform(keyWithEventType.EventType, cluster)
 	if !result {
 		klog.Errorf("Failed a cluster processing - event: %v, key: %v, error:", keyWithEventType, key, err)
@@ -238,41 +245,9 @@ func (c *ClusterController) syncHandler(keyWithEventType KeyWithEventType) error
 		klog.Infof(" Processed a cluster - %v", key)
 		c.workqueue.Forget(key)
 	}
-	fmt.Printf("Cluster Handled: %#v, Event: %#v\n", clusterName, key)
-	//update cluster status
-	//c.UpdateClusterStatus(cluster)
-	//
+	fmt.Printf("Cluster Handled: %v, Event: %v\n", clusterName, key)
 	c.recorder.Event(cluster, corev1.EventTypeNormal, SuccessSynched, MessageResourceSynched)
 	return nil
-}
-
-//Update cluster status
-func (c *ClusterController) UpdateClusterStatus(key string) error {
-	namespace, clusterName, err := cache.SplitMetaNamespaceKey(key)
-	cluster, err := c.clusterlister.Clusters(namespace).Get(clusterName)
-	clusterCopy := cluster.DeepCopy()
-	_, err = c.clusterclientset.GlobalschedulerV1().Clusters(cluster.Namespace).Update(clusterCopy)
-	if err != nil {
-		klog.Infof("cluster update error - %v", clusterName)
-		return err
-	}
-	return err
-}
-
-func (c *ClusterController) updateClusterStatus(cluster *clusterv1.Cluster) error {
-	clusterCopy := cluster.DeepCopy()
-	_, err := c.clusterclientset.GlobalschedulerV1().Clusters(cluster.Namespace).Update(clusterCopy)
-	if err != nil {
-		klog.Infof("cluster update error - %v", cluster.Name)
-		return err
-	}
-	return err
-}
-
-// Enqueue puts key of the cluster object in the work queue
-// EventType: Create=0, Update=1, Delete=2
-func (c *ClusterController) Enqueue(key string, eventType EventType) {
-	c.workqueue.Add(KeyWithEventType{Key: key, EventType: eventType})
 }
 
 func (c *ClusterController) determineEventType(cluster1, cluster2 *clusterv1.Cluster) (event int, err error) {
@@ -304,7 +279,7 @@ func (c *ClusterController) getclusterInfo(cluster *clusterv1.Cluster) (clusterN
 	return
 }
 
-//perform event
+//This function performs controller logic including gRPC handling
 func (c *ClusterController) perform(event EventType, cluster *clusterv1.Cluster) (response bool, err error) {
 	clusterName := cluster.GetName()
 	switch event {

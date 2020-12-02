@@ -194,6 +194,10 @@
         "state": "Ü郀",
         "reason": "66"
       }
-    ]
+    ],
+    "assignedScheduler": {
+      "name": "67",
+      "tag": "68"
+    }
   }
 }
