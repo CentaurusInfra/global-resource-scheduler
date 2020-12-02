@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+//This file and function is currently for unit testing.
 package cluster
 
 import (
@@ -203,6 +204,19 @@ func (c *ClusterController) CreateObject(object *clusterv1.Cluster) error {
 		klog.Fatalf("could not create: %v", errorMessage)
 	}
 	klog.Infof("Created a cluster: %s", object.Name)
+	return err
+}
+
+//Update cluster status
+func (c *ClusterController) UpdateClusterStatus(key string) error {
+	namespace, clusterName, err := cache.SplitMetaNamespaceKey(key)
+	cluster, err := c.clusterlister.Clusters(namespace).Get(clusterName)
+	clusterCopy := cluster.DeepCopy()
+	_, err = c.clusterclientset.GlobalschedulerV1().Clusters(cluster.Namespace).Update(clusterCopy)
+	if err != nil {
+		klog.Infof("cluster update error - %v", clusterName)
+		return err
+	}
 	return err
 }
 
