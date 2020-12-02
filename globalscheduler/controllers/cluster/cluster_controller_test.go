@@ -123,7 +123,6 @@ func (f *fixture) newController() (*ClusterController, informers.SharedInformerF
 		i.Globalscheduler().V1().Clusters().Informer().GetIndexer().Add(f)
 	}
 	c.CreateCRD()
-	//c.CreateObject(newCluster("cluster1"))
 	return c, i, k8sI
 }
 
@@ -135,6 +134,7 @@ func (f *fixture) runExpectError(clusterName string, event EventType) {
 	f.runController(clusterName, true, true, event)
 }
 
+//clusterName = cluster's namespace + cluster's name
 func (f *fixture) runController(clusterName string, startInformers bool, expectError bool, eventType EventType) {
 	c, i, k8sI := f.newController()
 	if startInformers {
@@ -143,16 +143,24 @@ func (f *fixture) runController(clusterName string, startInformers bool, expectE
 		i.Start(stopCh)
 		k8sI.Start(stopCh)
 	}
-	_, name, err := cache.SplitMetaNamespaceKey(clusterName)
-	if eventType == EventType_Create {
+	namespace, name, err := cache.SplitMetaNamespaceKey(clusterName)
+	if err != nil {
+		fmt.Errorf("cluster name is not correct - %v", clusterName)
+		return
+	}
+	switch eventType {
+	case EventType_Create:
 		cluster := newCluster(name)
 		c.CreateObject(cluster)
-	}
-	if eventType == EventType_Update {
-		c.UpdateClusterStatus(clusterName)
-	}
-	if eventType == EventType_Delete {
+		break
+	case EventType_Update:
+		c.UpdateClusterStatus(namespace, name)
+		break
+	case EventType_Delete:
 		c.DeleteObject(name)
+		break
+	default:
+		err = fmt.Errorf("cluster event is not correct - %v", eventType)
 	}
 	keyWithEventType := KeyWithEventType{Key: clusterName, EventType: eventType}
 	fmt.Println("keyWithEventType=%v", keyWithEventType)
@@ -267,25 +275,24 @@ func filterInformerActions(actions []core.Action) []core.Action {
 }
 
 func (f *fixture) expectCreateClusterStatusAction(cluster *clusterv1.Cluster) {
+	action := core.NewCreateAction(schema.GroupVersionResource{Resource: "clusters"}, cluster.Namespace, cluster)
 	f.actions = f.actions[:0]
-	f.actions = append(f.actions, core.NewCreateAction(schema.GroupVersionResource{Resource: "clusters"}, cluster.Namespace, cluster))
-
+	f.actions = append(f.actions, action)
+	fmt.Println("expect actions: %v, %v", action, f.actions)
 }
 
 func (f *fixture) expectUpdateClusterStatusAction(cluster *clusterv1.Cluster) {
 	action := core.NewUpdateAction(schema.GroupVersionResource{Resource: "clusters"}, cluster.Namespace, cluster)
 	f.actions = f.actions[:0]
 	f.actions = append(f.actions, action)
-	fmt.Println("expectUpdateClusterStatusAction1= %v", action)
-	fmt.Println("expectUpdateClusterStatusAction2= %v", f.actions)
+	fmt.Println("expect actions: %v, %v", action, f.actions)
 }
 
 func (f *fixture) expectDeleteClusterStatusAction(cluster *clusterv1.Cluster) {
 	action := core.NewDeleteAction(schema.GroupVersionResource{Resource: "clusters"}, cluster.Namespace, cluster.Name)
 	f.actions = f.actions[:0]
 	f.actions = append(f.actions, action)
-	fmt.Println("expectDeleteClusterStatusAction1= %v", action)
-	fmt.Println("expectDeleteClusterStatusAction2= %v", f.actions)
+	fmt.Println("expect actions: %v, %v", action, f.actions)
 }
 
 func (f *fixture) expectErrorClusterStatusAction(cluster *clusterv1.Cluster) {
@@ -314,7 +321,6 @@ func TestCreatesCluster(t *testing.T) {
 func TestUpdateCluster(t *testing.T) {
 	f := newFixture(t)
 	cluster := newCluster("cluster2")
-
 	f.clusterLister = append(f.clusterLister, cluster)
 	f.objects = append(f.objects, cluster)
 	f.expectUpdateClusterStatusAction(cluster)
