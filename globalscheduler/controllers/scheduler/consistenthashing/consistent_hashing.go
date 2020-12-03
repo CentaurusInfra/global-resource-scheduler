@@ -28,6 +28,8 @@ import (
 	"sync"
 )
 
+const VIRTUALNODENUMBER = 131072
+
 type uints []uint32
 
 // Len returns the length of the uints array.
@@ -44,6 +46,16 @@ type ConsistentHash struct {
 	SortedHashes         uints             // sorted hash key
 	NumberOfVirtualNodes int               // virtual nodes number
 	sync.RWMutex                           // read & write lock
+}
+
+// New creates a new Consistent object with a default setting of 131,072 replicas for each entry.
+//
+// To change the number of replicas, set NumberOfVirtualNodes before adding entries.
+func New() *ConsistentHash {
+	c := new(ConsistentHash)
+	c.NumberOfVirtualNodes = VIRTUALNODENUMBER
+	c.HashCircle = make(map[uint32]string)
+	return c
 }
 
 // 32-byte Fowler-Noll-Vo hash algorithm

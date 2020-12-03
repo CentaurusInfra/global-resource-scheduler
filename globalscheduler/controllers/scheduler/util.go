@@ -19,9 +19,11 @@ package scheduler
 type EventType string
 
 const (
-	EventTypeCreate EventType = "Create"
-	EventTypeUpdate EventType = "Update"
-	EventTypeDelete EventType = "Delete"
+	EventTypeCreateScheduler EventType = "CreateScheduler"
+	EventTypeUpdateScheduler EventType = "UpdateScheduler"
+	EventTypeDeleteScheduler EventType = "DeleteScheduler"
+	EventTypeAddCluster EventType = "AddCluster"
+	EventTypeDeleteCluster EventType = "DeleteCluster"
 )
 
 type KeyWithEventType struct {
