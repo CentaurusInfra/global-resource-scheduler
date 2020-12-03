@@ -3,13 +3,14 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "go_default_library",
     srcs = [
+        "eventType.go",
         "scheduler_controller.go",
-        "util.go",
     ],
     importpath = "k8s.io/kubernetes/globalscheduler/controllers/scheduler",
     visibility = ["//visibility:public"],
     deps = [
-        "//globalscheduler/controllers/scheduler/consistenthashing:go_default_library",
+        "//globalscheduler/controllers/util/consistenthashing:go_default_library",
+        "//globalscheduler/controllers/util/union:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/informers/externalversions/cluster/v1:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/listers/cluster/v1:go_default_library",
@@ -43,10 +44,7 @@ filegroup(
 
 filegroup(
     name = "all-srcs",
-    srcs = [
-        ":package-srcs",
-        "//globalscheduler/controllers/scheduler/consistenthashing:all-srcs",
-    ],
+    srcs = [":package-srcs"],
     tags = ["automanaged"],
     visibility = ["//visibility:public"],
 )
