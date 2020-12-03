@@ -22,8 +22,8 @@ const (
 	EventTypeCreateScheduler EventType = "CreateScheduler"
 	EventTypeUpdateScheduler EventType = "UpdateScheduler"
 	EventTypeDeleteScheduler EventType = "DeleteScheduler"
-	EventTypeAddCluster EventType = "AddCluster"
-	EventTypeDeleteCluster EventType = "DeleteCluster"
+	EventTypeAddCluster      EventType = "AddCluster"
+	EventTypeDeleteCluster   EventType = "DeleteCluster"
 )
 
 type KeyWithEventType struct {
