@@ -68,35 +68,23 @@ func (in *ClusterUnion) DeepCopyInto(out *ClusterUnion) {
 	}
 	if in.Flavors != nil {
 		in, out := &in.Flavors, &out.Flavors
-		*out = make([][]*clusterv1.FlavorInfo, len(*in))
+		*out = make([]*clusterv1.FlavorInfo, len(*in))
 		for i := range *in {
 			if (*in)[i] != nil {
 				in, out := &(*in)[i], &(*out)[i]
-				*out = make([]*clusterv1.FlavorInfo, len(*in))
-				for i := range *in {
-					if (*in)[i] != nil {
-						in, out := &(*in)[i], &(*out)[i]
-						*out = new(clusterv1.FlavorInfo)
-						**out = **in
-					}
-				}
+				*out = new(clusterv1.FlavorInfo)
+				**out = **in
 			}
 		}
 	}
 	if in.Storage != nil {
 		in, out := &in.Storage, &out.Storage
-		*out = make([][]*clusterv1.StorageSpec, len(*in))
+		*out = make([]*clusterv1.StorageSpec, len(*in))
 		for i := range *in {
 			if (*in)[i] != nil {
 				in, out := &(*in)[i], &(*out)[i]
-				*out = make([]*clusterv1.StorageSpec, len(*in))
-				for i := range *in {
-					if (*in)[i] != nil {
-						in, out := &(*in)[i], &(*out)[i]
-						*out = new(clusterv1.StorageSpec)
-						**out = **in
-					}
-				}
+				*out = new(clusterv1.StorageSpec)
+				**out = **in
 			}
 		}
 	}
@@ -118,11 +106,6 @@ func (in *ClusterUnion) DeepCopyInto(out *ClusterUnion) {
 	if in.ServerPrice != nil {
 		in, out := &in.ServerPrice, &out.ServerPrice
 		*out = make([]int64, len(*in))
-		copy(*out, *in)
-	}
-	if in.HomeScheduler != nil {
-		in, out := &in.HomeScheduler, &out.HomeScheduler
-		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
 	return
