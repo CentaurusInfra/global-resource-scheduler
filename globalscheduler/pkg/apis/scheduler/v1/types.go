@@ -34,9 +34,6 @@ type Scheduler struct {
 }
 
 type SchedulerSpec struct {
-	// Name is the name of the scheduler
-	Name string `json:"name"`
-
 	// Location represent which geo location the scheduler is responsable for
 	Location GeolocationInfo `json:"location"`
 
