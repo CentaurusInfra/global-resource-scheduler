@@ -19,7 +19,70 @@ package union
 import (
 	clustercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 	schedulercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
+	"reflect"
 )
+
+func RemoveCluster(currentClusterArray []*clustercrdv1.Cluster, cluster *clustercrdv1.Cluster) []*clustercrdv1.Cluster {
+	m := make(map[*clustercrdv1.Cluster]bool)
+
+	for _, v := range currentClusterArray {
+		m[v] = true
+	}
+
+	if _, ok := m[cluster]; ok {
+		delete(m, cluster)
+	}
+
+	var newClusterArray []*clustercrdv1.Cluster
+	for v := range m {
+		newClusterArray = append(newClusterArray, v)
+	}
+
+	return newClusterArray
+}
+
+func DeleteFromUnion(schedulerCopy *schedulercrdv1.Scheduler, cluster *clustercrdv1.Cluster) *schedulercrdv1.Scheduler {
+	union := schedulerCopy.Spec.Union
+
+	clusterArray := schedulerCopy.Spec.Cluster
+	if !checkIpAddressExist(clusterArray, cluster.Spec.IpAddress) {
+		// IpAddress Delete
+		union.IpAddress = deleteIpAddress(union.IpAddress, cluster.Spec.IpAddress)
+	}
+
+	if !checkGeoLocationExist(clusterArray, cluster.Spec.GeoLocation) {
+		// GeoLocation Delete
+		union.GeoLocation = deleteGeoLocation(union.GeoLocation, cluster.Spec.GeoLocation)
+	}
+
+	if !checkRegionExist(clusterArray, cluster.Spec.Region) {
+		// Region Delete
+		union.Region = deleteRegion(union.Region, cluster.Spec.Region)
+	}
+
+	if !checkOperatorExist(clusterArray, cluster.Spec.Operator) {
+		// Operator Delete
+		union.Operator = deleteOperator(union.Operator, cluster.Spec.Operator)
+	}
+
+	if !checkEipCapacityExist(clusterArray, cluster.Spec.EipCapacity) {
+		// EipCapacity Delete
+		union.EipCapacity = deleteEipCapacity(union.EipCapacity, cluster.Spec.EipCapacity)
+	}
+
+	if !checkCPUCapacityExist(clusterArray, cluster.Spec.CPUCapacity) {
+		// CPUCapacity Delete
+		union.CPUCapacity = deleteCPUCapacity(union.CPUCapacity, cluster.Spec.CPUCapacity)
+	}
+
+	if !checkMemCapacityExist(clusterArray, cluster.Spec.MemCapacity) {
+		// MemCapacity Delete
+		union.MemCapacity = deleteMemCapacity(union.MemCapacity, cluster.Spec.MemCapacity)
+	}
+
+	schedulerCopy.Spec.Union = union
+	return schedulerCopy
+}
 
 func UpdateUnion(schedulerCopy *schedulercrdv1.Scheduler, cluster *clustercrdv1.Cluster) *schedulercrdv1.Scheduler {
 	union := schedulerCopy.Spec.Union
@@ -50,9 +113,6 @@ func UpdateUnion(schedulerCopy *schedulercrdv1.Scheduler, cluster *clustercrdv1.
 
 	// MemCapacity Union
 	union.MemCapacity = unionMemCapacity(union.MemCapacity, cluster.Spec.MemCapacity)
-
-	// ServerPrice Union
-	union.ServerPrice = unionServerPrice(union.ServerPrice, cluster.Spec.ServerPrice)
 
 	schedulerCopy.Spec.Union = union
 	return schedulerCopy
@@ -86,21 +146,6 @@ func unionFlavors(unionFlavors []*clustercrdv1.FlavorInfo, flavors []clustercrdv
 		}
 	}
 	return unionFlavors
-
-}
-
-func unionServerPrice(unionPrice []int64, price int64) []int64 {
-	m := make(map[int64]int)
-	for _, v := range unionPrice {
-		m[v]++
-	}
-
-	times, _ := m[price]
-	if times == 0 {
-		unionPrice = append(unionPrice, price)
-	}
-
-	return unionPrice
 }
 
 func unionMemCapacity(unionMemCapacity []int64, memCapacity int64) []int64 {
@@ -117,6 +162,35 @@ func unionMemCapacity(unionMemCapacity []int64, memCapacity int64) []int64 {
 	return unionMemCapacity
 }
 
+func deleteMemCapacity(unionMemCapacity []int64, memCapacity int64) []int64 {
+	m := make(map[int64]bool)
+
+	for _, v := range unionMemCapacity {
+		m[v] = true
+	}
+
+	if _, ok := m[memCapacity]; ok {
+		delete(m, memCapacity)
+	}
+
+	var newUnionMemCapacity []int64
+	for v := range m {
+		newUnionMemCapacity = append(newUnionMemCapacity, v)
+	}
+
+	return newUnionMemCapacity
+}
+
+func checkMemCapacityExist(clusterArray []*clustercrdv1.Cluster, memCapacity int64) bool {
+	for _, v := range clusterArray {
+		if v.Spec.MemCapacity == memCapacity {
+			return true
+		}
+	}
+
+	return false
+}
+
 func unionCPUCapacity(unionCPUCapacity []int64, cpuCapacity int64) []int64 {
 	m := make(map[int64]int)
 	for _, v := range unionCPUCapacity {
@@ -129,6 +203,35 @@ func unionCPUCapacity(unionCPUCapacity []int64, cpuCapacity int64) []int64 {
 	}
 
 	return unionCPUCapacity
+}
+
+func deleteCPUCapacity(unionCpuCapacity []int64, cpuCapacity int64) []int64 {
+	m := make(map[int64]bool)
+
+	for _, v := range unionCpuCapacity {
+		m[v] = true
+	}
+
+	if _, ok := m[cpuCapacity]; ok {
+		delete(m, cpuCapacity)
+	}
+
+	var newUnionCPUCapacity []int64
+	for v := range m {
+		newUnionCPUCapacity = append(newUnionCPUCapacity, v)
+	}
+
+	return newUnionCPUCapacity
+}
+
+func checkCPUCapacityExist(clusterArray []*clustercrdv1.Cluster, cpuCapacity int64) bool {
+	for _, v := range clusterArray {
+		if v.Spec.CPUCapacity == cpuCapacity {
+			return true
+		}
+	}
+
+	return false
 }
 
 func unionEipCapacity(unionEipCapacity []int64, eipCapacity int64) []int64 {
@@ -145,6 +248,35 @@ func unionEipCapacity(unionEipCapacity []int64, eipCapacity int64) []int64 {
 	return unionEipCapacity
 }
 
+func deleteEipCapacity(unionCapacity []int64, capacity int64) []int64 {
+	m := make(map[int64]bool)
+
+	for _, v := range unionCapacity {
+		m[v] = true
+	}
+
+	if _, ok := m[capacity]; ok {
+		delete(m, capacity)
+	}
+
+	var newUnionEipCapacity []int64
+	for v := range m {
+		newUnionEipCapacity = append(newUnionEipCapacity, v)
+	}
+
+	return newUnionEipCapacity
+}
+
+func checkEipCapacityExist(clusterArray []*clustercrdv1.Cluster, eipCapacity int64) bool {
+	for _, v := range clusterArray {
+		if v.Spec.EipCapacity == eipCapacity {
+			return true
+		}
+	}
+
+	return false
+}
+
 func unionOperator(unionOperator []*clustercrdv1.OperatorInfo, operator clustercrdv1.OperatorInfo) []*clustercrdv1.OperatorInfo {
 	m := make(map[*clustercrdv1.OperatorInfo]int)
 	for _, v := range unionOperator {
@@ -157,6 +289,35 @@ func unionOperator(unionOperator []*clustercrdv1.OperatorInfo, operator clusterc
 	}
 
 	return unionOperator
+}
+
+func deleteOperator(unionOperator []*clustercrdv1.OperatorInfo, operator clustercrdv1.OperatorInfo) []*clustercrdv1.OperatorInfo {
+	m := make(map[*clustercrdv1.OperatorInfo]bool)
+
+	for _, v := range unionOperator {
+		m[v] = true
+	}
+
+	if _, ok := m[&operator]; ok {
+		delete(m, &operator)
+	}
+
+	var newUnionOperator []*clustercrdv1.OperatorInfo
+	for v := range m {
+		newUnionOperator = append(newUnionOperator, v)
+	}
+
+	return newUnionOperator
+}
+
+func checkOperatorExist(clusterArray []*clustercrdv1.Cluster, operator clustercrdv1.OperatorInfo) bool {
+	for _, v := range clusterArray {
+		if reflect.DeepEqual(v.Spec.Operator, operator) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func unionRegion(unionRegion []*clustercrdv1.RegionInfo, region clustercrdv1.RegionInfo) []*clustercrdv1.RegionInfo {
@@ -173,6 +334,35 @@ func unionRegion(unionRegion []*clustercrdv1.RegionInfo, region clustercrdv1.Reg
 	return unionRegion
 }
 
+func deleteRegion(unionRegion []*clustercrdv1.RegionInfo, region clustercrdv1.RegionInfo) []*clustercrdv1.RegionInfo {
+	m := make(map[*clustercrdv1.RegionInfo]bool)
+
+	for _, v := range unionRegion {
+		m[v] = true
+	}
+
+	if _, ok := m[&region]; ok {
+		delete(m, &region)
+	}
+
+	var newUnionRegion []*clustercrdv1.RegionInfo
+	for v := range m {
+		newUnionRegion = append(newUnionRegion, v)
+	}
+
+	return newUnionRegion
+}
+
+func checkRegionExist(clusterArray []*clustercrdv1.Cluster, region clustercrdv1.RegionInfo) bool {
+	for _, v := range clusterArray {
+		if reflect.DeepEqual(v.Spec.Region, region) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func unionGeoLocation(unionGeoLocation []*clustercrdv1.GeolocationInfo, geoLocation clustercrdv1.GeolocationInfo) []*clustercrdv1.GeolocationInfo {
 	m := make(map[*clustercrdv1.GeolocationInfo]int)
 	for _, v := range unionGeoLocation {
@@ -185,6 +375,35 @@ func unionGeoLocation(unionGeoLocation []*clustercrdv1.GeolocationInfo, geoLocat
 	}
 
 	return unionGeoLocation
+}
+
+func deleteGeoLocation(unionGeolocation []*clustercrdv1.GeolocationInfo, geoLocation clustercrdv1.GeolocationInfo) []*clustercrdv1.GeolocationInfo {
+	m := make(map[*clustercrdv1.GeolocationInfo]bool)
+
+	for _, v := range unionGeolocation {
+		m[v] = true
+	}
+
+	if _, ok := m[&geoLocation]; ok {
+		delete(m, &geoLocation)
+	}
+
+	var newUnionGeolocation []*clustercrdv1.GeolocationInfo
+	for v := range m {
+		newUnionGeolocation = append(newUnionGeolocation, v)
+	}
+
+	return newUnionGeolocation
+}
+
+func checkGeoLocationExist(clusterArray []*clustercrdv1.Cluster, geoLocation clustercrdv1.GeolocationInfo) bool {
+	for _, v := range clusterArray {
+		if reflect.DeepEqual(v.Spec.GeoLocation, geoLocation) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func unionIpAddress(unionIp []string, ip string) []string {
@@ -201,21 +420,31 @@ func unionIpAddress(unionIp []string, ip string) []string {
 	return unionIp
 }
 
-func RemoveCluster(currentClusterArray []*clustercrdv1.Cluster, cluster *clustercrdv1.Cluster) []*clustercrdv1.Cluster {
-	m := make(map[*clustercrdv1.Cluster]bool)
+func deleteIpAddress(unionIpAddress []string, ipAddress string) []string {
+	m := make(map[string]bool)
 
-	for _, v := range currentClusterArray {
+	for _, v := range unionIpAddress {
 		m[v] = true
 	}
 
-	if _, ok := m[cluster]; ok {
-		delete(m, cluster)
+	if _, ok := m[ipAddress]; ok {
+		delete(m, ipAddress)
 	}
 
-	var newClusterArray []*clustercrdv1.Cluster
+	var newUnionIpAddress []string
 	for v := range m {
-		newClusterArray = append(newClusterArray, v)
+		newUnionIpAddress = append(newUnionIpAddress, v)
 	}
 
-	return newClusterArray
+	return newUnionIpAddress
+}
+
+func checkIpAddressExist(clusterArray []*clustercrdv1.Cluster, ipAddress string) bool {
+	for _, v := range clusterArray {
+		if v.Spec.IpAddress == ipAddress {
+			return true
+		}
+	}
+
+	return false
 }

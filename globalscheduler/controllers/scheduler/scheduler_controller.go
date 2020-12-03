@@ -306,6 +306,15 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		schedulerCopy := scheduler.DeepCopy()
 		schedulerCopy.Spec.Cluster = union.RemoveCluster(schedulerCopy.Spec.Cluster, cluster)
 
+		schedulerCopy = union.DeleteFromUnion(schedulerCopy, cluster)
+
+		_, err = sc.schedulerclient.Update(schedulerCopy)
+		if err != nil {
+			klog.Infof("Fail to update scheduler object")
+			return err
+		}
+
+		sc.recorder.Event(scheduler, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	}
 
 	return nil
