@@ -17,12 +17,14 @@ limitations under the License.
 package scheduler
 
 import (
+	"bytes"
 	"fmt"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/klog"
+	"os/exec"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -244,6 +246,18 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		sc.consistentHash.Add(schedulerCopy.Name)
 
 		// Start Scheduler Process
+		command := "./hack/globalscheduler/start_scheduler.sh " + schedulerCopy.Spec.Tag
+		err = runCommand(command)
+		if err != nil {
+			return err
+		}
+
+		schedulerCopy.Status = schedulercrdv1.SchedulerActive
+		_, err = sc.schedulerclient.Update(schedulerCopy)
+		if err != nil {
+			klog.Infof("Fail to update scheduler object")
+			return err
+		}
 
 		sc.recorder.Event(scheduler, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 
@@ -261,6 +275,13 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		schedulerName, err := sc.consistentHash.Get(cluster.Spec.IpAddress)
 		if err != nil {
 			klog.Infof("Error getting scheduler name with the cluster IP: %s", cluster.Spec.IpAddress)
+			return err
+		}
+		clusterCopy := cluster.DeepCopy()
+		clusterCopy.Spec.HomeScheduler = schedulerName
+		_, err = sc.clusterclient.Update(clusterCopy)
+		if err != nil {
+			klog.Infof("Fail to update cluster object")
 			return err
 		}
 
@@ -315,6 +336,46 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		}
 
 		sc.recorder.Event(scheduler, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
+
+	case EventTypeDeleteScheduler:
+		// Get the Scheduler resource with this namespace/name
+		scheduler, err := sc.schedulerInformer.Schedulers(namespace).Get(name)
+		if err != nil {
+			// The Scheduler resource may no longer exist, in which case we stop
+			// processing.
+			if errors.IsNotFound(err) {
+				runtime.HandleError(fmt.Errorf("failed to list scheduler by: %s/%s", namespace, name))
+				return nil
+			}
+			return err
+		}
+		schedulerCopy := scheduler.DeepCopy()
+		sc.consistentHash.Remove(schedulerCopy.Name)
+
+		// Re-assign clusters from delete scheduler
+		for _, v := range schedulerCopy.Spec.Cluster {
+			schedulerName, err := sc.consistentHash.Get(v.Spec.IpAddress)
+			if err != nil {
+				klog.Infof("Error getting scheduler name with the cluster IP: %s", v.Spec.IpAddress)
+				return err
+			}
+			clusterCopy := v.DeepCopy()
+			clusterCopy.Spec.HomeScheduler = schedulerName
+			_, err = sc.clusterclient.Update(clusterCopy)
+			if err != nil {
+				klog.Infof("Fail to update cluster object")
+				return err
+			}
+		}
+
+		// Close Scheduler Process
+		command := "./hack/globalscheduler/close_scheduler.sh " + schedulerCopy.Spec.Tag
+		err = runCommand(command)
+		if err != nil {
+			return err
+		}
+
+		sc.recorder.Event(scheduler, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	}
 
 	return nil
@@ -324,15 +385,6 @@ func (sc *SchedulerController) addClusterToScheduler(clusterObj interface{}) {
 	sc.enqueue(clusterObj, EventTypeAddCluster)
 }
 
-//func (sc *SchedulerController) updateClusterFromScheduler(old, new interface{}) {
-//	oldCluster := old.(*clustercrdv1.Cluster)
-//	newCluster := new.(*clustercrdv1.Cluster)
-//	if oldCluster.ResourceVersion == newCluster.ResourceVersion {
-//		return
-//	}
-//	fmt.Println("Watching Cluster Update")
-//}
-//
 func (sc *SchedulerController) deleteClusterFromScheduler(clusterObj interface{}) {
 	cluster := clusterObj.(*clustercrdv1.Cluster)
 	sc.enqueue(cluster, EventTypeDeleteCluster)
@@ -378,4 +430,15 @@ func (sc *SchedulerController) enqueue(obj interface{}, eventType EventType) {
 	}
 	keyWithEventType := NewKeyWithEventType(eventType, key)
 	sc.workqueue.AddRateLimited(keyWithEventType)
+}
+
+func runCommand(command string) error {
+	cmd := exec.Command("/bin/bash", "-c", command)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+	return nil
 }

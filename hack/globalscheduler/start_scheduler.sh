@@ -26,45 +26,6 @@ source "${KUBE_ROOT}/hack/lib/init.sh"
 
 source "${KUBE_ROOT}/hack/lib/common.sh"
 
-### Allow user to supply the source directory.
-GO_OUT=${GO_OUT:-}
-while getopts "ho:O" OPTION
-do
-    case ${OPTION} in
-        o)
-            echo "skipping build"
-            GO_OUT="${OPTARG}"
-            echo "using source ${GO_OUT}"
-            ;;
-        O)
-            GO_OUT=$(kube::common::guess_built_binary_path)
-            if [ "${GO_OUT}" == "" ]; then
-                echo "Could not guess the correct output directory to use."
-                exit 1
-            fi
-            ;;
-        h)
-            usage
-            exit
-            ;;
-        ?)
-            usage
-            exit
-            ;;
-    esac
-done
-
-if [ "x${GO_OUT}" == "x" ]; then
-  make -C "${KUBE_ROOT}" WHAT="cmd/hyperkube cmd/kube-scheduler"
-else
-  echo "skipped the build."
-fi
-
-### IF the user didn't supply an output/ for the build... Then we detect.
-if [ "${GO_OUT}" == "" ]; then
-  kube::common::detect_binary
-fi
-
 function start_scheduler {
   # Ensure CERT_DIR is created for auto-generated crt/key and kubeconfig
   mkdir -p "${CERT_DIR}" &>/dev/null || sudo mkdir -p "${CERT_DIR}"
@@ -73,15 +34,11 @@ function start_scheduler {
   kube::util::ensure-gnu-sed
 
   kube::common::set_service_accounts
-  for ((i = $(($1 - 1)) ; i >= 0 ; i--)); do
-    # TODO:
-    # Lightweight scheduler component has not been reviewed and approved,
-    # so currently use kube-scheduler instead.
-    # Will change the scheduler start method in the future.
-    kube::common::start_kubescheduler $i
-  done
+
+  tag=$(($1))
+  kube::common::start_kubescheduler $tag
   
-  echo "Done Starting Scheduler"
+  echo "Done Starting Scheduler $tag"
 }
 
 start_scheduler $@

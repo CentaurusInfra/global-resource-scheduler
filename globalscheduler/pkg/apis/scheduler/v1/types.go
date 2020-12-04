@@ -21,6 +21,13 @@ import (
 	clustercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 )
 
+type SchedulerStatus string
+
+const (
+	SchedulerActive  SchedulerStatus = "Active"
+	SchedulerPending SchedulerStatus = "Pending"
+)
+
 // +genclient
 // +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -43,8 +50,14 @@ type SchedulerSpec struct {
 	// Cluster is an array that stores the name of clusters
 	Cluster []*clustercrdv1.Cluster `json:"cluster"`
 
-	// ClusterUnion is the union of all cluster spec
 	Union ClusterUnion `json:"union"`
+}
+
+type GeolocationInfo struct {
+	City     string `json:"city"`
+	Province string `json:"province"`
+	Area     string `json:"area"`
+	Country  string `json:"country"`
 }
 
 type ClusterUnion struct {
@@ -55,18 +68,6 @@ type ClusterUnion struct {
 	EipCapacity []int64                         `json:"eipcapacity"`
 	CPUCapacity []int64                         `json:"cpucapacity"`
 	MemCapacity []int64                         `json:"memcapacity"`
-	ServerPrice []int64                         `json:"serverprice"`
-}
-
-type SchedulerStatus struct {
-	State string `json:"state"`
-}
-
-type GeolocationInfo struct {
-	City     string `json:"city"`
-	Province string `json:"province"`
-	Area     string `json:"area"`
-	Country  string `json:"country"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

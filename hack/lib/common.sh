@@ -471,6 +471,7 @@ function kube::common::start_kubescheduler {
     secure_port_arg=$((${KUBE_SCHEDULER_PORT}))
 
     SCHEDULER_LOG=${LOG_DIR}/kube-scheduler$1.log
+    GO_OUT="/home/ubuntu/go/src/k8s.io/arktos/_output/local/bin/linux/amd64"
     ${CONTROLPLANE_SUDO} "${GO_OUT}/hyperkube" kube-scheduler \
       --v="${LOG_LEVEL}" \
       --port="$(($port_arg + $1))" \
