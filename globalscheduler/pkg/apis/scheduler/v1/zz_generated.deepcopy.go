@@ -66,28 +66,6 @@ func (in *ClusterUnion) DeepCopyInto(out *ClusterUnion) {
 			}
 		}
 	}
-	if in.Flavors != nil {
-		in, out := &in.Flavors, &out.Flavors
-		*out = make([]*clusterv1.FlavorInfo, len(*in))
-		for i := range *in {
-			if (*in)[i] != nil {
-				in, out := &(*in)[i], &(*out)[i]
-				*out = new(clusterv1.FlavorInfo)
-				**out = **in
-			}
-		}
-	}
-	if in.Storage != nil {
-		in, out := &in.Storage, &out.Storage
-		*out = make([]*clusterv1.StorageSpec, len(*in))
-		for i := range *in {
-			if (*in)[i] != nil {
-				in, out := &(*in)[i], &(*out)[i]
-				*out = new(clusterv1.StorageSpec)
-				**out = **in
-			}
-		}
-	}
 	if in.EipCapacity != nil {
 		in, out := &in.EipCapacity, &out.EipCapacity
 		*out = make([]int64, len(*in))
