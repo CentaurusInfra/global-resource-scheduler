@@ -975,7 +975,9 @@ func TestGetMultipleTypeObjectsAsList(t *testing.T) {
                 "securityContext": {},
                 "terminationGracePeriodSeconds": 30
             },
-            "status": {}
+            "status": {
+                "assignedScheduler": {}
+            }
         },
         {
             "apiVersion": "v1",
@@ -994,7 +996,9 @@ func TestGetMultipleTypeObjectsAsList(t *testing.T) {
                 "securityContext": {},
                 "terminationGracePeriodSeconds": 30
             },
-            "status": {}
+            "status": {
+                "assignedScheduler": {}
+            }
         },
         {
             "apiVersion": "v1",
