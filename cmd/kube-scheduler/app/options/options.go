@@ -69,6 +69,9 @@ type Options struct {
 	// WriteConfigTo is the path where the default configuration will be written.
 	WriteConfigTo string
 
+	// SchedulerTag represents the Nth scheduler
+	SchedulerTag string
+
 	Master string
 }
 
@@ -146,6 +149,7 @@ func (o *Options) Flags() (nfs cliflag.NamedFlagSets) {
 	fs.StringVar(&o.ConfigFile, "config", o.ConfigFile, "The path to the configuration file. Flags override values in this file.")
 	fs.StringVar(&o.WriteConfigTo, "write-config-to", o.WriteConfigTo, "If set, write the configuration values to this file and exit.")
 	fs.StringVar(&o.Master, "master", o.Master, "The address of the Kubernetes API server (overrides any value in kubeconfig)")
+	fs.StringVar(&o.SchedulerTag, "scheduler-tag", o.SchedulerTag, "The Nth scheduler")
 
 	o.SecureServing.AddFlags(nfs.FlagSet("secure serving"))
 	o.CombinedInsecureServing.AddFlags(nfs.FlagSet("insecure serving"))

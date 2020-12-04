@@ -466,9 +466,16 @@ function kube::common::start_kubescheduler {
     if [[ $# -gt 1 ]] ; then
        kubeconfigfilepaths=$@
     fi
-    SCHEDULER_LOG=${LOG_DIR}/kube-scheduler.log
+
+    port_arg=$((${INSECURE_SCHEDULER_PORT}))
+    secure_port_arg=$((${KUBE_SCHEDULER_PORT}))
+
+    SCHEDULER_LOG=${LOG_DIR}/kube-scheduler$1.log
     ${CONTROLPLANE_SUDO} "${GO_OUT}/hyperkube" kube-scheduler \
       --v="${LOG_LEVEL}" \
+      --port="$(($port_arg + $1))" \
+      --scheduler-tag="$1" \
+      --secure-port="$(($secure_port_arg + $1))" \
       --leader-elect=false \
       --kubeconfig "${kubeconfigfilepaths}" \
       --feature-gates="${FEATURE_GATES}" \
@@ -638,4 +645,13 @@ function kube::common::generate_kubeproxy_certs {
     fi
 }
 
-
+function kube::common::start_global_resource_scheduler {
+    CONTROLPLANE_SUDO=$(test -w "${CERT_DIR}" || echo "sudo -E")
+    kubeconfigfilepaths="${CERT_DIR}/admin.kubeconfig"
+    
+    GSR_LOG=${LOG_DIR}/global-resource-scheduler.log
+    ${CONTROLPLANE_SUDO} ${GO_OUT}/globalscheduler -kubeconfig "${kubeconfigfilepaths}"  >"${GSR_LOG}" 2>&1 &
+      # TODO need to add log level in the future for debugging
+      #--v="${LOG_LEVEL}" \
+    GSR_PID=$!
+}
