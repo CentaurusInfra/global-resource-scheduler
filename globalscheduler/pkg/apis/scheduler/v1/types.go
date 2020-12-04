@@ -52,8 +52,6 @@ type ClusterUnion struct {
 	GeoLocation []*clustercrdv1.GeolocationInfo `json:"geolocation"`
 	Region      []*clustercrdv1.RegionInfo      `json:"region"`
 	Operator    []*clustercrdv1.OperatorInfo    `json:"operator"`
-	Flavors     []*clustercrdv1.FlavorInfo      `json:"flavors"`
-	Storage     []*clustercrdv1.StorageSpec     `json:"storage"`
 	EipCapacity []int64                         `json:"eipcapacity"`
 	CPUCapacity []int64                         `json:"cpucapacity"`
 	MemCapacity []int64                         `json:"memcapacity"`

@@ -99,12 +99,6 @@ func UpdateUnion(schedulerCopy *schedulercrdv1.Scheduler, cluster *clustercrdv1.
 	// Operator Union
 	union.Operator = unionOperator(union.Operator, cluster.Spec.Operator)
 
-	// Flavors Union
-	union.Flavors = unionFlavors(union.Flavors, cluster.Spec.Flavors)
-
-	// Storage Union
-	union.Storage = unionStorage(union.Storage, cluster.Spec.Storage)
-
 	// EipCapacity Union
 	union.EipCapacity = unionEipCapacity(union.EipCapacity, cluster.Spec.EipCapacity)
 
@@ -116,36 +110,6 @@ func UpdateUnion(schedulerCopy *schedulercrdv1.Scheduler, cluster *clustercrdv1.
 
 	schedulerCopy.Spec.Union = union
 	return schedulerCopy
-}
-
-func unionStorage(unionStorage []*clustercrdv1.StorageSpec, storage []clustercrdv1.StorageSpec) []*clustercrdv1.StorageSpec {
-	m := make(map[*clustercrdv1.StorageSpec]int)
-	for _, v := range unionStorage {
-		m[v]++
-	}
-
-	for _, v := range storage {
-		times, _ := m[&v]
-		if times == 0 {
-			unionStorage = append(unionStorage, &v)
-		}
-	}
-	return unionStorage
-}
-
-func unionFlavors(unionFlavors []*clustercrdv1.FlavorInfo, flavors []clustercrdv1.FlavorInfo) []*clustercrdv1.FlavorInfo {
-	m := make(map[*clustercrdv1.FlavorInfo]int)
-	for _, v := range unionFlavors {
-		m[v]++
-	}
-
-	for _, v := range flavors {
-		times, _ := m[&v]
-		if times == 0 {
-			unionFlavors = append(unionFlavors, &v)
-		}
-	}
-	return unionFlavors
 }
 
 func unionMemCapacity(unionMemCapacity []int64, memCapacity int64) []int64 {
