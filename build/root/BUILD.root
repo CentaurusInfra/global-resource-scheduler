@@ -91,6 +91,7 @@ filegroup(
         "//globalscheduler/cmd/distributor:all-srcs",
         "//globalscheduler/controllers/cluster:all-srcs",
         "//globalscheduler/controllers/scheduler:all-srcs",
+        "//globalscheduler/controllers/util/union:all-srcs",
         "//globalscheduler/pkg/apis/cluster:all-srcs",
         "//globalscheduler/pkg/apis/distributor:all-srcs",
         "//globalscheduler/pkg/apis/scheduler:all-srcs",
