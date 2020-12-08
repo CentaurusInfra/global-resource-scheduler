@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option go_package = "k8s.io/kubernetes/globalscheduler/grpc/cluster";
+option java_multiple_files = true;
+option java_package = "io.globalscheduler.grpc.cluster";
+option java_outer_classname = "ClusterProto";
+
+package proto;
+
+// service
+service ResourceCollectorProtocol { 
+    rpc UpdateClusterStatus(ClusterState) returns (ReturnMessage) {}  
+}                                                                                               
+message ClusterState {
+    string NameSpace = 1;  
+    string Name = 2;
+    int32 State = 3; 	     //1: ready, 2: down, 3: unreachable…
+}
+
+//message from ClusterController
+message ReturnMessage {
+    string NameSpace = 1;  
+    string Name = 2;
+    int32 ReturnCode = 3;	 //0: Error, 1: OK 
+}
