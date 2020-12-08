@@ -214,14 +214,16 @@ func (sp *SchedulerProcess) syncHandler(key string) error {
 		} else {
 			schedulerCopy := scheduler.DeepCopy()
 			// Update Union
+			newUnion := schedulercrdv1.ClusterUnion{}
 			for _, v := range schedulerCopy.Spec.Cluster {
 				clusterObj, err := sp.clusterClient.Get(v, metav1.GetOptions{})
 				if err != nil {
 					klog.Infof("Error getting cluster object")
 					return err
 				}
-				schedulerCopy = union.UpdateUnion(schedulerCopy, clusterObj)
+				newUnion = union.UpdateUnion(newUnion, clusterObj)
 			}
+			schedulerCopy.Spec.Union = newUnion
 			_, err = sp.schedulerclient.Update(schedulerCopy)
 			if err != nil {
 				klog.Infof("Fail to update scheduler object")

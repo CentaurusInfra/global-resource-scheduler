@@ -19,40 +19,38 @@ package union
 import (
 	clustercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 	schedulercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
+	"reflect"
 )
 
-func UpdateUnion(schedulerCopy *schedulercrdv1.Scheduler, cluster *clustercrdv1.Cluster) *schedulercrdv1.Scheduler {
-	union := schedulerCopy.Spec.Union
-
+func UpdateUnion(schedulerUnion schedulercrdv1.ClusterUnion, cluster *clustercrdv1.Cluster) schedulercrdv1.ClusterUnion {
 	// IpAddress Union
-	union.IpAddress = unionIpAddress(union.IpAddress, cluster.Spec.IpAddress)
+	schedulerUnion.IpAddress = unionIpAddress(schedulerUnion.IpAddress, cluster.Spec.IpAddress)
 
 	// GeoLocation Union
-	union.GeoLocation = unionGeoLocation(union.GeoLocation, cluster.Spec.GeoLocation)
+	schedulerUnion.GeoLocation = unionGeoLocation(schedulerUnion.GeoLocation, cluster.Spec.GeoLocation)
 
 	// Region Union
-	union.Region = unionRegion(union.Region, cluster.Spec.Region)
+	schedulerUnion.Region = unionRegion(schedulerUnion.Region, cluster.Spec.Region)
 
 	// Operator Union
-	union.Operator = unionOperator(union.Operator, cluster.Spec.Operator)
+	schedulerUnion.Operator = unionOperator(schedulerUnion.Operator, cluster.Spec.Operator)
 
-	// Flavors Union
-	union.Flavors = unionFlavors(union.Flavors, cluster.Spec.Flavors)
-
-	// Storage Union
-	union.Storage = unionStorage(union.Storage, cluster.Spec.Storage)
+	//// Flavors Union
+	//schedulerUnion.Flavors = unionFlavors(schedulerUnion.Flavors, cluster.Spec.Flavors)
+	//
+	//// Storage Union
+	//schedulerUnion.Storage = unionStorage(schedulerUnion.Storage, cluster.Spec.Storage)
 
 	// EipCapacity Union
-	union.EipCapacity = unionEipCapacity(union.EipCapacity, cluster.Spec.EipCapacity)
+	schedulerUnion.EipCapacity = unionEipCapacity(schedulerUnion.EipCapacity, cluster.Spec.EipCapacity)
 
 	// CPUCapacity Union
-	union.CPUCapacity = unionCPUCapacity(union.CPUCapacity, cluster.Spec.CPUCapacity)
+	schedulerUnion.CPUCapacity = unionCPUCapacity(schedulerUnion.CPUCapacity, cluster.Spec.CPUCapacity)
 
 	// MemCapacity Union
-	union.MemCapacity = unionMemCapacity(union.MemCapacity, cluster.Spec.MemCapacity)
+	schedulerUnion.MemCapacity = unionMemCapacity(schedulerUnion.MemCapacity, cluster.Spec.MemCapacity)
 
-	schedulerCopy.Spec.Union = union
-	return schedulerCopy
+	return schedulerUnion
 }
 
 func unionMemCapacity(unionMemCapacity []int64, memCapacity int64) []int64 {
@@ -98,45 +96,62 @@ func unionEipCapacity(unionEipCapacity []int64, eipCapacity int64) []int64 {
 }
 
 func unionOperator(unionOperator []*clustercrdv1.OperatorInfo, operator clustercrdv1.OperatorInfo) []*clustercrdv1.OperatorInfo {
-	m := make(map[*clustercrdv1.OperatorInfo]int)
-	for _, v := range unionOperator {
-		m[v]++
+	m := make([]*clustercrdv1.OperatorInfo, len(unionOperator)+1)
+	for i, v := range unionOperator {
+		m[i] = v
 	}
 
-	times, _ := m[&operator]
-	if times == 0 {
-		unionOperator = append(unionOperator, &operator)
+	for i, v := range m {
+		if v == nil {
+			m[i] = &operator
+			return m
+		}
+		if reflect.DeepEqual(v, &operator) {
+			return unionOperator
+		}
 	}
+	m = append(m, &operator)
 
-	return unionOperator
+	return m
 }
 
 func unionRegion(unionRegion []*clustercrdv1.RegionInfo, region clustercrdv1.RegionInfo) []*clustercrdv1.RegionInfo {
-	m := make(map[*clustercrdv1.RegionInfo]int)
-	for _, v := range unionRegion {
-		m[v]++
+	m := make([]*clustercrdv1.RegionInfo, len(unionRegion)+1)
+	for i, v := range unionRegion {
+		m[i] = v
 	}
 
-	times, _ := m[&region]
-	if times == 0 {
-		unionRegion = append(unionRegion, &region)
+	for i, v := range m {
+		if v == nil {
+			m[i] = &region
+			return m
+		}
+		if reflect.DeepEqual(v, &region) {
+			return unionRegion
+		}
 	}
+	m = append(m, &region)
 
-	return unionRegion
+	return m
 }
 
 func unionGeoLocation(unionGeoLocation []*clustercrdv1.GeolocationInfo, geoLocation clustercrdv1.GeolocationInfo) []*clustercrdv1.GeolocationInfo {
-	m := make(map[*clustercrdv1.GeolocationInfo]int)
-	for _, v := range unionGeoLocation {
-		m[v]++
+	m := make([]*clustercrdv1.GeolocationInfo, len(unionGeoLocation)+1)
+	for i, v := range unionGeoLocation {
+		m[i] = v
 	}
 
-	times, _ := m[&geoLocation]
-	if times == 0 {
-		unionGeoLocation = append(unionGeoLocation, &geoLocation)
+	for i, v := range m {
+		if v == nil {
+			m[i] = &geoLocation
+			return m
+		}
+		if reflect.DeepEqual(v, &geoLocation) {
+			return unionGeoLocation
+		}
 	}
-
-	return unionGeoLocation
+	m = append(m, &geoLocation)
+	return m
 }
 
 func unionIpAddress(unionIp []string, ip string) []string {
@@ -153,32 +168,33 @@ func unionIpAddress(unionIp []string, ip string) []string {
 	return unionIp
 }
 
-func unionStorage(unionStorage []*clustercrdv1.StorageSpec, storage []clustercrdv1.StorageSpec) []*clustercrdv1.StorageSpec {
-	m := make(map[*clustercrdv1.StorageSpec]int)
-	for _, v := range unionStorage {
-		m[v]++
-	}
-
-	for _, v := range storage {
-		times, _ := m[&v]
-		if times == 0 {
-			unionStorage = append(unionStorage, &v)
-		}
-	}
-	return unionStorage
-}
-
-func unionFlavors(unionFlavors []*clustercrdv1.FlavorInfo, flavors []clustercrdv1.FlavorInfo) []*clustercrdv1.FlavorInfo {
-	m := make(map[*clustercrdv1.FlavorInfo]int)
-	for _, v := range unionFlavors {
-		m[v]++
-	}
-
-	for _, v := range flavors {
-		times, _ := m[&v]
-		if times == 0 {
-			unionFlavors = append(unionFlavors, &v)
-		}
-	}
-	return unionFlavors
-}
+//
+//func unionStorage(unionStorage []*clustercrdv1.StorageSpec, storage []clustercrdv1.StorageSpec) []*clustercrdv1.StorageSpec {
+//	m := make(map[*clustercrdv1.StorageSpec]int)
+//	for _, v := range unionStorage {
+//		m[v]++
+//	}
+//
+//	for _, v := range storage {
+//		times, _ := m[&v]
+//		if times == 0 {
+//			unionStorage = append(unionStorage, &v)
+//		}
+//	}
+//	return unionStorage
+//}
+//
+//func unionFlavors(unionFlavors []*clustercrdv1.FlavorInfo, flavors []clustercrdv1.FlavorInfo) []*clustercrdv1.FlavorInfo {
+//	m := make(map[*clustercrdv1.FlavorInfo]int)
+//	for _, v := range unionFlavors {
+//		m[v]++
+//	}
+//
+//	for _, v := range flavors {
+//		times, _ := m[&v]
+//		if times == 0 {
+//			unionFlavors = append(unionFlavors, &v)
+//		}
+//	}
+//	return unionFlavors
+//}
