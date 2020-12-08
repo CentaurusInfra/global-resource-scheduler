@@ -51,7 +51,7 @@ func (in *ClusterUnion) DeepCopyInto(out *ClusterUnion) {
 			if (*in)[i] != nil {
 				in, out := &(*in)[i], &(*out)[i]
 				*out = new(clusterv1.RegionInfo)
-				(*in).DeepCopyInto(*out)
+				**out = **in
 			}
 		}
 	}
