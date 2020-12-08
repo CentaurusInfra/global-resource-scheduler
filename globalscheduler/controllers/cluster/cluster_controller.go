@@ -237,7 +237,7 @@ func (c *ClusterController) syncHandler(keyWithEventType KeyWithEventType) error
 	}
 
 	//This performs controller logic such as gRPC handling
-	result, err := c.perform(keyWithEventType.EventType, cluster)
+	result, err := c.gRPCRequest(keyWithEventType.EventType, cluster)
 	if !result {
 		klog.Errorf("Failed a cluster processing - event: %v, key: %v, error:", keyWithEventType, key, err)
 		c.workqueue.AddRateLimited(keyWithEventType)
@@ -251,21 +251,21 @@ func (c *ClusterController) syncHandler(keyWithEventType KeyWithEventType) error
 }
 
 func (c *ClusterController) determineEventType(cluster1, cluster2 *clusterv1.Cluster) (event int, err error) {
-	clusterName1, clusterState1, err1 := c.getclusterInfo(cluster1)
-	clusterName2, clusterState2, err2 := c.getclusterInfo(cluster2)
+	clusterName1, clusterStatus1, err1 := c.getclusterInfo(cluster1)
+	clusterName2, clusterStatus2, err2 := c.getclusterInfo(cluster2)
 	if cluster1 == nil || cluster2 == nil || err1 != nil || err2 != nil {
 		err = fmt.Errorf("It cannot determine null clusters event type - cluster1: %v, cluster2:%v", cluster1, cluster2)
 		return
 	}
 	event = ClusterUpdateYes
-	if clusterName1 == clusterName2 && clusterState1 == clusterState2 {
+	if clusterName1 == clusterName2 && clusterStatus1 == clusterStatus2 {
 		event = ClusterUpdateNo
 	}
 	return
 }
 
 // Retrieve cluster info
-func (c *ClusterController) getclusterInfo(cluster *clusterv1.Cluster) (clusterName string, clusterState string, err error) {
+func (c *ClusterController) getclusterInfo(cluster *clusterv1.Cluster) (clusterName string, clusterStatus string, err error) {
 	if cluster == nil {
 		err = fmt.Errorf("cluster is null")
 		return
@@ -275,15 +275,17 @@ func (c *ClusterController) getclusterInfo(cluster *clusterv1.Cluster) (clusterN
 		err = fmt.Errorf("cluster name is not valid - %s", clusterName)
 		return
 	}
-	clusterState = cluster.State
+	clusterStatus = cluster.Status
 	return
 }
 
 //This function performs controller logic including gRPC handling
-func (c *ClusterController) perform(event EventType, cluster *clusterv1.Cluster) (response bool, err error) {
-	clusterName := cluster.GetName()
+func (c *ClusterController) gRPCRequest(event EventType, cluster *clusterv1.Cluster) (response bool, err error) {
+	clusterNameSpace := cluster.ObjectMeta.Namespace
+	clusterName := cluster.ObjectMeta.Name
 	switch event {
 	case EventType_Create:
+		response := grpc.GrpcSendClusterProfile(c.grpcHost, cluster)
 		klog.Infof("Cluster creation %v", clusterName)
 	case EventType_Update:
 		klog.Infof("Cluster update   %v", clusterName)
