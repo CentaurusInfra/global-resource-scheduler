@@ -71,7 +71,7 @@ type GeolocationInfo struct {
 	Country  string `json:"country"`
 }
 type RegionInfo struct {
-	Region           string   `json:"region"`
+	Region           string `json:"region"`
 	AvailabilityZone string `json:"availabilityzone"`
 }
 type OperatorInfo struct {
@@ -83,5 +83,5 @@ type OperatorInfo struct {
 type ClusterList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
-	Items []Cluster `json:"items"`
+	Items           []Cluster `json:"items"`
 }
