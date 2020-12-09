@@ -8,7 +8,7 @@ go 1.12
 
 require (
 	bitbucket.org/bertimus9/systemstat v0.0.0-20180207000608-0eeff89b0690
-	cloud.google.com/go v0.34.0
+	cloud.google.com/go v0.73.0
 	github.com/Azure/azure-sdk-for-go v35.0.0+incompatible
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78
 	github.com/Azure/go-autorest v11.1.2+incompatible
@@ -33,11 +33,13 @@ require (
 	github.com/bgentry/speakeasy v0.1.0
 	github.com/blang/semver v3.5.0+incompatible
 	github.com/boltdb/bolt v1.3.1
+	github.com/census-instrumentation/opencensus-proto v0.3.0
 	github.com/cespare/prettybench v0.0.0-20150116022406-03b8cfe5406c
 	github.com/chai2010/gettext-go v0.0.0-20160711120539-c6fed771bfd5
 	github.com/client9/misspell v0.3.4
 	github.com/cloudflare/cfssl v0.0.0-20180726162950-56268a613adf
 	github.com/clusterhq/flocker-go v0.0.0-20160920122132-2b8b7259d313
+	github.com/cncf/udpa/go v0.0.0-20201120205902-5459f2c99403
 	github.com/cockroachdb/datadriven v0.0.0-20190809214429-80d97fb3cbaa
 	github.com/codedellemc/goscaleio v0.0.0-20170830184815-20e2ce2cf885
 	github.com/codegangsta/negroni v1.0.0
@@ -71,6 +73,8 @@ require (
 	github.com/dustin/go-humanize v1.0.0
 	github.com/elazarl/goproxy v0.0.0-20180725130230-947c36da3153
 	github.com/emicklei/go-restful v2.9.5+incompatible
+	github.com/envoyproxy/go-control-plane v0.9.8
+	github.com/envoyproxy/protoc-gen-validate v0.4.1
 	github.com/euank/go-kmsg-parser v2.0.0+incompatible
 	github.com/evanphx/json-patch v4.2.0+incompatible
 	github.com/exponent-io/jsonpath v0.0.0-20151013193312-d6023ce2651d
@@ -94,17 +98,17 @@ require (
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/golang/groupcache v0.0.0-20160516000752-02826c3e7903
-	github.com/golang/mock v1.3.1
-	github.com/golang/protobuf v1.3.2
+	github.com/golang/mock v1.4.4
+	github.com/golang/protobuf v1.4.3
 	github.com/golangplus/bytes v0.0.0-20160111154220-45c989fe5450
 	github.com/golangplus/fmt v0.0.0-20150411045040-2a5d6d7d2995
 	github.com/golangplus/testing v0.0.0-20180327235837-af21d9c3145e
 	github.com/google/btree v1.0.0
 	github.com/google/cadvisor v0.35.0
 	github.com/google/certificate-transparency-go v1.0.21
-	github.com/google/go-cmp v0.3.0
+	github.com/google/go-cmp v0.5.4
 	github.com/google/gofuzz v1.1.0
-	github.com/google/uuid v1.1.1
+	github.com/google/uuid v1.1.2
 	github.com/googleapis/gnostic v0.1.0
 	github.com/gophercloud/gophercloud v0.6.0
 	github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1
@@ -123,6 +127,7 @@ require (
 	github.com/heketi/tests v0.0.0-20151005000721-f3775cbcefd6
 	github.com/heketi/utils v0.0.0-20170317161834-435bc5bdfa64
 	github.com/hpcloud/tail v1.0.0
+	github.com/iancoleman/strcase v0.1.2
 	github.com/imdario/mergo v0.3.5
 	github.com/inconshreveable/mousetrap v1.0.0
 	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af
@@ -141,6 +146,7 @@ require (
 	github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de
 	github.com/lithammer/dedent v1.1.0
 	github.com/lpabon/godbc v0.1.1
+	github.com/lyft/protoc-gen-star v0.5.2
 	github.com/magiconair/properties v1.8.1
 	github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329
 	github.com/marstr/guid v0.0.0-20170427235115-8bdf7d1a087c
@@ -198,7 +204,7 @@ require (
 	github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/soheilhy/cmux v0.1.4
-	github.com/spf13/afero v1.2.2
+	github.com/spf13/afero v1.5.1
 	github.com/spf13/cast v0.0.0-20160730092037-e31f36ffc91a
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/jwalterweatherman v1.1.0
@@ -206,7 +212,7 @@ require (
 	github.com/spf13/viper v1.3.2
 	github.com/storageos/go-api v0.0.0-20180912212459-343b3eff91fc
 	github.com/stretchr/objx v0.1.1
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.6.1
 	github.com/syndtr/gocapability v0.0.0-20180916011248-d98352740cb2
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20170815181823-89b8d40f7ca8
 	github.com/urfave/cli v1.20.0
@@ -226,21 +232,24 @@ require (
 	golang.org/x/crypto v0.0.0-20200220183623-bac4c82f6975
 	golang.org/x/exp v0.0.0-20190312203227-4b39c73a6495
 	golang.org/x/image v0.0.0-20190227222117-0694c2d4d067
-	golang.org/x/lint v0.0.0-20190409202823-959b441ac422
+	golang.org/x/lint v0.0.0-20201208152925-83fdc39ff7b5
 	golang.org/x/mobile v0.0.0-20190312151609-d3739f865fa6
-	golang.org/x/net v0.0.0-20191004110552-13f9640d40b9
-	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
-	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4
-	golang.org/x/sys v0.0.0-20191022100944-742c48ecaeb7
-	golang.org/x/text v0.3.1-0.20181227161524-e6919f6577db
+	golang.org/x/net v0.0.0-20201209123823-ac852fbbde11
+	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5
+	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
+	golang.org/x/sys v0.0.0-20201207223542-d4d67f95c62d
+	golang.org/x/text v0.3.4
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4
-	golang.org/x/tools v0.0.0-20190920225731-5eefd052ad72
+	golang.org/x/tools v0.0.0-20201208233053-a543418bbed2
 	gonum.org/v1/gonum v0.6.2
 	gonum.org/v1/netlib v0.0.0-20190331212654-76723241ea4e
 	google.golang.org/api v0.6.1-0.20190607001116-5213b8090861
-	google.golang.org/appengine v1.5.0
-	google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8
-	google.golang.org/grpc v1.26.0
+	google.golang.org/appengine v1.6.7
+	google.golang.org/genproto v0.0.0-20201209185603-f92720507ed4
+	google.golang.org/grpc v1.34.0
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.0.1
+	google.golang.org/grpc/examples v0.0.0-20201209011439-fd32f6a4fefe
+	google.golang.org/protobuf v1.25.0
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127
 	gopkg.in/cheggaaa/pb.v1 v1.0.25
 	gopkg.in/fatih/set.v0 v0.2.1
@@ -299,11 +308,13 @@ replace (
 	github.com/bgentry/speakeasy => github.com/bgentry/speakeasy v0.1.0
 	github.com/blang/semver => github.com/blang/semver v3.5.0+incompatible
 	github.com/boltdb/bolt => github.com/boltdb/bolt v1.3.1
+	github.com/census-instrumentation/opencensus-proto => github.com/census-instrumentation/opencensus-proto v0.3.0
 	github.com/cespare/prettybench => github.com/cespare/prettybench v0.0.0-20150116022406-03b8cfe5406c
 	github.com/chai2010/gettext-go => github.com/chai2010/gettext-go v0.0.0-20160711120539-c6fed771bfd5
 	github.com/client9/misspell => github.com/client9/misspell v0.0.0-20170928000206-9ce5d979ffda
 	github.com/cloudflare/cfssl => github.com/cloudflare/cfssl v0.0.0-20180726162950-56268a613adf
 	github.com/clusterhq/flocker-go => github.com/clusterhq/flocker-go v0.0.0-20160920122132-2b8b7259d313
+	github.com/cncf/udpa/go => github.com/cncf/udpa/go v0.0.0-20201120205902-5459f2c99403
 	github.com/cockroachdb/datadriven => github.com/cockroachdb/datadriven v0.0.0-20190809214429-80d97fb3cbaa
 	github.com/codedellemc/goscaleio => github.com/codedellemc/goscaleio v0.0.0-20170830184815-20e2ce2cf885
 	github.com/codegangsta/negroni => github.com/codegangsta/negroni v1.0.0
@@ -337,6 +348,8 @@ replace (
 	github.com/dustin/go-humanize => github.com/dustin/go-humanize v1.0.0
 	github.com/elazarl/goproxy => github.com/elazarl/goproxy v0.0.0-20170405201442-c4fc26588b6e
 	github.com/emicklei/go-restful => github.com/emicklei/go-restful v0.0.0-20170410110728-ff4f55a20633
+	github.com/envoyproxy/go-control-plane => github.com/envoyproxy/go-control-plane v0.9.8
+	github.com/envoyproxy/protoc-gen-validate => github.com/envoyproxy/protoc-gen-validate v0.4.1
 	github.com/euank/go-kmsg-parser => github.com/euank/go-kmsg-parser v2.0.0+incompatible
 	github.com/evanphx/json-patch => github.com/evanphx/json-patch v0.0.0-20190203023257-5858425f7550
 	github.com/exponent-io/jsonpath => github.com/exponent-io/jsonpath v0.0.0-20151013193312-d6023ce2651d
@@ -389,6 +402,7 @@ replace (
 	github.com/heketi/tests => github.com/heketi/tests v0.0.0-20151005000721-f3775cbcefd6
 	github.com/heketi/utils => github.com/heketi/utils v0.0.0-20170317161834-435bc5bdfa64
 	github.com/hpcloud/tail => github.com/hpcloud/tail v1.0.0
+	github.com/iancoleman/strcase => github.com/iancoleman/strcase v0.0.0-20180726023541-3605ed457bf7
 	github.com/imdario/mergo => github.com/imdario/mergo v0.3.5
 	github.com/inconshreveable/mousetrap => github.com/inconshreveable/mousetrap v1.0.0
 	github.com/jmespath/go-jmespath => github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af
@@ -407,6 +421,7 @@ replace (
 	github.com/liggitt/tabwriter => github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de
 	github.com/lithammer/dedent => github.com/lithammer/dedent v1.1.0
 	github.com/lpabon/godbc => github.com/lpabon/godbc v0.1.1
+	github.com/lyft/protoc-gen-star => github.com/lyft/protoc-gen-star v0.5.1
 	github.com/magiconair/properties => github.com/magiconair/properties v0.0.0-20160816085511-61b492c03cf4
 	github.com/mailru/easyjson => github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329
 	github.com/marstr/guid => github.com/marstr/guid v0.0.0-20170427235115-8bdf7d1a087c
@@ -506,7 +521,10 @@ replace (
 	google.golang.org/api => google.golang.org/api v0.0.0-20181220000619-583d854617af
 	google.golang.org/appengine => google.golang.org/appengine v1.5.0
 	google.golang.org/genproto => google.golang.org/genproto v0.0.0-20170731182057-09f6ed296fc6
-	google.golang.org/grpc => google.golang.org/grpc v1.23.0
+	google.golang.org/grpc => github.com/grpc/grpc-go v1.34.0
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc => google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.0.1
+	google.golang.org/grpc/examples => google.golang.org/grpc/examples v0.0.0-20201209011439-fd32f6a4fefe
+	google.golang.org/protobuf => google.golang.org/protobuf v1.25.0
 	gopkg.in/check.v1 => gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405
 	gopkg.in/cheggaaa/pb.v1 => gopkg.in/cheggaaa/pb.v1 v1.0.25
 	gopkg.in/fatih/set.v0 => gopkg.in/fatih/set.v0 v0.2.1
@@ -525,6 +543,7 @@ replace (
 	k8s.io/apiextensions-apiserver => ../apiextensions-apiserver
 	k8s.io/apimachinery => ../apimachinery
 	k8s.io/apiserver => ../apiserver
+	k8s.io/arktos-ext => ../arktos-ext
 	k8s.io/cli-runtime => ../cli-runtime
 	k8s.io/client-go => ../client-go
 	k8s.io/cloud-provider => ../cloud-provider

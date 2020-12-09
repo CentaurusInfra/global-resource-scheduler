@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/reflect/protoreflect"
 	"k8s.io/klog"
 	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
 	clusterv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
