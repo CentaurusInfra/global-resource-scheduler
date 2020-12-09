@@ -30,6 +30,7 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog"
+	grpc "k8s.io/kubernetes/globalscheduler/grpc/cluster"
 	clienteset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
 	clusterscheme "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned/scheme"
 	informers "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/informers/externalversions/cluster/v1"
@@ -285,8 +286,11 @@ func (c *ClusterController) gRPCRequest(event EventType, cluster *clusterv1.Clus
 	clusterName := cluster.ObjectMeta.Name
 	switch event {
 	case EventType_Create:
-		response := grpc.GrpcSendClusterProfile(c.grpcHost, cluster)
-		klog.Infof("Cluster creation %v", clusterName)
+		//response := grpc.GrpcSendClusterProfile(c.grpcHost, cluster)
+		response := grpc.GrpcSendClusterProfile("localhost", cluster)
+		klog.Infof("Cluster creation %s, %s", clusterNameSpace, clusterName)
+		fmt.Printf("Cluster creation %s, %s", clusterNameSpace, clusterName)
+		fmt.Printf("gRPC request is sent %v", response)
 	case EventType_Update:
 		klog.Infof("Cluster update   %v", clusterName)
 	case EventType_Delete:

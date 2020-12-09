@@ -85,7 +85,7 @@ func newCluster(name string) *clusterv1.Cluster {
 			},
 			Region: clusterv1.RegionInfo{
 				Region:           "us-west",
-				AvailabilityZone: []string{"us-west-1", "us-west-2"},
+				AvailabilityZone: "us-west-1",
 			},
 			Operator: clusterv1.OperatorInfo{
 				Operator: "globalscheduler",
