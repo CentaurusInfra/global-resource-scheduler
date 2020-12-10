@@ -34,9 +34,7 @@ import (
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/controllers/util/union"
-	clusterclient "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client"
 	clusterclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
-	schedulerclient "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client"
 	schedulerclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
 	schedulerscheme "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned/scheme"
 	schedulerinformers "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/informers/externalversions"
@@ -67,9 +65,9 @@ const (
 var closeProcessName string
 
 type SchedulerProcess struct {
-	kubeclientset   *kubernetes.Clientset
-	schedulerclient *schedulerclient.SchedulerClient
-	clusterClient   *clusterclient.ClusterClient
+	kubeclientset   kubernetes.Interface
+	schedulerclient schedulerclientset.Interface
+	clusterClient   clusterclientset.Interface
 	processName     string
 
 	schedulerInformer schedulerlisters.SchedulerLister
@@ -216,7 +214,7 @@ func (sp *SchedulerProcess) syncHandler(key string) error {
 			// Update Union
 			newUnion := schedulercrdv1.ClusterUnion{}
 			for _, v := range schedulerCopy.Spec.Cluster {
-				clusterObj, err := sp.clusterClient.Get(v, metav1.GetOptions{})
+				clusterObj, err := sp.clusterClient.GlobalschedulerV1().Clusters(namespace).Get(v, metav1.GetOptions{})
 				if err != nil {
 					klog.Infof("Error getting cluster object")
 					return err
@@ -224,7 +222,7 @@ func (sp *SchedulerProcess) syncHandler(key string) error {
 				newUnion = union.UpdateUnion(newUnion, clusterObj)
 			}
 			schedulerCopy.Spec.Union = newUnion
-			_, err = sp.schedulerclient.Update(schedulerCopy)
+			_, err = sp.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Update(schedulerCopy)
 			if err != nil {
 				klog.Infof("Fail to update scheduler object")
 				return err
@@ -284,27 +282,17 @@ func StartSchedulerProcess(name string) {
 	if err != nil {
 		klog.Fatalf("Error building scheduler clientset: %s", err.Error())
 	}
-	// Create scheduler client
-	schedulerClient, err := schedulerclient.NewClient(schedulerClientset, defaultNamespace)
-	if err != nil {
-		klog.Fatalf("Error creating scheduler client: %s", err.Error())
-	}
 
 	// Create clusterClientset
 	clusterClientset, err := clusterclientset.NewForConfig(cfg)
 	if err != nil {
 		klog.Fatalf("Error building clusterclientset: %s", err.Error())
 	}
-	// Create clusterClient
-	clusterClient, err := clusterclient.NewClusterClient(clusterClientset, defaultNamespace)
-	if err != nil {
-		klog.Fatalf("Error creating cluster client: %s", err.Error())
-	}
 
 	schedulerInformerFactory := schedulerinformers.NewSharedInformerFactory(schedulerClientset, time.Second*30)
 	schedulerInformer := schedulerInformerFactory.Globalscheduler().V1().Schedulers()
 
-	schedulerProcess := newSchedulerProcess(kubeClientset, schedulerClient, clusterClient, schedulerInformer)
+	schedulerProcess := newSchedulerProcess(kubeClientset, schedulerClientset, clusterClientset, schedulerInformer)
 
 	go schedulerInformerFactory.Start(stopCh)
 
@@ -313,7 +301,7 @@ func StartSchedulerProcess(name string) {
 	}
 }
 
-func newSchedulerProcess(kubeclientset *kubernetes.Clientset, schedulerClient *schedulerclient.SchedulerClient, clusterClient *clusterclient.ClusterClient, schedulerInformer v1.SchedulerInformer) *SchedulerProcess {
+func newSchedulerProcess(kubeclientset kubernetes.Interface, schedulerClient schedulerclientset.Interface, clusterClient clusterclientset.Interface, schedulerInformer v1.SchedulerInformer) *SchedulerProcess {
 	// Create event broadcaster
 	// Add sample-controller types to the default Kubernetes Scheme so Events can be
 	// logged for sample-controller types.
