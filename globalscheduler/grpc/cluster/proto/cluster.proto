@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "k8s.io/kubernetes/globalscheduler/grpc/cluster";
+option go_package = "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto";
 //option java_multiple_files = true;
 //option java_package = "io.globalscheduler.grpc.cluster";
 //option java_outer_classname = "ClusterProto";

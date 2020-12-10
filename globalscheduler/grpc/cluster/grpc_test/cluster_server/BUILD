@@ -7,7 +7,7 @@ go_library(
     visibility = ["//visibility:private"],
     deps = [
         "//vendor/google.golang.org/grpc:go_default_library",
-        "//vendor/k8s.io/arktos/globalscheduler/grpc/cluster:go_default_library",
+        "//vendor/k8s.io/arktos/globalscheduler/grpc/cluster/proto:go_default_library",
     ],
 )
 

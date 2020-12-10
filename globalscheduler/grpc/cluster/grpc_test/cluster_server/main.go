@@ -23,7 +23,7 @@ import (
 	"net"
 
 	"google.golang.org/grpc"
-	pb "k8s.io/arktos/globalscheduler/grpc/cluster"
+	pb "k8s.io/arktos/globalscheduler/grpc/cluster/proto"
 )
 
 const (

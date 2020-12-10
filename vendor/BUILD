@@ -220,6 +220,7 @@ filegroup(
         "//vendor/github.com/grpc-ecosystem/go-grpc-prometheus:all-srcs",
         "//vendor/github.com/grpc-ecosystem/grpc-gateway/runtime:all-srcs",
         "//vendor/github.com/grpc-ecosystem/grpc-gateway/utilities:all-srcs",
+        "//vendor/github.com/grpc/grpc-go:all-srcs",
         "//vendor/github.com/hashicorp/golang-lru:all-srcs",
         "//vendor/github.com/hashicorp/hcl:all-srcs",
         "//vendor/github.com/heketi/heketi/client/api/go-client:all-srcs",

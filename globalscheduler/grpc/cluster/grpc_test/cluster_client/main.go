@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"k8s.io/klog"
-	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster"
+	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
 
 	"google.golang.org/grpc"
 )

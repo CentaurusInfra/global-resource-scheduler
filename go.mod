@@ -218,6 +218,7 @@ require (
 	github.com/xanzy/go-cloudstack v2.4.1+incompatible
 	github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2
 	github.com/xlab/handysort v0.0.0-20150421192137-fb3537ed64a1
+	github.com/grpc/grpc-go v1.34.0
 	go.etcd.io/bbolt v1.3.5
 	go.etcd.io/etcd v3.3.25+incompatible
 	go.uber.org/atomic v1.7.0
@@ -402,6 +403,7 @@ replace (
 	github.com/grpc-ecosystem/go-grpc-middleware => github.com/grpc-ecosystem/go-grpc-middleware v0.0.0-20190222133341-cfaf5686ec79
 	github.com/grpc-ecosystem/go-grpc-prometheus => github.com/grpc-ecosystem/go-grpc-prometheus v0.0.0-20170330212424-2500245aa611
 	github.com/grpc-ecosystem/grpc-gateway => github.com/grpc-ecosystem/grpc-gateway v1.3.0
+	github.com/grpc/grpc-go => github.com/grpc/grpc-go v1.34.0
 	github.com/hashicorp/golang-lru => github.com/hashicorp/golang-lru v0.5.0
 	github.com/hashicorp/hcl => github.com/hashicorp/hcl v0.0.0-20160711231752-d8c773c4cba1
 	github.com/heketi/heketi => github.com/heketi/heketi v0.0.0-20181109135656-558b29266ce0
@@ -526,7 +528,7 @@ replace (
 	google.golang.org/api => google.golang.org/api v0.0.0-20181220000619-583d854617af
 	google.golang.org/appengine => google.golang.org/appengine v1.5.0
 	google.golang.org/genproto => google.golang.org/genproto v0.0.0-20170731182057-09f6ed296fc6
-	google.golang.org/grpc => google.golang.org/grpc v1.23.0
+	google.golang.org/grpc => google.golang.org/grpc v1.34.0
 	gopkg.in/check.v1 => gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405
 	gopkg.in/cheggaaa/pb.v1 => gopkg.in/cheggaaa/pb.v1 v1.0.25
 	gopkg.in/fatih/set.v0 => gopkg.in/fatih/set.v0 v0.2.1

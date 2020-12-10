@@ -6,7 +6,7 @@ go_library(
     importpath = "k8s.io/kubernetes/globalscheduler/grpc/cluster/grpc_test/cluster_client",
     visibility = ["//visibility:private"],
     deps = [
-        "//globalscheduler/grpc/cluster:go_default_library",
+        "//globalscheduler/grpc/cluster/proto:go_default_library",
         "//vendor/google.golang.org/grpc:go_default_library",
         "//vendor/k8s.io/klog:go_default_library",
     ],
