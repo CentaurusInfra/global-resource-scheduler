@@ -205,7 +205,7 @@ func (sp *SchedulerProcess) syncHandler(key string) error {
 	} else {
 		if scheduler.Status == schedulercrdv1.SchedulerDelete {
 			closeProcessName = sp.processName
-			//syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+			syscall.Kill(syscall.Getpid(), syscall.SIGINT)
 			return nil
 		} else {
 			schedulerCopy := scheduler.DeepCopy()
