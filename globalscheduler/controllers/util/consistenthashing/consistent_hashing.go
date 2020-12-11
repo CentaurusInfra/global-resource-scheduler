@@ -28,7 +28,7 @@ import (
 	"sync"
 )
 
-const VIRTUALNODENUMBER = 131072
+const VIRTUAL_NODE_NUMBER = 131072
 
 type uints []uint32
 
