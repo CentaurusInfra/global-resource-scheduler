@@ -32,7 +32,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ClusterProtocolClient interface {
-	SendClusterProfile(ctx context.Context, in *ClusterProfile, opts ...grpc.CallOption) (*ReturnMessage, error)
+	SendClusterProfile(ctx context.Context, in *ClusterProfile, opts ...grpc.CallOption) (*ReturnMessageClusterProfile, error)
 }
 
 type clusterProtocolClient struct {
@@ -43,8 +43,8 @@ func NewClusterProtocolClient(cc grpc.ClientConnInterface) ClusterProtocolClient
 	return &clusterProtocolClient{cc}
 }
 
-func (c *clusterProtocolClient) SendClusterProfile(ctx context.Context, in *ClusterProfile, opts ...grpc.CallOption) (*ReturnMessage, error) {
-	out := new(ReturnMessage)
+func (c *clusterProtocolClient) SendClusterProfile(ctx context.Context, in *ClusterProfile, opts ...grpc.CallOption) (*ReturnMessageClusterProfile, error) {
+	out := new(ReturnMessageClusterProfile)
 	err := c.cc.Invoke(ctx, "/proto.ClusterProtocol/SendClusterProfile", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -53,21 +53,19 @@ func (c *clusterProtocolClient) SendClusterProfile(ctx context.Context, in *Clus
 }
 
 // ClusterProtocolServer is the server API for ClusterProtocol service.
-// All implementations must embed UnimplementedClusterProtocolServer
+// All implementations should embed UnimplementedClusterProtocolServer
 // for forward compatibility
 type ClusterProtocolServer interface {
-	SendClusterProfile(context.Context, *ClusterProfile) (*ReturnMessage, error)
-	mustEmbedUnimplementedClusterProtocolServer()
+	SendClusterProfile(context.Context, *ClusterProfile) (*ReturnMessageClusterProfile, error)
 }
 
-// UnimplementedClusterProtocolServer must be embedded to have forward compatible implementations.
+// UnimplementedClusterProtocolServer should be embedded to have forward compatible implementations.
 type UnimplementedClusterProtocolServer struct {
 }
 
-func (UnimplementedClusterProtocolServer) SendClusterProfile(context.Context, *ClusterProfile) (*ReturnMessage, error) {
+func (UnimplementedClusterProtocolServer) SendClusterProfile(context.Context, *ClusterProfile) (*ReturnMessageClusterProfile, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendClusterProfile not implemented")
 }
-func (UnimplementedClusterProtocolServer) mustEmbedUnimplementedClusterProtocolServer() {}
 
 // UnsafeClusterProtocolServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to ClusterProtocolServer will

@@ -23,7 +23,7 @@ import (
 	"net"
 
 	"google.golang.org/grpc"
-	pb "k8s.io/arktos/globalscheduler/grpc/cluster/proto"
+	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
 )
 
 const (
@@ -34,12 +34,12 @@ const (
 type ClusterProtocolServer struct{}
 
 // services - Send cluster profile
-func (s *ClusterProtocolServer) SendClusterProfile(ctx context.Context, in *pb.ClusterProfile) (*pb.ReturnMessage, error) {
+func (s *ClusterProtocolServer) SendClusterProfile(ctx context.Context, in *pb.ClusterProfile) (*pb.ReturnMessageClusterProfile, error) {
 	log.Printf("Received Request - Create: %v", in)
 	ns := in.ClusterNameSpace
 	name := in.ClusterName
 	//result := (int32)1
-	return &pb.ReturnMessage{ClusterNameSpace: ns, ClusterName: name, ReturnCode: 1}, nil
+	return &pb.ReturnMessageClusterProfile{ClusterNameSpace: ns, ClusterName: name, ReturnCode: 1}, nil
 }
 
 func main() {

@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/reflect/protoreflect"
+	//"google.golang.org/protobuf/reflect/protoreflect"
 	"k8s.io/klog"
 	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
 	clusterv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
@@ -116,8 +116,8 @@ func getGrpcClient(grpcHost string) (pb.ClusterProtocolClient, context.Context, 
 	return client, ctx, conn, cancel, nil
 }
 
-func getReturnMessageFromError(ns, name string, err *error) *pb.ReturnMessage {
-	return &pb.ReturnMessage{
+func getReturnMessageFromError(ns, name string, err *error) *pb.ReturnMessageClusterProfile {
+	return &pb.ReturnMessageClusterProfile{
 		ClusterNameSpace: ns,
 		ClusterName:      name,
 		ReturnCode:       ReturnError,

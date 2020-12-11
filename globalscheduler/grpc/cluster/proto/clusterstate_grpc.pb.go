@@ -32,7 +32,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ResourceCollectorProtocolClient interface {
-	UpdateClusterStatus(ctx context.Context, in *ClusterState, opts ...grpc.CallOption) (*ReturnMessage, error)
+	UpdateClusterStatus(ctx context.Context, in *ClusterState, opts ...grpc.CallOption) (*ReturnMessageClusterState, error)
 }
 
 type resourceCollectorProtocolClient struct {
@@ -43,8 +43,8 @@ func NewResourceCollectorProtocolClient(cc grpc.ClientConnInterface) ResourceCol
 	return &resourceCollectorProtocolClient{cc}
 }
 
-func (c *resourceCollectorProtocolClient) UpdateClusterStatus(ctx context.Context, in *ClusterState, opts ...grpc.CallOption) (*ReturnMessage, error) {
-	out := new(ReturnMessage)
+func (c *resourceCollectorProtocolClient) UpdateClusterStatus(ctx context.Context, in *ClusterState, opts ...grpc.CallOption) (*ReturnMessageClusterState, error) {
+	out := new(ReturnMessageClusterState)
 	err := c.cc.Invoke(ctx, "/proto.ResourceCollectorProtocol/UpdateClusterStatus", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -53,21 +53,18 @@ func (c *resourceCollectorProtocolClient) UpdateClusterStatus(ctx context.Contex
 }
 
 // ResourceCollectorProtocolServer is the server API for ResourceCollectorProtocol service.
-// All implementations must embed UnimplementedResourceCollectorProtocolServer
+// All implementations should embed UnimplementedResourceCollectorProtocolServer
 // for forward compatibility
 type ResourceCollectorProtocolServer interface {
-	UpdateClusterStatus(context.Context, *ClusterState) (*ReturnMessage, error)
-	mustEmbedUnimplementedResourceCollectorProtocolServer()
+	UpdateClusterStatus(context.Context, *ClusterState) (*ReturnMessageClusterState, error)
 }
 
-// UnimplementedResourceCollectorProtocolServer must be embedded to have forward compatible implementations.
+// UnimplementedResourceCollectorProtocolServer should be embedded to have forward compatible implementations.
 type UnimplementedResourceCollectorProtocolServer struct {
 }
 
-func (UnimplementedResourceCollectorProtocolServer) UpdateClusterStatus(context.Context, *ClusterState) (*ReturnMessage, error) {
+func (UnimplementedResourceCollectorProtocolServer) UpdateClusterStatus(context.Context, *ClusterState) (*ReturnMessageClusterState, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateClusterStatus not implemented")
-}
-func (UnimplementedResourceCollectorProtocolServer) mustEmbedUnimplementedResourceCollectorProtocolServer() {
 }
 
 // UnsafeResourceCollectorProtocolServer may be embedded to opt out of forward compatibility for this service.

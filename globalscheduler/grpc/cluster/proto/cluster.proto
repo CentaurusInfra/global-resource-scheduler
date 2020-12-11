@@ -9,7 +9,7 @@ package proto;
 
 // service
 service ClusterProtocol { 
-    rpc SendClusterProfile(ClusterProfile) returns (ReturnMessage) {}
+    rpc SendClusterProfile(ClusterProfile) returns (ReturnMessageClusterProfile) {}
 }
 
 //message from ClusterController to ResourceCollector
@@ -59,7 +59,7 @@ message ClusterProfile {
 }
 
 //Message from ResourceCollector, Cluster Controller should get response from ResourceCollector.
-message ReturnMessage {
+message ReturnMessageClusterProfile {
     enum CodeType{
         Error = 0;
         OK = 1;
