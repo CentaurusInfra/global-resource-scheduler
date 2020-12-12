@@ -23,7 +23,7 @@ message ClusterProfile {
             string Province = 2;
             string Area = 3;
             string Country = 4;             
-        }   
+        }
         message RegionInfo {
             string Region = 1;
             string AvailabilityZone = 2; 

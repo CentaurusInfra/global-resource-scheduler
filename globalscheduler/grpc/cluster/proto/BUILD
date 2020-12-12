@@ -1,25 +1,5 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
-go_library(
-    name = "go_default_library",
-    srcs = [
-        "cluster.pb.go",
-        "cluster_grpc.pb.go",
-        "clusterstate.pb.go",
-        "clusterstate_grpc.pb.go",
-    ],
-    importpath = "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto",
-    visibility = ["//visibility:public"],
-    deps = [
-        "//vendor/github.com/golang/protobuf/proto:go_default_library",
-        "//vendor/google.golang.org/grpc:go_default_library",
-        "//vendor/google.golang.org/grpc/codes:go_default_library",
-        "//vendor/google.golang.org/grpc/status:go_default_library",
-        "//vendor/google.golang.org/protobuf/reflect/protoreflect:go_default_library",
-        "//vendor/google.golang.org/protobuf/runtime/protoimpl:go_default_library",
-    ],
-)
-
 filegroup(
     name = "package-srcs",
     srcs = glob(["**"]),
@@ -32,4 +12,24 @@ filegroup(
     srcs = [":package-srcs"],
     tags = ["automanaged"],
     visibility = ["//visibility:public"],
+)
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "cluster.pb.go",
+        "cluster_grpc.pb.go",
+        "clusterstate.pb.go",
+        "clusterstate_grpc.pb.go",
+    ],
+    importpath = "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/golang/protobuf/proto3:go_default_library",
+        "//vendor/google.golang.org/grpc:go_default_library",
+        "//vendor/google.golang.org/grpc/codes:go_default_library",
+        "//vendor/google.golang.org/grpc/status:go_default_library",
+        "//vendor/google.golang.org/protobuf/reflect/protoreflect:go_default_library",
+        "//vendor/google.golang.org/protobuf/runtime/protoimpl:go_default_library",
+    ],
 )

@@ -14,12 +14,12 @@ service ResourceCollectorProtocol {
 message ClusterState {
     string NameSpace = 1;  
     string Name = 2;
-    int32 State = 3; 	     //1: ready, 2: down, 3: unreachable…
+    int64 State = 3; 	     //1: ready, 2: down, 3: unreachable…
 }
 
 //message from ClusterController
 message ReturnMessageClusterState {
     string NameSpace = 1;  
     string Name = 2;
-    int32 ReturnCode = 3;	 //0: Error, 1: OK 
+    int64 ReturnCode = 3;	 //0: Error, 1: OK 
 }

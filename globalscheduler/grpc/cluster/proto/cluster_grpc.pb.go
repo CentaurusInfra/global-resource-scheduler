@@ -26,7 +26,7 @@ import (
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion7
+const _ = grpc.SupportPackageIsVersion4
 
 // ClusterProtocolClient is the client API for ClusterProtocol service.
 //
@@ -36,7 +36,7 @@ type ClusterProtocolClient interface {
 }
 
 type clusterProtocolClient struct {
-	cc grpc.ClientConnInterface
+	//cc grpc.ClientConnInterface
 }
 
 func NewClusterProtocolClient(cc grpc.ClientConnInterface) ClusterProtocolClient {
@@ -53,19 +53,21 @@ func (c *clusterProtocolClient) SendClusterProfile(ctx context.Context, in *Clus
 }
 
 // ClusterProtocolServer is the server API for ClusterProtocol service.
-// All implementations should embed UnimplementedClusterProtocolServer
+// All implementations must embed UnimplementedClusterProtocolServer
 // for forward compatibility
 type ClusterProtocolServer interface {
 	SendClusterProfile(context.Context, *ClusterProfile) (*ReturnMessageClusterProfile, error)
+	mustEmbedUnimplementedClusterProtocolServer()
 }
 
-// UnimplementedClusterProtocolServer should be embedded to have forward compatible implementations.
+// UnimplementedClusterProtocolServer must be embedded to have forward compatible implementations.
 type UnimplementedClusterProtocolServer struct {
 }
 
 func (UnimplementedClusterProtocolServer) SendClusterProfile(context.Context, *ClusterProfile) (*ReturnMessageClusterProfile, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendClusterProfile not implemented")
 }
+func (UnimplementedClusterProtocolServer) mustEmbedUnimplementedClusterProtocolServer() {}
 
 // UnsafeClusterProtocolServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to ClusterProtocolServer will

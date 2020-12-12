@@ -9,7 +9,6 @@ go_library(
         "//globalscheduler/grpc/cluster/proto:go_default_library",
         "//globalscheduler/pkg/apis/cluster/v1:go_default_library",
         "//vendor/google.golang.org/grpc:go_default_library",
-        "//vendor/google.golang.org/protobuf/reflect/protoreflect:go_default_library",
         "//vendor/k8s.io/klog:go_default_library",
     ],
 )
