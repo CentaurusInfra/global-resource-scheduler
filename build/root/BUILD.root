@@ -92,6 +92,7 @@ filegroup(
         "//globalscheduler/controllers/cluster:all-srcs",
         "//globalscheduler/controllers/scheduler:all-srcs",
         "//globalscheduler/pkg/apis/cluster:all-srcs",
+        "//globalscheduler/pkg/apis/dispatcher:all-srcs",
         "//globalscheduler/pkg/apis/distributor:all-srcs",
         "//globalscheduler/pkg/apis/scheduler:all-srcs",
         "//hack:all-srcs",
