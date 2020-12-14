@@ -38,7 +38,7 @@ const (
 )
 
 // GrpcCreateCluster is to invoking grpc func of SendClusterProfile
-func GrpcSendClusterProfile(grpcHost string, cluster *clusterv1.Cluster) *pb.ReturnMessage {
+func GrpcSendClusterProfile(grpcHost string, cluster *clusterv1.Cluster) *pb.ReturnMessageClusterProfile {
 	client, ctx, conn, cancel, err := getGrpcClient(grpcHost)
 	if err != nil {
 		return getReturnMessageFromError(cluster.ObjectMeta.Namespace, cluster.ObjectMeta.Name, &err)
@@ -86,7 +86,7 @@ func ConvertClusterToClusterProfile(cluster *clusterv1.Cluster) *pb.ClusterProfi
 			},
 			Region: &pb.ClusterProfile_ClusterSpecInfo_RegionInfo{
 				Region:           cluster.Spec.Region.Region,
-				AvailabilityZone: cluster.Spec.Region.AvailabilityZone[0],
+				AvailabilityZone: cluster.Spec.Region.AvailabilityZone,
 			},
 			Operator: &pb.ClusterProfile_ClusterSpecInfo_OperatorInfo{
 				Operator: cluster.Spec.Operator.Operator,

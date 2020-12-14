@@ -32,16 +32,11 @@ message ClusterProfile {
             string Operator = 1;
         }
         message FlavorInfo {
-            int64 FlavorID = 1;  //1:Small, 2:Medium, 3:Large, 4:Xlarge, 5:2xLarge 
+            string FlavorID = 1;  //Small, Medium, Large, Xlarge, 2xLarge 
             int64 TotalCapacity = 2;
         }
-        enum StorageType {
-            SATA = 0;
-            SAS = 1;
-            SSD = 2;
-        }
         message StorageInfo {
-            StorageType TypeID = 1; 
+            string  TypeID = 1;     //"SATA", "SAS", "SSD"
             int64   StorageCapacity =2;
         }
         GeoLocationInfo GeoLocation = 2;

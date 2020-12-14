@@ -61,13 +61,13 @@ func main() {
 				Operator: "futurewei",
 			},
 			Flavor: []*pb.ClusterProfile_ClusterSpecInfo_FlavorInfo{
-				{FlavorID: 5, //1:Small, 2:Medium, 3:Large, 4:Xlarge, 5:2xLarge
+				{FlavorID: "Large", //1:Small, 2:Medium, 3:Large, 4:Xlarge, 5:2xLarge
 					TotalCapacity: 10,
 				},
 			},
 			Storage: []*pb.ClusterProfile_ClusterSpecInfo_StorageInfo{
 				{
-					TypeID:          pb.ClusterProfile_ClusterSpecInfo_SSD,
+					TypeID:          "ssd",
 					StorageCapacity: 2048,
 				},
 			},

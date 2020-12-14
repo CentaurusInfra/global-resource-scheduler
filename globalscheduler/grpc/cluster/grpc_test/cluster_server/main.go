@@ -22,7 +22,7 @@ import (
 	"log"
 	"net"
 
-	"google.golang.org/grpc"
+	grpc "google.golang.org/grpc"
 	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
 )
 
@@ -48,9 +48,11 @@ func main() {
 	if err != nil {
 		log.Printf("failed to listen: %v", err)
 	}
-	var opts []grpc.ServerOption
-	s := grpc.NewServer(opts...)
+	// opts []grpc.ServerOption
+	//s := grpc.NewServer(opts...)
+	s := grpc.NewServer()
 	pb.RegisterClusterProtocolServer(s, &ClusterProtocolServer{})
+	//pb.RegisterClusterProtocolServer(s, &ClusterProtocolServer{})
 	if err := s.Serve(lis); err != nil {
 		log.Printf("failed to serve: %v", err)
 	}
