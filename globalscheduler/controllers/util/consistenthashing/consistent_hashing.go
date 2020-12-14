@@ -28,7 +28,7 @@ import (
 	"sync"
 )
 
-const VIRTUAL_NODE_NUMBER = 131072
+const VIRTUAL_NODE_NUMBER = 1000
 
 type uints []uint32
 
@@ -45,7 +45,7 @@ type ConsistentHash struct {
 	HashCircle           map[uint32]string // store hash key & value pair
 	SortedHashes         uints             // sorted hash key
 	NumberOfVirtualNodes int               // virtual nodes number
-	Members              []string
+	Members              map[string]string
 	Results              map[string][]string
 	sync.RWMutex         // read & write lock
 }
@@ -55,9 +55,9 @@ type ConsistentHash struct {
 // To change the number of replicas, set NumberOfVirtualNodes before adding entries.
 func New() *ConsistentHash {
 	ch := new(ConsistentHash)
-	ch.NumberOfVirtualNodes = VIRTUALNODENUMBER
+	ch.NumberOfVirtualNodes = VIRTUAL_NODE_NUMBER
 	ch.HashCircle = make(map[uint32]string)
-	ch.Members = []string{}
+	ch.Members = make(map[string]string)
 	ch.Results = make(map[string][]string)
 	return ch
 }
@@ -74,33 +74,37 @@ func (ch *ConsistentHash) generateKey(elt string, idx int) string {
 }
 
 func (ch *ConsistentHash) updateSortedHashes() {
-	// Improve space complexity without reallocation
-	hashes := ch.SortedHashes[:0]
+	hashes := make(map[uint32]bool)
+	res := ch.SortedHashes
+	for _, v := range res {
+		hashes[v] = true
+	}
 
-	// Reallocate if sortedHashed array is too big
-	if cap(ch.SortedHashes)/(ch.NumberOfVirtualNodes*4) > len(ch.HashCircle) {
-		hashes = nil
-	}
 	for k := range ch.HashCircle {
-		hashes = append(hashes, k)
+		if !hashes[k] {
+			res = append(res, k)
+		}
 	}
-	sort.Sort(hashes)
-	ch.SortedHashes = hashes
+	sort.Sort(res)
+	ch.SortedHashes = res
 }
 
-func (ch *ConsistentHash) Add(elt string) {
+func (ch *ConsistentHash) Add(elt []string) {
 	ch.Lock()
 	defer ch.Unlock()
 
 	ch.add(elt)
 }
-func (ch *ConsistentHash) add(elt string) {
+
+func (ch *ConsistentHash) add(elt []string) {
 	// add virtual nodes
-	for i := 0; i < ch.NumberOfVirtualNodes; i++ {
-		ch.HashCircle[ch.fnv32Hash(ch.generateKey(elt, i))] = elt
+	for _, v := range elt {
+		for i := 0; i < ch.NumberOfVirtualNodes; i++ {
+			ch.HashCircle[ch.fnv32Hash(ch.generateKey(v, i))] = v
+		}
 	}
 
-	// sort hash key
+	// sort hash key only once
 	ch.updateSortedHashes()
 
 	if len(ch.Members) > 0 {
@@ -111,12 +115,31 @@ func (ch *ConsistentHash) add(elt string) {
 	}
 }
 
+func (ch *ConsistentHash) RemoveElt(elt string) {
+	ch.Lock()
+	defer ch.Unlock()
+
+	ch.removeElt(elt)
+}
+
+func (ch *ConsistentHash) removeElt(elt string) {
+	if _, ok := ch.Members[elt]; !ok {
+		return
+	}
+	res := ch.Members[elt]
+	ids := ch.Results[res]
+	ids = removeElementFromArray(ids, elt)
+	ch.Results[res] = ids
+	delete(ch.Members, elt)
+}
+
 func (ch *ConsistentHash) Remove(elt string) {
 	ch.Lock()
 	defer ch.Unlock()
 
 	ch.remove(elt)
 }
+
 func (ch *ConsistentHash) remove(elt string) {
 	for i := 0; i < ch.NumberOfVirtualNodes; i++ {
 		delete(ch.HashCircle, ch.fnv32Hash(ch.generateKey(elt, i)))
@@ -133,22 +156,25 @@ func (ch *ConsistentHash) remove(elt string) {
 	}
 }
 
-func (ch *ConsistentHash) Insert(name string) (string, error) {
+func (ch *ConsistentHash) Insert(names []string) error {
 	ch.RLock()
 	defer ch.RUnlock()
 
 	if len(ch.HashCircle) == 0 {
-		return "", errors.New("empty hash circle")
+		return errors.New("empty hash circle")
 	}
-	ch.Members = append(ch.Members, name)
 
-	key := ch.fnv32Hash(name)
-	// find the first index of hash value that is greater than key
-	idx := ch.search(key)
+	for _, v := range names {
+		if _, ok := ch.Members[v]; !ok {
+			key := ch.fnv32Hash(v)
+			// find the first index of hash value that is greater than key
+			idx := ch.search(key)
+			ch.Members[v] = ch.HashCircle[ch.SortedHashes[idx]]
+			ch.Results[ch.HashCircle[ch.SortedHashes[idx]]] = append(ch.Results[ch.HashCircle[ch.SortedHashes[idx]]], v)
+		}
+	}
 
-	ch.Results[ch.HashCircle[ch.SortedHashes[idx]]] = append(ch.Results[ch.HashCircle[ch.SortedHashes[idx]]], name)
-
-	return ch.HashCircle[ch.SortedHashes[idx]], nil
+	return nil
 }
 
 func (ch *ConsistentHash) GetIdList(name string) []string {
@@ -173,13 +199,28 @@ func (ch *ConsistentHash) search(key uint32) int {
 	}
 }
 
+// TODO: We can optimize this in the future. Instead of looping through all members, we can just loop through the members whose assignment changes
 func (ch *ConsistentHash) rebalance() error {
 	ch.Results = make(map[string][]string)
-	for _, v := range ch.Members {
-		_, err := ch.Insert(v)
-		if err != nil {
-			return err
-		}
+	var res []string
+	for k := range ch.Members {
+		res = append(res, k)
+	}
+	err := ch.Insert(res)
+	if err != nil {
+		return err
 	}
 	return nil
+}
+
+func removeElementFromArray(array []string, ele string) []string {
+	var idx int
+	for i, v := range array {
+		if v == ele {
+			idx = i
+			break
+		}
+	}
+	array[idx], array[len(array)-1] = array[len(array)-1], array[idx]
+	return array[:len(array)-1]
 }
