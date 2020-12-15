@@ -39,7 +39,7 @@ import (
 	"k8s.io/kubernetes/pkg/controller"
 )
 
-const controllerAgentName = "globalscheduler-cluster-controller"
+const ControllerAgentName = "globalscheduler-cluster-controller"
 const (
 	SuccessSynched         = "Synched"
 	ErrResourceExists      = "ErrResourceExists"
@@ -76,20 +76,22 @@ type ClusterController struct {
 	clusterSynced          cache.InformerSynced
 	workqueue              workqueue.RateLimitingInterface
 	recorder               record.EventRecorder
+	grpcHost               string
 }
 
 func NewClusterController(
 	kubeclientset kubernetes.Interface,
 	apiextensionsclientset apiextensionsclientset.Interface,
 	clusterclientset clienteset.Interface,
-	clusterInformer informers.ClusterInformer) *ClusterController {
+	clusterInformer informers.ClusterInformer,
+	grpcHost string) *ClusterController {
 	utilruntime.Must(clusterscheme.AddToScheme(clusterscheme.Scheme))
 	klog.V(4).Info("Creating cluster event broadcaster")
 	eventBroadcaster := record.NewBroadcaster()
 	eventBroadcaster.StartLogging(klog.Infof)
 	eventBroadcaster.StartRecordingToSink(
 		&typedcorev1.EventSinkImpl{Interface: kubeclientset.CoreV1().Events("")})
-	recorder := eventBroadcaster.NewRecorder(clusterscheme.Scheme, corev1.EventSource{Component: controllerAgentName})
+	recorder := eventBroadcaster.NewRecorder(clusterscheme.Scheme, corev1.EventSource{Component: ControllerAgentName})
 	workqueue := workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Cluster")
 	c := &ClusterController{
 		kubeclientset:          kubeclientset,
@@ -99,6 +101,7 @@ func NewClusterController(
 		clusterSynced:          clusterInformer.Informer().HasSynced,
 		workqueue:              workqueue,
 		recorder:               recorder,
+		grpcHost:               grpcHost,
 	}
 
 	//KeyFunc : controller.lookup_cache.go
@@ -119,6 +122,7 @@ func (c *ClusterController) addCluster(object interface{}) {
 	}
 	c.Enqueue(key, EventType_Create)
 	klog.Infof("Create cluster -%v ", key)
+	fmt.Printf("Create cluster -%v ", key)
 }
 
 func (c *ClusterController) updateCluster(oldObject, newObject interface{}) {
@@ -238,6 +242,7 @@ func (c *ClusterController) syncHandler(keyWithEventType KeyWithEventType) error
 	}
 
 	//This performs controller logic such as gRPC handling
+	fmt.Printf("c.gRPCRequest -%v, %v ", keyWithEventType.EventType, cluster)
 	result, err := c.gRPCRequest(keyWithEventType.EventType, cluster)
 	if !result {
 		klog.Errorf("Failed a cluster processing - event: %v, key: %v, error:", keyWithEventType, key, err)
@@ -286,11 +291,13 @@ func (c *ClusterController) gRPCRequest(event EventType, cluster *clusterv1.Clus
 	clusterName := cluster.ObjectMeta.Name
 	switch event {
 	case EventType_Create:
-		//response := grpc.GrpcSendClusterProfile(c.grpcHost, cluster)
-		response := grpc.GrpcSendClusterProfile("localhost", cluster)
+		if c.grpcHost != "" {
+			fmt.Printf("grpc.GrpcSendClusterProfile -%v, %v ", c.grpcHost, cluster)
+			response := grpc.GrpcSendClusterProfile(c.grpcHost, cluster)
+			fmt.Printf("gRPC request is sent %v", response)
+		}
 		klog.Infof("Cluster creation %s, %s", clusterNameSpace, clusterName)
 		fmt.Printf("Cluster creation %s, %s", clusterNameSpace, clusterName)
-		fmt.Printf("gRPC request is sent %v", response)
 	case EventType_Update:
 		klog.Infof("Cluster update   %v", clusterName)
 	case EventType_Delete:

@@ -31,7 +31,7 @@ import (
 type EventType string
 
 const (
-	port = "50052"
+	Port = "50052"
 
 	ReturnError = 0
 	ReturnOK    = 1
@@ -57,19 +57,23 @@ func ConvertClusterToClusterProfile(cluster *clusterv1.Cluster) *pb.ClusterProfi
 	var flavors []*pb.ClusterProfile_ClusterSpecInfo_FlavorInfo
 	if cluster.Spec.Flavors == nil {
 		flavors = nil
-	} else {
+	} else if len(cluster.Spec.Flavors) > 0 {
 		for i := 0; i < len(cluster.Spec.Flavors); i++ {
-			flavors[i].FlavorID = cluster.Spec.Flavors[i].FlavorID
-			flavors[i].TotalCapacity = cluster.Spec.Flavors[i].TotalCapacity
+			flavor := pb.ClusterProfile_ClusterSpecInfo_FlavorInfo{}
+			flavor.FlavorID = cluster.Spec.Flavors[i].FlavorID
+			flavor.TotalCapacity = cluster.Spec.Flavors[i].TotalCapacity
+			flavors = append(flavors, &flavor)
 		}
 	}
 	var storages []*pb.ClusterProfile_ClusterSpecInfo_StorageInfo
 	if cluster.Spec.Storage == nil {
 		storages = nil
-	} else {
+	} else if len(cluster.Spec.Storage) > 0 {
 		for i := 0; i < len(cluster.Spec.Storage); i++ {
-			storages[i].TypeID = cluster.Spec.Storage[i].TypeID
-			storages[i].StorageCapacity = cluster.Spec.Storage[i].StorageCapacity
+			storage := pb.ClusterProfile_ClusterSpecInfo_StorageInfo{}
+			storage.TypeID = cluster.Spec.Storage[i].TypeID
+			storage.StorageCapacity = cluster.Spec.Storage[i].StorageCapacity
+			storages = append(storages, &storage)
 		}
 	}
 
@@ -105,7 +109,7 @@ func ConvertClusterToClusterProfile(cluster *clusterv1.Cluster) *pb.ClusterProfi
 }
 
 func getGrpcClient(grpcHost string) (pb.ClusterProtocolClient, context.Context, *grpc.ClientConn, context.CancelFunc, error) {
-	address := fmt.Sprintf("%s:%s", grpcHost, port)
+	address := fmt.Sprintf("%s:%s", grpcHost, Port)
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return nil, nil, conn, nil, err

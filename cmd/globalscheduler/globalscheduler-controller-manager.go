@@ -39,12 +39,17 @@ var (
 	masterURL  string
 	kubeconfig string
 	workers    int
+	grpcHost   string
 )
 
 func main() {
 	flag.Parse()
 	if workers <= 0 {
 		workers = defaultWorkers
+	}
+
+	if grpcHost == nil {
+		grpcHost = ""
 	}
 
 	defer klog.Flush()
@@ -78,7 +83,7 @@ func main() {
 
 	// register crd
 	clusterInformer := informerFactory.Globalscheduler().V1().Clusters()
-	controller := cluster.NewClusterController(kubeClient, apiextensionsClient, clusterClientset, clusterInformer)
+	controller := cluster.NewClusterController(kubeClient, apiextensionsClient, clusterClientset, clusterInformer, grpcHost)
 	err = controller.CreateCRD()
 	if err != nil {
 		klog.Fatalf("error - register cluster crd: %s", err.Error())
@@ -100,4 +105,5 @@ func init() {
 	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	flag.IntVar(&workers, "concurrent-workers", defaultWorkers, "The number of workers that are allowed to process concurrently.")
+	flag.StringVar(&grpcHost, "grpchost", "", "IP address of resource collector.")
 }

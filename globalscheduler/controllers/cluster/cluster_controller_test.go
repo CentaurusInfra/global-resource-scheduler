@@ -114,7 +114,7 @@ func (f *fixture) newController() (*ClusterController, informers.SharedInformerF
 	f.apiextensionsclient = fakeapiextensionsv1beta1.NewSimpleClientset(f.apiextensionobjects...)
 	i := informers.NewSharedInformerFactory(f.client, noResyncPeriodFunc())
 	k8sI := kubeinformers.NewSharedInformerFactory(f.kubeclient, noResyncPeriodFunc())
-	c := NewClusterController(f.kubeclient, f.apiextensionsclient, f.client, i.Globalscheduler().V1().Clusters())
+	c := NewClusterController(f.kubeclient, f.apiextensionsclient, f.client, i.Globalscheduler().V1().Clusters(), "")
 
 	c.clusterSynced = alwaysReady
 	c.recorder = &record.FakeRecorder{}
