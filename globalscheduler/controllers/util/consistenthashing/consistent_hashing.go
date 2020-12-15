@@ -89,6 +89,20 @@ func (ch *ConsistentHash) updateSortedHashes() {
 	ch.SortedHashes = res
 }
 
+func (ch *ConsistentHash) addToSortedHashes(elt []uint32) {
+	for _, v := range elt {
+		ch.SortedHashes = append(ch.SortedHashes, v)
+	}
+	sort.Sort(ch.SortedHashes)
+}
+
+func (ch *ConsistentHash) deleteFromSortedHashes(elt []uint32) {
+	for _, v := range elt {
+		ch.SortedHashes = removeKeyFromSortedHashedFromArray(ch.SortedHashes, v)
+	}
+	sort.Sort(ch.SortedHashes)
+}
+
 func (ch *ConsistentHash) Add(elt []string) {
 	ch.Lock()
 	defer ch.Unlock()
@@ -98,14 +112,17 @@ func (ch *ConsistentHash) Add(elt []string) {
 
 func (ch *ConsistentHash) add(elt []string) {
 	// add virtual nodes
+	var eltHash []uint32
 	for _, v := range elt {
 		for i := 0; i < ch.NumberOfVirtualNodes; i++ {
-			ch.HashCircle[ch.fnv32Hash(ch.generateKey(v, i))] = v
+			hashKey := ch.fnv32Hash(ch.generateKey(v, i))
+			eltHash = append(eltHash, hashKey)
+			ch.HashCircle[hashKey] = v
 		}
 	}
 
 	// sort hash key only once
-	ch.updateSortedHashes()
+	ch.addToSortedHashes(eltHash)
 
 	if len(ch.Members) > 0 {
 		err := ch.rebalance()
@@ -115,14 +132,14 @@ func (ch *ConsistentHash) add(elt []string) {
 	}
 }
 
-func (ch *ConsistentHash) RemoveElt(elt string) {
+func (ch *ConsistentHash) Delete(elt string) {
 	ch.Lock()
 	defer ch.Unlock()
 
-	ch.removeElt(elt)
+	ch.delete(elt)
 }
 
-func (ch *ConsistentHash) removeElt(elt string) {
+func (ch *ConsistentHash) delete(elt string) {
 	if _, ok := ch.Members[elt]; !ok {
 		return
 	}
@@ -141,12 +158,15 @@ func (ch *ConsistentHash) Remove(elt string) {
 }
 
 func (ch *ConsistentHash) remove(elt string) {
+	var eltHash []uint32
 	for i := 0; i < ch.NumberOfVirtualNodes; i++ {
-		delete(ch.HashCircle, ch.fnv32Hash(ch.generateKey(elt, i)))
+		key := ch.fnv32Hash(ch.generateKey(elt, i))
+		eltHash = append(eltHash, key)
+		delete(ch.HashCircle, key)
 	}
 
 	// sort hash key
-	ch.updateSortedHashes()
+	ch.deleteFromSortedHashes(eltHash)
 
 	if len(ch.Members) > 0 {
 		err := ch.rebalance()
@@ -214,6 +234,18 @@ func (ch *ConsistentHash) rebalance() error {
 }
 
 func removeElementFromArray(array []string, ele string) []string {
+	var idx int
+	for i, v := range array {
+		if v == ele {
+			idx = i
+			break
+		}
+	}
+	array[idx], array[len(array)-1] = array[len(array)-1], array[idx]
+	return array[:len(array)-1]
+}
+
+func removeKeyFromSortedHashedFromArray(array []uint32, ele uint32) []uint32 {
 	var idx int
 	for i, v := range array {
 		if v == ele {
