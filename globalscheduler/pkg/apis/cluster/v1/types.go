@@ -18,16 +18,17 @@ package v1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/kubernetes/globalscheduler/pkg/apis/cluster"
 )
 
 // These const variables are used in our custom controller.
 const (
+	GroupName string = "globalscheduler.com"
 	Kind      string = "Cluster"
+	Version   string = "v1"
 	Plural    string = "clusters"
 	Singluar  string = "cluster"
 	ShortName string = "cluster"
-	Name      string = Plural + "." + cluster.GroupName
+	Name      string = Plural + "." + GroupName
 )
 
 // +genclient
@@ -43,7 +44,7 @@ type Cluster struct {
 // ClusterSpec is the spec for a Cluster resource.
 //This is where you would put your custom resource data
 type ClusterSpec struct {
-	IpAdrress     string          `json:"ipaddress"`
+	IpAddress     string          `json:"ipaddress"`
 	GeoLocation   GeolocationInfo `json:"geolocation"`
 	Region        RegionInfo      `json:"region"`
 	Operator      OperatorInfo    `json:"operator"`
