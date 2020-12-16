@@ -21,6 +21,13 @@ import (
 	clustercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 )
 
+type SchedulerStatus string
+
+const (
+	SchedulerActive SchedulerStatus = "Active"
+	SchedulerDelete SchedulerStatus = "Delete"
+)
+
 // +genclient
 // +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -34,9 +41,6 @@ type Scheduler struct {
 }
 
 type SchedulerSpec struct {
-	// Name is the name of the scheduler
-	Name string `json:"name"`
-
 	// Location represent which geo location the scheduler is responsable for
 	Location GeolocationInfo `json:"location"`
 
@@ -44,28 +48,9 @@ type SchedulerSpec struct {
 	Tag string `json:"tag"`
 
 	// Cluster is an array that stores the name of clusters
-	Cluster []*clustercrdv1.Cluster `json:"cluster"`
+	Cluster []string `json:"cluster"`
 
-	// ClusterUnion is the union of all cluster spec
 	Union ClusterUnion `json:"union"`
-}
-
-type ClusterUnion struct {
-	IpAddress     []string                        `json:"ipaddress"`
-	GeoLocation   []*clustercrdv1.GeolocationInfo `json:"geolocation"`
-	Region        []*clustercrdv1.RegionInfo      `json:"region"`
-	Operator      []*clustercrdv1.OperatorInfo    `json:"operator"`
-	Flavors       [][]*clustercrdv1.FlavorInfo    `json:"flavors"`
-	Storage       [][]*clustercrdv1.StorageSpec   `json:"storage"`
-	EipCapacity   []int64                         `json:"eipcapacity"`
-	CPUCapacity   []int64                         `json:"cpucapacity"`
-	MemCapacity   []int64                         `json:"memcapacity"`
-	ServerPrice   []int64                         `json:"serverprice"`
-	HomeScheduler []string                        `json:"homescheduler"`
-}
-
-type SchedulerStatus struct {
-	State string `json:"state"`
 }
 
 type GeolocationInfo struct {
@@ -73,6 +58,18 @@ type GeolocationInfo struct {
 	Province string `json:"province"`
 	Area     string `json:"area"`
 	Country  string `json:"country"`
+}
+
+type ClusterUnion struct {
+	IpAddress   []string                        `json:"ipaddress"`
+	GeoLocation []*clustercrdv1.GeolocationInfo `json:"geolocation"`
+	Region      []*clustercrdv1.RegionInfo      `json:"region"`
+	Operator    []*clustercrdv1.OperatorInfo    `json:"operator"`
+	Flavors     []*clustercrdv1.FlavorInfo      `json:"flavors"`
+	Storage     []*clustercrdv1.StorageSpec     `json:"storage"`
+	EipCapacity []int64                         `json:"eipcapacity"`
+	CPUCapacity []int64                         `json:"cpucapacity"`
+	MemCapacity []int64                         `json:"memcapacity"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
