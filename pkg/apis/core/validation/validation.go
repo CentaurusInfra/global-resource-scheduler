@@ -3935,7 +3935,7 @@ func validatePodConditions(conditions []core.PodCondition, fldPath *field.Path) 
 func ValidatePodBinding(binding *core.Binding) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	if len(binding.Target.Kind) != 0 && binding.Target.Kind != "Node"  && binding.Target.Kind != "Scheduler"  && binding.Target.Kind != "Cluster"  {
+	if len(binding.Target.Kind) != 0 && binding.Target.Kind != "Node" && binding.Target.Kind != "Scheduler" && binding.Target.Kind != "Cluster" {
 		// TODO: When validation becomes versioned, this gets more complicated.
 		allErrs = append(allErrs, field.NotSupported(field.NewPath("target", "kind"), binding.Target.Kind, []string{"Node", "Scheduler", "Cluster", "<empty>"}))
 	}
