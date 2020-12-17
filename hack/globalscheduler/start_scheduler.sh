@@ -69,9 +69,10 @@ function start_scheduler {
   kube::common::set_service_accounts
 
   tag=$(($1))
-  kube::common::start_kubescheduler $tag
+  schedulerid=$2
+  kube::common::start_kubescheduler $tag $schedulerid
   
-  echo "Done Starting Scheduler $tag"
+  echo "Done Starting Scheduler $tag "
 }
 
 start_scheduler $@

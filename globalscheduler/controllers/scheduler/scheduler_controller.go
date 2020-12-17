@@ -271,7 +271,7 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		}
 
 		// Start Scheduler Process
-		command := "./hack/globalscheduler/start_scheduler.sh " + schedulerCopy.Spec.Tag
+		command := "./hack/globalscheduler/start_scheduler.sh " + schedulerCopy.Spec.Tag + " " + schedulerCopy.Name
 		err = runCommand(command)
 		if err != nil {
 			klog.Infof("ERROR HERE")
