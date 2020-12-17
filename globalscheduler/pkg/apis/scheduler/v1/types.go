@@ -61,7 +61,6 @@ type GeolocationInfo struct {
 }
 
 type ClusterUnion struct {
-	IpAddress   []string                        `json:"ipaddress"`
 	GeoLocation []*clustercrdv1.GeolocationInfo `json:"geolocation"`
 	Region      []*clustercrdv1.RegionInfo      `json:"region"`
 	Operator    []*clustercrdv1.OperatorInfo    `json:"operator"`
@@ -70,6 +69,7 @@ type ClusterUnion struct {
 	EipCapacity []int64                         `json:"eipcapacity"`
 	CPUCapacity []int64                         `json:"cpucapacity"`
 	MemCapacity []int64                         `json:"memcapacity"`
+	ServerPrice []int64                         `json:"serverprice"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

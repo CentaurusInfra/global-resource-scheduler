@@ -516,6 +516,8 @@ func StartControllers(ctx ControllerContext, startSATokenController InitFunc, co
 		klog.Infof("Started %q", controllerName)
 	}
 
+	go StartSchedulerController()
+
 	return nil
 }
 
