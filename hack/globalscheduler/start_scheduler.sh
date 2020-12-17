@@ -54,12 +54,6 @@ do
     esac
 done
 
-if [ "x${GO_OUT}" == "x" ]; then
-  make -C "${KUBE_ROOT}" WHAT="cmd/hyperkube cmd/kube-scheduler"
-else
-  echo "skipped the build."
-fi
-
 ### IF the user didn't supply an output/ for the build... Then we detect.
 if [ "${GO_OUT}" == "" ]; then
   kube::common::detect_binary
@@ -73,15 +67,11 @@ function start_scheduler {
   kube::util::ensure-gnu-sed
 
   kube::common::set_service_accounts
-  for ((i = $(($1 - 1)) ; i >= 0 ; i--)); do
-    # TODO:
-    # Lightweight scheduler component has not been reviewed and approved,
-    # so currently use kube-scheduler instead.
-    # Will change the scheduler start method in the future.
-    kube::common::start_kubescheduler $i
-  done
+
+  tag=$(($1))
+  kube::common::start_kubescheduler $tag
   
-  echo "Done Starting Scheduler"
+  echo "Done Starting Scheduler $tag"
 }
 
 start_scheduler $@

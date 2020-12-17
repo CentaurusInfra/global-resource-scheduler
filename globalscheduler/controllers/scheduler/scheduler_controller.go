@@ -271,12 +271,12 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		}
 
 		// Start Scheduler Process
-		// command := "./hack/globalscheduler/start_scheduler.sh "+schedulerCopy.Spec.Tag
-		// err = runCommand(command)
-		// if err != nil {
-		// 	klog.Infof("ERROR HERE")
-		// 	return err
-		// }
+		command := "./hack/globalscheduler/start_scheduler.sh " + schedulerCopy.Spec.Tag
+		err = runCommand(command)
+		if err != nil {
+			klog.Infof("ERROR HERE")
+			return err
+		}
 		sc.recorder.Event(schedulerCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	case EventTypeUpdateScheduler:
 		klog.Infof("Event Type '%s'", EventTypeUpdateScheduler)
@@ -320,6 +320,12 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 			}
 
 			// Delete scheduler process
+			command := "./hack/globalscheduler/close_scheduler.sh " + schedulerCopy.Spec.Tag
+			err = runCommand(command)
+			if err != nil {
+				klog.Infof("ERROR HERE")
+				return err
+			}
 		}
 		sc.recorder.Event(schedulerCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	case EventTypeAddCluster:
