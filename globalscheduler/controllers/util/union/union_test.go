@@ -32,9 +32,6 @@ func TestUpdateUnionWithDifferentUnion(t *testing.T) {
 		},
 		Spec: schedulercrdv1.SchedulerSpec{
 			Union: schedulercrdv1.ClusterUnion{
-				IpAddress: []string{
-					"167.0.0.1",
-				},
 				GeoLocation: []*clustercrdv1.GeolocationInfo{
 					{
 						City: "NewYork",
@@ -51,18 +48,18 @@ func TestUpdateUnionWithDifferentUnion(t *testing.T) {
 						Operator: "operator-1",
 					},
 				},
-				//Flavors: []*clustercrdv1.FlavorInfo{
-				//	{
-				//		FlavorID:      "flavor-id-1",
-				//		TotalCapacity: 100,
-				//	},
-				//},
-				//Storage: []*clustercrdv1.StorageSpec{
-				//	{
-				//		TypeID:          "storage -id-1",
-				//		StorageCapacity: 100,
-				//	},
-				//},
+				Flavors: []*clustercrdv1.FlavorInfo{
+					{
+						FlavorID:      "flavor-id-1",
+						TotalCapacity: 100,
+					},
+				},
+				Storage: []*clustercrdv1.StorageSpec{
+					{
+						TypeID:          "storage -id-1",
+						StorageCapacity: 100,
+					},
+				},
 				EipCapacity: []int64{100},
 				CPUCapacity: []int64{100},
 				MemCapacity: []int64{100},
@@ -105,7 +102,6 @@ func TestUpdateUnionWithDifferentUnion(t *testing.T) {
 	}
 
 	expectedRes := schedulercrdv1.ClusterUnion{
-		IpAddress: []string{"167.0.0.1", "127.0.0.1"},
 		GeoLocation: []*clustercrdv1.GeolocationInfo{
 			{
 				City: "NewYork",
@@ -132,18 +128,18 @@ func TestUpdateUnionWithDifferentUnion(t *testing.T) {
 				Operator: "operator-2",
 			},
 		},
-		//Flavors: []*clustercrdv1.FlavorInfo{
-		//	{
-		//		FlavorID:      "flavor-id-1",
-		//		TotalCapacity: 100,
-		//	},
-		//},
-		//Storage: []*clustercrdv1.StorageSpec{
-		//	{
-		//		TypeID:          "storage -id-1",
-		//		StorageCapacity: 100,
-		//	},
-		//},
+		Flavors: []*clustercrdv1.FlavorInfo{
+			{
+				FlavorID:      "flavor-id-1",
+				TotalCapacity: 100,
+			},
+		},
+		Storage: []*clustercrdv1.StorageSpec{
+			{
+				TypeID:          "storage -id-1",
+				StorageCapacity: 100,
+			},
+		},
 		EipCapacity: []int64{100, 50},
 		CPUCapacity: []int64{100, 50},
 		MemCapacity: []int64{100, 50},
@@ -166,9 +162,6 @@ func TestUpdateUnionWithDefaultUnion(t *testing.T) {
 		},
 		Spec: schedulercrdv1.SchedulerSpec{
 			Union: schedulercrdv1.ClusterUnion{
-				IpAddress: []string{
-					"127.0.0.1",
-				},
 				GeoLocation: []*clustercrdv1.GeolocationInfo{
 					{
 						City: "Bellevue",
@@ -185,18 +178,18 @@ func TestUpdateUnionWithDefaultUnion(t *testing.T) {
 						Operator: "operator",
 					},
 				},
-				//Flavors: []*clustercrdv1.FlavorInfo{
-				//	{
-				//		FlavorID:      "flavor-id-1",
-				//		TotalCapacity: 100,
-				//	},
-				//},
-				//Storage: []*clustercrdv1.StorageSpec{
-				//	{
-				//		TypeID:          "storage -id-1",
-				//		StorageCapacity: 100,
-				//	},
-				//},
+				Flavors: []*clustercrdv1.FlavorInfo{
+					{
+						FlavorID:      "flavor-id-1",
+						TotalCapacity: 100,
+					},
+				},
+				Storage: []*clustercrdv1.StorageSpec{
+					{
+						TypeID:          "storage -id-1",
+						StorageCapacity: 100,
+					},
+				},
 				EipCapacity: []int64{100},
 				CPUCapacity: []int64{100},
 				MemCapacity: []int64{100},
@@ -220,18 +213,18 @@ func TestUpdateUnionWithDefaultUnion(t *testing.T) {
 			Operator: clustercrdv1.OperatorInfo{
 				Operator: "operator",
 			},
-			//Flavors: []clustercrdv1.FlavorInfo{
-			//	{
-			//		FlavorID:      "flavor-id-1",
-			//		TotalCapacity: 100,
-			//	},
-			//},
-			//Storage: []clustercrdv1.StorageSpec{
-			//	{
-			//		TypeID:          "storage -id-1",
-			//		StorageCapacity: 100,
-			//	},
-			//},
+			Flavors: []clustercrdv1.FlavorInfo{
+				{
+					FlavorID:      "flavor-id-1",
+					TotalCapacity: 100,
+				},
+			},
+			Storage: []clustercrdv1.StorageSpec{
+				{
+					TypeID:          "storage -id-1",
+					StorageCapacity: 100,
+				},
+			},
 			EipCapacity: 100,
 			CPUCapacity: 100,
 			MemCapacity: 100,
@@ -239,7 +232,6 @@ func TestUpdateUnionWithDefaultUnion(t *testing.T) {
 	}
 
 	expectedRes := schedulercrdv1.ClusterUnion{
-		IpAddress: []string{"127.0.0.1"},
 		GeoLocation: []*clustercrdv1.GeolocationInfo{
 			{
 				City: "Bellevue",
@@ -256,18 +248,18 @@ func TestUpdateUnionWithDefaultUnion(t *testing.T) {
 				Operator: "operator",
 			},
 		},
-		//Flavors: []*clustercrdv1.FlavorInfo{
-		//	{
-		//		FlavorID:      "flavor-id-1",
-		//		TotalCapacity: 100,
-		//	},
-		//},
-		//Storage: []*clustercrdv1.StorageSpec{
-		//	{
-		//		TypeID:          "storage -id-1",
-		//		StorageCapacity: 100,
-		//	},
-		//},
+		Flavors: []*clustercrdv1.FlavorInfo{
+			{
+				FlavorID:      "flavor-id-1",
+				TotalCapacity: 100,
+			},
+		},
+		Storage: []*clustercrdv1.StorageSpec{
+			{
+				TypeID:          "storage -id-1",
+				StorageCapacity: 100,
+			},
+		},
 		EipCapacity: []int64{100},
 		CPUCapacity: []int64{100},
 		MemCapacity: []int64{100},
@@ -306,18 +298,18 @@ func TestUpdateUnionWithoutDefaultUnion(t *testing.T) {
 			Operator: clustercrdv1.OperatorInfo{
 				Operator: "operator",
 			},
-			//Flavors: []clustercrdv1.FlavorInfo{
-			//	{
-			//		FlavorID:      "flavor-id-1",
-			//		TotalCapacity: 100,
-			//	},
-			//},
-			//Storage: []clustercrdv1.StorageSpec{
-			//	{
-			//		TypeID:          "storage -id-1",
-			//		StorageCapacity: 100,
-			//	},
-			//},
+			Flavors: []clustercrdv1.FlavorInfo{
+				{
+					FlavorID:      "flavor-id-1",
+					TotalCapacity: 100,
+				},
+			},
+			Storage: []clustercrdv1.StorageSpec{
+				{
+					TypeID:          "storage -id-1",
+					StorageCapacity: 100,
+				},
+			},
 			EipCapacity: 100,
 			CPUCapacity: 100,
 			MemCapacity: 100,
@@ -325,7 +317,6 @@ func TestUpdateUnionWithoutDefaultUnion(t *testing.T) {
 	}
 
 	expectedRes := schedulercrdv1.ClusterUnion{
-		IpAddress: []string{"127.0.0.1"},
 		GeoLocation: []*clustercrdv1.GeolocationInfo{
 			{
 				City: "Bellevue",
@@ -342,18 +333,18 @@ func TestUpdateUnionWithoutDefaultUnion(t *testing.T) {
 				Operator: "operator",
 			},
 		},
-		//Flavors: []*clustercrdv1.FlavorInfo{
-		//	{
-		//		FlavorID:      "flavor-id-1",
-		//		TotalCapacity: 100,
-		//	},
-		//},
-		//Storage: []*clustercrdv1.StorageSpec{
-		//	{
-		//		TypeID:          "storage -id-1",
-		//		StorageCapacity: 100,
-		//	},
-		//},
+		Flavors: []*clustercrdv1.FlavorInfo{
+			{
+				FlavorID:      "flavor-id-1",
+				TotalCapacity: 100,
+			},
+		},
+		Storage: []*clustercrdv1.StorageSpec{
+			{
+				TypeID:          "storage -id-1",
+				StorageCapacity: 100,
+			},
+		},
 		EipCapacity: []int64{100},
 		CPUCapacity: []int64{100},
 		MemCapacity: []int64{100},
@@ -369,40 +360,36 @@ func TestUpdateUnionWithoutDefaultUnion(t *testing.T) {
 }
 
 func unionEqual(unionRes schedulercrdv1.ClusterUnion, expectedRes schedulercrdv1.ClusterUnion) bool {
-	if !reflect.DeepEqual(unionRes.IpAddress, expectedRes.IpAddress) {
-		fmt.Println("error 1")
-		return false
-	}
 	if !reflect.DeepEqual(unionRes.GeoLocation, expectedRes.GeoLocation) {
-		fmt.Println("error 2")
+		fmt.Println("Different GeoLocation")
 		return false
 	}
 	if !reflect.DeepEqual(unionRes.Region, expectedRes.Region) {
-		fmt.Println("error 3")
+		fmt.Println("Different Region")
 		return false
 	}
 	if !reflect.DeepEqual(unionRes.Operator, expectedRes.Operator) {
-		fmt.Println("error 4")
+		fmt.Println("Different Operator")
 		return false
 	}
 	if !reflect.DeepEqual(unionRes.Flavors, expectedRes.Flavors) {
-		fmt.Println("error 5")
+		fmt.Println("Different Flavors")
 		return false
 	}
 	if !reflect.DeepEqual(unionRes.Storage, expectedRes.Storage) {
-		fmt.Println("error 6")
+		fmt.Println("Different Storage")
 		return false
 	}
 	if !reflect.DeepEqual(unionRes.EipCapacity, expectedRes.EipCapacity) {
-		fmt.Println("error 7")
+		fmt.Println("Different EipCapacity")
 		return false
 	}
 	if !reflect.DeepEqual(unionRes.CPUCapacity, expectedRes.CPUCapacity) {
-		fmt.Println("error 8")
+		fmt.Println("Different CPUCapacity")
 		return false
 	}
 	if !reflect.DeepEqual(unionRes.MemCapacity, expectedRes.MemCapacity) {
-		fmt.Println("error 9")
+		fmt.Println("Different MemCapacity")
 		return false
 	}
 

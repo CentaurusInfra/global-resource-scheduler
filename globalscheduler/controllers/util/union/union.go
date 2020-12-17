@@ -169,30 +169,36 @@ func unionGeoLocation(unionGeoLocation []*clustercrdv1.GeolocationInfo, geoLocat
 }
 
 func unionStorage(unionStorage []*clustercrdv1.StorageSpec, storage []clustercrdv1.StorageSpec) []*clustercrdv1.StorageSpec {
-	m := make(map[*clustercrdv1.StorageSpec]int)
-	for _, v := range unionStorage {
-		m[v]++
+	if len(unionStorage) == 0 {
+		for _, y := range storage {
+			unionStorage = append(unionStorage, &y)
+		}
+		return unionStorage
 	}
 
-	for _, v := range storage {
-		times, _ := m[&v]
-		if times == 0 {
-			unionStorage = append(unionStorage, &v)
+	for _, x := range unionStorage {
+		for _, y := range storage {
+			if !reflect.DeepEqual(x, &y) {
+				unionStorage = append(unionStorage, &y)
+			}
 		}
 	}
 	return unionStorage
 }
 
 func unionFlavors(unionFlavors []*clustercrdv1.FlavorInfo, flavors []clustercrdv1.FlavorInfo) []*clustercrdv1.FlavorInfo {
-	m := make(map[*clustercrdv1.FlavorInfo]int)
-	for _, v := range unionFlavors {
-		m[v]++
+	if len(unionFlavors) == 0 {
+		for _, y := range flavors {
+			unionFlavors = append(unionFlavors, &y)
+		}
+		return unionFlavors
 	}
 
-	for _, v := range flavors {
-		times, _ := m[&v]
-		if times == 0 {
-			unionFlavors = append(unionFlavors, &v)
+	for _, x := range unionFlavors {
+		for _, y := range flavors {
+			if !reflect.DeepEqual(x, &y) {
+				unionFlavors = append(unionFlavors, &y)
+			}
 		}
 	}
 	return unionFlavors

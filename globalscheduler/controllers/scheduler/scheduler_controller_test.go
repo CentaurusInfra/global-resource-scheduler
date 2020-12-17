@@ -166,11 +166,7 @@ func (f *fixture) runController(fooName string, startInformer bool, expectError 
 
 	namespace, name, _ := cache.SplitMetaNamespaceKey(fooName)
 	if !expectError {
-		if eventType == EventTypeUpdateScheduler {
-			sc, _ := p.schedulerInformer.Schedulers(namespace).Get(name)
-			p.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Create(sc)
-			p.consistentHash.Results["scheduler1"] = []string{"1", "2"}
-		} else if eventType == EventTypeAddCluster {
+		if eventType == EventTypeAddCluster {
 			cl, _ := p.clusterInformer.Clusters(namespace).Get(name)
 			ns := newScheduler(cl.Spec.HomeScheduler)
 			p.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Create(ns)
@@ -361,10 +357,11 @@ func TestCreatesCluster(t *testing.T) {
 	f.clusterobjects = append(f.clusterobjects, cluster)
 	f.expectCreateClusterAction(cluster)
 	f.expectUpdateClusterAction(cluster)
+	f.expectGetClusterAction(cluster)
 	f.run(getClusterKey(cluster, t), EventTypeAddCluster)
 }
 
-func TestUpdateCluster(t *testing.T) {
+func TestDeleteCluster(t *testing.T) {
 	f := newFixture(t)
 	cluster := newCluster("cluster2")
 	cluster.State = "Delete"
@@ -373,18 +370,4 @@ func TestUpdateCluster(t *testing.T) {
 	f.expectGetClusterAction(cluster)
 	f.expectUpdateClusterAction(cluster)
 	f.run(getClusterKey(cluster, t), EventTypeUpdateCluster)
-}
-
-func TestDeleteScheduler(t *testing.T) {
-	f := newFixture(t)
-	scheduler := newScheduler("scheduler1")
-	scheduler.Spec.Cluster = []string{"1", "2"}
-	scheduler.Status = schedulercrdv1.SchedulerDelete
-	f.schedulerLister = append(f.schedulerLister, scheduler)
-	f.schedulerobjects = append(f.schedulerobjects, scheduler)
-	f.expectCreateSchedulerAction(scheduler)
-	f.expectGetSchedulerAction(scheduler)
-	f.expectUpdateSchedulerAction(scheduler)
-	f.expectDeleteSchedulerAction(scheduler)
-	f.run(getSchedulerKey(scheduler, t), EventTypeUpdateScheduler)
 }
