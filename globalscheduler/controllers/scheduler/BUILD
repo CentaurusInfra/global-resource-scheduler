@@ -9,8 +9,8 @@ go_library(
     importpath = "k8s.io/kubernetes/globalscheduler/controllers/scheduler",
     visibility = ["//visibility:public"],
     deps = [
-        "//globalscheduler/controllers/scheduler/process:go_default_library",
         "//globalscheduler/controllers/util/consistenthashing:go_default_library",
+        "//globalscheduler/controllers/util/union:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/clientset/versioned:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/informers/externalversions/cluster/v1:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/listers/cluster/v1:go_default_library",
@@ -44,10 +44,7 @@ filegroup(
 
 filegroup(
     name = "all-srcs",
-    srcs = [
-        ":package-srcs",
-        "//globalscheduler/controllers/scheduler/process:all-srcs",
-    ],
+    srcs = [":package-srcs"],
     tags = ["automanaged"],
     visibility = ["//visibility:public"],
 )

@@ -3,9 +3,4 @@ kind: Scheduler
 metadata:
   name: sample-scheduler
 spec:
-  name: "scheduler-1"
-  cluster:
-    - "cluster-1"
-    - "cluster-2"
-    - "cluster-3"
-    - "cluster-4"
+  tag: "1"
