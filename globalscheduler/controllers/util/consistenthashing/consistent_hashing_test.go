@@ -75,10 +75,10 @@ func TestInsertEmpty(t *testing.T) {
 	x := New()
 	input := []string{"node-1"}
 	err := x.Insert(input)
-	if err == nil {
-		t.Errorf("expected error")
+	if err != nil {
+		t.Errorf("expected no error")
 	}
-	checkNum(len(x.Members), 0, t)
+	checkNum(len(x.Members), 1, t)
 }
 
 func TestDelete(t *testing.T) {
