@@ -357,7 +357,6 @@ func TestCreatesCluster(t *testing.T) {
 	f.clusterobjects = append(f.clusterobjects, cluster)
 	f.expectCreateClusterAction(cluster)
 	f.expectUpdateClusterAction(cluster)
-	f.expectGetClusterAction(cluster)
 	f.run(getClusterKey(cluster, t), EventTypeAddCluster)
 }
 
