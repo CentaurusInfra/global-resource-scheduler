@@ -320,6 +320,7 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 			}
 
 			// Delete scheduler process
+			// TBD: Will add logic which will wait for the scheduler process to complete processing all PODs in its internal queue and then close the scheduler process
 			command := "./hack/globalscheduler/close_scheduler.sh " + schedulerCopy.Spec.Tag
 			err = runCommand(command)
 			if err != nil {
@@ -358,15 +359,8 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 			}
 
 			schedulerObj.Spec.Cluster = append(schedulerObj.Spec.Cluster, clusterCopy.Name)
-			newUnion := schedulercrdv1.ClusterUnion{}
-			for _, v := range schedulerObj.Spec.Cluster {
-				clusterObj, err := sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(v, metav1.GetOptions{})
-				if err != nil {
-					klog.Infof("Cluster Object Get Failed")
-					return err
-				}
-				newUnion = union.UpdateUnion(newUnion, clusterObj)
-			}
+
+			newUnion := union.UpdateUnion(schedulerObj.Spec.Union, clusterCopy)
 			schedulerObj.Spec.Union = newUnion
 			_, err = sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Update(schedulerObj)
 			if err != nil {
@@ -530,16 +524,6 @@ func (sc *SchedulerController) deleteCluster(obj interface{}) {
 	}
 	keyWithEventType := NewKeyWithEventType(EventTypeDeleteCluster, key)
 	sc.workqueue.AddRateLimited(keyWithEventType)
-}
-
-func (sc *SchedulerController) updateSchedulerBinding(obj *schedulercrdv1.Scheduler, val []string, namespace string) error {
-	obj.Spec.Cluster = val
-	_, err := sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Update(obj)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (sc *SchedulerController) updateUnion(obj *schedulercrdv1.Scheduler, namespace string) error {

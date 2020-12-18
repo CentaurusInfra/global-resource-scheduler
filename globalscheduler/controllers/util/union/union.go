@@ -22,6 +22,7 @@ import (
 	"reflect"
 )
 
+// TBD: Change all the uniuon data structure to "map" instead of "array" so that do not need to do the loop.
 func UpdateUnion(schedulerUnion schedulercrdv1.ClusterUnion, cluster *clustercrdv1.Cluster) schedulercrdv1.ClusterUnion {
 	// GeoLocation Union
 	schedulerUnion.GeoLocation = unionGeoLocation(schedulerUnion.GeoLocation, cluster.Spec.GeoLocation)
