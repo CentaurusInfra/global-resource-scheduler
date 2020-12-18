@@ -294,22 +294,21 @@ func (c *ClusterController) gRPCRequest(event EventType, cluster *clusterv1.Clus
 	case EventType_Create:
 		if c.grpcHost != "" {
 			cluster.Status = ClusterStatusCreated
-			fmt.Printf("grpc.GrpcSendClusterProfile -%v, %v ", c.grpcHost, cluster)
+			klog.Infof("grpc.GrpcSendClusterProfile -%v, %v ", c.grpcHost, cluster)
 			response := grpc.GrpcSendClusterProfile(c.grpcHost, cluster)
-			fmt.Printf("gRPC request is sent %v", response)
+			klog.Infof("gRPC request is sent %v", response)
 		}
 		klog.Infof("Cluster creation %s, %s", clusterNameSpace, clusterName)
-		fmt.Printf("Cluster creation %s, %s", clusterNameSpace, clusterName)
 	case EventType_Update:
 		cluster.Status = ClusterStatusUpdated
 		klog.Infof("Cluster update   %v", clusterName)
 	case EventType_Delete:
 		klog.Infof("Cluster deletion  %v", clusterName)
 		if c.grpcHost != "" {
-			fmt.Printf("grpc.GrpcSendClusterProfile -%v, %v ", c.grpcHost, cluster)
+			klog.Infof("grpc.GrpcSendClusterProfile -%v, %v ", c.grpcHost, cluster)
 			cluster.Status = ClusterStatusDeleted
 			response := grpc.GrpcSendClusterProfile(c.grpcHost, cluster)
-			fmt.Printf("gRPC request is sent %v", response)
+			klog.Infof("gRPC request is sent %v", response)
 		}
 	default:
 		klog.Infof("cluster event is not correct - %v", event)
