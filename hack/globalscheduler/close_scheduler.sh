@@ -22,8 +22,9 @@ function kill_scheduler_process {
         echo "The process to kill is not specified."
     else
         port_arg=$((${INSECURE_SCHEDULER_PORT}))
+        tag=$(($1))
         # kill a scheduler process listened on a specific port number
-        sudo fuser -k $(($port_arg + $1))/tcp
+        sudo fuser -k $(($port_arg + $tag))/tcp
     fi
 }
 
