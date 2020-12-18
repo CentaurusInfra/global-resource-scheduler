@@ -122,7 +122,6 @@ func (c *ClusterController) addCluster(object interface{}) {
 	}
 	c.Enqueue(key, EventType_Create)
 	klog.Infof("Create cluster -%v ", key)
-	fmt.Printf("Create cluster -%v ", key)
 }
 
 func (c *ClusterController) updateCluster(oldObject, newObject interface{}) {
@@ -181,9 +180,6 @@ func (c *ClusterController) Run(workers int, stopCh <-chan struct{}) error {
 	defer c.workqueue.ShutDown()
 	klog.Infof("Starting global scheduler cluster controller")
 	klog.Infof("Waiting informer caches to synce")
-	fmt.Printf("Starting global scheduler cluster controller")
-	fmt.Printf("Waiting informer caches to synce")
-
 	if ok := cache.WaitForCacheSync(stopCh, c.clusterSynced); !ok {
 		return fmt.Errorf("failed to wait for caches to sync")
 	}
@@ -234,16 +230,14 @@ func (c *ClusterController) syncHandler(keyWithEventType KeyWithEventType) error
 		klog.V(4).Infof("Finished syncing  %q (%v)", key, time.Since(startTime))
 	}()
 	namespace, clusterName, err := cache.SplitMetaNamespaceKey(key)
-	fmt.Println("key, namespace, clusterName: %v,%v,%v", key, namespace, clusterName)
 	cluster, err := c.clusterlister.Clusters(namespace).Get(clusterName)
 	if err != nil || cluster == nil {
 		klog.Errorf("Failed to retrieve cluster in local cache by cluster name - %s", clusterName)
-		fmt.Println("Failed to retrieve cluster in local cache by cluster  - %v, %v", cluster, err)
 		return err
 	}
 
 	//This performs controller logic such as gRPC handling
-	fmt.Printf("c.gRPCRequest -%v, %v ", keyWithEventType.EventType, cluster)
+	klog.Infof("c.gRPCRequest -%v, %v ", keyWithEventType.EventType, cluster)
 	result, err := c.gRPCRequest(keyWithEventType.EventType, cluster)
 	if !result {
 		klog.Errorf("Failed a cluster processing - event: %v, key: %v, error:", keyWithEventType, key, err)
@@ -252,7 +246,7 @@ func (c *ClusterController) syncHandler(keyWithEventType KeyWithEventType) error
 		klog.Infof(" Processed a cluster - %v", key)
 		c.workqueue.Forget(key)
 	}
-	fmt.Printf("Cluster Handled: %v, Event: %v\n", clusterName, key)
+	klog.Infof("Cluster Handled: %v, Event: %v\n", clusterName, key)
 	c.recorder.Event(cluster, corev1.EventTypeNormal, SuccessSynched, MessageResourceSynched)
 	return nil
 }

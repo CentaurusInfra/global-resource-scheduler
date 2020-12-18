@@ -19,8 +19,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
-	"log"
 	"net"
 
 	grpc "google.golang.org/grpc"
@@ -114,7 +112,7 @@ func main() {
 	flag.Parse()
 	defer klog.Flush()
 
-	fmt.Print("Server started, Port: " + Port)
+	klog.Info("Server started, Port: " + Port)
 	lis, err := net.Listen("tcp", Port)
 	if err != nil {
 		klog.Printf("failed to listen: %v", err)

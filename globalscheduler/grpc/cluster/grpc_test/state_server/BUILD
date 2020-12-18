@@ -8,6 +8,7 @@ go_library(
     deps = [
         "//globalscheduler/grpc/cluster/proto:go_default_library",
         "//vendor/google.golang.org/grpc:go_default_library",
+        "//vendor/k8s.io/klog:go_default_library",
     ],
 )
 

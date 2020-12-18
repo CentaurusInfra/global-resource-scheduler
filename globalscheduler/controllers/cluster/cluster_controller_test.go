@@ -32,6 +32,7 @@ import (
 	core "k8s.io/client-go/testing"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
+	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned/fake"
 	informers "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/informers/externalversions"
 	clusterv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
@@ -145,7 +146,7 @@ func (f *fixture) runController(clusterName string, startInformers bool, expectE
 	}
 	namespace, name, err := cache.SplitMetaNamespaceKey(clusterName)
 	if err != nil {
-		fmt.Errorf("cluster name is not correct - %v", clusterName)
+		klog.Errorf("cluster name is not correct - %v", clusterName)
 		return
 	}
 	switch eventType {
@@ -163,10 +164,10 @@ func (f *fixture) runController(clusterName string, startInformers bool, expectE
 		err = fmt.Errorf("cluster event is not correct - %v", eventType)
 	}
 	keyWithEventType := KeyWithEventType{Key: clusterName, EventType: eventType}
-	fmt.Println("keyWithEventType=%v", keyWithEventType)
+	klog.Infof("keyWithEventType=%v", keyWithEventType)
 	err = c.syncHandler(keyWithEventType)
 	if expectError && err != nil {
-		fmt.Println("expected error syncing cluster & got %v", err)
+		klog.Infof("expected error syncing cluster & got %v", err)
 	} else if !expectError && err != nil {
 		f.t.Errorf("error syncing cluster: %v", err)
 	} else if expectError && err == nil {
@@ -182,8 +183,8 @@ func (f *fixture) runController(clusterName string, startInformers bool, expectE
 		expectedAction := f.actions[i]
 		checkAction(expectedAction, action, f.t)
 	}
-	fmt.Println("actions = %d, %v", len(actions), actions)
-	fmt.Println("f.actions = %d, %v", len(f.actions), f.actions)
+	klog.Infof("actions = %d, %v", len(actions), actions)
+	klog.Infof("f.actions = %d, %v", len(f.actions), f.actions)
 	if len(f.actions) > len(actions) {
 		f.t.Errorf("%d additional expected actions:%+v", len(f.actions)-len(actions), f.actions[len(actions):])
 	}
@@ -196,12 +197,12 @@ func (f *fixture) runController(clusterName string, startInformers bool, expectE
 		expectedAction := f.kubeactions[i]
 		checkAction(expectedAction, action, f.t)
 	}
-	fmt.Println("k8sActions = %d, %v", len(k8sActions), k8sActions)
-	fmt.Println("f.kubeactions = %d, %v", len(f.kubeactions), f.kubeactions)
+	klog.Infof("k8sActions = %d, %v", len(k8sActions), k8sActions)
+	klog.Infof("f.kubeactions = %d, %v", len(f.kubeactions), f.kubeactions)
 	if len(f.kubeactions) > len(k8sActions) {
 		f.t.Errorf("%d additional k8s expected actions:%+v", len(f.kubeactions)-len(k8sActions), f.kubeactions[len(k8sActions):])
 	}
-	fmt.Println("Done Test = %v", eventType)
+	klog.Infof("Done Test = %v", eventType)
 }
 
 // checkAction verifies that expected and actual actions are equal and both have

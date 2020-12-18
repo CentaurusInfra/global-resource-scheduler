@@ -20,11 +20,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc"
+	"k8s.io/klog"
+	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
 	"os"
 	"time"
-
-	"google.golang.org/grpc"
-	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
 )
 
 const (
@@ -35,7 +35,7 @@ func main() {
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		fmt.Printf("did not connect: %v", err)
+		klog.Infof("did not connect: %v", err)
 	}
 	defer conn.Close()
 	c := pb.NewClusterProtocolClient(conn)
@@ -80,9 +80,9 @@ func main() {
 	var arg string
 	if len(os.Args) > 1 {
 		arg = os.Args[1]
-		fmt.Printf("Request %s", arg)
+		klog.Infof("Request %s", arg)
 	} else {
-		fmt.Print("Request service name is missing. example format: main.go cluster")
+		klog.Infof("Request service name is missing. example format: main.go cluster")
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
@@ -91,13 +91,13 @@ func main() {
 	case "cluster":
 		result, err := c.SendClusterProfile(ctx, clusterProfile)
 		errorMessage = err
-		fmt.Printf("return result = %v", result)
+		klog.Infof("return result = %v", result)
 	default:
-		fmt.Infof("cluster profile is not correct - %v", clusterProfile)
+		klog.Infof("cluster profile is not correct - %v", clusterProfile)
 		errorMessage = fmt.Errorf("cluster profile is not correct - %v", clusterProfile)
 	}
 	if errorMessage != nil {
-		fmt.Printf("could not greet: %v", errorMessage)
+		klog.Infof("could not greet: %v", errorMessage)
 	}
-	fmt.Printf("Returned Client")
+	klog.Infof("Returned Client")
 }

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package  state_server
 
 import (
 	"context"
@@ -22,6 +22,7 @@ import (
 	"net"
 
 	grpc "google.golang.org/grpc"
+	"k8s.io/klog"
 	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
 )
 
@@ -34,23 +35,23 @@ type ResourceCollectorProtocolServer struct{}
 
 // services - Send cluster profile
 func (s *ResourceCollectorProtocolServer) UpdateClusterStatus(ctx context.Context, in *pb.ClusterState) (*pb.ReturnMessageClusterState, error) {
-	fmt.Printf("Received Request - Update Status: %v", in)
+	klog.Infof("Received Request - Update Status: %v", in)
 	ns := in.NameSpace
 	name := in.Name
 	state := in.State
-	fmt.Println("received state: %v, %v, %v", ns, name, state)
+	klog.Infof("received state: %v, %v, %v", ns, name, state)
 	return &pb.ReturnMessageClusterState{NameSpace: ns, Name: name, ReturnCode: 1}, nil
 }
 
 func main() {
-	fmt.Print("Server started, Port: " + Port)
+	klog.Infof("Server started, Port: " + Port)
 	lis, err := net.Listen("tcp", Port)
 	if err != nil {
-		fmt.Printf("failed to listen: %v", err)
+		klog.Infof("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
 	pb.RegisterResourceCollectorProtocolServer(s, &ResourceCollectorProtocolServer{})
 	if err := s.Serve(lis); err != nil {
-		fmt.Printf("failed to serve: %v", err)
+		klog.Infof("failed to serve: %v", err)
 	}
 }

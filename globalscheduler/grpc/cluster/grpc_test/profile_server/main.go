@@ -19,11 +19,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
-	"net"
-
 	grpc "google.golang.org/grpc"
+	"k8s.io/klog"
 	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
+	"net"
 )
 
 const (
@@ -35,21 +34,21 @@ type ClusterProtocolServer struct{}
 
 // services - Send cluster profile
 func (s *ClusterProtocolServer) SendClusterProfile(ctx context.Context, in *pb.ClusterProfile) (*pb.ReturnMessageClusterProfile, error) {
-	fmt.Printf("Received Request - Create: %v", in)
+	klog.Infof("Received Request - Create: %v", in)
 	ns := in.ClusterNameSpace
 	name := in.ClusterName
 	return &pb.ReturnMessageClusterProfile{ClusterNameSpace: ns, ClusterName: name, ReturnCode: 1}, nil
 }
 
 func main() {
-	fmt.Print("Server started, Port: " + port)
+	klog.Infof("Server started, Port: " + port)
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
-		log.Printf("failed to listen: %v", err)
+		klog.Infof("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
 	pb.RegisterClusterProtocolServer(s, &ClusterProtocolServer{})
 	if err := s.Serve(lis); err != nil {
-		fmt.Printf("failed to serve: %v", err)
+		klog.Infof("failed to serve: %v", err)
 	}
 }
