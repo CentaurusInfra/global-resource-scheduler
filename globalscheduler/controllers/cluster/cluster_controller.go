@@ -189,6 +189,7 @@ func (c *ClusterController) Run(workers int, stopCh <-chan struct{}) error {
 	}
 
 	klog.Infof("Starting workers...")
+	//perform runworker function until stopCh is closed
 	for i := 0; i < workers; i++ {
 		go wait.Until(c.runWorker, time.Second, stopCh)
 	}

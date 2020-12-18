@@ -47,11 +47,6 @@ func main() {
 	if workers <= 0 {
 		workers = defaultWorkers
 	}
-
-	if grpcHost == nil {
-		grpcHost = ""
-	}
-
 	defer klog.Flush()
 
 	cfg, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)

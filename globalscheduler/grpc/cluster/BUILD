@@ -24,8 +24,10 @@ filegroup(
     name = "all-srcs",
     srcs = [
         ":package-srcs",
-        "//globalscheduler/grpc/cluster/grpc_test/cluster_client:all-srcs",
-        "//globalscheduler/grpc/cluster/grpc_test/cluster_server:all-srcs",
+        "//globalscheduler/grpc/cluster/grpc_test/profile_client:all-srcs",
+        "//globalscheduler/grpc/cluster/grpc_test/profile_server:all-srcs",
+        "//globalscheduler/grpc/cluster/grpc_test/state_client:all-srcs",
+        "//globalscheduler/grpc/cluster/grpc_test/state_server:all-srcs",
         "//globalscheduler/grpc/cluster/proto:all-srcs",
     ],
     tags = ["automanaged"],

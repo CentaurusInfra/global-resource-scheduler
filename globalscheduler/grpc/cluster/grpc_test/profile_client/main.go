@@ -20,13 +20,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
-	"k8s.io/klog"
 	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
-
 	"google.golang.org/grpc"
 )
 
@@ -38,7 +35,7 @@ func main() {
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		fmt.Printf("did not connect: %v", err)
 	}
 	defer conn.Close()
 	c := pb.NewClusterProtocolClient(conn)
@@ -96,12 +93,11 @@ func main() {
 		errorMessage = err
 		fmt.Printf("return result = %v", result)
 	default:
-		klog.Infof("cluster profile is not correct - %v", clusterProfile)
+		fmt.Infof("cluster profile is not correct - %v", clusterProfile)
 		errorMessage = fmt.Errorf("cluster profile is not correct - %v", clusterProfile)
 	}
 	if errorMessage != nil {
-		log.Printf("could not greet: %v", errorMessage)
+		fmt.Printf("could not greet: %v", errorMessage)
 	}
-
-	log.Printf("Returned Client")
+	fmt.Printf("Returned Client")
 }

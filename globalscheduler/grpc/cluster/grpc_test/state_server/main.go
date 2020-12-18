@@ -19,7 +19,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"net"
 
 	grpc "google.golang.org/grpc"
@@ -27,33 +26,31 @@ import (
 )
 
 const (
-	port = ":50052"
+	Port = ":50053"
 )
 
 // ApiServer : Empty API server struct
-type ClusterProtocolServer struct{}
+type ResourceCollectorProtocolServer struct{}
 
 // services - Send cluster profile
-func (s *ClusterProtocolServer) SendClusterProfile(ctx context.Context, in *pb.ClusterProfile) (*pb.ReturnMessageClusterProfile, error) {
-	log.Printf("Received Request - Create: %v", in)
-	ns := in.ClusterNameSpace
-	name := in.ClusterName
-	//result := (int32)1
-	return &pb.ReturnMessageClusterProfile{ClusterNameSpace: ns, ClusterName: name, ReturnCode: 1}, nil
+func (s *ResourceCollectorProtocolServer) UpdateClusterStatus(ctx context.Context, in *pb.ClusterState) (*pb.ReturnMessageClusterState, error) {
+	fmt.Printf("Received Request - Update Status: %v", in)
+	ns := in.NameSpace
+	name := in.Name
+	state := in.State
+	fmt.Println("received state: %v, %v, %v", ns, name, state)
+	return &pb.ReturnMessageClusterState{NameSpace: ns, Name: name, ReturnCode: 1}, nil
 }
 
 func main() {
-	fmt.Print("Server started, Port: " + port)
-	lis, err := net.Listen("tcp", port)
+	fmt.Print("Server started, Port: " + Port)
+	lis, err := net.Listen("tcp", Port)
 	if err != nil {
-		log.Printf("failed to listen: %v", err)
+		fmt.Printf("failed to listen: %v", err)
 	}
-	// opts []grpc.ServerOption
-	//s := grpc.NewServer(opts...)
 	s := grpc.NewServer()
-	pb.RegisterClusterProtocolServer(s, &ClusterProtocolServer{})
-	//pb.RegisterClusterProtocolServer(s, &ClusterProtocolServer{})
+	pb.RegisterResourceCollectorProtocolServer(s, &ResourceCollectorProtocolServer{})
 	if err := s.Serve(lis); err != nil {
-		log.Printf("failed to serve: %v", err)
+		fmt.Printf("failed to serve: %v", err)
 	}
 }
