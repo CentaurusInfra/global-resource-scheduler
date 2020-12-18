@@ -23,8 +23,8 @@ import (
 	"os"
 	"time"
 
-	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
 	"google.golang.org/grpc"
+	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
 )
 
 const (

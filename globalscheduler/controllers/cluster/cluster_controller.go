@@ -42,11 +42,11 @@ import (
 const ControllerAgentName = "globalscheduler-cluster-controller"
 const (
 	SuccessSynched         = "Synched"
-	ErrResourceExists      = "ErrResourceExists"
-	MessageResourceExists  = "Resource %q already exists and is not managed by Cluster"
 	MessageResourceSynched = "Cluster synced successfully"
 	ClusterKind            = "Cluster"
-	ClusterStatusMessage   = "HANDLED"
+	ClusterStatusCreated   = "Created"
+	ClusterStatusUpdated   = "Updated"
+	ClusterStatusDeleted   = "Deleted"
 )
 
 type EventType int
@@ -293,6 +293,7 @@ func (c *ClusterController) gRPCRequest(event EventType, cluster *clusterv1.Clus
 	switch event {
 	case EventType_Create:
 		if c.grpcHost != "" {
+			cluster.Status = ClusterStatusCreated
 			fmt.Printf("grpc.GrpcSendClusterProfile -%v, %v ", c.grpcHost, cluster)
 			response := grpc.GrpcSendClusterProfile(c.grpcHost, cluster)
 			fmt.Printf("gRPC request is sent %v", response)
@@ -300,9 +301,16 @@ func (c *ClusterController) gRPCRequest(event EventType, cluster *clusterv1.Clus
 		klog.Infof("Cluster creation %s, %s", clusterNameSpace, clusterName)
 		fmt.Printf("Cluster creation %s, %s", clusterNameSpace, clusterName)
 	case EventType_Update:
+		cluster.Status = ClusterStatusUpdated
 		klog.Infof("Cluster update   %v", clusterName)
 	case EventType_Delete:
 		klog.Infof("Cluster deletion  %v", clusterName)
+		if c.grpcHost != "" {
+			fmt.Printf("grpc.GrpcSendClusterProfile -%v, %v ", c.grpcHost, cluster)
+			cluster.Status = ClusterStatusDeleted
+			response := grpc.GrpcSendClusterProfile(c.grpcHost, cluster)
+			fmt.Printf("gRPC request is sent %v", response)
+		}
 	default:
 		klog.Infof("cluster event is not correct - %v", event)
 		err = fmt.Errorf("cluster event is not correct - %v", event)

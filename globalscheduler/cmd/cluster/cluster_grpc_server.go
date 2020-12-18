@@ -33,11 +33,11 @@ import (
 )
 
 const (
-	Port = ":50053"
-	ReturnError = 0
-	ReturnOk = 1
-	StateReady = 1	
-	StateDown = 2
+	Port             = ":50053"
+	ReturnError      = 0
+	ReturnOk         = 1
+	StateReady       = 1
+	StateDown        = 2
 	StateUnreachable = 3
 )
 
@@ -76,7 +76,7 @@ func (s *ResourceCollectorProtocolServer) UpdateClusterStatus(ctx context.Contex
 	if err != nil || cluster == nil {
 		klog.Errorf("error - update a cluster: %s", err.Error())
 		return &pb.ReturnMessageClusterState{NameSpace: ns, Name: name, ReturnCode: ReturnError}, nil
-	} 
+	}
 	switch state {
 	case StateReady:
 		{
@@ -98,7 +98,7 @@ func (s *ResourceCollectorProtocolServer) UpdateClusterStatus(ctx context.Contex
 			cluster.Status = "Unknown"
 			break
 		}
-	} 
+	}
 	cluster, err = clusterClient.Update(cluster)
 	if err != nil {
 		klog.Errorf("error - update a cluster: %s", err.Error())
