@@ -294,8 +294,10 @@ func (c *ClusterController) gRPCRequest(event EventType, cluster *clusterv1.Clus
 		}
 		klog.Infof("Cluster creation %s, %s", clusterNameSpace, clusterName)
 	case EventType_Update:
-		cluster.Status = ClusterStatusUpdated
-		klog.Infof("Cluster update   %v", clusterName)
+		if c.grpcHost != "" {
+			cluster.Status = ClusterStatusUpdated
+			klog.Infof("Cluster update   %v", clusterName)
+		}
 	case EventType_Delete:
 		klog.Infof("Cluster deletion  %v", clusterName)
 		if c.grpcHost != "" {
