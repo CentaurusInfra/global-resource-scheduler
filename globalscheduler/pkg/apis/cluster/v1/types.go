@@ -44,17 +44,18 @@ type Cluster struct {
 // ClusterSpec is the spec for a Cluster resource.
 //This is where you would put your custom resource data
 type ClusterSpec struct {
-	IpAddress     string          `json:"ipaddress"`
-	GeoLocation   GeolocationInfo `json:"geolocation"`
-	Region        RegionInfo      `json:"region"`
-	Operator      OperatorInfo    `json:"operator"`
-	Flavors       []FlavorInfo    `json:"flavors"`
-	Storage       []StorageSpec   `json:"storage"`
-	EipCapacity   int64           `json:"eipcapacity"`
-	CPUCapacity   int64           `json:"cpucapacity"`
-	MemCapacity   int64           `json:"memcapacity"`
-	ServerPrice   int64           `json:"serverprice"`
-	HomeScheduler string          `json:"homescheduler"`
+	IpAddress      string          `json:"ipaddress"`
+	GeoLocation    GeolocationInfo `json:"geolocation"`
+	Region         RegionInfo      `json:"region"`
+	Operator       OperatorInfo    `json:"operator"`
+	Flavors        []FlavorInfo    `json:"flavors"`
+	Storage        []StorageSpec   `json:"storage"`
+	EipCapacity    int64           `json:"eipcapacity"`
+	CPUCapacity    int64           `json:"cpucapacity"`
+	MemCapacity    int64           `json:"memcapacity"`
+	ServerPrice    int64           `json:"serverprice"`
+	HomeScheduler  string          `json:"homescheduler"`
+	HomeDispatcher string          `json:"homedispatcher"`
 }
 type FlavorInfo struct {
 	FlavorID      string `json:"flavorid"`
