@@ -463,9 +463,6 @@ function kube::common::start_controller_manager {
 function kube::common::start_kubescheduler {
     CONTROLPLANE_SUDO=$(test -w "${CERT_DIR}" || echo "sudo -E")
     kubeconfigfilepaths="${CERT_DIR}/scheduler.kubeconfig"
-    if [[ $# -gt 1 ]] ; then
-       kubeconfigfilepaths=$@
-    fi
 
     port_arg=$((${INSECURE_SCHEDULER_PORT}))
     secure_port_arg=$((${KUBE_SCHEDULER_PORT}))
@@ -477,6 +474,7 @@ function kube::common::start_kubescheduler {
       --scheduler-tag="$1" \
       --secure-port="$(($secure_port_arg + $1))" \
       --leader-elect=false \
+      --scheduler-name="$2" \
       --kubeconfig "${kubeconfigfilepaths}" \
       --feature-gates="${FEATURE_GATES}" \
       --master="https://${API_HOST}:${API_SECURE_PORT}" >"${SCHEDULER_LOG}" 2>&1 &

@@ -21,7 +21,6 @@ limitations under the License.
 package consistenthashing
 
 import (
-	"errors"
 	"hash/fnv"
 	"sort"
 	"strconv"
@@ -177,15 +176,16 @@ func (ch *ConsistentHash) remove(elt string) {
 }
 
 func (ch *ConsistentHash) Insert(names []string) error {
-	ch.RLock()
-	defer ch.RUnlock()
-
 	if len(ch.HashCircle) == 0 {
-		return errors.New("empty hash circle")
+		for _, v := range names {
+			ch.Members[v] = "nil"
+		}
+		return nil
 	}
 
 	for _, v := range names {
-		if _, ok := ch.Members[v]; !ok {
+		res, ok := ch.Members[v]
+		if !ok || res == "nil" {
 			key := ch.fnv32Hash(v)
 			// find the first index of hash value that is greater than key
 			idx := ch.search(key)
