@@ -444,10 +444,10 @@ func (sc *SchedulerController) getSchedulerFromCache(namespace string, name stri
 }
 
 func (sc *SchedulerController) getClusterFromCache(namespace string, name string) (*clustercrdv1.Cluster, error) {
-	// Get the Scheduler resource with this namespace/name
+	// Get the Cluster resource with this namespace/name
 	cluster, err := sc.clusterInformer.Clusters(namespace).Get(name)
 	if err != nil {
-		// The Scheduler resource may no longer exist, in which case we stop
+		// The Cluster resource may no longer exist, in which case we stop
 		// processing.
 		if errors.IsNotFound(err) {
 			runtime.HandleError(fmt.Errorf("failed to list cluster by: %s/%s", namespace, name))
