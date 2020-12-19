@@ -363,7 +363,7 @@ func TestCreatesCluster(t *testing.T) {
 func TestDeleteCluster(t *testing.T) {
 	f := newFixture(t)
 	cluster := newCluster("cluster2")
-	cluster.State = "Delete"
+	cluster.Status = "Delete"
 	f.clusterLister = append(f.clusterLister, cluster)
 	f.clusterobjects = append(f.clusterobjects, cluster)
 	f.expectGetClusterAction(cluster)
