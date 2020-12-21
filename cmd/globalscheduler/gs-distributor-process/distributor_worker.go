@@ -29,6 +29,8 @@ func main() {
 	configFile := flag.String("config", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	namespace := flag.String("ns", "", "The namespace of the distributor process")
 	name := flag.String("n", "", "The name of the distributor process")
+	start := flag.Int64("start", 0, "The start of the distributor range")
+	end := flag.Int64("end", 0, "The end of the distributor range")
 	flag.Parse()
 	logs.InitLogs()
 	defer logs.FlushLogs()
@@ -41,6 +43,6 @@ func main() {
 	quit := make(chan struct{})
 	defer close(quit)
 
-	process := process.NewProcess(config, *namespace, *name, quit)
+	process := process.NewProcess(config, *namespace, *name, quit, *start, *end)
 	process.Run(quit)
 }
