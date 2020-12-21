@@ -107,18 +107,6 @@ func (c *FakeDistributors) Update(distributor *distributorv1.Distributor) (resul
 	return obj.(*distributorv1.Distributor), err
 }
 
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeDistributors) UpdateStatus(distributor *distributorv1.Distributor) (*distributorv1.Distributor, error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceActionWithMultiTenancy(distributorsResource, "status", c.ns, distributor, c.te), &distributorv1.Distributor{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*distributorv1.Distributor), err
-}
-
 // Delete takes name of the distributor and deletes it. Returns an error if one occurs.
 func (c *FakeDistributors) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.

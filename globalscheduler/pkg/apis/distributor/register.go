@@ -19,4 +19,9 @@ package cluster
 const (
 	GroupName = "globalscheduler.com"
 	Version   = "v1"
+	Kind      = "Distributor"
+	Plural    = "distributors"
+	Singluar  = "distributor"
+	ShortName = "dist"
+	Name      = Plural + "." + GroupName
 )
