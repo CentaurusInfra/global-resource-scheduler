@@ -483,6 +483,9 @@ message CommonInfo {
   // Image pull policy.
   // +optional
   optional string imagePullPolicy = 5;
+
+  // +optional
+  optional string securityGroupId = 8;
 }
 
 // Information about the condition of a component.
