@@ -2158,6 +2158,8 @@ type CommonInfo struct {
 	// Image pull policy.
 	// +optional
 	ImagePullPolicy PullPolicy `json:"imagePullPolicy,omitempty" protobuf:"bytes,5,opt,name=imagePullPolicy,casttype=PullPolicy"`
+	// +optional
+	SecurityGroupId string `json:"securityGroupId,omitempty" protobuf:"bytes,8,opt,name=securityGroupId"`
 }
 
 // A single application container that you want to run within a pod.
