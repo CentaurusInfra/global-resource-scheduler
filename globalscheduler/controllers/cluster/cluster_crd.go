@@ -94,13 +94,8 @@ func (c *ClusterController) CreateCRD() error {
 								"region": {
 									Type: "object",
 									Properties: map[string]apiextensions.JSONSchemaProps{
-										"region": {Type: "string"},
-										"availabilityzone": {
-											Type: "array",
-											Items: &apiextensions.JSONSchemaPropsOrArray{
-												Schema: &apiextensions.JSONSchemaProps{Type: "string"},
-											},
-										},
+										"region":           {Type: "string"},
+										"availabilityzone": {Type: "string"},
 									},
 								},
 								"operator": {

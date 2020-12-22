@@ -46,6 +46,7 @@ type ClustersGetter interface {
 type ClusterInterface interface {
 	Create(*v1.Cluster) (*v1.Cluster, error)
 	Update(*v1.Cluster) (*v1.Cluster, error)
+	UpdateStatus(*v1.Cluster) (*v1.Cluster, error)
 	Delete(name string, options *metav1.DeleteOptions) error
 	DeleteCollection(options *metav1.DeleteOptions, listOptions metav1.ListOptions) error
 	Get(name string, options metav1.GetOptions) (*v1.Cluster, error)
@@ -283,6 +284,30 @@ func (c *clusters) Update(cluster *v1.Cluster) (result *v1.Cluster, err error) {
 		Namespace(c.ns).
 		Resource("clusters").
 		Name(cluster.Name).
+		Body(cluster).
+		Do().
+		Into(result)
+
+	return
+}
+
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+
+func (c *clusters) UpdateStatus(cluster *v1.Cluster) (result *v1.Cluster, err error) {
+	result = &v1.Cluster{}
+
+	objectTenant := cluster.ObjectMeta.Tenant
+	if objectTenant == "" {
+		objectTenant = c.te
+	}
+
+	err = c.client.Put().
+		Tenant(objectTenant).
+		Namespace(c.ns).
+		Resource("clusters").
+		Name(cluster.Name).
+		SubResource("status").
 		Body(cluster).
 		Do().
 		Into(result)

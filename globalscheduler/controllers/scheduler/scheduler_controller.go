@@ -377,7 +377,7 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 			return err
 		}
 
-		if clusterCopy.State == "Delete" {
+		if clusterCopy.Status == "Delete" {
 			sc.consistentHash.Delete(clusterCopy.Name)
 			scheduler, err := sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Get(clusterCopy.Spec.HomeScheduler, metav1.GetOptions{})
 			if err != nil {

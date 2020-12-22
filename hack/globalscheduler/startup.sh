@@ -104,7 +104,7 @@ do
 done
 
 if [ "x${GO_OUT}" == "x" ]; then
-    make -C "${KUBE_ROOT}" WHAT="cmd/kubectl cmd/hyperkube cmd/kube-apiserver cmd/kubelet cmd/kube-proxy cmd/globalscheduler"
+    make -C "${KUBE_ROOT}" WHAT="cmd/kubectl cmd/hyperkube cmd/kube-apiserver cmd/kubelet cmd/kube-proxy cmd/globalscheduler cmd/globalscheduler/gs-distributor-controller cmd/globalscheduler/gs-distributor-process"
 else
     echo "skipped the build."
 fi
@@ -201,6 +201,11 @@ function healthcheck {
   if [[ -n "${GRS_PID-}" ]] && ! sudo kill -0 "${GRS_PID}" 2>/dev/null; then
     warning_log "global resource scheduler terminated unexpectedly, see ${GRS_LOG}"
     GRS_PID=
+  fi
+
+  if [[ -n "${GSDC_PID-}" ]] && ! sudo kill -0 "${GSDC_PID}" 2>/dev/null; then
+    warning_log "global scheduler distributor controller terminated unexpectedly, see ${GSDC_LOG}"
+    GSDC_PID=
   fi
 
   if [[ -n "${KUBELET_PID-}" ]] && ! sudo kill -0 "${KUBELET_PID}" 2>/dev/null; then
@@ -436,6 +441,7 @@ if [[ "${START_MODE}" != "kubeletonly" ]]; then
 
   ${KUBECTL} --kubeconfig="${CERT_DIR}/admin.kubeconfig" apply -f "${KUBE_ROOT}/test/yaml/globalscheduler/scheduler.yaml"
   kube::common::start_global_resource_scheduler
+  kube::common::start_gs_distributor_controller
   if [[ "${START_MODE}" != "nokubeproxy" ]]; then
     kube::common::start_kubeproxy
   fi
