@@ -72,6 +72,9 @@ type Options struct {
 	// SchedulerTag represents the Nth scheduler
 	SchedulerTag string
 
+	// SchedulerName is the unique identification for a scheduler
+	SchedulerName string
+
 	Master string
 }
 
@@ -150,6 +153,7 @@ func (o *Options) Flags() (nfs cliflag.NamedFlagSets) {
 	fs.StringVar(&o.WriteConfigTo, "write-config-to", o.WriteConfigTo, "If set, write the configuration values to this file and exit.")
 	fs.StringVar(&o.Master, "master", o.Master, "The address of the Kubernetes API server (overrides any value in kubeconfig)")
 	fs.StringVar(&o.SchedulerTag, "scheduler-tag", o.SchedulerTag, "The Nth scheduler")
+	fs.StringVar(&o.SchedulerName, "scheduler-name", o.SchedulerName, "Unique Identification")
 
 	o.SecureServing.AddFlags(nfs.FlagSet("secure serving"))
 	o.CombinedInsecureServing.AddFlags(nfs.FlagSet("insecure serving"))
