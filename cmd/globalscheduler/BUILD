@@ -32,7 +32,11 @@ filegroup(
 
 filegroup(
     name = "all-srcs",
-    srcs = [":package-srcs"],
+    srcs = [
+        ":package-srcs",
+        "//cmd/globalscheduler/gs-distributor-controller:all-srcs",
+        "//cmd/globalscheduler/gs-distributor-process:all-srcs",
+    ],
     tags = ["automanaged"],
     visibility = ["//visibility:public"],
 )

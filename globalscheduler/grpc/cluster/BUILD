@@ -1,0 +1,35 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["grpc_adaptor.go"],
+    importpath = "k8s.io/kubernetes/globalscheduler/grpc/cluster",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//globalscheduler/grpc/cluster/proto:go_default_library",
+        "//globalscheduler/pkg/apis/cluster/v1:go_default_library",
+        "//vendor/google.golang.org/grpc:go_default_library",
+        "//vendor/k8s.io/klog:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//globalscheduler/grpc/cluster/grpc_test/profile_client:all-srcs",
+        "//globalscheduler/grpc/cluster/grpc_test/profile_server:all-srcs",
+        "//globalscheduler/grpc/cluster/grpc_test/state_client:all-srcs",
+        "//globalscheduler/grpc/cluster/grpc_test/state_server:all-srcs",
+        "//globalscheduler/grpc/cluster/proto:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)
