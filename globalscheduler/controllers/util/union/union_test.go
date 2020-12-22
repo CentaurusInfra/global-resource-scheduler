@@ -40,7 +40,8 @@ func TestUpdateUnionWithDifferentUnion(t *testing.T) {
 				Region: []*clustercrdv1.RegionInfo{
 					{
 						Region:           "LA",
-						AvailabilityZone: []string{"C", "D"},
+						AvailabilityZone: "C",
+						//AvailabilityZone: []string{"C", "D"},
 					},
 				},
 				Operator: []*clustercrdv1.OperatorInfo{
@@ -78,7 +79,8 @@ func TestUpdateUnionWithDifferentUnion(t *testing.T) {
 			},
 			Region: clustercrdv1.RegionInfo{
 				Region:           "Oregon",
-				AvailabilityZone: []string{"A", "B"},
+				AvailabilityZone: "A",
+				//AvailabilityZone: []string{"A", "B"},
 			},
 			Operator: clustercrdv1.OperatorInfo{
 				Operator: "operator-2",
@@ -113,11 +115,13 @@ func TestUpdateUnionWithDifferentUnion(t *testing.T) {
 		Region: []*clustercrdv1.RegionInfo{
 			{
 				Region:           "LA",
-				AvailabilityZone: []string{"C", "D"},
+				AvailabilityZone: "C",
+				//AvailabilityZone: []string{"C", "D"},
 			},
 			{
 				Region:           "Oregon",
-				AvailabilityZone: []string{"A", "B"},
+				AvailabilityZone: "A",
+				//AvailabilityZone: []string{"A", "B"},
 			},
 		},
 		Operator: []*clustercrdv1.OperatorInfo{
@@ -170,7 +174,8 @@ func TestUpdateUnionWithDefaultUnion(t *testing.T) {
 				Region: []*clustercrdv1.RegionInfo{
 					{
 						Region:           "Oregon",
-						AvailabilityZone: []string{"A", "B"},
+						AvailabilityZone: "A",
+						//AvailabilityZone: []string{"A", "B"},
 					},
 				},
 				Operator: []*clustercrdv1.OperatorInfo{
@@ -208,7 +213,8 @@ func TestUpdateUnionWithDefaultUnion(t *testing.T) {
 			},
 			Region: clustercrdv1.RegionInfo{
 				Region:           "Oregon",
-				AvailabilityZone: []string{"A", "B"},
+				AvailabilityZone: "A",
+				//AvailabilityZone: []string{"A", "B"},
 			},
 			Operator: clustercrdv1.OperatorInfo{
 				Operator: "operator",
@@ -240,7 +246,8 @@ func TestUpdateUnionWithDefaultUnion(t *testing.T) {
 		Region: []*clustercrdv1.RegionInfo{
 			{
 				Region:           "Oregon",
-				AvailabilityZone: []string{"A", "B"},
+				AvailabilityZone: "A",
+				//AvailabilityZone: []string{"A", "B"},
 			},
 		},
 		Operator: []*clustercrdv1.OperatorInfo{
@@ -293,7 +300,8 @@ func TestUpdateUnionWithoutDefaultUnion(t *testing.T) {
 			},
 			Region: clustercrdv1.RegionInfo{
 				Region:           "Oregon",
-				AvailabilityZone: []string{"A", "B"},
+				AvailabilityZone: "A",
+				//AvailabilityZone: []string{"A", "B"},
 			},
 			Operator: clustercrdv1.OperatorInfo{
 				Operator: "operator",
@@ -325,7 +333,8 @@ func TestUpdateUnionWithoutDefaultUnion(t *testing.T) {
 		Region: []*clustercrdv1.RegionInfo{
 			{
 				Region:           "Oregon",
-				AvailabilityZone: []string{"A", "B"},
+				AvailabilityZone: "A",
+				//AvailabilityZone: []string{"A", "B"},
 			},
 		},
 		Operator: []*clustercrdv1.OperatorInfo{
