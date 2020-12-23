@@ -112,6 +112,7 @@ spec:
         - "349"
         topologyKey: "350"
   automountServiceAccountToken: false
+  clusterName: "371"
   containers:
   - args:
     - "209"
@@ -795,34 +796,34 @@ spec:
       subPathExpr: "302"
 status:
   assignedScheduler:
-    name: "413"
-    tag: "414"
+    name: "414"
+    tag: "415"
   conditions:
   - lastProbeTime: "2476-07-28T03:34:42Z"
     lastTransitionTime: "2592-05-14T17:29:31Z"
-    message: "372"
-    reason: "371"
+    message: "373"
+    reason: "372"
     status: ¶ȲƪE1º轪d
     type: ȗŜŲ&洪y儕lmòɻ
   containerStatuses:
-  - containerID: "405"
-    image: "403"
-    imageID: "404"
+  - containerID: "406"
+    image: "404"
+    imageID: "405"
     lastState:
       running:
         startedAt: "2898-12-24T04:19:10Z"
       terminated:
-        containerID: "402"
+        containerID: "403"
         exitCode: -1346973729
         finishedAt: "2739-01-31T03:32:14Z"
-        message: "401"
-        reason: "400"
+        message: "402"
+        reason: "401"
         signal: -177041290
         startedAt: "2134-06-08T07:11:24Z"
       waiting:
-        message: "399"
-        reason: "398"
-    name: "392"
+        message: "400"
+        reason: "399"
+    name: "393"
     ready: false
     resources:
       limits:
@@ -834,36 +835,36 @@ status:
       running:
         startedAt: "2745-12-08T14:44:29Z"
       terminated:
-        containerID: "397"
+        containerID: "398"
         exitCode: 1177532507
         finishedAt: "2784-10-07T18:21:37Z"
-        message: "396"
-        reason: "395"
+        message: "397"
+        reason: "396"
         signal: -1139477828
         startedAt: "1998-06-13T09:36:44Z"
       waiting:
-        message: "394"
-        reason: "393"
-  hostIP: "376"
+        message: "395"
+        reason: "394"
+  hostIP: "377"
   initContainerStatuses:
-  - containerID: "391"
-    image: "389"
-    imageID: "390"
+  - containerID: "392"
+    image: "390"
+    imageID: "391"
     lastState:
       running:
         startedAt: "2916-10-07T14:50:41Z"
       terminated:
-        containerID: "388"
+        containerID: "389"
         exitCode: -1469700627
         finishedAt: "1995-10-31T09:59:43Z"
-        message: "387"
-        reason: "386"
+        message: "388"
+        reason: "387"
         signal: 1496979800
         startedAt: "2660-04-23T10:55:28Z"
       waiting:
-        message: "385"
-        reason: "384"
-    name: "378"
+        message: "386"
+        reason: "385"
+    name: "379"
     ready: false
     resources:
       limits:
@@ -875,32 +876,32 @@ status:
       running:
         startedAt: "2010-10-20T14:23:48Z"
       terminated:
-        containerID: "383"
+        containerID: "384"
         exitCode: 933900321
         finishedAt: "2409-02-05T03:24:10Z"
-        message: "382"
-        reason: "381"
+        message: "383"
+        reason: "382"
         signal: -1446780640
         startedAt: "2624-07-02T23:06:23Z"
       waiting:
-        message: "380"
-        reason: "379"
-  message: "373"
+        message: "381"
+        reason: "380"
+  message: "374"
   nicStatuses:
-  - name: "410"
-    portID: "411"
-    reason: "412"
+  - name: "411"
+    portID: "412"
+    reason: "413"
     state: 霉}閜LIȜŚɇA%ɀ蓧睔SJȋ
-  nominatedNodeName: "375"
+  nominatedNodeName: "376"
   phase: ɢ嫎¸殚篎3o8[y#t
-  podIP: "377"
+  podIP: "378"
   qosClass: Ʈƙ2詃ǣ普
-  reason: "374"
+  reason: "375"
   virtualMachineStatus:
-    image: "409"
-    imageId: "408"
+    image: "410"
+    imageId: "409"
     lastTerminationState: 栦阫Ƈʥ椹ý飝ȕ笧L唞鹚蝉茲ʛ饊ɣK
-    name: "406"
+    name: "407"
     powerState: ś錏嬮#
     ready: true
     resources:
@@ -910,4 +911,4 @@ status:
         ƌ驔瓊'轁ʦ: "279"
     restartCount: -1203269993
     state: Ť萃Q+駟à稨氙'[>ĵ
-    virtualMachineId: "407"
+    virtualMachineId: "408"

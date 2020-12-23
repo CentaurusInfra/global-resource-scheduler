@@ -1284,7 +1284,8 @@
           "runtimeClassName": "414",
           "enableServiceLinks": true,
           "preemptionPolicy": "ɱD很唟-墡è箁E嗆R2",
-          "resourceType": "415"
+          "resourceType": "415",
+          "clusterName": "416"
         }
       },
       "ttlSecondsAfterFinished": -172900943

@@ -1242,7 +1242,8 @@
         "runtimeClassName": "399",
         "enableServiceLinks": true,
         "preemptionPolicy": "L©鈀6w屑_ǪɄ6ɲǛʦ緒gb",
-        "resourceType": "400"
+        "resourceType": "400",
+        "clusterName": "401"
       }
     },
     "updateStrategy": {
@@ -1270,8 +1271,8 @@
         "type": "Ȉð鱥ǌ繊ʍȎ'uň笨D嫾ʏǌ礤",
         "status": "呄½永ʕW6¯ȗŮ·俦磊",
         "lastTransitionTime": "2499-05-31T04:42:44Z",
-        "reason": "401",
-        "message": "402"
+        "reason": "402",
+        "message": "403"
       }
     ]
   }

@@ -203,6 +203,7 @@ spec:
                 - "398"
                 topologyKey: "399"
           automountServiceAccountToken: true
+          clusterName: "420"
           containers:
           - args:
             - "257"
@@ -890,11 +891,11 @@ spec:
   suspend: false
 status:
   active:
-  - apiVersion: "423"
-    fieldPath: "425"
-    kind: "420"
-    name: "422"
-    namespace: "421"
-    resourceVersion: "424"
-    tenant: "426"
+  - apiVersion: "424"
+    fieldPath: "426"
+    kind: "421"
+    name: "423"
+    namespace: "422"
+    resourceVersion: "425"
+    tenant: "427"
     uid: o*Ĵ麻齔試ŭ莰`鬙Ǒȃ绡>堵z

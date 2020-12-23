@@ -1291,7 +1291,8 @@
             "runtimeClassName": "418",
             "enableServiceLinks": false,
             "preemptionPolicy": "鲛ô衞Ɵ鳝稃Ȍ液文?謮",
-            "resourceType": "419"
+            "resourceType": "419",
+            "clusterName": "420"
           }
         },
         "ttlSecondsAfterFinished": -1423239967
@@ -1303,14 +1304,14 @@
   "status": {
     "active": [
       {
-        "kind": "420",
-        "namespace": "421",
-        "name": "422",
+        "kind": "421",
+        "namespace": "422",
+        "name": "423",
         "uid": "o*Ĵ麻齔試ŭ莰`鬙Ǒȃ绡\u003e堵z",
-        "apiVersion": "423",
-        "resourceVersion": "424",
-        "fieldPath": "425",
-        "tenant": "426"
+        "apiVersion": "424",
+        "resourceVersion": "425",
+        "fieldPath": "426",
+        "tenant": "427"
       }
     ]
   }
