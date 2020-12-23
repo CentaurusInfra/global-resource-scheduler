@@ -2431,6 +2431,10 @@ const (
 	ContainersReady PodConditionType = "ContainersReady"
 	// VmReady indicates whether the virtual machine in the pod is ready
 	VmReady PodConditionType = "VirtualMachineReady"
+	// SchedulerAssigned represents status of the assigned scheduler for this pod.
+	SchedulerAssigned PodConditionType = "SchedulerAssigned"
+	// ClusterBound represents status of the bound cluster for this pod.
+	ClusterBound PodConditionType = "ClusterBound"
 )
 
 type PodCondition struct {
@@ -2939,6 +2943,11 @@ type PodSpec struct {
 	// Resource Type indicates whether the resource objects are VM or containers
 	// +optional
 	ResourceType string
+	// ClusterName is a request to schedule this pod onto a specific cluster.  If it is non-empty,
+	// the scheduler simply binds this pod onto that cluster, assuming that it fits resource
+	// requirements.
+	// +optional
+	ClusterName string
 }
 
 func (ps *PodSpec) Workloads() []CommonInfo {
