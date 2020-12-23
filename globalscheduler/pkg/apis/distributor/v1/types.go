@@ -21,29 +21,12 @@ import (
 
 // DistributorSpec defines the desired state of Distributor
 type DistributorSpec struct {
-	Policy DistributorPolicy `json:"policy,omitempty"`
+	Range DistributorRange `json:"range,omitempty"`
 }
 
-// DistributorPolicy describes how the job will be handled.
-// Only one of the following concurrent policies may be specified.
-// If none of the following policies is specified, the default one
-// is AllowConcurrent.
-// +kubebuilder:validation:Enum=Allow;Forbid;Replace
-type DistributorPolicy string
-
-const (
-	// GeoLocation  allows distributors to assign schedulers to pods based on geoLocation
-	GeoLocation DistributorPolicy = "GeoLocation"
-)
-
-// DistributorStatus defines the observed state of Distributor
-type DistributorStatus struct {
-	// Information when was the last time the job was successfully scheduled.
-	// +optional
-	Active *bool `json:"active,omitempty"`
-	// Information when was the last time the job was successfully scheduled.
-	// +optional
-	StartTime *metav1.Time `json:"startTime,omitempty"`
+type DistributorRange struct {
+	Start int64 `json:"start,omitempty"`
+	End   int64 `json:"end,omitempty"`
 }
 
 // +genclient
@@ -53,8 +36,7 @@ type Distributor struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   DistributorSpec   `json:"spec,omitempty"`
-	Status DistributorStatus `json:"status,omitempty"`
+	Spec DistributorSpec `json:"spec,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

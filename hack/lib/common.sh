@@ -647,9 +647,21 @@ function kube::common::start_global_resource_scheduler {
     CONTROLPLANE_SUDO=$(test -w "${CERT_DIR}" || echo "sudo -E")
     kubeconfigfilepaths="${CERT_DIR}/admin.kubeconfig"
     
-    GSR_LOG=${LOG_DIR}/global-resource-scheduler.log
-    ${CONTROLPLANE_SUDO} ${GO_OUT}/globalscheduler -kubeconfig "${kubeconfigfilepaths}"  >"${GSR_LOG}" 2>&1 &
+    GRS_LOG=${LOG_DIR}/global-resource-scheduler.log
+    ${CONTROLPLANE_SUDO} ${GO_OUT}/globalscheduler -kubeconfig "${kubeconfigfilepaths}"  >"${GRS_LOG}" 2>&1 &
       # TODO need to add log level in the future for debugging
       #--v="${LOG_LEVEL}" \
-    GSR_PID=$!
+    GRS_PID=$!
+}
+
+
+function kube::common::start_gs_distributor_controller {
+    CONTROLPLANE_SUDO=$(test -w "${CERT_DIR}" || echo "sudo -E")
+    kubeconfigfilepaths="${CERT_DIR}/admin.kubeconfig"
+
+    GSDC_LOG=${LOG_DIR}/gs-distributor-controller.log
+    ${CONTROLPLANE_SUDO} ${GO_OUT}/gs-distributor-controller -config "${kubeconfigfilepaths}"  >"${GSDC_LOG}" 2>&1 &
+      # TODO need to add log level in the future for debugging
+      #--v="${LOG_LEVEL}" \
+    GSDC_PID=$!
 }
