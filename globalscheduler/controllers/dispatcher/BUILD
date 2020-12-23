@@ -4,6 +4,7 @@ go_library(
     name = "go_default_library",
     srcs = [
         "dispatcher_controller.go",
+        "dispatcher_process.go",
         "eventType.go",
     ],
     importpath = "k8s.io/kubernetes/globalscheduler/controllers/dispatcher",
