@@ -18,6 +18,7 @@ go_library(
         "//cmd/controller-manager/app:go_default_library",
         "//cmd/kube-controller-manager/app/config:go_default_library",
         "//cmd/kube-controller-manager/app/options:go_default_library",
+        "//globalscheduler/cmd/scheduler:go_default_library",
         "//globalscheduler/controllers/scheduler:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/clientset/versioned:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/informers/externalversions:go_default_library",
