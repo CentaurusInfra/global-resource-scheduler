@@ -35,8 +35,8 @@ import (
 // client config
 var (
 	flagSet              = flag.NewFlagSet("dispatcher_controller", flag.ExitOnError)
-	master               = flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
-	kubeconfig           = flag.String("kubeconfig", "/var/run/kubernetes/controller.kubeconfig", "Path to a kubeconfig. Only required if out-of-cluster.")
+	dispatchermaster     = flag.String("dispatchermaster", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+	dispatcherconfig     = flag.String("dispatcherconfig", "/var/run/kubernetes/controller.kubeconfig", "Path to a kubeconfig. Only required if out-of-cluster.")
 	onlyOneSignalHandler = make(chan struct{})
 	shutdownSignals      = []os.Signal{os.Interrupt, syscall.SIGTERM}
 )
@@ -48,7 +48,7 @@ func StartDispatcherController() {
 	stopCh := make(chan struct{})
 	defer close(stopCh)
 
-	cfg, err := clientcmd.BuildConfigFromFlags(*master, *kubeconfig)
+	cfg, err := clientcmd.BuildConfigFromFlags(*dispatchermaster, *dispatcherconfig)
 	if err != nil {
 		klog.Fatalf("Error building kubeconfig: %s", err.Error())
 	}

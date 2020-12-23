@@ -330,7 +330,7 @@ func (dc *DispatcherController) syncHandler(key *KeyWithEventType) error {
 			return err
 		}
 
-		if clusterCopy.State == "Delete" {
+		if clusterCopy.Status == "Delete" {
 			dc.consistentHash.Delete(clusterCopy.Name)
 			dispatcher, err := dc.dispatcherclient.GlobalschedulerV1().Dispatchers(namespace).Get(clusterCopy.Spec.HomeDispatcher, metav1.GetOptions{})
 			if err != nil {
