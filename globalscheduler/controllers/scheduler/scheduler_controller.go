@@ -47,6 +47,7 @@ import (
 	schedulerlisters "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/listers/scheduler/v1"
 	schedulercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
 
+	"k8s.io/kubernetes/globalscheduler/controllers/util"
 	"k8s.io/kubernetes/globalscheduler/controllers/util/consistenthashing"
 )
 
@@ -229,10 +230,9 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 	switch key.EventType {
 	case EventTypeCreateScheduler:
 		klog.Infof("Event Type '%s'", EventTypeCreateScheduler)
-		schedulerCopy, err := sc.getSchedulerFromCache(namespace, name)
+		schedulerCopy, err := sc.getScheduler(namespace, name)
 		if err != nil {
-			klog.Infof("Scheduler Object Get From Cache Failed")
-			return err
+			return fmt.Errorf("scheduler object get failed")
 		}
 
 		schedulerInput := []string{schedulerCopy.Name}
@@ -240,8 +240,7 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		for key, val := range sc.consistentHash.Results {
 			schedulerObj, err := sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Get(key, metav1.GetOptions{})
 			if err != nil {
-				klog.Infof("Scheduler Object Get Failed")
-				return err
+				return fmt.Errorf("scheduler object get failed")
 			}
 
 			schedulerObj.Spec.Cluster = val
@@ -249,8 +248,7 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 			for _, v := range schedulerObj.Spec.Cluster {
 				clusterObj, err := sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(v, metav1.GetOptions{})
 				if err != nil {
-					klog.Infof("Cluster Object Get Failed")
-					return err
+					return fmt.Errorf("cluster object get failed")
 				}
 				newUnion = union.UpdateUnion(newUnion, clusterObj)
 			}
@@ -258,49 +256,44 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 
 			_, err = sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Update(schedulerObj)
 			if err != nil {
-				klog.Infof("Scheduler Object Update Failed")
-				return err
+				return fmt.Errorf("scheduler object update failed")
 			}
 		}
 
 		// Update cluster HomeScheduler
 		err = sc.updateClusterBinding(schedulerCopy, namespace)
 		if err != nil {
-			klog.Infof("Cluster HomeScheduler Update Failed")
-			return err
+			return fmt.Errorf("cluster HomeScheduler update failed")
 		}
 
 		// Start Scheduler Process
 		command := "./hack/globalscheduler/start_scheduler.sh " + schedulerCopy.Spec.Tag + " " + schedulerCopy.Name
 		err = runCommand(command)
 		if err != nil {
-			klog.Infof("ERROR HERE")
-			return err
+			return fmt.Errorf("start scheduler process failed")
 		}
 		sc.recorder.Event(schedulerCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	case EventTypeUpdateScheduler:
 		klog.Infof("Event Type '%s'", EventTypeUpdateScheduler)
-		schedulerCopy, err := sc.getSchedulerFromCache(namespace, name)
+		schedulerCopy, err := sc.getScheduler(namespace, name)
 		if err != nil {
-			klog.Infof("Scheduler Object Get From Cache Failed")
-			return err
+			return fmt.Errorf("scheduler object get failed")
 		}
 
 		if schedulerCopy.Status == schedulercrdv1.SchedulerDelete {
+			clusterIds := sc.consistentHash.Results[schedulerCopy.Name]
 			sc.consistentHash.Remove(schedulerCopy.Name)
 			for key, val := range sc.consistentHash.Results {
 				schedulerObj, err := sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Get(key, metav1.GetOptions{})
 				if err != nil {
-					klog.Infof("Scheduler Object Get Failed")
-					return err
+					return fmt.Errorf("scheduler object Get Failed")
 				}
 				schedulerObj.Spec.Cluster = val
 				newUnion := schedulercrdv1.ClusterUnion{}
 				for _, v := range schedulerObj.Spec.Cluster {
 					clusterObj, err := sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(v, metav1.GetOptions{})
 					if err != nil {
-						klog.Infof("Cluster Object Get Failed")
-						return err
+						return fmt.Errorf("cluster object Get Failed")
 					}
 					newUnion = union.UpdateUnion(newUnion, clusterObj)
 				}
@@ -308,15 +301,26 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 
 				_, err = sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Update(schedulerObj)
 				if err != nil {
-					klog.Infof("Scheduler Object Update Failed")
-					return err
+					return fmt.Errorf("scheduler object Update Failed")
+				}
+			}
+
+			for _, v := range clusterIds {
+				clusterObj, err := sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(v, metav1.GetOptions{})
+				if err != nil {
+					return fmt.Errorf("cluster object Get Failed")
+				}
+				newHomeScheduler := sc.consistentHash.Members[v]
+				clusterObj.Spec.HomeScheduler = newHomeScheduler
+				_, err = sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Update(clusterObj)
+				if err != nil {
+					return fmt.Errorf("scheduler object Update Failed")
 				}
 			}
 
 			err = sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Delete(schedulerCopy.Name, &metav1.DeleteOptions{})
 			if err != nil {
-				klog.Infof("Scheduler Object Delete Failed")
-				return err
+				return fmt.Errorf("scheduler object delete failed")
 			}
 
 			// Delete scheduler process
@@ -324,23 +328,20 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 			command := "./hack/globalscheduler/close_scheduler.sh " + schedulerCopy.Spec.Tag
 			err = runCommand(command)
 			if err != nil {
-				klog.Infof("ERROR HERE")
-				return err
+				return fmt.Errorf("delete scheduler process failed")
 			}
 		}
 		sc.recorder.Event(schedulerCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	case EventTypeAddCluster:
 		klog.Infof("Event Type '%s'", EventTypeAddCluster)
-		clusterCopy, err := sc.getClusterFromCache(namespace, name)
+		clusterCopy, err := sc.getCluster(namespace, name)
 		if err != nil {
-			klog.Infof("Cluster Object Get From Cache Failed")
-			return err
+			return fmt.Errorf("cluster object get failed")
 		}
 		clusterInput := []string{clusterCopy.Name}
 		err = sc.consistentHash.Insert(clusterInput)
 		if err != nil {
-			klog.Infof("Cluster Name Failed to Insert Into Consistent Hash Circle")
-			return err
+			return fmt.Errorf("cluster name failed to insert into consistent hash circle")
 		}
 
 		schedulerName := sc.consistentHash.Members[clusterCopy.Name]
@@ -348,14 +349,12 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 			clusterCopy.Spec.HomeScheduler = schedulerName
 			_, err = sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Update(clusterCopy)
 			if err != nil {
-				klog.Infof("Cluster Object Update Failed")
-				return err
+				return fmt.Errorf("cluster object update failed")
 			}
 
 			schedulerObj, err := sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Get(schedulerName, metav1.GetOptions{})
 			if err != nil {
-				klog.Infof("Scheduler Object Get Failed")
-				return err
+				return fmt.Errorf("scheduler object get failed")
 			}
 
 			schedulerObj.Spec.Cluster = append(schedulerObj.Spec.Cluster, clusterCopy.Name)
@@ -364,35 +363,31 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 			schedulerObj.Spec.Union = newUnion
 			_, err = sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Update(schedulerObj)
 			if err != nil {
-				klog.Infof("Scheduler Object Update Failed")
-				return err
+				return fmt.Errorf("scheduler object update failed")
 			}
 		}
 		sc.recorder.Event(clusterCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	case EventTypeUpdateCluster:
 		klog.Infof("Event Type '%s'", EventTypeUpdateCluster)
-		clusterCopy, err := sc.getClusterFromCache(namespace, name)
+		clusterCopy, err := sc.getCluster(namespace, name)
 		if err != nil {
-			klog.Infof("Cluster Object Get From Cache Failed")
-			return err
+			return fmt.Errorf("cluster object get failed")
 		}
 
 		if clusterCopy.Status == "Delete" {
 			sc.consistentHash.Delete(clusterCopy.Name)
 			scheduler, err := sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Get(clusterCopy.Spec.HomeScheduler, metav1.GetOptions{})
 			if err != nil {
-				klog.Infof("Scheduler Object Get Failed")
-				return err
+				return fmt.Errorf("scheduler object get failed")
 			}
 
 			schedulerCopy := scheduler.DeepCopy()
-			schedulerCopy.Spec.Cluster = removeCluster(schedulerCopy.Spec.Cluster, clusterCopy.Name)
+			schedulerCopy.Spec.Cluster = util.RemoveCluster(schedulerCopy.Spec.Cluster, clusterCopy.Name)
 			newUnion := schedulercrdv1.ClusterUnion{}
 			for _, v := range schedulerCopy.Spec.Cluster {
 				clusterObj, err := sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(v, metav1.GetOptions{})
 				if err != nil {
-					klog.Infof("Cluster Object Get Failed")
-					return err
+					return fmt.Errorf("cluster object get failed")
 				}
 				newUnion = union.UpdateUnion(newUnion, clusterObj)
 			}
@@ -400,14 +395,12 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 
 			_, err = sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Update(schedulerCopy)
 			if err != nil {
-				klog.Infof("Scheduler Object Update Failed")
-				return err
+				return fmt.Errorf("scheduler object update failed")
 			}
 
 			err = sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Delete(clusterCopy.Name, &metav1.DeleteOptions{})
 			if err != nil {
-				klog.Infof("Cluster Object Delete Failed")
-				return err
+				return fmt.Errorf("cluster object delete failed")
 			}
 		}
 		sc.recorder.Event(clusterCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
@@ -415,19 +408,7 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 	return nil
 }
 
-func removeCluster(clusters []string, clusterName string) []string {
-	var idx int
-	for i, v := range clusters {
-		if v == clusterName {
-			idx = i
-			break
-		}
-	}
-	clusters[idx], clusters[len(clusters)-1] = clusters[len(clusters)-1], clusters[idx]
-	return clusters[:len(clusters)-1]
-}
-
-func (sc *SchedulerController) getSchedulerFromCache(namespace string, name string) (*schedulercrdv1.Scheduler, error) {
+func (sc *SchedulerController) getScheduler(namespace string, name string) (*schedulercrdv1.Scheduler, error) {
 	// Get the Scheduler resource with this namespace/name
 	scheduler, err := sc.schedulerInformer.Schedulers(namespace).Get(name)
 	if err != nil {
@@ -443,7 +424,7 @@ func (sc *SchedulerController) getSchedulerFromCache(namespace string, name stri
 	return schedulerCopy, nil
 }
 
-func (sc *SchedulerController) getClusterFromCache(namespace string, name string) (*clustercrdv1.Cluster, error) {
+func (sc *SchedulerController) getCluster(namespace string, name string) (*clustercrdv1.Cluster, error) {
 	// Get the Cluster resource with this namespace/name
 	cluster, err := sc.clusterInformer.Clusters(namespace).Get(name)
 	if err != nil {
