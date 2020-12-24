@@ -2413,6 +2413,10 @@ const (
 	// PodUnknown means that for some reason the state of the pod could not be obtained, typically due
 	// to an error in communicating with the host of the pod.
 	PodUnknown PodPhase = "Unknown"
+	// SchedulerAssigned represents status of the assigned scheduler for this pod.
+	SchedulerAssigned PodPhase = "assigned"
+	// ClusterBinded represents status of the binded cluster for this pod.
+	ClusterBinded PodPhase = "binded"
 )
 
 type PodConditionType string
@@ -2941,6 +2945,11 @@ type PodSpec struct {
 	// Resource Type indicates whether the resource objects are VM or containers
 	// +optional
 	ResourceType string
+	// ClusterName is a request to schedule this pod onto a specific cluster.  If it is non-empty,
+	// the scheduler simply binds this pod onto that cluster, assuming that it fits resource
+	// requirements.
+	// +optional
+	ClusterName string
 }
 
 func (ps *PodSpec) Workloads() []CommonInfo {

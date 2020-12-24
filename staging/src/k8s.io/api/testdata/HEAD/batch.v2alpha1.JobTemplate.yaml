@@ -199,6 +199,7 @@ template:
               - "395"
               topologyKey: "396"
         automountServiceAccountToken: true
+        clusterName: "417"
         containers:
         - args:
           - "256"

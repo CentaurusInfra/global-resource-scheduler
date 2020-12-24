@@ -1245,7 +1245,8 @@
         "runtimeClassName": "400",
         "enableServiceLinks": false,
         "preemptionPolicy": "!ń1ċƹ|慼櫁色苆试揯遐",
-        "resourceType": "401"
+        "resourceType": "401",
+        "clusterName": "402"
       }
     },
     "ttlSecondsAfterFinished": 217833402
@@ -1257,8 +1258,8 @@
         "status": "n",
         "lastProbeTime": "2740-10-14T09:28:06Z",
         "lastTransitionTime": "2133-04-18T01:37:37Z",
-        "reason": "402",
-        "message": "403"
+        "reason": "403",
+        "message": "404"
       }
     ],
     "active": -68737405,

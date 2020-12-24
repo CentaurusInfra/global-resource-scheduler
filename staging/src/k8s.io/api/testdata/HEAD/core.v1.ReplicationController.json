@@ -1236,7 +1236,8 @@
         "runtimeClassName": "398",
         "enableServiceLinks": false,
         "preemptionPolicy": "怨彬ɈNƋl塠傫ü",
-        "resourceType": "399"
+        "resourceType": "399",
+        "clusterName": "400"
       }
     }
   },
@@ -1251,8 +1252,8 @@
         "type": "赂ʓ蔋 ǵq砯á缈gȇǙ屏宨殴妓",
         "status": "閥óƒ畒Üɉ愂,wa纝佯fɞ糮",
         "lastTransitionTime": "2148-04-22T20:43:33Z",
-        "reason": "400",
-        "message": "401"
+        "reason": "401",
+        "message": "402"
       }
     ]
   }
