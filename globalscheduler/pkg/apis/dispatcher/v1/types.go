@@ -21,7 +21,8 @@ import (
 
 // dispatcherSpec defines the desired state of dispatcher
 type DispatcherSpec struct {
-	POD []string `json:"POD name"`
+	// Cluster is an array that stores the name of clusters
+	Cluster []string `json:"cluster"`
 }
 
 // +genclient

@@ -3036,6 +3036,7 @@ func autoConvert_v1_CommonInfo_To_core_CommonInfo(in *v1.CommonInfo, out *core.C
 	out.ResizePolicy = *(*[]core.ResizePolicy)(unsafe.Pointer(&in.ResizePolicy))
 	out.VolumeMounts = *(*[]core.VolumeMount)(unsafe.Pointer(&in.VolumeMounts))
 	out.ImagePullPolicy = core.PullPolicy(in.ImagePullPolicy)
+	out.SecurityGroupId = in.SecurityGroupId
 	return nil
 }
 
@@ -3054,6 +3055,7 @@ func autoConvert_core_CommonInfo_To_v1_CommonInfo(in *core.CommonInfo, out *v1.C
 	out.ResizePolicy = *(*[]v1.ResizePolicy)(unsafe.Pointer(&in.ResizePolicy))
 	out.VolumeMounts = *(*[]v1.VolumeMount)(unsafe.Pointer(&in.VolumeMounts))
 	out.ImagePullPolicy = v1.PullPolicy(in.ImagePullPolicy)
+	out.SecurityGroupId = in.SecurityGroupId
 	return nil
 }
 
@@ -6355,6 +6357,7 @@ func autoConvert_v1_PodSpec_To_core_PodSpec(in *v1.PodSpec, out *core.PodSpec, s
 	out.EnableServiceLinks = (*bool)(unsafe.Pointer(in.EnableServiceLinks))
 	out.PreemptionPolicy = (*core.PreemptionPolicy)(unsafe.Pointer(in.PreemptionPolicy))
 	out.ResourceType = in.ResourceType
+	out.ClusterName = in.ClusterName
 	return nil
 }
 
@@ -6408,6 +6411,7 @@ func autoConvert_core_PodSpec_To_v1_PodSpec(in *core.PodSpec, out *v1.PodSpec, s
 	out.RuntimeClassName = (*string)(unsafe.Pointer(in.RuntimeClassName))
 	out.EnableServiceLinks = (*bool)(unsafe.Pointer(in.EnableServiceLinks))
 	out.ResourceType = in.ResourceType
+	out.ClusterName = in.ClusterName
 	return nil
 }
 
