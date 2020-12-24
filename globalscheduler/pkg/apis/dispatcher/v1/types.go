@@ -21,7 +21,6 @@ import (
 
 // dispatcherSpec defines the desired state of dispatcher
 type DispatcherSpec struct {
-	Pod []string `json:"pod"`
 	// Cluster is an array that stores the name of clusters
 	Cluster []string `json:"cluster"`
 }
