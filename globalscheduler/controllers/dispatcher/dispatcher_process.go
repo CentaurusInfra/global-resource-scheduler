@@ -25,6 +25,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog"
+	"k8s.io/kubernetes/globalscheduler/controllers/util/openstack"
 	dispatcherclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/client/clientset/versioned"
 	dispatcherv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/v1"
 	schedulerclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
@@ -47,7 +48,7 @@ type Process struct {
 	tokenMap            map[string]string
 }
 
-func NewProcess(config *rest.Config, namespace string, name string, quit chan struct{}) Process {
+func NewProcess(config *rest.Config, namespace string, name string, quit chan struct{}, start int64, end int64) Process {
 	podQueue := make(chan *v1.Pod, 300)
 	defer close(podQueue)
 
@@ -61,7 +62,7 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		klog.Fatal(err)
 	}
 
-	clusterIdList, clusterIpMap := convertClustersToMap(dispatcher.Spec.POD)
+	clusterIdList, clusterIpMap := convertClustersToMap(dispatcher.Spec.Cluster)
 
 	schedulerClientset, err := schedulerclientset.NewForConfig(config)
 	if err != nil {
@@ -122,8 +123,8 @@ func (p *Process) Run(quit chan struct{}) {
 				return
 			}
 			//TODO Spec.POD shall be Spec.Cluster
-			if !reflect.DeepEqual(oldDispatcher.Spec.POD, newDispatcher.Spec.POD) {
-				clusterIdList, clusterIpMap := convertClustersToMap(newDispatcher.Spec.POD)
+			if !reflect.DeepEqual(oldDispatcher.Spec.Cluster, newDispatcher.Spec.Cluster) {
+				clusterIdList, clusterIpMap := convertClustersToMap(newDispatcher.Spec.Cluster)
 				p.clusterIdList = clusterIdList
 				p.clusterIpMap = clusterIpMap
 				p.addBoundedPodsToQueue(p.resetCh, p.clusterIdList)
@@ -135,7 +136,7 @@ func (p *Process) Run(quit chan struct{}) {
 	p.addBoundedPodsToQueue(p.resetCh, p.clusterIdList)
 	p.addDeletedPodsToQueue(p.resetCh, p.clusterIdList)
 	go dispatcherInformer.Run(quit)
-	wait.Until(p.SendRequests, 0, quit)
+	wait.Until(p.SendPodToCluster, 0, quit)
 }
 
 func (p *Process) initPodInformer(resetCh chan struct{}, clusterIds []string, statusPhase string) cache.SharedIndexInformer {
@@ -192,32 +193,40 @@ func (p *Process) addBoundedPodsToQueue(resetCh chan struct{}, clusterIds []stri
 	podInformer.Run(resetCh)
 }
 
-func (p *Process) SendRequests() {
+func (p *Process) SendPodToCluster() {
 
 	pod := <-p.podQueue
 	if pod != nil {
 		klog.V(3).Infof("Processing the item %v", pod)
-		//host := p.clusterIpMap[pod.Spec.ClusterName]
-		//token, err := p.getToken(host)
-		//if err != nil {
-		//	klog.Warningf("Failed to get token from host %v", host)
-		//	return
-		//}
-		//if pod.ObjectMeta.DeletionTimestamp != nil {
-		//	err = openstack.DeleteInstance(host, token, pod.Spec.ClusterName)
-		//	if err == nil {
-		//		klog.V(3).Infof("Deleting request for pod %v has been sent to %v", pod.ObjectMeta.Name, host)
-		//	} else {
-		//		klog.Warningf("Failed to delete the pod %v with error %v",  pod.ObjectMeta.Name, err)
-		//	}
-		//} else {
-		//	err = openstack.ServerCreate(host, token, pod.Spec)
-		//	if err == nil {
-		//		klog.V(3).Infof("Creating request for pod %v has been sent to %v", pod.ObjectMeta.Name, host)
-		//	} else {
-		//		klog.Warningf("Failed to create the pod %v with error %v", pod.ObjectMeta.Name, err)
-		//	}
-		//}
+		host := p.clusterIpMap[pod.Spec.ClusterName]
+		token, err := p.getToken(host)
+		if err != nil {
+			klog.Warningf("Failed to get token from host %v", host)
+			return
+		}
+		if pod.ObjectMeta.DeletionTimestamp != nil {
+			err = openstack.DeleteInstance(host, token, pod.Spec.Hostname)
+			if err == nil {
+				klog.V(3).Infof("Deleting request for pod %v has been sent to %v", pod.ObjectMeta.Name, host)
+			} else {
+				klog.Warningf("Failed to delete the pod %v with error %v", pod.ObjectMeta.Name, err)
+			}
+		} else {
+			instanceId, err := openstack.ServerCreate(host, token, &pod.Spec)
+			if err == nil {
+				klog.V(3).Infof("Creating request for pod %v has been sent to %v", pod.ObjectMeta.Name, host)
+				pod.Spec.Hostname = instanceId
+				pod.Status.Phase = v1.PodRunning
+				updatedPod, err := p.clientset.CoreV1().Pods(pod.ObjectMeta.Namespace).Update(pod)
+				if err == nil {
+					klog.V(3).Infof("Creating request for pod %v returned successfully with %v", updatedPod, instanceId)
+				} else {
+					klog.Warningf("Failed to update the pod %v with error %v", pod.ObjectMeta.Name, err)
+				}
+			} else {
+				klog.Warningf("Failed to create the pod %v with error %v", pod.ObjectMeta.Name, err)
+			}
+		}
 	}
 }
 
@@ -237,16 +246,16 @@ func convertClustersToMap(clusters []string) ([]string, map[string]string) {
 }
 
 func (p *Process) getToken(ip string) (string, error) {
-	//if token, ok := p.tokenMap[ip]; ok {
-	//	if !openstack.TokenExpired(token, ipo) {
-	//		return token, nil
-	//	}
-	//}
-	//token, err := openstack.RequestToken(ip)
-	//if err != nil{
-	//	return "", err
-	//}
-	//p.tokenMap[ip] = token
-	//return token, nil
+	if token, ok := p.tokenMap[ip]; ok {
+		if !openstack.TokenExpired(token, ip) {
+			return token, nil
+		}
+	}
+	token, err := openstack.RequestToken(ip)
+	if err != nil {
+		return "", err
+	}
+	p.tokenMap[ip] = token
+	return token, nil
 	return "", nil
 }
