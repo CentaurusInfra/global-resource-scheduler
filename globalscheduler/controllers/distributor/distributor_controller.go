@@ -48,6 +48,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -122,6 +123,11 @@ func NewController(
 	})
 
 	return distributorController
+}
+
+func (c *DistributorController) RunController(stopCh <-chan struct{}, wg *sync.WaitGroup) {
+	defer wg.Done()
+	c.Run(stopCh)
 }
 
 // Run will set up the event handlers for types we are interested in, as well

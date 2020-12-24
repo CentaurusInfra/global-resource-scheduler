@@ -28,6 +28,7 @@ import (
 	clusterclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
 	schedulerclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
 	"os/exec"
+	"sync"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -123,6 +124,11 @@ func NewSchedulerController(
 	})
 
 	return controller
+}
+
+func (sc *SchedulerController) RunController(threadiness int, stopCh <-chan struct{}, wg *sync.WaitGroup) {
+	defer wg.Done()
+	sc.Run(threadiness, stopCh)
 }
 
 // Run will set up the event handlers for types we are interested in, as well
