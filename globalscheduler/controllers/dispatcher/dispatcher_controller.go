@@ -42,6 +42,7 @@ import (
 	dispatcherinformers "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/client/informers/externalversions/dispatcher/v1"
 	dispatcherlisters "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/client/listers/dispatcher/v1"
 	dispatchercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/v1"
+	"strings"
 	"time"
 )
 
@@ -274,7 +275,9 @@ func (dc *DispatcherController) syncHandler(key *KeyWithEventType) error {
 			}
 
 			for _, v := range clusterIds {
-				clusterObj, err := dc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(v, metav1.GetOptions{})
+				idx := strings.Index(v, "&")
+				clusterName := v[:idx]
+				clusterObj, err := dc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(clusterName, metav1.GetOptions{})
 				if err != nil {
 					return fmt.Errorf("cluster object get failed")
 				}
@@ -298,13 +301,15 @@ func (dc *DispatcherController) syncHandler(key *KeyWithEventType) error {
 		if err != nil {
 			return fmt.Errorf("cluster object get failed")
 		}
-		clusterInput := []string{clusterCopy.Name}
+
+		str := clusterCopy.Name + "&" + clusterCopy.Spec.IpAddress
+		clusterInput := []string{str}
 		err = dc.consistentHash.Insert(clusterInput)
 		if err != nil {
 			return fmt.Errorf("cluster name failed to insert into consistent hash circle")
 		}
 
-		dispatcherName := dc.consistentHash.Members[clusterCopy.Name]
+		dispatcherName := dc.consistentHash.Members[str]
 		if dispatcherName != "nil" {
 			clusterCopy.Spec.HomeDispatcher = dispatcherName
 			_, err = dc.clusterclient.GlobalschedulerV1().Clusters(namespace).Update(clusterCopy)
@@ -317,7 +322,7 @@ func (dc *DispatcherController) syncHandler(key *KeyWithEventType) error {
 				return fmt.Errorf("dispatcher object get failed")
 			}
 
-			dispatcherObj.Spec.Cluster = append(dispatcherObj.Spec.Cluster, clusterCopy.Name)
+			dispatcherObj.Spec.Cluster = append(dispatcherObj.Spec.Cluster, str)
 			_, err = dc.dispatcherclient.GlobalschedulerV1().Dispatchers(namespace).Update(dispatcherObj)
 			if err != nil {
 				return fmt.Errorf("dispatcher object update failed")
@@ -332,14 +337,15 @@ func (dc *DispatcherController) syncHandler(key *KeyWithEventType) error {
 		}
 
 		if clusterCopy.Status == "Delete" {
-			dc.consistentHash.Delete(clusterCopy.Name)
+			str := clusterCopy.Name + "&" + clusterCopy.Spec.IpAddress
+			dc.consistentHash.Delete(str)
 			dispatcher, err := dc.dispatcherclient.GlobalschedulerV1().Dispatchers(namespace).Get(clusterCopy.Spec.HomeDispatcher, metav1.GetOptions{})
 			if err != nil {
 				return fmt.Errorf("dispatcher object get failed")
 			}
 
 			dispatcherCopy := dispatcher.DeepCopy()
-			dispatcherCopy.Spec.Cluster = util.RemoveCluster(dispatcherCopy.Spec.Cluster, clusterCopy.Name)
+			dispatcherCopy.Spec.Cluster = util.RemoveCluster(dispatcherCopy.Spec.Cluster, str)
 
 			_, err = dc.dispatcherclient.GlobalschedulerV1().Dispatchers(namespace).Update(dispatcherCopy)
 			if err != nil {
@@ -394,7 +400,9 @@ func (dc *DispatcherController) enqueue(obj interface{}, eventType EventType) {
 func (dc *DispatcherController) updateClusterBinding(dispatcherCopy *dispatchercrdv1.Dispatcher, namespace string) error {
 	clusterIdList := dc.consistentHash.GetIdList(dispatcherCopy.Name)
 	for _, v := range clusterIdList {
-		clusterObj, err := dc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(v, metav1.GetOptions{})
+		idx := strings.Index(v, "&")
+		clusterName := v[:idx]
+		clusterObj, err := dc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(clusterName, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
