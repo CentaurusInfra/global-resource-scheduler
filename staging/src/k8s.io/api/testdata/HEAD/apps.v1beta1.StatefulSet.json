@@ -1241,33 +1241,34 @@
         "runtimeClassName": "396",
         "enableServiceLinks": false,
         "preemptionPolicy": "鲛ô衞Ɵ鳝稃Ȍ液文?謮",
-        "resourceType": "397"
+        "resourceType": "397",
+        "clusterName": "398"
       }
     },
     "volumeClaimTemplates": [
       {
         "metadata": {
-          "name": "398",
-          "generateName": "399",
-          "tenant": "400",
-          "namespace": "401",
-          "selfLink": "402",
+          "name": "399",
+          "generateName": "400",
+          "tenant": "401",
+          "namespace": "402",
+          "selfLink": "403",
           "hashKey": 5472609002491880230,
           "resourceVersion": "10383213866147804238",
           "generation": 8368796729455728078,
           "creationTimestamp": null,
           "deletionGracePeriodSeconds": 2673870861947841176,
           "labels": {
-            "404": "405"
+            "405": "406"
           },
           "annotations": {
-            "406": "407"
+            "407": "408"
           },
           "ownerReferences": [
             {
-              "apiVersion": "408",
-              "kind": "409",
-              "name": "410",
+              "apiVersion": "409",
+              "kind": "410",
+              "name": "411",
               "uid": "鍫",
               "hashKey": -3447419751321692995,
               "controller": false,
@@ -1275,15 +1276,15 @@
             }
           ],
           "finalizers": [
-            "411"
+            "412"
           ],
-          "clusterName": "412",
+          "clusterName": "413",
           "managedFields": [
             {
-              "manager": "413",
+              "manager": "414",
               "operation": "ɨ悪@黝Ɓ",
-              "apiVersion": "414",
-              "fields": {"415":{"416":null}}
+              "apiVersion": "415",
+              "fields": {"416":{"417":null}}
             }
           ]
         },
@@ -1310,13 +1311,13 @@
               "SȲ1z勻苁_Ȧ4Á$议ĪS幻/饑Ȉ": "329"
             }
           },
-          "volumeName": "425",
-          "storageClassName": "426",
+          "volumeName": "426",
+          "storageClassName": "427",
           "volumeMode": "ÿ1諘蚿[ĵ皥袨\\k%橳逫ƗǨƶ皗蒸C",
           "dataSource": {
-            "apiGroup": "427",
-            "kind": "428",
-            "name": "429"
+            "apiGroup": "428",
+            "kind": "429",
+            "name": "430"
           }
         },
         "status": {
@@ -1333,14 +1334,14 @@
               "status": "熔ķ´ʑ潞Ĵ3Q蠯0",
               "lastProbeTime": "2873-04-03T12:16:48Z",
               "lastTransitionTime": "2958-10-02T20:26:00Z",
-              "reason": "430",
-              "message": "431"
+              "reason": "431",
+              "message": "432"
             }
           ]
         }
       }
     ],
-    "serviceName": "432",
+    "serviceName": "433",
     "podManagementPolicy": "PWk",
     "updateStrategy": {
       "type": "NZ!",
@@ -1356,16 +1357,16 @@
     "readyReplicas": 1157257034,
     "currentReplicas": -1551187503,
     "updatedReplicas": -1607291056,
-    "currentRevision": "433",
-    "updateRevision": "434",
+    "currentRevision": "434",
+    "updateRevision": "435",
     "collisionCount": -727089824,
     "conditions": [
       {
         "type": "hɫ淫Ď眊:",
         "status": "ƿOqõƨj2愴ňù廻@p",
         "lastTransitionTime": "2252-06-28T22:34:24Z",
-        "reason": "435",
-        "message": "436"
+        "reason": "436",
+        "message": "437"
       }
     ]
   }

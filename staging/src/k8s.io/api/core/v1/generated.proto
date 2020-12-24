@@ -3469,6 +3469,12 @@ message PodSpec {
   // Resource Type indicates whether the resource objects are VM or containers
   // +optional
   optional string resourceType = 36;
+
+  // ClusterName is a request to schedule this pod onto a specific cluster. If it is non-empty,
+  // the scheduler simply binds this pod onto that cluster, assuming that it fits resource
+  // requirements.
+  // +optional
+  optional string clusterName = 37;
 }
 
 // PodStatus represents information about the status of a pod. Status may trail the actual
