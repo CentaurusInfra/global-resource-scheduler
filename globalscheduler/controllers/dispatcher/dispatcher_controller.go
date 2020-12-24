@@ -125,7 +125,7 @@ func NewDispatcherController(
 // as syncing informer caches and starting workers. It will block until stopCh
 // is closed, at which point it will shutdown the workqueue and wait for
 // workers to finish processing their current work items.
-func (dc *DispatcherController) Run(threadiness int, stopCh <-chan struct{}) error {
+func (dc *DispatcherController) Run(workers int, stopCh <-chan struct{}) error {
 	defer runtime.HandleCrash()
 	defer dc.workqueue.ShutDown()
 
@@ -138,8 +138,8 @@ func (dc *DispatcherController) Run(threadiness int, stopCh <-chan struct{}) err
 		return fmt.Errorf("failed to wait for caches to sync")
 	}
 
-	klog.Info("Starting workers")
-	for i := 0; i < threadiness; i++ {
+	klog.Infof("Starting %d workers", workers)
+	for i := 0; i < workers; i++ {
 		go wait.Until(dc.runWorker, time.Second, stopCh)
 	}
 

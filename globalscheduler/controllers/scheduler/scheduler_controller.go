@@ -130,7 +130,7 @@ func NewSchedulerController(
 // as syncing informer caches and starting workers. It will block until stopCh
 // is closed, at which point it will shutdown the workqueue and wait for
 // workers to finish processing their current work items.
-func (sc *SchedulerController) Run(threadiness int, stopCh <-chan struct{}) error {
+func (sc *SchedulerController) Run(workers int, stopCh <-chan struct{}) error {
 	defer runtime.HandleCrash()
 	defer sc.workqueue.ShutDown()
 
@@ -143,8 +143,8 @@ func (sc *SchedulerController) Run(threadiness int, stopCh <-chan struct{}) erro
 		return fmt.Errorf("failed to wait for caches to sync")
 	}
 
-	klog.Info("Starting workers")
-	for i := 0; i < threadiness; i++ {
+	klog.Infof("Starting %d workers", workers)
+	for i := 0; i < workers; i++ {
 		go wait.Until(sc.runWorker, time.Second, stopCh)
 	}
 
