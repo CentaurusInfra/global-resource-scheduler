@@ -168,6 +168,7 @@ spec:
             - "376"
             topologyKey: "377"
       automountServiceAccountToken: true
+      clusterName: "398"
       containers:
       - args:
         - "235"
@@ -856,8 +857,8 @@ status:
   conditions:
   - lastTransitionTime: "2046-11-30T08:06:33Z"
     lastUpdateTime: "2844-11-24T08:01:51Z"
-    message: "399"
-    reason: "398"
+    message: "400"
+    reason: "399"
     status: ƽ,ʢ
     type: ŕƧ钖孝0蛮xAǫ&tŧK剛Ʀ魨
   observedGeneration: -536969517184575576

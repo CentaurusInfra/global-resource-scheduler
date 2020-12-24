@@ -1227,7 +1227,8 @@
       "runtimeClassName": "392",
       "enableServiceLinks": true,
       "preemptionPolicy": "啾閥óƒ",
-      "resourceType": "393"
+      "resourceType": "393",
+      "clusterName": "394"
     }
   }
 }

@@ -1241,7 +1241,8 @@
         "runtimeClassName": "396",
         "enableServiceLinks": false,
         "preemptionPolicy": "鲛ô衞Ɵ鳝稃Ȍ液文?謮",
-        "resourceType": "397"
+        "resourceType": "397",
+        "clusterName": "398"
       }
     },
     "strategy": {
@@ -1268,8 +1269,8 @@
         "status": "ƽ,ʢ",
         "lastUpdateTime": "2844-11-24T08:01:51Z",
         "lastTransitionTime": "2046-11-30T08:06:33Z",
-        "reason": "398",
-        "message": "399"
+        "reason": "399",
+        "message": "400"
       }
     ],
     "collisionCount": -1784164316
