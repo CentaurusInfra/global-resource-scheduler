@@ -2432,9 +2432,9 @@ const (
 	// VmReady indicates whether the virtual machine in the pod is ready
 	VmReady PodConditionType = "VirtualMachineReady"
 	// SchedulerAssigned represents status of the assigned scheduler for this pod.
-	SchedulerAssigned PodConditionType = "SchedulerAssigned"
-	// ClusterBound represents status of the bound cluster for this pod.
-	ClusterBound PodConditionType = "ClusterBound"
+	SchedulerAssigned PodConditionType = "assigned"
+	// ClusterBound represents status of the binded cluster for this pod.
+	ClusterBinded PodConditionType = "binded"
 )
 
 type PodCondition struct {
