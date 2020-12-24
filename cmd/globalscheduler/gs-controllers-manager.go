@@ -18,7 +18,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"sync"
 	"time"
 
@@ -41,33 +40,27 @@ import (
 )
 
 const (
-	defaultNamespace             = "default"
-	defaultWorkers               = 4
-	distributerServerWorkerCount = 1
-	distributerWorkerCount       = 1
-	schedulerWorkerCount         = 1
-	clusterWorkerCount           = 4
-)
-
-var (
-	masterURL  string
-	kubeconfig string
-	workers    int
-	grpcHost   string
+	defaultNamespace = "default"
+	defaultWorkers   = 1
 )
 
 func main() {
 	//1. flag & log
+	kubeconfig := flag.String("kubeconfig", "/var/run/kubernetes/admin.kubeconfig", "Path to a kubeconfig. Only required if out-of-cluster.")
+	masterURL := flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+	workers := flag.Int("concurrent-workers", 0, "The number of workers that are allowed to process concurrently.")
+	grpcHost := flag.String("grpchost", "", "IP address of resource collector.")
+
 	flag.Parse()
-	if workers <= 0 {
-		workers = defaultWorkers
+	if *workers <= 0 {
+		*workers = defaultWorkers
 	}
 	defer klog.Flush()
 
 	//2. config
-	config, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
+	config, err := clientcmd.BuildConfigFromFlags(*masterURL, *kubeconfig)
 	if err != nil {
-		klog.Fatalf("Failed to load config %v with errors %v", kubeconfig, err)
+		klog.Fatalf("Failed to load config %v with errors %v", *kubeconfig, err)
 	}
 
 	//3. stop channel
@@ -95,7 +88,7 @@ func main() {
 	}
 	distributorFactory := distributorinformer.NewSharedInformerFactory(distributorClientset, 0)
 	distributorInformer := distributorFactory.Globalscheduler().V1().Distributors()
-	distributorController := distributor.NewController(kubeconfig, kubeClientset, apiextensionsClient, distributorClientset, distributorInformer)
+	distributorController := distributor.NewController(*kubeconfig, kubeClientset, apiextensionsClient, distributorClientset, distributorInformer)
 	err = distributorController.EnsureCustomResourceDefinitionCreation()
 	if err != nil {
 		klog.Fatalf("Error registering distributor: %v", err)
@@ -119,7 +112,7 @@ func main() {
 	schedulerController := scheduler.NewSchedulerController(kubeClientset, schedulerClientset, clusterClientset, schedulerInformer, clusterInformer)
 
 	//8. cluster clientset
-	clusterController := cluster.NewClusterController(kubeClientset, apiextensionsClient, clusterClientset, clusterInformer, grpcHost)
+	clusterController := cluster.NewClusterController(kubeClientset, apiextensionsClient, clusterClientset, clusterInformer, *grpcHost)
 	err = clusterController.CreateCRD()
 	if err != nil {
 		klog.Fatalf("error - register cluster crd: %s", err.Error())
@@ -130,27 +123,14 @@ func main() {
 	klog.Infof("Start controllers")
 	klog.Infof("Start cluster controller")
 	wg.Add(1)
-	go clusterController.RunController(clusterWorkerCount, stopCh, &wg)
-	time.Sleep(time.Second)
+	go clusterController.RunController(*workers, stopCh, &wg)
 	klog.Infof("Start scheduler controller")
 	wg.Add(1)
-	go schedulerController.RunController(schedulerWorkerCount, stopCh, &wg)
-	time.Sleep(time.Second)
+	go schedulerController.RunController(*workers, stopCh, &wg)
 	klog.Infof("Start distributor controller")
 	wg.Add(1)
 	go distributorController.RunController(quit, &wg)
-	time.Sleep(time.Second)
 	klog.Info("Main: Waiting for controllers to start")
-	fmt.Println("Main: Waiting for controllers to start")
 	wg.Wait()
 	klog.Info("Main: Completed to start all controllers")
-	fmt.Println("Main: Completed to start all controllers")
-	fmt.Scanln()
-}
-
-func init() {
-	flag.StringVar(&kubeconfig, "kubeconfig", "/var/run/kubernetes/admin.kubeconfig", "Path to a kubeconfig. Only required if out-of-cluster.")
-	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
-	flag.IntVar(&workers, "concurrent-workers", defaultWorkers, "The number of workers that are allowed to process concurrently.")
-	flag.StringVar(&grpcHost, "grpchost", "", "IP address of resource collector.")
 }
