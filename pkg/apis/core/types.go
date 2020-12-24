@@ -2411,6 +2411,10 @@ const (
 	// PodUnknown means that for some reason the state of the pod could not be obtained, typically due
 	// to an error in communicating with the host of the pod.
 	PodUnknown PodPhase = "Unknown"
+	// SchedulerAssigned represents status of the assigned scheduler for this pod.
+	SchedulerAssigned PodPhase = "assigned"
+	// ClusterBinded represents status of the binded cluster for this pod.
+	ClusterBinded PodPhase = "binded"
 )
 
 type PodConditionType string
@@ -2431,10 +2435,6 @@ const (
 	ContainersReady PodConditionType = "ContainersReady"
 	// VmReady indicates whether the virtual machine in the pod is ready
 	VmReady PodConditionType = "VirtualMachineReady"
-	// SchedulerAssigned represents status of the assigned scheduler for this pod.
-	SchedulerAssigned PodConditionType = "assigned"
-	// ClusterBound represents status of the binded cluster for this pod.
-	ClusterBinded PodConditionType = "binded"
 )
 
 type PodCondition struct {

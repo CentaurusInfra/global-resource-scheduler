@@ -188,15 +188,14 @@ func (r *BindingREST) setPodHostAndAnnotations(ctx context.Context, podID, oldMa
 		if pod.DeletionTimestamp != nil {
 			return nil, fmt.Errorf("pod %s is being deleted, cannot be assigned to a host", pod.Name)
 		}
-		podCondition := api.PodScheduled
 
 		switch targetKind {
 		case "Scheduler":
 			pod.Status.AssignedScheduler.Name = targetName
-			podCondition = api.SchedulerAssigned
+			pod.Status.Phase = api.SchedulerAssigned
 		case "Cluster":
 			pod.Spec.ClusterName = targetName
-			podCondition = api.ClusterBinded
+			pod.Status.Phase = api.ClusterBinded
 		default:
 			if pod.Spec.VirtualMachine == nil && pod.Spec.NodeName != oldMachine {
 				return nil, fmt.Errorf("pod %v is already assigned to node %q", pod.Name, pod.Spec.NodeName)
@@ -210,7 +209,7 @@ func (r *BindingREST) setPodHostAndAnnotations(ctx context.Context, podID, oldMa
 			pod.Annotations[k] = v
 		}
 		podutil.UpdatePodCondition(&pod.Status, &api.PodCondition{
-			Type:   podCondition,
+			Type:   api.PodScheduled,
 			Status: api.ConditionTrue,
 		})
 		finalPod = pod
