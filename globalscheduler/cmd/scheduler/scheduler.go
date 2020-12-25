@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package app
+package scheduler
 
 import (
 	"flag"
@@ -35,8 +35,8 @@ import (
 // client config
 var (
 	flagSet              = flag.NewFlagSet("scheduler_controller", flag.ExitOnError)
-	master               = flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
-	kubeconfig           = flag.String("kubeconfig", "/var/run/kubernetes/controller.kubeconfig", "Path to a kubeconfig. Only required if out-of-cluster.")
+	schedulermaster      = flag.String("schedulermaster", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+	schedulerconfig      = flag.String("schedulerconfig", "/var/run/kubernetes/controller.kubeconfig", "Path to a kubeconfig. Only required if out-of-cluster.")
 	onlyOneSignalHandler = make(chan struct{})
 	shutdownSignals      = []os.Signal{os.Interrupt, syscall.SIGTERM}
 )
@@ -50,7 +50,7 @@ func StartSchedulerController() {
 	stopCh := make(chan struct{})
 	defer close(stopCh)
 
-	cfg, err := clientcmd.BuildConfigFromFlags(*master, *kubeconfig)
+	cfg, err := clientcmd.BuildConfigFromFlags(*schedulermaster, *schedulerconfig)
 	if err != nil {
 		klog.Fatalf("Error building kubeconfig: %s", err.Error())
 	}

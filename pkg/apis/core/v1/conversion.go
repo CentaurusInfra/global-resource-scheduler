@@ -65,6 +65,7 @@ func addConversionFuncs(scheme *runtime.Scheme) error {
 				"metadata.namespace",
 				"metadata.hashkey",
 				"metadata.uid",
+				"spec.clusterName",
 				"spec.nodeName",
 				"spec.restartPolicy",
 				"spec.schedulerName",
@@ -77,6 +78,7 @@ func addConversionFuncs(scheme *runtime.Scheme) error {
 				"spec.selector.regions.availablityZone",
 				"spec.selector.operator",
 				"spec.selector.strategy.localStrategy",
+				"status.assignedScheduler.name",
 				"status.phase",
 				"status.podIP",
 				"status.nominatedNodeName":
