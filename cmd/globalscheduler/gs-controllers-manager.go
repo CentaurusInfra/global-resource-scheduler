@@ -118,7 +118,7 @@ func main() {
 		klog.Fatalf("error - register cluster crd: %s", err.Error())
 	}
 
-	//9. start controllers in the order of less dependent one first
+	//9. start controllers, independent controller first
 	var wg sync.WaitGroup
 	klog.Infof("Start controllers")
 	klog.Infof("Start cluster controller")
