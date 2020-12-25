@@ -20,8 +20,6 @@ package rest
 import (
 	"context"
 	"fmt"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/klog"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -74,15 +72,6 @@ type RESTGracefulDeleteStrategy interface {
 // other one for cascading deletions.
 func BeforeDelete(strategy RESTDeleteStrategy, ctx context.Context, obj runtime.Object, options *metav1.DeleteOptions) (graceful, gracefulPending bool, err error) {
 	objectMeta, gvk, kerr := objectMetaAndKind(strategy, obj)
-	if gvk.Kind == "pod" {
-		pod := obj.(*v1.Pod)
-		for _, cond := range pod.Status.Conditions {
-			if cond.Status == "Deleting" {
-				objectMeta.SetDeletionTimestamp(nil)
-				klog.V(2).Infof("The pod %v bound to a cluster is waiting to be deleted.", pod.Name)
-			}
-		}
-	}
 	if kerr != nil {
 		return false, false, kerr
 	}
