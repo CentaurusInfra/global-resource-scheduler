@@ -34,6 +34,7 @@ func main() {
 	flag.Parse()
 	logs.InitLogs()
 	defer logs.FlushLogs()
+
 	config, err := clientcmd.BuildConfigFromFlags("", *configFile)
 	if err != nil {
 		klog.Fatal("Failed to load config %v with errors %v", *configFile, err)

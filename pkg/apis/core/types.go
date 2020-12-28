@@ -2054,6 +2054,8 @@ type CommonInfo struct {
 	// Policy for pulling images for this container
 	// +optional
 	ImagePullPolicy PullPolicy
+	// +optional
+	SecurityGroupId string
 }
 
 // Container represents a single container that is expected to be run on the host.

@@ -22,6 +22,7 @@ import (
 	distributortype "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor"
 	distributorv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/v1"
 	"strconv"
+	"sync"
 
 	"errors"
 	"k8s.io/api/core/v1"
@@ -115,8 +116,12 @@ func initSchedulerInformers(schedulerClientset *schedulerclientset.Clientset, qu
 	return schedulerInformer.Lister()
 }
 
-func (p *Process) Run(quit chan struct{}) {
+func (p *Process) RunController(quit chan struct{}, wg *sync.WaitGroup) {
+	defer wg.Done()
+	p.Run(quit)
+}
 
+func (p *Process) Run(quit chan struct{}) {
 	distributorSelector := fields.ParseSelectorOrDie(
 		",metatdata.namespace" + p.namespace + ",metatdata.name=" + p.name)
 	distributorLW := cache.NewListWatchFromClient(p.distributorClientset, string(distributortype.Plural), metav1.NamespaceAll, distributorSelector)

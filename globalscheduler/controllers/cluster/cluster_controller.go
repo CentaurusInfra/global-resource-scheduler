@@ -18,6 +18,7 @@ package cluster
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -172,6 +173,11 @@ func (c *ClusterController) deleteCluster(object interface{}) {
 // EventType: Create=0, Update=1, Delete=2
 func (c *ClusterController) Enqueue(key string, eventType EventType) {
 	c.workqueue.Add(KeyWithEventType{Key: key, EventType: eventType})
+}
+
+func (c *ClusterController) RunController(workers int, stopCh <-chan struct{}, wg *sync.WaitGroup) {
+	defer wg.Done()
+	c.Run(workers, stopCh)
 }
 
 // Run starts an asynchronous loop that detects events of cluster clusters.
