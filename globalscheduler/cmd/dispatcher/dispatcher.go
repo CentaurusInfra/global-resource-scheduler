@@ -18,6 +18,7 @@ package dispatcher
 
 import (
 	"flag"
+	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
@@ -71,13 +72,18 @@ func StartDispatcherController() {
 		klog.Fatalf("Error building clusterclientset: %s", err.Error())
 	}
 
+	apiextensionsClient, err := apiextensionsclientset.NewForConfig(cfg)
+	if err != nil {
+		klog.Fatalf("error - building global scheduler cluster apiextensions client: %s", err.Error())
+	}
+
 	dispatcherInformerFactory := dispatcherinformers.NewSharedInformerFactory(dispatcherClientset, time.Second*30)
 	dispatcherInformer := dispatcherInformerFactory.Globalscheduler().V1().Dispatchers()
 
 	clusterInformerFactory := clusterinformers.NewSharedInformerFactory(clusterClientset, time.Second*30)
 	clusterInformer := clusterInformerFactory.Globalscheduler().V1().Clusters()
 
-	dispatcherController := dispatcher.NewDispatcherController(kubeClientset, dispatcherClientset, clusterClientset, dispatcherInformer, clusterInformer)
+	dispatcherController := dispatcher.NewDispatcherController(kubeClientset, apiextensionsClient, dispatcherClientset, clusterClientset, dispatcherInformer, clusterInformer)
 
 	go dispatcherInformerFactory.Start(stopCh)
 	go clusterInformerFactory.Start(stopCh)

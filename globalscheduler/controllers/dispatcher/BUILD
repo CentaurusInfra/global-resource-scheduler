@@ -4,6 +4,7 @@ go_library(
     name = "go_default_library",
     srcs = [
         "dispatcher_controller.go",
+        "dispatcher_crd.go",
         "dispatcher_process.go",
         "eventType.go",
     ],
@@ -24,6 +25,8 @@ go_library(
         "//globalscheduler/pkg/apis/dispatcher/v1:go_default_library",
         "//globalscheduler/pkg/apis/scheduler/client/clientset/versioned:go_default_library",
         "//staging/src/k8s.io/api/core/v1:go_default_library",
+        "//staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1:go_default_library",
+        "//staging/src/k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset:go_default_library",
         "//staging/src/k8s.io/apimachinery/pkg/api/errors:go_default_library",
         "//staging/src/k8s.io/apimachinery/pkg/apis/meta/v1:go_default_library",
         "//staging/src/k8s.io/apimachinery/pkg/fields:go_default_library",
