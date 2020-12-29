@@ -67,6 +67,28 @@ func (sc *SchedulerController) CreateCRD() error {
 				Kind:   "Scheduler",
 				Plural: "schedulers",
 			},
+			Validation: &apiextensions.CustomResourceValidation{
+				OpenAPIV3Schema: &apiextensions.JSONSchemaProps{
+					Type: "object",
+					Properties: map[string]apiextensions.JSONSchemaProps{
+						"spec": {
+							Type: "object",
+							Properties: map[string]apiextensions.JSONSchemaProps{
+								"location": {
+									Type: "object",
+									Properties: map[string]apiextensions.JSONSchemaProps{
+										"city":     {Type: "string"},
+										"province": {Type: "string"},
+										"area":     {Type: "string"},
+										"country":  {Type: "string"},
+									},
+								},
+								"tag": {Type: "string"},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 
