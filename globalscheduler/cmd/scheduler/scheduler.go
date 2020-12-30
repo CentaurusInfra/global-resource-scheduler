@@ -86,6 +86,15 @@ func StartSchedulerController() {
 	clusterInformer := clusterInformerFactory.Globalscheduler().V1().Clusters()
 
 	schedulerController := scheduler.NewSchedulerController(kubeClientset, apiextensionsClient, schedulerClientset, clusterClientset, schedulerInformer, clusterInformer)
+	err = schedulerController.CreateSchedulerCRD()
+	if err != nil {
+		klog.Fatalf("error - register scheduler crd: %s", err.Error())
+	}
+
+	err = schedulerController.CreateClusterCRD()
+	if err != nil {
+		klog.Fatalf("error - register cluster crd: %s", err.Error())
+	}
 
 	go schedulerInformerFactory.Start(stopCh)
 	go clusterInformerFactory.Start(stopCh)
