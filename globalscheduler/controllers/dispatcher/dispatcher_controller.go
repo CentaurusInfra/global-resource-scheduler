@@ -18,6 +18,7 @@ package dispatcher
 
 import (
 	"fmt"
+	"sync"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -480,5 +481,5 @@ func (dc *DispatcherController) getCluster(namespace string, name string) (*clus
 
 func (dc *DispatcherController) RunController(workers int, stopCh <-chan struct{}, wg *sync.WaitGroup) {
 	defer wg.Done()
-	c.Run(workers, stopCh)
+	dc.Run(workers, stopCh)
 }

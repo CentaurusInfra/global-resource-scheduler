@@ -18,9 +18,9 @@ package main
 
 import (
 	"flag"
-	"os"
+//	"os"
 	"sync"
-	"syscall"
+//	"syscall"
 	"time"
 
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -53,7 +53,6 @@ const (
 
 func main() {
 	//1. flag & log
-	flagSet := flag.NewFlagSet("globalscheduler", flag.ExitOnError)
 	kubeconfig := flag.String("kubeconfig", "/var/run/kubernetes/admin.kubeconfig", "Path to a kubeconfig. Only required if out-of-cluster.")
 	masterURL := flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	workers := flag.Int("concurrent-workers", 0, "The number of workers that are allowed to process concurrently.")
@@ -118,11 +117,11 @@ func main() {
 	}
 
 	//8. dispatcher
-	dispatcherClientset, err := dispatcherclientset.NewForConfig(cfg)
+	dispatcherClientset, err := dispatcherclientset.NewForConfig(config)
 	if err != nil {
 		klog.Fatalf("Error building dispatcher clientset: %s", err.Error())
 	}
-	dispatcherInformerFactory := dispatcherinformers.NewSharedInformerFactory(dispatcherClientset, time.Second*30)
+	dispatcherInformerFactory := dispatcherinformer.NewSharedInformerFactory(dispatcherClientset, time.Second*30)
 	dispatcherInformer := dispatcherInformerFactory.Globalscheduler().V1().Dispatchers()
 	dispatcherController := dispatcher.NewDispatcherController(kubeClientset, dispatcherClientset, clusterClientset, dispatcherInformer, clusterInformer)
 
