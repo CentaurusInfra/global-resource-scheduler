@@ -20,7 +20,7 @@ filegroup(
         "//cmd/genswaggertypedocs:all-srcs",
         "//cmd/genutils:all-srcs",
         "//cmd/genyaml:all-srcs",
-        "//cmd/globalscheduler/gs-dispatcher-process:all-srcs",
+        "//cmd/globalscheduler:all-srcs",
         "//cmd/hyperkube:all-srcs",
         "//cmd/importverifier:all-srcs",
         "//cmd/kube-apiserver:all-srcs",
