@@ -44,6 +44,7 @@ import (
 	dispatcherlisters "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/client/listers/dispatcher/v1"
 	dispatchercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/v1"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -480,4 +481,9 @@ func (dc *DispatcherController) getCluster(namespace string, name string) (*clus
 	}
 	clusterCopy := cluster.DeepCopy()
 	return clusterCopy, nil
+}
+
+func (dc *DispatcherController) RunController(workers int, stopCh <-chan struct{}, wg *sync.WaitGroup) {
+	defer wg.Done()
+	dc.Run(workers, stopCh)
 }
