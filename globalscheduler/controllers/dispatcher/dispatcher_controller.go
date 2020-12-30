@@ -477,3 +477,8 @@ func (dc *DispatcherController) getCluster(namespace string, name string) (*clus
 	clusterCopy := cluster.DeepCopy()
 	return clusterCopy, nil
 }
+
+func (dc *DispatcherController) RunController(workers int, stopCh <-chan struct{}, wg *sync.WaitGroup) {
+	defer wg.Done()
+	c.Run(workers, stopCh)
+}

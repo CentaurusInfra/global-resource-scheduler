@@ -18,13 +18,20 @@ package main
 
 import (
 	"flag"
+	"os"
 	"sync"
+	"syscall"
 	"time"
 
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
+
+	//dispatcher
+	"k8s.io/kubernetes/globalscheduler/controllers/dispatcher"
+	dispatcherclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/client/clientset/versioned"
+	dispatcherinformer "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/client/informers/externalversions"
 	//distributer server & worker
 	"k8s.io/kubernetes/globalscheduler/controllers/distributor"
 	distributorclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/client/clientset/versioned"
@@ -46,6 +53,7 @@ const (
 
 func main() {
 	//1. flag & log
+	flagSet := flag.NewFlagSet("globalscheduler", flag.ExitOnError)
 	kubeconfig := flag.String("kubeconfig", "/var/run/kubernetes/admin.kubeconfig", "Path to a kubeconfig. Only required if out-of-cluster.")
 	masterURL := flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	workers := flag.Int("concurrent-workers", 0, "The number of workers that are allowed to process concurrently.")
@@ -64,8 +72,10 @@ func main() {
 	}
 
 	//3. stop channel
+	//cluster, scheduler, dispatcher
 	stopCh := make(chan struct{})
 	defer close(stopCh)
+	//distributer
 	quit := make(chan struct{})
 	defer close(quit)
 
@@ -81,7 +91,7 @@ func main() {
 		klog.Fatalf("error - building global scheduler cluster apiextensions client: %s", err.Error())
 	}
 
-	//6. distributer_server - clientset, controller
+	//6. distributer_server
 	distributorClientset, err := distributorclientset.NewForConfig(config)
 	if err != nil {
 		klog.Fatalf("Error building distributor clientset: %v", err)
@@ -94,42 +104,61 @@ func main() {
 		klog.Fatalf("Error registering distributor: %v", err)
 	}
 
-	//7. scheduler
-	// Create schedulerClientset
-	schedulerClientset, err := schedulerclientset.NewForConfig(config)
-	if err != nil {
-		klog.Fatalf("Error building scheduler clientset: %s", err.Error())
-	}
-	// Create clusterClientset
+	//7. cluster
 	clusterClientset, err := clusterclientset.NewForConfig(config)
 	if err != nil {
 		klog.Fatalf("Error building clusterclientset: %s", err.Error())
 	}
-	schedulerInformerFactory := schedulerinformer.NewSharedInformerFactory(schedulerClientset, time.Second*30)
-	schedulerInformer := schedulerInformerFactory.Globalscheduler().V1().Schedulers()
 	clusterInformerFactory := clusterinformer.NewSharedInformerFactory(clusterClientset, time.Second*30)
 	clusterInformer := clusterInformerFactory.Globalscheduler().V1().Clusters()
-	schedulerController := scheduler.NewSchedulerController(kubeClientset, schedulerClientset, clusterClientset, schedulerInformer, clusterInformer)
-
-	//8. cluster clientset
 	clusterController := cluster.NewClusterController(kubeClientset, apiextensionsClient, clusterClientset, clusterInformer, *grpcHost)
 	err = clusterController.CreateCRD()
 	if err != nil {
 		klog.Fatalf("error - register cluster crd: %s", err.Error())
 	}
 
-	//9. start controllers, independent controller first
+	//8. dispatcher
+	dispatcherClientset, err := dispatcherclientset.NewForConfig(cfg)
+	if err != nil {
+		klog.Fatalf("Error building dispatcher clientset: %s", err.Error())
+	}
+	dispatcherInformerFactory := dispatcherinformers.NewSharedInformerFactory(dispatcherClientset, time.Second*30)
+	dispatcherInformer := dispatcherInformerFactory.Globalscheduler().V1().Dispatchers()
+	dispatcherController := dispatcher.NewDispatcherController(kubeClientset, dispatcherClientset, clusterClientset, dispatcherInformer, clusterInformer)
+
+	//9. scheduler
+	schedulerClientset, err := schedulerclientset.NewForConfig(config)
+	if err != nil {
+		klog.Fatalf("Error building scheduler clientset: %s", err.Error())
+	}
+	schedulerInformerFactory := schedulerinformer.NewSharedInformerFactory(schedulerClientset, time.Second*30)
+	schedulerInformer := schedulerInformerFactory.Globalscheduler().V1().Schedulers()
+	schedulerController := scheduler.NewSchedulerController(kubeClientset, schedulerClientset, clusterClientset, schedulerInformer, clusterInformer)
+
+	//10. start controllers, independent controller first
 	var wg sync.WaitGroup
 	klog.Infof("Start controllers")
-	klog.Infof("Start cluster controller")
-	wg.Add(1)
-	go clusterController.RunController(*workers, stopCh, &wg)
-	klog.Infof("Start scheduler controller")
-	wg.Add(1)
-	go schedulerController.RunController(*workers, stopCh, &wg)
+
+	//distributor
 	klog.Infof("Start distributor controller")
 	wg.Add(1)
 	go distributorController.RunController(quit, &wg)
+
+	//cluster
+	klog.Infof("Start cluster controller")
+	wg.Add(1)
+	go clusterController.RunController(*workers, stopCh, &wg)
+
+	//dispatcher
+	klog.Infof("Start dispatcher controller")
+	wg.Add(1)
+	go dispatcherController.RunController(*workers, stopCh, &wg)
+
+	//scheduler
+	klog.Infof("Start scheduler controller")
+	wg.Add(1)
+	go schedulerController.RunController(*workers, stopCh, &wg)
+
 	klog.Info("Main: Waiting for controllers to start")
 	wg.Wait()
 	klog.Info("Main: Completed to start all controllers")

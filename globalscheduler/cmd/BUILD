@@ -1,35 +1,19 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 
-filegroup(
-    name = "package-srcs",
-    srcs = glob(["**"]),
-    tags = ["automanaged"],
-    visibility = ["//visibility:private"],
-)
-
-filegroup(
-    name = "all-srcs",
-    srcs = [
-        ":package-srcs",
-        "//cmd/globalscheduler/gs-cluster-controller:all-srcs",
-        "//cmd/globalscheduler/gs-distributor-controller:all-srcs",
-        "//cmd/globalscheduler/gs-distributor-process:all-srcs",
-    ],
-    tags = ["automanaged"],
-    visibility = ["//visibility:public"],
-)
-
 go_library(
     name = "go_default_library",
     srcs = ["gs-controllers-manager.go"],
-    importpath = "k8s.io/kubernetes/cmd/globalscheduler",
+    importpath = "k8s.io/kubernetes/globalscheduler/cmd",
     visibility = ["//visibility:private"],
     deps = [
         "//globalscheduler/controllers/cluster:go_default_library",
+        "//globalscheduler/controllers/dispatcher:go_default_library",
         "//globalscheduler/controllers/distributor:go_default_library",
         "//globalscheduler/controllers/scheduler:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/clientset/versioned:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/informers/externalversions:go_default_library",
+        "//globalscheduler/pkg/apis/dispatcher/client/clientset/versioned:go_default_library",
+        "//globalscheduler/pkg/apis/dispatcher/client/informers/externalversions:go_default_library",
         "//globalscheduler/pkg/apis/distributor/client/clientset/versioned:go_default_library",
         "//globalscheduler/pkg/apis/distributor/client/informers/externalversions:go_default_library",
         "//globalscheduler/pkg/apis/scheduler/client/clientset/versioned:go_default_library",
@@ -42,8 +26,26 @@ go_library(
 )
 
 go_binary(
-    name = "globalscheduler",
+    name = "cmd",
     embed = [":go_default_library"],
     visibility = ["//visibility:public"],
 )
 
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//globalscheduler/cmd/cluster:all-srcs",
+        "//globalscheduler/cmd/dispatcher:all-srcs",
+        "//globalscheduler/cmd/scheduler:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)
