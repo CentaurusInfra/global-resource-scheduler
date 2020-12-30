@@ -19,6 +19,7 @@ package dispatcher
 import (
 	"fmt"
 	corev1 "k8s.io/api/core/v1"
+	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/runtime"
@@ -54,9 +55,10 @@ const (
 
 type DispatcherController struct {
 	// kubeclientset is a standard kubernetes clientset
-	kubeclientset    kubernetes.Interface
-	dispatcherclient dispatcherclientset.Interface
-	clusterclient    clusterclientset.Interface
+	kubeclientset          kubernetes.Interface
+	apiextensionsclientset apiextensionsclientset.Interface
+	dispatcherclient       dispatcherclientset.Interface
+	clusterclient          clusterclientset.Interface
 
 	dispatcherInformer dispatcherlisters.DispatcherLister
 	clusterInformer    clusterlisters.ClusterLister
@@ -78,6 +80,7 @@ type DispatcherController struct {
 // NewDispatcherController returns a new dispatcher controller
 func NewDispatcherController(
 	kubeclientset kubernetes.Interface,
+	apiextensionsclientset apiextensionsclientset.Interface,
 	dispatcherclient dispatcherclientset.Interface,
 	clusterclient clusterclientset.Interface,
 	dispatcherInformer dispatcherinformers.DispatcherInformer,
@@ -94,15 +97,16 @@ func NewDispatcherController(
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 
 	controller := &DispatcherController{
-		kubeclientset:      kubeclientset,
-		dispatcherclient:   dispatcherclient,
-		clusterclient:      clusterclient,
-		dispatcherInformer: dispatcherInformer.Lister(),
-		clusterInformer:    clusterInformer.Lister(),
-		dispatcherSynced:   dispatcherInformer.Informer().HasSynced,
-		consistentHash:     consistenthashing.New(),
-		workqueue:          workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Dispatcher"),
-		recorder:           recorder,
+		kubeclientset:          kubeclientset,
+		apiextensionsclientset: apiextensionsclientset,
+		dispatcherclient:       dispatcherclient,
+		clusterclient:          clusterclient,
+		dispatcherInformer:     dispatcherInformer.Lister(),
+		clusterInformer:        clusterInformer.Lister(),
+		dispatcherSynced:       dispatcherInformer.Informer().HasSynced,
+		consistentHash:         consistenthashing.New(),
+		workqueue:              workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Dispatcher"),
+		recorder:               recorder,
 	}
 
 	klog.Info("Setting up dispatcher event handlers")

@@ -11,6 +11,7 @@ go_library(
         "//globalscheduler/pkg/apis/cluster/client/informers/externalversions:go_default_library",
         "//globalscheduler/pkg/apis/scheduler/client/clientset/versioned:go_default_library",
         "//globalscheduler/pkg/apis/scheduler/client/informers/externalversions:go_default_library",
+        "//staging/src/k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset:go_default_library",
         "//staging/src/k8s.io/client-go/kubernetes:go_default_library",
         "//staging/src/k8s.io/client-go/tools/clientcmd:go_default_library",
         "//vendor/k8s.io/klog:go_default_library",
