@@ -19,6 +19,7 @@ package scheduler
 import (
 	"bytes"
 	"fmt"
+	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -60,9 +61,10 @@ const (
 
 type SchedulerController struct {
 	// kubeclientset is a standard kubernetes clientset
-	kubeclientset   kubernetes.Interface
-	schedulerclient schedulerclientset.Interface
-	clusterclient   clusterclientset.Interface
+	kubeclientset          kubernetes.Interface
+	apiextensionsclientset apiextensionsclientset.Interface
+	schedulerclient        schedulerclientset.Interface
+	clusterclient          clusterclientset.Interface
 
 	schedulerInformer schedulerlisters.SchedulerLister
 	clusterInformer   clusterlisters.ClusterLister
@@ -84,6 +86,7 @@ type SchedulerController struct {
 // NewSchedulerController returns a new scheduler controller
 func NewSchedulerController(
 	kubeclientset kubernetes.Interface,
+	apiextensionsclientset apiextensionsclientset.Interface,
 	schedulerclient schedulerclientset.Interface,
 	clusterclient clusterclientset.Interface,
 	schedulerInformer schedulerinformers.SchedulerInformer,
@@ -100,15 +103,16 @@ func NewSchedulerController(
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 
 	controller := &SchedulerController{
-		kubeclientset:     kubeclientset,
-		schedulerclient:   schedulerclient,
-		clusterclient:     clusterclient,
-		schedulerInformer: schedulerInformer.Lister(),
-		clusterInformer:   clusterInformer.Lister(),
-		schedulerSynced:   schedulerInformer.Informer().HasSynced,
-		consistentHash:    consistenthashing.New(),
-		workqueue:         workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Scheduler"),
-		recorder:          recorder,
+		kubeclientset:          kubeclientset,
+		apiextensionsclientset: apiextensionsclientset,
+		schedulerclient:        schedulerclient,
+		clusterclient:          clusterclient,
+		schedulerInformer:      schedulerInformer.Lister(),
+		clusterInformer:        clusterInformer.Lister(),
+		schedulerSynced:        schedulerInformer.Informer().HasSynced,
+		consistentHash:         consistenthashing.New(),
+		workqueue:              workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Scheduler"),
+		recorder:               recorder,
 	}
 
 	klog.Info("Setting up scheduler event handlers")

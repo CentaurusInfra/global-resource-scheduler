@@ -430,6 +430,8 @@ func ClusterRoles() []rbacv1.ClusterRole {
 				rbacv1helpers.NewRule("create", "update", "delete", "get", "list").Groups("globalscheduler.com").Resources("schedulers").RuleOrDie(),
 				// Give system:kube-controller-manager access to ClusterCRD
 				rbacv1helpers.NewRule("create", "update", "delete", "get", "list").Groups("globalscheduler.com").Resources("clusters").RuleOrDie(),
+				// Give system:kube-controller-manager access to crd definition
+				rbacv1helpers.NewRule("create", "update", "delete", "get", "list").Groups("apiextensions.k8s.io").Resources("customresourcedefinitions").RuleOrDie(),
 			},
 		},
 		{
