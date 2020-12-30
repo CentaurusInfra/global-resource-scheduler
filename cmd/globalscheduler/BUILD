@@ -12,6 +12,7 @@ filegroup(
     srcs = [
         ":package-srcs",
         "//cmd/globalscheduler/gs-cluster-controller:all-srcs",
+        "//cmd/globalscheduler/gs-dispatcher-process:all-srcs",
         "//cmd/globalscheduler/gs-distributor-controller:all-srcs",
         "//cmd/globalscheduler/gs-distributor-process:all-srcs",
     ],
@@ -46,4 +47,3 @@ go_binary(
     embed = [":go_default_library"],
     visibility = ["//visibility:public"],
 )
-

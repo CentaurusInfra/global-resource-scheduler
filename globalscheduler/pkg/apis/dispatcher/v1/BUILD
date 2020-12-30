@@ -11,7 +11,7 @@ go_library(
     importpath = "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/v1",
     visibility = ["//visibility:public"],
     deps = [
-        "//globalscheduler/pkg/apis/distributor:go_default_library",
+        "//globalscheduler/pkg/apis/dispatcher:go_default_library",
         "//staging/src/k8s.io/apimachinery/pkg/apis/meta/v1:go_default_library",
         "//staging/src/k8s.io/apimachinery/pkg/runtime:go_default_library",
         "//staging/src/k8s.io/apimachinery/pkg/runtime/schema:go_default_library",

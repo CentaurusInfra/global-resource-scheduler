@@ -28,7 +28,6 @@ import (
 	"k8s.io/kubernetes/globalscheduler/controllers/util/openstack"
 	dispatcherclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/client/clientset/versioned"
 	dispatcherv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/v1"
-	schedulerclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
 	"reflect"
 	"strings"
 )
@@ -39,7 +38,6 @@ type Process struct {
 	namespace           string
 	name                string
 	dispatcherClientset *dispatcherclientset.Clientset
-	schedulerClientset  *schedulerclientset.Clientset
 	clientset           *kubernetes.Clientset
 	podQueue            chan *v1.Pod
 	resetCh             chan struct{}
@@ -48,7 +46,7 @@ type Process struct {
 	tokenMap            map[string]string
 }
 
-func NewProcess(config *rest.Config, namespace string, name string, quit chan struct{}, start int64, end int64) Process {
+func NewProcess(config *rest.Config, namespace string, name string, quit chan struct{}) Process {
 	podQueue := make(chan *v1.Pod, 300)
 	defer close(podQueue)
 
@@ -63,11 +61,6 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 	}
 
 	clusterIdList, clusterIpMap := convertClustersToMap(dispatcher.Spec.Cluster)
-
-	schedulerClientset, err := schedulerclientset.NewForConfig(config)
-	if err != nil {
-		klog.Fatal(err)
-	}
 
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
@@ -91,7 +84,6 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		name:                name,
 		clientset:           clientset,
 		dispatcherClientset: dispatcherClientset,
-		schedulerClientset:  schedulerClientset,
 		podQueue:            podQueue,
 		resetCh:             resetCh,
 		clusterIdList:       clusterIdList,
@@ -122,7 +114,6 @@ func (p *Process) Run(quit chan struct{}) {
 				klog.Warningf("Failed to convert a new object  %+v to a dispatcher", new)
 				return
 			}
-			//TODO Spec.POD shall be Spec.Cluster
 			if !reflect.DeepEqual(oldDispatcher.Spec.Cluster, newDispatcher.Spec.Cluster) {
 				clusterIdList, clusterIpMap := convertClustersToMap(newDispatcher.Spec.Cluster)
 				p.clusterIdList = clusterIdList
@@ -184,7 +175,6 @@ func (p *Process) addBoundedPodsToQueue(resetCh chan struct{}, clusterIds []stri
 				klog.Warningf("Failed to convert a new object  %+v to a pod", new)
 				return
 			}
-			//TODO since the scheduler is not ready, we suppose that clusterName is set to non-empty during the event
 			if oldPod.ClusterName == "" && newPod.ClusterName != "" {
 				p.podQueue <- newPod
 			}
