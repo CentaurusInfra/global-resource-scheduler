@@ -1,5 +1,12 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
 go_library(
     name = "go_default_library",
     srcs = ["gs-controllers-manager.go"],

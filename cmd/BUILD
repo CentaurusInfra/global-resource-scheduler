@@ -21,8 +21,6 @@ filegroup(
         "//cmd/genutils:all-srcs",
         "//cmd/genyaml:all-srcs",
         "//cmd/globalscheduler/gs-dispatcher-process:all-srcs",
-        "//cmd/globalscheduler/gs-distributor-controller:all-srcs",
-        "//cmd/globalscheduler/gs-distributor-process:all-srcs",
         "//cmd/hyperkube:all-srcs",
         "//cmd/importverifier:all-srcs",
         "//cmd/kube-apiserver:all-srcs",
