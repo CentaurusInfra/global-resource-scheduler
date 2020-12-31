@@ -123,7 +123,7 @@ func main() {
 	}
 	dispatcherInformerFactory := dispatcherinformer.NewSharedInformerFactory(dispatcherClientset, time.Second*30)
 	dispatcherInformer := dispatcherInformerFactory.Globalscheduler().V1().Dispatchers()
-	dispatcherController := dispatcher.NewDispatcherController(kubeClientset, dispatcherClientset, clusterClientset, dispatcherInformer, clusterInformer)
+	dispatcherController := dispatcher.NewDispatcherController(kubeClientset, apiextensionsClient, dispatcherClientset, clusterClientset, dispatcherInformer, clusterInformer)
 
 	//9. scheduler
 	schedulerClientset, err := schedulerclientset.NewForConfig(config)
@@ -132,7 +132,7 @@ func main() {
 	}
 	schedulerInformerFactory := schedulerinformer.NewSharedInformerFactory(schedulerClientset, time.Second*30)
 	schedulerInformer := schedulerInformerFactory.Globalscheduler().V1().Schedulers()
-	schedulerController := scheduler.NewSchedulerController(kubeClientset, schedulerClientset, clusterClientset, schedulerInformer, clusterInformer)
+	schedulerController := scheduler.NewSchedulerController(kubeClientset, apiextensionsClient, schedulerClientset, clusterClientset, schedulerInformer, clusterInformer)
 
 	//10. start controllers, independent controller first
 	var wg sync.WaitGroup
