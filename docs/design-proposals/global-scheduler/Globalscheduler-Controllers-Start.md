@@ -7,8 +7,6 @@ Dec-30-2020
 This section describes how to build and run scheduler, distributor, dispatcher and cluster controllers of global scheduler concurrently.
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\itemsep1pt\parskip0pt\parsep0pt
 \item
   foo
 \item
