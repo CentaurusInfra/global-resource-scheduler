@@ -5,6 +5,7 @@ Dec-30-2020
 ## 1. Build GlobalScheduler Controllers
 
 This section describes how to build and run scheduler, distributor, dispatcher and cluster controllers of global scheduler concurrently.
+\usepackage{enumitem}
 \begin{enumerate}
 \item (1) ~/go/src/k8s.io/arktos$> make clean
 \item (2) ~/go/src/k8s.io/arktos$> make WHAT=globalscheduler/cmd/gs-controllers \\hfill \\break
