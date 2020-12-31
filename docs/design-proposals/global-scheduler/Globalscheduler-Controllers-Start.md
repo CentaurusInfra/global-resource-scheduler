@@ -8,7 +8,7 @@ This section describes how to build and run scheduler, distributor, dispatcher a
 
 
 
- foo
+ foo \
  bar
 
 (1) ~/go/src/k8s.io/arktos$> make clean
