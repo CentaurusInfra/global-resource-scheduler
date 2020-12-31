@@ -6,8 +6,16 @@ Dec-30-2020
 
 This section describes how to build and run scheduler, distributor, dispatcher and cluster controllers of global scheduler concurrently.
 
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  foo
+\item
+  bar
+\end{enumerate}
 (1) ~/go/src/k8s.io/arktos$> make clean
-/newline (2) ~/go/src/k8s.io/arktos$> make WHAT=globalscheduler/cmd/gs-controllers
+(2) ~/go/src/k8s.io/arktos$> make WHAT=globalscheduler/cmd/gs-controllers
 (3) ~/go/src/k8s.io/arktos$> make update
 (4) ~/go/src/k8s.io/arktos$> bazel clean
 (5) ~/go/src/k8s.io/arktos$> make bazel-test
