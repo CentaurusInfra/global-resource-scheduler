@@ -18,7 +18,7 @@ This section describes how to build and run scheduler, distributor, dispatcher a
 (2) ~/go/src/k8s.io/arktos$> ./hack/arktos-up.sh \
     Open another terminal. \
 (3) ~/go/src/k8s.io/arktos$> cd _output/local/bin/linux/amd64 \
-(4) ~/go/src/k8s.io/arktos/_output/local/bin/linux/amd64$>gs-controllers \
+(4) ~/go/src/k8s.io/arktos/_output/local/bin/linux/amd64$>./gs-controllers \
 The following step is optional. This starts cluster_grpc_server when global scheduler's ResourceCollector module is available. \
 (5) ~/go/src/k8s.io/kubernetes/globalscheduler/cmd$> go run cluster/cluster_grpc_server.go \
 
