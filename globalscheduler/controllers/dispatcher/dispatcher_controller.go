@@ -264,7 +264,7 @@ func (dc *DispatcherController) syncHandler(key *KeyWithEventType) error {
 			return fmt.Errorf("dispatcher object get failed")
 		}
 
-		if dispatcherCopy.State == "Delete" {
+		if dispatcherCopy.Status == "Delete" {
 			clusterIds := dc.consistentHash.Results[dispatcherCopy.Name]
 			dc.consistentHash.Remove(dispatcherCopy.Name)
 			for key, val := range dc.consistentHash.Results {
