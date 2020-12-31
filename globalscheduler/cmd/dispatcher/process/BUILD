@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 go_library(
     name = "go_default_library",
     srcs = ["dispatcher_worker.go"],
-    importpath = "k8s.io/kubernetes/cmd/globalscheduler/gs-dispatcher-process",
+    importpath = "k8s.io/kubernetes/globalscheduler/cmd/dispatcher/process",
     visibility = ["//visibility:private"],
     deps = [
         "//globalscheduler/controllers/dispatcher:go_default_library",
@@ -14,7 +14,7 @@ go_library(
 )
 
 go_binary(
-    name = "gs-dispatcher-process",
+    name = "process",
     embed = [":go_default_library"],
     visibility = ["//visibility:public"],
 )
