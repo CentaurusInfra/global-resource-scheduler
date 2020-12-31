@@ -107,6 +107,18 @@ func (c *FakeDispatchers) Update(dispatcher *dispatcherv1.Dispatcher) (result *d
 	return obj.(*dispatcherv1.Dispatcher), err
 }
 
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+func (c *FakeDispatchers) UpdateStatus(dispatcher *dispatcherv1.Dispatcher) (*dispatcherv1.Dispatcher, error) {
+	obj, err := c.Fake.
+		Invokes(testing.NewUpdateSubresourceActionWithMultiTenancy(dispatchersResource, "status", c.ns, dispatcher, c.te), &dispatcherv1.Dispatcher{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*dispatcherv1.Dispatcher), err
+}
+
 // Delete takes name of the dispatcher and deletes it. Returns an error if one occurs.
 func (c *FakeDispatchers) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.

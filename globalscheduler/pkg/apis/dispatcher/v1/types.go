@@ -32,8 +32,8 @@ type Dispatcher struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec  DispatcherSpec `json:"spec,omitempty"`
-	State string         `json:"state"`
+	Spec   DispatcherSpec `json:"spec,omitempty"`
+	Status string         `json:"status"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

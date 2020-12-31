@@ -17,6 +17,7 @@ limitations under the License.
 package scheduler
 
 import (
+	fakeapiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/fake"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -45,9 +46,10 @@ var (
 type fixture struct {
 	t *testing.T
 
-	schedulerClient *schedulerfake.Clientset
-	clusterClient   *clusterfake.Clientset
-	kubeclient      *k8sfake.Clientset
+	schedulerClient     *schedulerfake.Clientset
+	clusterClient       *clusterfake.Clientset
+	kubeclient          *k8sfake.Clientset
+	apiextensionsclient *fakeapiextensionsv1beta1.Clientset
 	// Objects to put in the store.
 	schedulerLister []*schedulercrdv1.Scheduler
 	clusterLister   []*clustercrdv1.Cluster
@@ -56,9 +58,10 @@ type fixture struct {
 	clusterActions   []core.Action
 	schedulerActions []core.Action
 	// Objects from here preloaded into NewSimpleFake.
-	kubeobjects      []runtime.Object
-	schedulerobjects []runtime.Object
-	clusterobjects   []runtime.Object
+	kubeobjects         []runtime.Object
+	schedulerobjects    []runtime.Object
+	clusterobjects      []runtime.Object
+	apiextensionobjects []runtime.Object
 }
 
 func newFixture(t *testing.T) *fixture {
@@ -127,10 +130,11 @@ func (f *fixture) newController() (*SchedulerController, schedulerinformers.Shar
 	f.schedulerClient = schedulerfake.NewSimpleClientset(f.schedulerobjects...)
 	f.clusterClient = clusterfake.NewSimpleClientset(f.clusterobjects...)
 	f.kubeclient = k8sfake.NewSimpleClientset(f.kubeobjects...)
+	f.apiextensionsclient = fakeapiextensionsv1beta1.NewSimpleClientset(f.apiextensionobjects...)
 	si := schedulerinformers.NewSharedInformerFactory(f.schedulerClient, noResyncPeriodFunc())
 	ci := clusterinformers.NewSharedInformerFactory(f.clusterClient, noResyncPeriodFunc())
 
-	p := NewSchedulerController(f.kubeclient, f.schedulerClient, f.clusterClient, si.Globalscheduler().V1().Schedulers(), ci.Globalscheduler().V1().Clusters())
+	p := NewSchedulerController(f.kubeclient, f.apiextensionsclient, f.schedulerClient, f.clusterClient, si.Globalscheduler().V1().Schedulers(), ci.Globalscheduler().V1().Clusters())
 	p.schedulerSynced = alwaysReady
 	p.recorder = &record.FakeRecorder{}
 
