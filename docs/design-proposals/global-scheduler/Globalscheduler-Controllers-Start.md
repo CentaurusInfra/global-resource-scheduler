@@ -7,8 +7,8 @@ Dec-30-2020
 This section describes how to build and run scheduler, distributor, dispatcher and cluster controllers of global scheduler concurrently using a single main() function.
 
 (1) ~/go/src/k8s.io/arktos$> make clean \
-(2) ~/go/src/k8s.io/arktos$> make all WHAT=globalscheduler/cmd/gs-controllers \
-(3) ~/go/src/k8s.io/arktos$> make update \
+(2) ~/go/src/k8s.io/arktos$> make update \
+(3) ~/go/src/k8s.io/arktos$> make all WHAT=globalscheduler/cmd/gs-controllers \
 (4) ~/go/src/k8s.io/arktos$> bazel clean \
 (5) ~/go/src/k8s.io/arktos$> make bazel-test \
 (6) ~/go/src/k8s.io/arktos$> make bazel-test-integration

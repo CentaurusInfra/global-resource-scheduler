@@ -141,21 +141,25 @@ func main() {
 	//distributor
 	klog.Infof("Start distributor controller")
 	wg.Add(1)
+	distributorFactory.Start(quit)
 	go distributorController.RunController(quit, &wg)
 
 	//cluster
 	klog.Infof("Start cluster controller")
 	wg.Add(1)
+	clusterInformerFactory.Start(stopCh)
 	go clusterController.RunController(*workers, stopCh, &wg)
 
 	//dispatcher
 	klog.Infof("Start dispatcher controller")
 	wg.Add(1)
+	dispatcherInformerFactory.Start(stopCh)
 	go dispatcherController.RunController(*workers, stopCh, &wg)
 
 	//scheduler
 	klog.Infof("Start scheduler controller")
 	wg.Add(1)
+	schedulerInformerFactory.Start(stopCh)
 	go schedulerController.RunController(*workers, stopCh, &wg)
 
 	klog.Info("Main: Waiting for controllers to start")
