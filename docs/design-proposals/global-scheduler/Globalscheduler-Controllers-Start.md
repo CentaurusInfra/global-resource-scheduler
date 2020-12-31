@@ -4,7 +4,7 @@ Dec-30-2020
 
 ## 1. Build GlobalScheduler Controllers
 
-This section describes how to build and run scheduler, distributor, dispatcher and cluster controllers of global scheduler concurrently.
+This section describes how to build and run scheduler, distributor, dispatcher and cluster controllers of global scheduler concurrently using a single main() function.
 
 (1) ~/go/src/k8s.io/arktos$> make clean \
 (2) ~/go/src/k8s.io/arktos$> make WHAT=globalscheduler/cmd/gs-controllers \
