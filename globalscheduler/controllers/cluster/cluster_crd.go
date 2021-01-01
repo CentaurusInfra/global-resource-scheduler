@@ -56,7 +56,7 @@ func (c *ClusterController) waitCRDAccepted() error {
 }
 
 // CreateCRD creates a custom resource definition, Cluster.
-func (c *ClusterController) CreateCRD() error {
+func (c *ClusterController) CreateClusterCRD() error {
 	if result, _ := c.doesCRDExist(); result {
 		return nil
 	}

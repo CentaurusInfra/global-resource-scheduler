@@ -111,7 +111,7 @@ func main() {
 	clusterInformerFactory := clusterinformer.NewSharedInformerFactory(clusterClientset, time.Second*30)
 	clusterInformer := clusterInformerFactory.Globalscheduler().V1().Clusters()
 	clusterController := cluster.NewClusterController(kubeClientset, apiextensionsClient, clusterClientset, clusterInformer, *grpcHost)
-	err = clusterController.CreateCRD()
+	err = clusterController.CreateClusterCRD()
 	if err != nil {
 		klog.Fatalf("error - register cluster crd: %s", err.Error())
 	}
@@ -123,7 +123,11 @@ func main() {
 	}
 	dispatcherInformerFactory := dispatcherinformer.NewSharedInformerFactory(dispatcherClientset, time.Second*30)
 	dispatcherInformer := dispatcherInformerFactory.Globalscheduler().V1().Dispatchers()
-	dispatcherController := dispatcher.NewDispatcherController(kubeClientset, dispatcherClientset, clusterClientset, dispatcherInformer, clusterInformer)
+	dispatcherController := dispatcher.NewDispatcherController(kubeClientset, apiextensionsClient, dispatcherClientset, clusterClientset, dispatcherInformer, clusterInformer)
+	err = dispatcherController.CreateDispatcherCRD()
+	if err != nil {
+		klog.Fatalf("error - register dispatcher crd: %s", err.Error())
+	}
 
 	//9. scheduler
 	schedulerClientset, err := schedulerclientset.NewForConfig(config)
@@ -132,7 +136,7 @@ func main() {
 	}
 	schedulerInformerFactory := schedulerinformer.NewSharedInformerFactory(schedulerClientset, time.Second*30)
 	schedulerInformer := schedulerInformerFactory.Globalscheduler().V1().Schedulers()
-	schedulerController := scheduler.NewSchedulerController(kubeClientset, schedulerClientset, clusterClientset, schedulerInformer, clusterInformer)
+	schedulerController := scheduler.NewSchedulerController(kubeClientset, apiextensionsClient, schedulerClientset, clusterClientset, schedulerInformer, clusterInformer)
 
 	//10. start controllers, independent controller first
 	var wg sync.WaitGroup
@@ -141,21 +145,25 @@ func main() {
 	//distributor
 	klog.Infof("Start distributor controller")
 	wg.Add(1)
+	distributorFactory.Start(quit)
 	go distributorController.RunController(quit, &wg)
 
 	//cluster
 	klog.Infof("Start cluster controller")
 	wg.Add(1)
+	clusterInformerFactory.Start(stopCh)
 	go clusterController.RunController(*workers, stopCh, &wg)
 
 	//dispatcher
 	klog.Infof("Start dispatcher controller")
 	wg.Add(1)
+	dispatcherInformerFactory.Start(stopCh)
 	go dispatcherController.RunController(*workers, stopCh, &wg)
 
 	//scheduler
 	klog.Infof("Start scheduler controller")
 	wg.Add(1)
+	schedulerInformerFactory.Start(stopCh)
 	go schedulerController.RunController(*workers, stopCh, &wg)
 
 	klog.Info("Main: Waiting for controllers to start")

@@ -123,7 +123,7 @@ func (f *fixture) newController() (*ClusterController, informers.SharedInformerF
 	for _, f := range f.clusterLister {
 		i.Globalscheduler().V1().Clusters().Informer().GetIndexer().Add(f)
 	}
-	c.CreateCRD()
+	c.CreateClusterCRD()
 	return c, i, k8sI
 }
 
