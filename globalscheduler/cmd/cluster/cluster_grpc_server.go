@@ -115,12 +115,12 @@ func main() {
 	klog.Info("Server started, Port: " + Port)
 	lis, err := net.Listen("tcp", Port)
 	if err != nil {
-		klog.Printf("failed to listen: %v", err)
+		klog.Infof("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
 	pb.RegisterResourceCollectorProtocolServer(s, &ResourceCollectorProtocolServer{})
 	if err := s.Serve(lis); err != nil {
-		klog.Printf("failed to serve: %v", err)
+		klog.Infof("failed to serve: %v", err)
 	}
 }
 
