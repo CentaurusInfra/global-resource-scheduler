@@ -174,4 +174,3 @@ func main() {
 	wg.Wait()
 	klog.Info("Main: Completed to start all controllers")
 }
-

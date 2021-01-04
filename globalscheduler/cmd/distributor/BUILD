@@ -34,7 +34,7 @@ filegroup(
     name = "all-srcs",
     srcs = [
         ":package-srcs",
-        "//globalscheduler/cmd/distributor/process:all-srcs",
+        "//globalscheduler/cmd/distributor/distributorprocess:all-srcs",
     ],
     tags = ["automanaged"],
     visibility = ["//visibility:public"],

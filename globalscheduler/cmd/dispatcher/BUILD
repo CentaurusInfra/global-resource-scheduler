@@ -29,7 +29,7 @@ filegroup(
     name = "all-srcs",
     srcs = [
         ":package-srcs",
-        "//globalscheduler/cmd/dispatcher/process:all-srcs",
+        "//globalscheduler/cmd/dispatcher/dispatcherprocess:all-srcs",
     ],
     tags = ["automanaged"],
     visibility = ["//visibility:public"],

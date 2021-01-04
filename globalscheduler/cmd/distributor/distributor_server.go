@@ -20,13 +20,12 @@ import (
 	"flag"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
-	distributorinformer "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/client/informers/externalversions"
-
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/component-base/logs"
 	"k8s.io/klog"
 	controller "k8s.io/kubernetes/globalscheduler/controllers/distributor"
 	clientset "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/client/clientset/versioned"
+	distributorinformer "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/client/informers/externalversions"
 )
 
 func main() {
@@ -44,6 +43,7 @@ func main() {
 	defer close(quit)
 
 	kubeClientset, err := kubernetes.NewForConfig(config)
+
 	if err != nil {
 		klog.Fatalf("Error building kubernetes clientset: %v", err)
 	}
