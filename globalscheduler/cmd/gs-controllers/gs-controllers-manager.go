@@ -18,9 +18,7 @@ package main
 
 import (
 	"flag"
-	//	"os"
 	"sync"
-	//	"syscall"
 	"time"
 
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"

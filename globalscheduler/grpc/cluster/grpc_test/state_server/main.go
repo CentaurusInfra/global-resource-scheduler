@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package state_server
+package main
 
 import (
+	"flag"
 	"context"
-	"fmt"
 	"net"
 
 	grpc "google.golang.org/grpc"
@@ -31,7 +31,10 @@ const (
 )
 
 // ApiServer : Empty API server struct
-type ResourceCollectorProtocolServer struct{}
+type ResourceCollectorProtocolServer struct{
+	kubeconfig string
+	masterURL string
+}
 
 // services - Send cluster profile
 func (s *ResourceCollectorProtocolServer) UpdateClusterStatus(ctx context.Context, in *pb.ClusterState) (*pb.ReturnMessageClusterState, error) {
@@ -44,13 +47,19 @@ func (s *ResourceCollectorProtocolServer) UpdateClusterStatus(ctx context.Contex
 }
 
 func main() {
+	kubeconfig := flag.String("kubeconfig", "/var/run/kubernetes/admin.kubeconfig", "Path to a kubeconfig. Only required if out-of-cluster.")
+	masterURL := flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+
+	flag.Parse()
+	defer klog.Flush()
+	
 	klog.Infof("Server started, Port: " + Port)
 	lis, err := net.Listen("tcp", Port)
 	if err != nil {
 		klog.Infof("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	pb.RegisterResourceCollectorProtocolServer(s, &ResourceCollectorProtocolServer{})
+	pb.RegisterResourceCollectorProtocolServer(s, &ResourceCollectorProtocolServer{*kubeconfig, *masterURL})
 	if err := s.Serve(lis); err != nil {
 		klog.Infof("failed to serve: %v", err)
 	}
