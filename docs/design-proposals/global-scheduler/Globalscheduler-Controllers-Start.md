@@ -21,7 +21,7 @@ This section describes how to build and run scheduler, distributor, dispatcher a
 (3) ~/go/src/k8s.io/arktos/_output/local/bin/linux/amd64$>./gs-controllers \
 The following step is optional. This starts cluster_grpc_server when global scheduler's ResourceCollector module is available. \
 (4) ~/go/src/k8s.io/arktos/_output/local/bin/linux/amd64$>./grpc-server \
-Testing yaml files are located in /globalscheduler/test/yaml
+Testing yaml files are located in /globalscheduler/test/yaml \
 (5) ~/go/src/k8s.io/arktos/globalscheduler/test/yaml$>kubectl apply -f tested_cluster_object2.yaml
 
 ## 3. Check log files 
