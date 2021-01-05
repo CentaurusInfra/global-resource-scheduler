@@ -182,12 +182,11 @@ func (c *ClusterController) CreateClusterCRD() error {
 			},
 		},
 	}
-
 	_, err := c.apiextensionsclientset.ApiextensionsV1beta1().CustomResourceDefinitions().Create(crd)
-
 	if err != nil {
-		klog.Fatalf(err.Error())
+		klog.Errorf(err.Error())
 	}
+	klog.Info("Registered a cluster CRD")
 	return c.waitCRDAccepted()
 }
 
@@ -196,9 +195,10 @@ func (c *ClusterController) CreateObject(object *clusterv1.Cluster) error {
 	_, err := c.clusterclientset.GlobalschedulerV1().Clusters(corev1.NamespaceDefault).Create(object)
 	errorMessage := err
 	if err != nil {
-		klog.Fatalf("could not create: %v", errorMessage)
+		klog.Errorf("cluster creation error: %v", errorMessage)
+	} else {
+		klog.Infof("Created a cluster: %s", object.Name)
 	}
-	klog.Infof("Created a cluster: %s", object.Name)
 	return err
 }
 
@@ -208,8 +208,9 @@ func (c *ClusterController) UpdateClusterStatus(namespace, clustername string) e
 	clusterCopy := cluster.DeepCopy()
 	_, err = c.clusterclientset.GlobalschedulerV1().Clusters(cluster.Namespace).Update(clusterCopy)
 	if err != nil {
-		klog.Infof("cluster update error - %v", clustername)
-		return err
+		klog.Errorf("cluster update error - %v", clustername)
+	} else {
+		klog.Infof("Updated a cluster: %s", clustername)
 	}
 	return err
 }
@@ -222,8 +223,9 @@ func (c *ClusterController) DeleteObject(clustername string) error {
 	}
 	err := c.clusterclientset.GlobalschedulerV1().Clusters(corev1.NamespaceDefault).Delete(clustername, &deleteOptions)
 	if err != nil {
-		klog.Errorf("could not delete: %v", err)
+		klog.Errorf("cluster deletion error: %v", err)
+	} else {
+		klog.Infof("Deleted a cluster: %s", clustername)
 	}
-	klog.Infof("Deleted a cluster: %s", clustername)
 	return err
 }

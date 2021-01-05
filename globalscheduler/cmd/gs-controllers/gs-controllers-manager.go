@@ -55,12 +55,12 @@ func main() {
 	masterURL := flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	workers := flag.Int("concurrent-workers", 0, "The number of workers that are allowed to process concurrently.")
 	grpcHost := flag.String("grpchost", "", "IP address of resource collector.")
-
 	flag.Parse()
 	if *workers <= 0 {
 		*workers = defaultWorkers
 	}
 	defer klog.Flush()
+	klog.Infof("gs-controllers-manager configuration: kubeconfig %s, masterURL %s, workers %v, grpcHost %s", *kubeconfig, *masterURL, *workers, *grpcHost)
 
 	//2. config
 	config, err := clientcmd.BuildConfigFromFlags(*masterURL, *kubeconfig)
@@ -77,18 +77,21 @@ func main() {
 	defer close(quit)
 
 	//4. kubecluent
+	klog.Infof("configure kubernetes cluent")
 	kubeClientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		klog.Fatalf("error building Kubernetes client: %s", err.Error())
 	}
 
 	//5. apiextensions clientset to create crd programmatically
+	klog.Infof("configure apiextensions client")
 	apiextensionsClient, err := apiextensionsclientset.NewForConfig(config)
 	if err != nil {
 		klog.Fatalf("error - building global scheduler cluster apiextensions client: %s", err.Error())
 	}
 
 	//6. distributer_server
+	klog.Infof("configure distributor controller")
 	distributorClientset, err := distributorclientset.NewForConfig(config)
 	if err != nil {
 		klog.Fatalf("Error building distributor clientset: %v", err)
@@ -102,6 +105,7 @@ func main() {
 	}
 
 	//7. cluster
+	klog.Infof("configure cluster controller")
 	clusterClientset, err := clusterclientset.NewForConfig(config)
 	if err != nil {
 		klog.Fatalf("Error building clusterclientset: %s", err.Error())
@@ -115,6 +119,7 @@ func main() {
 	}
 
 	//8. dispatcher
+	klog.Infof("configure dispatcher controller")
 	dispatcherClientset, err := dispatcherclientset.NewForConfig(config)
 	if err != nil {
 		klog.Fatalf("Error building dispatcher clientset: %s", err.Error())
@@ -128,6 +133,7 @@ func main() {
 	}
 
 	//9. scheduler
+	klog.Infof("configure scheduler controller")
 	schedulerClientset, err := schedulerclientset.NewForConfig(config)
 	if err != nil {
 		klog.Fatalf("Error building scheduler clientset: %s", err.Error())

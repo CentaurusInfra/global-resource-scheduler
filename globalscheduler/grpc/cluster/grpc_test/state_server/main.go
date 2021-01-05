@@ -17,8 +17,8 @@ limitations under the License.
 package main
 
 import (
-	"flag"
 	"context"
+	"flag"
 	"net"
 
 	grpc "google.golang.org/grpc"
@@ -31,9 +31,9 @@ const (
 )
 
 // ApiServer : Empty API server struct
-type ResourceCollectorProtocolServer struct{
+type ResourceCollectorProtocolServer struct {
 	kubeconfig string
-	masterURL string
+	masterURL  string
 }
 
 // services - Send cluster profile
@@ -52,7 +52,7 @@ func main() {
 
 	flag.Parse()
 	defer klog.Flush()
-	
+
 	klog.Infof("Server started, Port: " + Port)
 	lis, err := net.Listen("tcp", Port)
 	if err != nil {
