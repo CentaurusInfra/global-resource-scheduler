@@ -31,7 +31,8 @@ import (
 )
 
 const (
-	Port             = ":50053"
+	DefaultAddress   = "localhost"
+	DefaultPort      = "50053"
 	ReturnError      = 0
 	ReturnOk         = 1
 	StateReady       = 1
@@ -39,13 +40,11 @@ const (
 	StateUnreachable = 3
 )
 
-var (
-	masterURL  string
-	kubeconfig string
-)
-
 // ApiServer : Empty API server struct
-type ResourceCollectorProtocolServer struct{}
+type ResourceCollectorProtocolServer struct {
+	kubeconfig string
+	masterURL  string
+}
 
 // services - Send cluster profile
 func (s *ResourceCollectorProtocolServer) UpdateClusterStatus(ctx context.Context, in *pb.ClusterState) (*pb.ReturnMessageClusterState, error) {
@@ -53,7 +52,7 @@ func (s *ResourceCollectorProtocolServer) UpdateClusterStatus(ctx context.Contex
 	ns := in.NameSpace
 	name := in.Name
 	state := in.State
-	cfg, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
+	cfg, err := clientcmd.BuildConfigFromFlags(s.masterURL, s.kubeconfig)
 	if err != nil {
 		klog.Errorf("error getting client config: %s", err.Error())
 	}
@@ -103,28 +102,29 @@ func (s *ResourceCollectorProtocolServer) UpdateClusterStatus(ctx context.Contex
 		return &pb.ReturnMessageClusterState{NameSpace: ns, Name: name, ReturnCode: ReturnError}, nil
 
 	} else {
-		klog.Info("updated cluster state: %v", cluster)
+		klog.Infof("updated cluster state: %v", cluster)
 	}
 	return &pb.ReturnMessageClusterState{NameSpace: ns, Name: name, ReturnCode: ReturnOk}, nil
 }
 
 func main() {
+	kubeconfig := flag.String("kubeconfig", "/var/run/kubernetes/admin.kubeconfig", "Path to a kubeconfig. Only required if out-of-cluster.")
+	masterURL := flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+	address := flag.String("address", "localhost", "The address of the gRPC server.")
+	port := flag.String("port", "50053", "The port number of the gRPC server")
+
 	flag.Parse()
 	defer klog.Flush()
+	addressport := *address + ":" + *port
+	klog.Infof("Server started: address:port %s", addressport)
 
-	klog.Info("Server started, Port: " + Port)
-	lis, err := net.Listen("tcp", Port)
+	lis, err := net.Listen("tcp", addressport)
 	if err != nil {
-		klog.Infof("failed to listen: %v", err)
+		klog.Errorf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	pb.RegisterResourceCollectorProtocolServer(s, &ResourceCollectorProtocolServer{})
+	pb.RegisterResourceCollectorProtocolServer(s, &ResourceCollectorProtocolServer{*kubeconfig, *masterURL})
 	if err := s.Serve(lis); err != nil {
-		klog.Infof("failed to serve: %v", err)
+		klog.Errorf("failed to serve: %v", err)
 	}
-}
-
-func init() {
-	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
-	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 }

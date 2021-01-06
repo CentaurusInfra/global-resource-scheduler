@@ -38,14 +38,17 @@ const (
 
 // GrpcCreateCluster is to invoking grpc func of SendClusterProfile
 func GrpcSendClusterProfile(grpcHost string, cluster *clusterv1.Cluster) *pb.ReturnMessageClusterProfile {
+	klog.Infof("Cluster controller is connecting ResourceCollector %s to send cluster profile %v", grpcHost, cluster)
 	client, ctx, conn, cancel, err := getGrpcClient(grpcHost)
 	if err != nil {
+		klog.Errorf("Error to make a connection to ResourceCollector %s", grpcHost)
 		return getReturnMessageFromError(cluster.ObjectMeta.Namespace, cluster.ObjectMeta.Name, &err)
 	}
 	defer conn.Close()
 	defer cancel()
 	returnMessage, err := client.SendClusterProfile(ctx, ConvertClusterToClusterProfile(cluster))
 	if err != nil {
+		klog.Errorf("Error to send cluster profile to ResourceCollector %v", cluster)
 		return getReturnMessageFromError(cluster.ObjectMeta.Namespace, cluster.ObjectMeta.Name, &err)
 	}
 	return returnMessage
@@ -102,12 +105,14 @@ func ConvertClusterToClusterProfile(cluster *clusterv1.Cluster) *pb.ClusterProfi
 			ServerPrice:   cluster.Spec.ServerPrice,
 			HomeScheduler: cluster.Spec.HomeScheduler,
 		},
+		ClusterStatus: cluster.Status,
 	}
-	klog.Infof("Cluster controller is sending cluster profile info to ResourceCollector %v", clusterProfile)
+	klog.Infof("Converted a cluster to grpc protocol: %v", clusterProfile)
 	return clusterProfile
 }
 
 func getGrpcClient(grpcHost string) (pb.ClusterProtocolClient, context.Context, *grpc.ClientConn, context.CancelFunc, error) {
+	klog.Infof("get gRPC client: %s", grpcHost)
 	address := fmt.Sprintf("%s:%s", grpcHost, Port)
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
@@ -120,6 +125,7 @@ func getGrpcClient(grpcHost string) (pb.ClusterProtocolClient, context.Context, 
 }
 
 func getReturnMessageFromError(ns, name string, err *error) *pb.ReturnMessageClusterProfile {
+	klog.Infof("generate a gRPC error message: %s, %s", ns, name)
 	return &pb.ReturnMessageClusterProfile{
 		ClusterNameSpace: ns,
 		ClusterName:      name,
