@@ -16,26 +16,26 @@ limitations under the License.
 package distributor
 
 import (
-	"k8s.io/apimachinery/pkg/fields"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/klog"
-	distributortype "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor"
-	distributorv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/v1"
-	"strconv"
-	"sync"
-
 	"errors"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/klog"
+	distributortype "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor"
 	distributorclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/client/clientset/versioned"
+	distributorv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/v1"
 	schedulerclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
 	schedulerinformer "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/informers/externalversions"
 	schedulerlister "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/listers/scheduler/v1"
 	schedulerv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
+	"os"
+	"strconv"
+	"syscall"
 )
 
 const distributorName = "distributor"
@@ -56,13 +56,20 @@ type Process struct {
 	priorities           []priorityFunc
 	rangeStart           int64
 	rangeEnd             int64
+	pid                  int
 }
 
-func NewProcess(config *rest.Config, namespace string, name string, quit chan struct{}, start int64, end int64) Process {
+func NewProcess(config *rest.Config, namespace string, name string, quit chan struct{}) Process {
+
 	podQueue := make(chan *v1.Pod, 300)
 	defer close(podQueue)
 
 	distributorClientset, err := distributorclientset.NewForConfig(config)
+	if err != nil {
+		klog.Fatal(err)
+	}
+
+	distributor, err := distributorClientset.GlobalschedulerV1().Distributors(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
 		klog.Fatal(err)
 	}
@@ -78,16 +85,10 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 	}
 
 	resetCh := make(chan struct{})
-	defer close(resetCh)
-	go func() {
-		for {
-			select {
-			case <-quit:
-				resetCh <- struct{}{}
-				return
-			}
-		}
-	}()
+
+	if err != nil {
+		klog.Warningf("Failed to run distributor process %v - %v with the err %v", namespace, distributorName, err)
+	}
 
 	return Process{
 		namespace:            namespace,
@@ -104,8 +105,9 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		priorities: []priorityFunc{
 			GeoLocationPriority,
 		},
-		rangeStart: start,
-		rangeEnd:   end,
+		rangeStart: distributor.Spec.Range.Start,
+		rangeEnd:   distributor.Spec.Range.End,
+		pid:        os.Getgid(),
 	}
 }
 
@@ -116,53 +118,46 @@ func initSchedulerInformers(schedulerClientset *schedulerclientset.Clientset, qu
 	return schedulerInformer.Lister()
 }
 
-func (p *Process) RunController(quit chan struct{}, wg *sync.WaitGroup) {
-	defer wg.Done()
-	p.Run(quit)
-}
-
 func (p *Process) Run(quit chan struct{}) {
-	distributorSelector := fields.ParseSelectorOrDie(
-		",metatdata.namespace" + p.namespace + ",metatdata.name=" + p.name)
-	distributorLW := cache.NewListWatchFromClient(p.distributorClientset, string(distributortype.Plural), metav1.NamespaceAll, distributorSelector)
-
+	distributorSelector := fields.ParseSelectorOrDie("metadata.name=" + p.name)
+	distributorLW := cache.NewListWatchFromClient(p.distributorClientset.GlobalschedulerV1(), string(distributortype.Plural), p.namespace, distributorSelector)
 	distributorInformer := cache.NewSharedIndexInformer(distributorLW, &distributorv1.Distributor{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
-
 	distributorInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		DeleteFunc: func(obj interface{}) {
-			quit <- struct{}{}
+			if err := syscall.Kill(-p.pid, 15); err != nil {
+				klog.Fatalf("Fail to exit the current process %v\n", err)
+			}
 		},
 		UpdateFunc: func(old, new interface{}) {
-			oldDistributor, ok := old.(*distributorv1.DistributorRange)
+			oldDistributor, ok := old.(*distributorv1.Distributor)
 			if !ok {
 				klog.Warningf("Failed to convert a old object  %+v to a distributor", old)
 				return
 			}
-			newDistributor, ok := new.(*distributorv1.DistributorRange)
+			newDistributor, ok := new.(*distributorv1.Distributor)
 			if !ok {
 				klog.Warningf("Failed to convert a new object  %+v to a distributor", new)
 				return
 			}
-			if oldDistributor.Start != newDistributor.Start || oldDistributor.End != newDistributor.End {
-				podInformer := p.initPodInformers(p.resetCh, newDistributor.Start, newDistributor.End)
+			if oldDistributor.Spec.Range.Start != newDistributor.Spec.Range.Start || oldDistributor.Spec.Range.End != newDistributor.Spec.Range.End {
+				podInformer := p.initPodInformers(newDistributor.Spec.Range.Start, newDistributor.Spec.Range.End)
 				podInformer.Run(p.resetCh)
 			}
 		},
 	})
 
-	podInformer := p.initPodInformers(p.resetCh, p.rangeStart, p.rangeEnd)
+	podInformer := p.initPodInformers(p.rangeStart, p.rangeEnd)
 	go podInformer.Run(p.resetCh)
 	go distributorInformer.Run(quit)
 	wait.Until(p.ScheduleOne, 0, quit)
 }
 
-func (p *Process) initPodInformers(resetCh chan struct{}, start, end int64) cache.SharedIndexInformer {
-	resetCh <- struct{}{}
-
+func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
+	close(p.resetCh)
+	p.resetCh = make(chan struct{})
 	podSelector := fields.ParseSelectorOrDie(
-		"status.phase=" + string(v1.PodPending) + ",status.phase!=" + string(v1.PodFailed) +
-			",metatdata.hashkey=gte:" + strconv.FormatInt(start, 10) +
-			",metatdata.hashkey=lte:" + strconv.FormatInt(end, 10))
+		"metatdata.hashkey=gte:" + strconv.FormatInt(start, 10) + ",metatdata.hashkey=lte:" + strconv.FormatInt(end, 10) + ",status.phase=" + string(v1.PodPending))
+
 	lw := cache.NewListWatchFromClient(p.clientset.CoreV1(), string(v1.ResourcePods), metav1.NamespaceAll, podSelector)
 
 	podInformer := cache.NewSharedIndexInformer(lw, &v1.Pod{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})

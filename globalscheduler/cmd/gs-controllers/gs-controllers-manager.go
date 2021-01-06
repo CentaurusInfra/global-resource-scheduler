@@ -126,7 +126,7 @@ func main() {
 	}
 	dispatcherInformerFactory := dispatcherinformer.NewSharedInformerFactory(dispatcherClientset, time.Second*30)
 	dispatcherInformer := dispatcherInformerFactory.Globalscheduler().V1().Dispatchers()
-	dispatcherController := dispatcher.NewDispatcherController(kubeClientset, apiextensionsClient, dispatcherClientset, clusterClientset, dispatcherInformer, clusterInformer)
+	dispatcherController := dispatcher.NewDispatcherController(*kubeconfig, kubeClientset, apiextensionsClient, dispatcherClientset, clusterClientset, dispatcherInformer, clusterInformer)
 	err = dispatcherController.CreateDispatcherCRD()
 	if err != nil {
 		klog.Fatalf("error - register dispatcher crd: %s", err.Error())
@@ -141,6 +141,9 @@ func main() {
 	schedulerInformerFactory := schedulerinformer.NewSharedInformerFactory(schedulerClientset, time.Second*30)
 	schedulerInformer := schedulerInformerFactory.Globalscheduler().V1().Schedulers()
 	schedulerController := scheduler.NewSchedulerController(kubeClientset, apiextensionsClient, schedulerClientset, clusterClientset, schedulerInformer, clusterInformer)
+	if err = schedulerController.CreateSchedulerCRD(); err != nil {
+		klog.Fatalf("error - register scheduler crd: %s", err.Error())
+	}
 
 	//10. start controllers, independent controller first
 	var wg sync.WaitGroup

@@ -2,8 +2,8 @@ load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 
 go_library(
     name = "go_default_library",
-    srcs = ["distributor_worker.go"],
-    importpath = "k8s.io/kubernetes/globalscheduler/cmd/distributor/process",
+    srcs = ["distributor_process.go"],
+    importpath = "k8s.io/kubernetes/globalscheduler/cmd/distributor_process",
     visibility = ["//visibility:private"],
     deps = [
         "//globalscheduler/controllers/distributor:go_default_library",
@@ -14,7 +14,7 @@ go_library(
 )
 
 go_binary(
-    name = "process",
+    name = "distributor_process",
     embed = [":go_default_library"],
     visibility = ["//visibility:public"],
 )

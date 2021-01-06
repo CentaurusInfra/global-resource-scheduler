@@ -28,8 +28,10 @@ import (
 	"k8s.io/kubernetes/globalscheduler/controllers/util/openstack"
 	dispatcherclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/client/clientset/versioned"
 	dispatcherv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/v1"
+	"os"
 	"reflect"
 	"strings"
+	"syscall"
 )
 
 const dispatcherName = "dispatcher"
@@ -44,6 +46,7 @@ type Process struct {
 	clusterIdList       []string
 	clusterIpMap        map[string]string
 	tokenMap            map[string]string
+	pid                 int
 }
 
 func NewProcess(config *rest.Config, namespace string, name string, quit chan struct{}) Process {
@@ -68,16 +71,6 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 	}
 
 	resetCh := make(chan struct{})
-	defer close(resetCh)
-	go func() {
-		for {
-			select {
-			case <-quit:
-				resetCh <- struct{}{}
-				return
-			}
-		}
-	}()
 
 	return Process{
 		namespace:           namespace,
@@ -88,20 +81,21 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		resetCh:             resetCh,
 		clusterIdList:       clusterIdList,
 		clusterIpMap:        clusterIpMap,
+		pid:                 os.Getgid(),
 	}
 }
 
 func (p *Process) Run(quit chan struct{}) {
-
-	dispatcherSelector := fields.ParseSelectorOrDie(
-		",metatdata.namespace=" + p.namespace + ",metatdata.name=" + p.name)
-	dispatcherLW := cache.NewListWatchFromClient(p.dispatcherClientset, "Dispatchers", metav1.NamespaceAll, dispatcherSelector)
+	dispatcherSelector := fields.ParseSelectorOrDie("metadata.name=" + p.name)
+	dispatcherLW := cache.NewListWatchFromClient(p.dispatcherClientset.GlobalschedulerV1(), "dispatchers", p.namespace, dispatcherSelector)
 
 	dispatcherInformer := cache.NewSharedIndexInformer(dispatcherLW, &dispatcherv1.Dispatcher{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
 
 	dispatcherInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		DeleteFunc: func(obj interface{}) {
-			quit <- struct{}{}
+			if err := syscall.Kill(-p.pid, 15); err != nil {
+				klog.Fatalf("Fail to exit the current process %v\n", err)
+			}
 		},
 		UpdateFunc: func(old, new interface{}) {
 			oldDispatcher, ok := old.(*dispatcherv1.Dispatcher)
@@ -130,25 +124,24 @@ func (p *Process) Run(quit chan struct{}) {
 	wait.Until(p.SendPodToCluster, 0, quit)
 }
 
-func (p *Process) initPodInformer(resetCh chan struct{}, clusterIds []string, statusPhase string) cache.SharedIndexInformer {
-	resetCh <- struct{}{}
+func (p *Process) initPodInformer(clusterIds []string, statusPhase string) cache.SharedIndexInformer {
+	close(p.resetCh)
+	p.resetCh = make(chan struct{})
 	conditions := "status.phase=" + statusPhase + ","
 
 	for _, clusterId := range clusterIds {
 		conditions = conditions + "spec.clusterName=" + clusterId + ";"
 	}
 	clusterSelector := fields.ParseSelectorOrDie(conditions)
-
-	lw := cache.NewListWatchFromClient(p.clientset.CoreV1(), "Pods", metav1.NamespaceAll, clusterSelector)
+	lw := cache.NewListWatchFromClient(p.clientset.CoreV1(), string(v1.ResourcePods), metav1.NamespaceAll, clusterSelector)
 
 	return cache.NewSharedIndexInformer(lw, &v1.Pod{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
 }
 
 func (p *Process) addDeletedPodsToQueue(resetCh chan struct{}, clusterIds []string) {
 	//Since we did not set up scheduler, we don't know its actual status, using Running for now
-	podInformer := p.initPodInformer(resetCh, clusterIds, "Running")
+	podInformer := p.initPodInformer(clusterIds, "Running")
 	podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-		//TO DO
 		DeleteFunc: func(obj interface{}) {
 			pod, ok := obj.(*v1.Pod)
 			if !ok {
@@ -162,7 +155,7 @@ func (p *Process) addDeletedPodsToQueue(resetCh chan struct{}, clusterIds []stri
 }
 
 func (p *Process) addBoundedPodsToQueue(resetCh chan struct{}, clusterIds []string) {
-	podInformer := p.initPodInformer(resetCh, clusterIds, "binded")
+	podInformer := p.initPodInformer(clusterIds, "binded")
 	podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		UpdateFunc: func(old, new interface{}) {
 			oldPod, ok := old.(*v1.Pod)
@@ -225,7 +218,7 @@ func convertClustersToMap(clusters []string) ([]string, map[string]string) {
 	clusterIpMap := make(map[string]string)
 	for idx, cluster := range clusters {
 		clusterIdIp := strings.Split(cluster, "&")
-		clusters[idx] = clusterIdIp[0]
+		clusterIdList[idx] = clusterIdIp[0]
 		if len(clusterIdIp) != 2 {
 			klog.Warningf("The input has a bad formatted cluster item %v", clusterIdIp)
 		} else {
