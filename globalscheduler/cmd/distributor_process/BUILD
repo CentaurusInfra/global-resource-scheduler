@@ -14,7 +14,7 @@ go_library(
 )
 
 go_binary(
-    name = "distributor",
+    name = "distributor_process",
     embed = [":go_default_library"],
     visibility = ["//visibility:public"],
 )
