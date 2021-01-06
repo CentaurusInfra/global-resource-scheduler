@@ -83,7 +83,7 @@ func StartDispatcherController() {
 	clusterInformerFactory := clusterinformers.NewSharedInformerFactory(clusterClientset, time.Second*30)
 	clusterInformer := clusterInformerFactory.Globalscheduler().V1().Clusters()
 
-	dispatcherController := dispatcher.NewDispatcherController(kubeClientset, apiextensionsClient, dispatcherClientset, clusterClientset, dispatcherInformer, clusterInformer)
+	dispatcherController := dispatcher.NewDispatcherController(*dispatcherconfig, kubeClientset, apiextensionsClient, dispatcherClientset, clusterClientset, dispatcherInformer, clusterInformer)
 	err = dispatcherController.CreateDispatcherCRD()
 	if err != nil {
 		klog.Fatalf("error - register dispatcher crd: %s", err.Error())

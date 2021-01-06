@@ -104,7 +104,7 @@ do
 done
 
 if [ "x${GO_OUT}" == "x" ]; then
-    make -C "${KUBE_ROOT}" WHAT="cmd/kubectl cmd/hyperkube cmd/kube-apiserver cmd/kubelet cmd/kube-proxy cmd/globalscheduler cmd/globalscheduler/gs-distributor-controller cmd/globalscheduler/gs-distributor-process"
+    make -C "${KUBE_ROOT}" WHAT="cmd/kubectl cmd/hyperkube cmd/kube-apiserver cmd/kubelet cmd/kube-proxy cmd/kube-controller-manager globalscheduler/cmd/gs-controllers globalscheduler/cmd/dispatcher/dispatcherprocess globalscheduler/cmd/distributor/distributorprocess"
 else
     echo "skipped the build."
 fi
@@ -154,6 +154,10 @@ cleanup()
   done
   #[[ -n "${APISERVER_PID-}" ]] && mapfile -t APISERVER_PIDS < <(pgrep -P "${APISERVER_PID}" ; ps -o pid= -p "${APISERVER_PID}")
   #[[ -n "${APISERVER_PIDS-}" ]] && sudo kill "${APISERVER_PIDS[@]}" 2>/dev/null
+
+   # Check if the controller-manager is still running
+  [[ -n "${CTLRMGR_PID-}" ]] && mapfile -t CTLRMGR_PIDS < <(pgrep -P "${CTLRMGR_PID}" ; ps -o pid= -p "${CTLRMGR_PID}")
+  [[ -n "${CTLRMGR_PIDS-}" ]] && sudo kill "${CTLRMGR_PIDS[@]}" 2>/dev/null
 
   # Check if the global resource scheduler is still running
   [[ -n "${GRS_PID-}" ]] && mapfile -t GRS_PIDS < <(pgrep -P "${GRS_PID}" ; ps -o pid= -p "${GRS_PID}")
@@ -439,9 +443,7 @@ if [[ "${START_MODE}" != "kubeletonly" ]]; then
 
   #cluster/kubectl.sh create -f hack/runtime/workload-controller-manager-clusterrolebinding.yaml
 
-  ${KUBECTL} --kubeconfig="${CERT_DIR}/admin.kubeconfig" apply -f "${KUBE_ROOT}/test/yaml/globalscheduler/scheduler.yaml"
-  kube::common::start_global_resource_scheduler
-  kube::common::start_gs_distributor_controller
+  kube::common::start_gs_controllers
   if [[ "${START_MODE}" != "nokubeproxy" ]]; then
     kube::common::start_kubeproxy
   fi
@@ -452,6 +454,7 @@ if [[ "${START_MODE}" != "kubeletonly" ]]; then
   fi
   start_kubedashboard
 fi
+
 
 if [[ "${START_MODE}" != "nokubelet" ]]; then
   ## TODO remove this check if/when kubelet is supported on darwin

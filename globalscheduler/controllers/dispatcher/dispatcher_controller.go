@@ -17,6 +17,7 @@ limitations under the License.
 package dispatcher
 
 import (
+	"bytes"
 	"fmt"
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -43,6 +44,10 @@ import (
 	dispatcherinformers "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/client/informers/externalversions/dispatcher/v1"
 	dispatcherlisters "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/client/listers/dispatcher/v1"
 	dispatchercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/v1"
+	"os"
+	"os/exec"
+	"path"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -55,6 +60,7 @@ const (
 )
 
 type DispatcherController struct {
+	configfile string
 	// kubeclientset is a standard kubernetes clientset
 	kubeclientset          kubernetes.Interface
 	apiextensionsclientset apiextensionsclientset.Interface
@@ -80,6 +86,7 @@ type DispatcherController struct {
 
 // NewDispatcherController returns a new dispatcher controller
 func NewDispatcherController(
+	configfile string,
 	kubeclientset kubernetes.Interface,
 	apiextensionsclientset apiextensionsclientset.Interface,
 	dispatcherclient dispatcherclientset.Interface,
@@ -98,6 +105,7 @@ func NewDispatcherController(
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 
 	controller := &DispatcherController{
+		configfile:             configfile,
 		kubeclientset:          kubeclientset,
 		apiextensionsclientset: apiextensionsclientset,
 		dispatcherclient:       dispatcherclient,
@@ -254,7 +262,29 @@ func (dc *DispatcherController) syncHandler(key *KeyWithEventType) error {
 			return fmt.Errorf("cluster HomeDispatcher update failed")
 		}
 
-		// Start Dispatcher Process
+		args := strings.Split(fmt.Sprintf("-config %s -ns %s -n %s", dc.configfile, namespace, name), " ")
+
+		//	Format the command
+		dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+		if err != nil {
+			klog.Fatalf("Failed to get the path to the process with the err %v", err)
+		}
+
+		cmd := exec.Command(path.Join(dir, "dispatcherprocess"), args...)
+		var out bytes.Buffer
+		var stderr bytes.Buffer
+		cmd.Stdout = &out
+		cmd.Stderr = &stderr
+
+		//	Run the command
+		go cmd.Run()
+
+		//	Output our results
+		klog.V(2).Infof("Running process with the result: %v / %v\n", out.String(), stderr.String())
+
+		if err != nil {
+			klog.Warningf("Failed to run dispatcher process %v - %v with the err %v", namespace, name, err)
+		}
 
 		dc.recorder.Event(dispatcherCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	case EventTypeUpdateDispatcher:

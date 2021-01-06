@@ -643,12 +643,12 @@ function kube::common::generate_kubeproxy_certs {
     fi
 }
 
-function kube::common::start_global_resource_scheduler {
+function kube::common::start_gs_controllers {
     CONTROLPLANE_SUDO=$(test -w "${CERT_DIR}" || echo "sudo -E")
     kubeconfigfilepaths="${CERT_DIR}/admin.kubeconfig"
     
     GRS_LOG=${LOG_DIR}/global-resource-scheduler.log
-    ${CONTROLPLANE_SUDO} ${GO_OUT}/globalscheduler -kubeconfig "${kubeconfigfilepaths}"  >"${GRS_LOG}" 2>&1 &
+    ${CONTROLPLANE_SUDO} ${GO_OUT}/gs-controllers -kubeconfig "${kubeconfigfilepaths}"  >"${GRS_LOG}" 2>&1 &
       # TODO need to add log level in the future for debugging
       #--v="${LOG_LEVEL}" \
     GRS_PID=$!
@@ -665,3 +665,4 @@ function kube::common::start_gs_distributor_controller {
       #--v="${LOG_LEVEL}" \
     GSDC_PID=$!
 }
+
