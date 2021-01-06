@@ -104,7 +104,7 @@ do
 done
 
 if [ "x${GO_OUT}" == "x" ]; then
-    make -C "${KUBE_ROOT}" WHAT="cmd/kubectl cmd/hyperkube cmd/kube-apiserver cmd/kubelet cmd/kube-proxy cmd/kube-controller-manager globalscheduler/cmd/gs-controllers globalscheduler/cmd/dispatcher/dispatcherprocess globalscheduler/cmd/distributor/distributorprocess"
+    make -C "${KUBE_ROOT}" WHAT="cmd/kubectl cmd/hyperkube cmd/kube-apiserver cmd/kubelet cmd/kube-proxy cmd/kube-controller-manager cmd/kube-scheduler globalscheduler/cmd/gs-controllers globalscheduler/cmd/dispatcher_process  globalscheduler/cmd/distributor_process globalscheduler/cmd/scheduler_process globalscheduler/cmd/grpc-server"
 else
     echo "skipped the build."
 fi
@@ -162,6 +162,11 @@ cleanup()
   # Check if the global resource scheduler is still running
   [[ -n "${GRS_PID-}" ]] && mapfile -t GRS_PIDS < <(pgrep -P "${GRS_PID}" ; ps -o pid= -p "${GRS_PID}")
   [[ -n "${GRS_PIDS-}" ]] && sudo kill "${GRS_PIDS[@]}" 2>/dev/null
+
+  # Check if the grpc server is still running
+  [[ -n "${GRPC_SERVER_PID-}" ]] && mapfile -t GRPC_SERVER_PIDS < <(pgrep -P "${GRPC_SERVER_PID}" ; ps -o pid= -p "${GRPC_SERVER_PID}")
+  [[ -n "${GRPC_SERVER_PIDS-}" ]] && sudo kill "${GRPC_SERVER_PIDS[@]}" 2>/dev/null
+  
 
   # Check if the kubelet is still running
   [[ -n "${KUBELET_PID-}" ]] && mapfile -t KUBELET_PIDS < <(pgrep -P "${KUBELET_PID}" ; ps -o pid= -p "${KUBELET_PID}")
@@ -442,8 +447,10 @@ if [[ "${START_MODE}" != "kubeletonly" ]]; then
   #cluster/kubectl.sh create -f hack/runtime/workload-controller-manager-clusterrole.yaml
 
   #cluster/kubectl.sh create -f hack/runtime/workload-controller-manager-clusterrolebinding.yaml
-
+  echo "Starting global scheduler controllers..."
   kube::common::start_gs_controllers
+  echo "Starting grpc server..."
+  kube::common::start_grpc_server
   if [[ "${START_MODE}" != "nokubeproxy" ]]; then
     kube::common::start_kubeproxy
   fi
