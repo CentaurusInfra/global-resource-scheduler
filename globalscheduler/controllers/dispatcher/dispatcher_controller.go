@@ -270,7 +270,7 @@ func (dc *DispatcherController) syncHandler(key *KeyWithEventType) error {
 			klog.Fatalf("Failed to get the path to the process with the err %v", err)
 		}
 
-		cmd := exec.Command(path.Join(dir, "dispatcherprocess"), args...)
+		cmd := exec.Command(path.Join(dir, "dispatcher_process"), args...)
 		var out bytes.Buffer
 		var stderr bytes.Buffer
 		cmd.Stdout = &out

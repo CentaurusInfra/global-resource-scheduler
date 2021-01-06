@@ -72,7 +72,7 @@ import (
 	"k8s.io/kubernetes/pkg/version"
 	"k8s.io/kubernetes/pkg/version/verflag"
 
-	sc "k8s.io/kubernetes/globalscheduler/cmd/scheduler"
+	sc "k8s.io/kubernetes/globalscheduler/cmd/scheduler_process"
 )
 
 const (

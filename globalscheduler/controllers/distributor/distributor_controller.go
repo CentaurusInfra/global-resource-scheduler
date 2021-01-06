@@ -208,7 +208,7 @@ func (c *DistributorController) syncHandlerAndUpdate(key string) error {
 		klog.Fatalf("Failed to get the path to the process with the err %v", err)
 	}
 
-	cmd := exec.Command(path.Join(dir, "distributorprocess"), args...)
+	cmd := exec.Command(path.Join(dir, "distributor_process"), args...)
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 	cmd.Stdout = &out
