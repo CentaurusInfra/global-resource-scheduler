@@ -1,6 +1,7 @@
 # gRPC Communication between ClusterController and ResourceCollector 
 
-Nov-20-2020, Cathy Hong Zhang, Eunju Kim
+Nov-20-2020, Cathy Hong Zhang, Eunju Kim, Created
+Jan-5-2021, Updated
 
 Both Cluster Controller and Resource Collector should implement and support gRPC server and client interface. 
 
@@ -11,14 +12,14 @@ Both Cluster Controller and Resource Collector should implement and support gRPC
 - Cluster2ResourceCollector.Proto (Version: Proto3)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // service
-service ClusterProtocol {
-        rpc SendClusterProfile(ClusterProfile) returns (ReturnMessage) {}
+service ClusterProtocol { 
+    rpc SendClusterProfile(ClusterProfile) returns (ReturnMessageClusterProfile) {}
 }
 
 //message from ClusterController to ResourceCollector
 message ClusterProfile {
-    string ClusterNameSpace = 1
-    string ClusterName = 2
+    string ClusterNameSpace = 1;
+    string ClusterName = 2;
     message ClusterSpecInfo {
         string ClusterIpAddress = 1;
         message GeoLocationInfo{
@@ -26,7 +27,7 @@ message ClusterProfile {
             string Province = 2;
             string Area = 3;
             string Country = 4;             
-        }   
+        }
         message RegionInfo {
             string Region = 1;
             string AvailabilityZone = 2; 
@@ -35,37 +36,39 @@ message ClusterProfile {
             string Operator = 1;
         }
         message FlavorInfo {
-            int32 FlavorID = 1;  //1:Small, 2:Medium, 3:Large, 4:Xlarge, 5:2xLarge 
-            int32 TotalCapacity = 2;
-        }
-        enum StorageType {
-            SATA = 1;
-            SAS = 2;
-            SSD = 3;
+            string FlavorID = 1;  //Small, Medium, Large, Xlarge, 2xLarge 
+            int64 TotalCapacity = 2;
         }
         message StorageInfo {
-            StorageType TypeID = 1; 
-            int32   StorageCapacity =2;
+            string  TypeID = 1;     //"SATA", "SAS", "SSD"
+            int64   StorageCapacity =2;
         }
         GeoLocationInfo GeoLocation = 2;
-        Region RegionInfo = 3;
-        Operator OperatorInfo = 4;
+        RegionInfo Region = 3;
+        OperatorInfo Operator = 4;
         repeated FlavorInfo Flavor = 5;
         repeated StorageInfo Storage = 6;
-        int32 EipCapacity = 7;  
-        int32 CPUCapacity = 8;  
-        int32 MemCapacity = 9;   
-        int32 ServerPrice = 10;    
-        string HomeScheduler = 11; 
+        int64 EipCapacity = 7;  
+        int64 CPUCapacity = 8;  
+        int64 MemCapacity = 9;   
+        int64 ServerPrice = 10;    
+        string HomeScheduler = 11;
+        string HomeDispatcher = 12;
    }
    ClusterSpecInfo ClusterSpec = 3;
+   string ClusterStatus = 4;
 }
 
 //Message from ResourceCollector, Cluster Controller should get response from ResourceCollector.
-message ReturnMessage {               
-        string ClusterNameSpace = 1;
-        string ClusterName = 2;
-        int32  ReturnCode = 3;	     //0: Error, 1: OK
+message ReturnMessageClusterProfile {
+    enum CodeType{
+        Error = 0;
+        OK = 1;
+    }               
+    string ClusterNameSpace = 1;
+    string ClusterName = 2;
+    CodeType  ReturnCode = 3;
+    string Message = 4;
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -125,8 +128,10 @@ message ReturnMessage {
             “cpucapacity”: 8, 
             “memcapacity”: 256, 
             “serverprice”: 10, 
-            “homescheduler”: “scheduler1” 
-        }   
+            “homescheduler”: “scheduler1”,
+            “homedispatcher”: “dispatcher1” 
+        }
+        "clusterstatus": "ready"   
     } 
 } 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -145,7 +150,9 @@ message ReturnMessage {
     CPUCapacity   int64           `json:"cpucapacity"`
     MemCapacity   int64           `json:"memcapacity"`
     ServerPrice   int64           `json:"serverprice"`
-    HomeScheduler string 
+    HomeScheduler string          `json:"homescheduler"`
+    HomeDispatcher string         `json:"homedispatcher"`
+    Status         string         `json:"status"`
 
 type FlavorInfo struct {
     FlavorID      string `json:"flavorid"`
@@ -180,21 +187,19 @@ type OperatorInfo struct {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // service
 service ResourceCollectorProtocol { 
-rpc UpdateClusterStatus(ClusterState) returns (ReturnMessage) {}  
-
-//message from ResourceCollector
+    rpc UpdateClusterStatus(ClusterState) returns (ReturnMessageClusterState) {}  
+}                                                                                               
 message ClusterState {
-        string NameSpace = 1;  
-        string Name = 2;
-        int32 State = 3; 	     //1: ready, 2: down
+    string NameSpace = 1;  
+    string Name = 2;
+    int64 State = 3; 	     //1: ready, 2: down, 3: unreachable…
 }
 
 //message from ClusterController
-message ReturnMessage {
-        string NameSpace = 1;  
-        string Name = 2;
-        int32 ReturnCode = 3;	 //0: Error, 1: OK 
+message ReturnMessageClusterState {
+    string NameSpace = 1;  
+    string Name = 2;
+    int64 ReturnCode = 3;	 //0: Error, 1: OK 
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 

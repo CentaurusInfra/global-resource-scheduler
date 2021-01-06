@@ -115,7 +115,9 @@ type Cluster struct {
     kind:               string          //Cluster
     Name:               string          
     Spec                ClusterSpec     // Spec is the custom resource spec 
+    Status              string
 } 
+
 // MyResourceSpec is the spec for a MyResource resource. 
 //This is where you would put your custom resource data
 type ClusterSpec struct { 
@@ -130,6 +132,7 @@ type ClusterSpec struct {
     MemCapacity         int64 
     ServerPrice         int64 
     HomeScheduler       string 
+    HomeDispatcher      string
 } 
 type FlavorInfo struct { 
     FlavorID            string 
@@ -227,7 +230,8 @@ Body:
                 “CPUCapacity”: 8, 
                 “MemCapacity”: 256, 
                 “ServerPrice”: 10, 
-                “HomeScheduler”: “scheduler1” 
+                “HomeScheduler”: “scheduler1”,
+                “HomeDispatcher ”: “dispatcher1” 
             } 
         } 
     } 
@@ -247,7 +251,8 @@ Response:
             “CPUCapacity”: 8, 
             “MemCapacity”: 256, 
             “ServerPrice”: 10, 
-            “HomeScheduler”: “scheduler1” 
+            “HomeScheduler”: “scheduler1”,
+            “HomeDispatcher ”: “dispatcher1”
             } 
         } 
     } 
@@ -371,7 +376,8 @@ Response:
             “CPUCapacity”: 8, 
             “MemCapacity”: 256, 
             “ServerPrice”: 10, 
-            “HomeScheduler”: “scheduler1” 
+            “HomeScheduler”: “scheduler1”,
+            “HomeDispatcher ”: “dispatcher1”
             } 
         } 
     } 
@@ -411,7 +417,8 @@ Response:
             “CPUCapacity”: 8, 
             “MemCapacity”: 256, 
             “ServerPrice”: 10, 
-            “HomeScheduler”: “scheduler1” 
+            “HomeScheduler”: “scheduler1”,
+            “HomeDispatcher ”: “dispatcher1” 
             } 
         } 
     } 

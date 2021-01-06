@@ -66,7 +66,7 @@ func main() {
 		errorMessage = fmt.Errorf("cluster state is not correct - %v", clusterState)
 	}
 	if errorMessage != nil {
-		klog.Infof("could not greet: %v", errorMessage)
+		klog.Infof("could not send a message: %v", errorMessage)
 	}
 	klog.Infof("Returned ClusterState Client")
 }
