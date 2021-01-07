@@ -144,45 +144,45 @@ func (c *CycleState) RUnlock() {
 	c.mx.RUnlock()
 }
 
-//NodeSelectorInfo node temp info
-type NodeSelectorInfo struct {
+//SiteSelectorInfo site temp info
+type SiteSelectorInfo struct {
 	Flavors       []FlavorInfo
 	VolumeType    []string
 	StackMaxCount int
 }
 
-//NodeSelectorInfo node temp info
-type NodeSelectorInfos map[string]NodeSelectorInfo
+//SiteSelectorInfo site temp info
+type SiteSelectorInfos map[string]SiteSelectorInfo
 
 // Clone the prefilter state.
-func (s *NodeSelectorInfos) Clone() StateData {
+func (s *SiteSelectorInfos) Clone() StateData {
 	return s
 }
 
-func UpdateNodeSelectorState(cycleState *CycleState, nodeID string, updateInfo map[string]interface{}) error {
+func UpdateSiteSelectorState(cycleState *CycleState, SiteID string, updateInfo map[string]interface{}) error {
 	if updateInfo == nil {
 		return nil
 	}
 
 	cycleState.Lock()
 	defer cycleState.Unlock()
-	c, err := cycleState.Read(types.NodeTempSelectorKey)
+	c, err := cycleState.Read(types.SiteTempSelectorKey)
 	if err != nil {
-		selectInfos := NodeSelectorInfos{}
-		selectInfo := NodeSelectorInfo{}
+		selectInfos := SiteSelectorInfos{}
+		selectInfo := SiteSelectorInfo{}
 
-		selectInfos[nodeID] = selectInfo
-		cycleState.Write(types.NodeTempSelectorKey, &selectInfos)
+		selectInfos[SiteID] = selectInfo
+		cycleState.Write(types.SiteTempSelectorKey, &selectInfos)
 	}
 
-	s, ok := c.(*NodeSelectorInfos)
+	s, ok := c.(*SiteSelectorInfos)
 	if !ok {
-		return fmt.Errorf("%+v  convert to NodeSelectorInfos error", c)
+		return fmt.Errorf("%+v  convert to SiteSelectorInfos error", c)
 	}
 
-	selectInfo, ok := (*s)[nodeID]
+	selectInfo, ok := (*s)[SiteID]
 	if !ok {
-		selectInfo = NodeSelectorInfo{}
+		selectInfo = SiteSelectorInfo{}
 	}
 
 	for key, value := range updateInfo {
@@ -207,27 +207,27 @@ func UpdateNodeSelectorState(cycleState *CycleState, nodeID string, updateInfo m
 		}
 	}
 
-	(*s)[nodeID] = selectInfo
+	(*s)[SiteID] = selectInfo
 
-	cycleState.Write(types.NodeTempSelectorKey, s)
+	cycleState.Write(types.SiteTempSelectorKey, s)
 
 	return nil
 }
 
-func GetNodeSelectorState(cycleState *CycleState, nodeID string) (*NodeSelectorInfo, error) {
-	c, err := cycleState.Read(types.NodeTempSelectorKey)
+func GetSiteSelectorState(cycleState *CycleState, siteID string) (*SiteSelectorInfo, error) {
+	c, err := cycleState.Read(types.SiteTempSelectorKey)
 	if err != nil {
-		return nil, fmt.Errorf("error reading %q from cycleState: %v", types.NodeTempSelectorKey, err)
+		return nil, fmt.Errorf("error reading %q from cycleState: %v", types.SiteTempSelectorKey, err)
 	}
 
-	s, ok := c.(*NodeSelectorInfos)
+	s, ok := c.(*SiteSelectorInfos)
 	if !ok {
-		return nil, fmt.Errorf("%+v  convert to NodeSelectorInfos error", c)
+		return nil, fmt.Errorf("%+v  convert to SiteSelectorInfos error", c)
 	}
 
-	value, ok := (*s)[nodeID]
+	value, ok := (*s)[siteID]
 	if !ok {
-		return nil, fmt.Errorf("nodeID(%s) not found", nodeID)
+		return nil, fmt.Errorf("siteID(%s) not found", siteID)
 	}
 
 	return &value, nil

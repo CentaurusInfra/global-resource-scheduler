@@ -156,8 +156,8 @@ type Flavor struct {
 
 //RegionFlavor info
 type RegionFlavor struct {
-	RegionFlavorID string  `json:"region_flavor_id"`
-	Region         string  `json:"region"`
+	RegionFlavorID string `json:"region_flavor_id"`
+	Region         string `json:"region"`
 	Flavor
 }
 
@@ -194,15 +194,15 @@ type VolumeType struct {
 }
 
 type VolumeCapabilities struct {
-	PoolName string `json:"pool_name"`
-	ProvisionedCapacityGb float64 `json:"provisioned_capacity_gb"`
-	AllocatedCapacityGb float64 `json:"allocated_capacity_gb"`
-	FreeCapacityGb float64 `json:"free_capacity_gb"`
-	TotalCapacityGb float64 `json:"total_capacity_gb"`
-	VolumeType string `json:"volume_type"`
+	PoolName                 string  `json:"pool_name"`
+	ProvisionedCapacityGb    float64 `json:"provisioned_capacity_gb"`
+	AllocatedCapacityGb      float64 `json:"allocated_capacity_gb"`
+	FreeCapacityGb           float64 `json:"free_capacity_gb"`
+	TotalCapacityGb          float64 `json:"total_capacity_gb"`
+	VolumeType               string  `json:"volume_type"`
 	MaxOverSubscriptionRatio float64 `json:"max_over_subscription_ratio"`
-	ThinProvisioningSupport bool `json:"thin_provisioning_support"`
-	ReservedPercentage float64 `json:"reserved_percentage"`
+	ThinProvisioningSupport  bool    `json:"thin_provisioning_support"`
+	ReservedPercentage       float64 `json:"reserved_percentage"`
 	// PoolModel ，0: normal，1:public test，2: us pool
 	PoolModel float64 `json:"pool_model"`
 }
@@ -210,7 +210,7 @@ type VolumeCapabilities struct {
 type VolumePoolInfo struct {
 	AvailabilityZone string `json:"availability_zone"`
 	// Name style：cinder-volume@volume_backend_name#pool_name
-	Name string `json:"name"`
+	Name         string             `json:"name"`
 	Capabilities VolumeCapabilities `json:"capabilities"`
 }
 
@@ -221,7 +221,7 @@ type VolumePools struct {
 //RegionVolumeType add region info
 type RegionVolumeType struct {
 	VolumeType
-	Region string  `json:"region"`
+	Region string `json:"region"`
 }
 
 //RegionVolumePool List
@@ -232,7 +232,7 @@ type RegionVolumePools struct {
 //RegionVolumePools region with volumepool
 type RegionVolumePool struct {
 	VolumePools
-	Region string		`json:"region"`
+	Region string `json:"region"`
 }
 
 // IPCommonPools struct
@@ -251,7 +251,7 @@ type IPCommonPool struct {
 }
 
 type EipPools struct {
-	Pools []EipPool 	`json:"eip_pools"`
+	Pools []EipPool `json:"eip_pools"`
 }
 
 //EipPool eip pool
@@ -269,78 +269,66 @@ func (iep EipPool) ToString() string {
 	return string(ret)
 }
 
-// NodeInfo struct
-type NodeInfo struct {
-	EdgeNodeID         string	`json:"edge_node_id"`
-	HostName           string	`json:"host_name"`
-	Region             string	`json:"region"`
-	AvailabilityZone   string	`json:"availability_zone"`
-	TotalDisk          int		`json:"total_disk"`
-	UsedDisk           int		`json:"used_disk"`
-	TotalVCPUs         int		`json:"total_vcpus"`
-	UsedVCPUs          int		`json:"used_vcpus"`
-	TotalMem           int		`json:"total_mem"`
-	UsedMem            int		`json:"used_mem"`
-	State              string	`json:"state"`
-	Status             string	`json:"status"`
-	ResourceType       string	`json:"resource_type"`
-	CPUAllocationRatio string	`json:"cpu_allocation_ratio"`
-	EcsPerformanceType string	`json:"ecs_performance_type"`
-	MaxCount           int		`json:"max_count"`
+// Host struct
+type Host struct {
+	HostID             string `json:"host_id"`
+	HostName           string `json:"host_name"`
+	Region             string `json:"region"`
+	AvailabilityZone   string `json:"availability_zone"`
+	TotalDisk          int    `json:"total_disk"`
+	UsedDisk           int    `json:"used_disk"`
+	TotalVCPUs         int    `json:"total_vcpus"`
+	UsedVCPUs          int    `json:"used_vcpus"`
+	TotalMem           int    `json:"total_mem"`
+	UsedMem            int    `json:"used_mem"`
+	State              string `json:"state"`
+	Status             string `json:"status"`
+	ResourceType       string `json:"resource_type"`
+	CPUAllocationRatio string `json:"cpu_allocation_ratio"`
+	EcsPerformanceType string `json:"ecs_performance_type"`
+	MaxCount           int    `json:"max_count"`
 }
 
 type Operator struct {
-	ID string `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name,omitempty"`
-	I18Name string `json:"i18n_name,omitempty"`
-	Sa string `json:"sa"`
+	Sa   string `json:"sa"`
 }
 
 type SiteAttribute struct {
-	ID string `json:"id"`
-	Key string `json:"site_attr"`
+	ID    string `json:"id"`
+	Key   string `json:"site_attr"`
 	Value string `json:"site_attr_value"`
 }
 
-type SiteBase struct {
-	City string `json:"city,omitempty"`
-	I18nCity string `json:"i18n_city,omitempty"`
-	Province string `json:"province,omitempty"`
-	I18nProvince string `json:"i18n_province,omitempty"`
-	Area string `json:"area,omitempty"`
-	I18nArea string `json:"i18n_area,omitempty"`
-	Country string `json:"country,omitempty"`
-	I18nCountry string `json:"i18n_country,omitempty"`
-	Operator *Operator `json:"operator,omitempty"`
+type SiteInfo struct {
+	SiteID           string           `json:"site_id"`
+	Name             string           `json:"name"`
+	Region           string           `json:"region"`
+	AvailabilityZone string           `json:"availability_zone"`
+	Status           string           `json:"status"`
+	City             string           `json:"city,omitempty"`
+	Province         string           `json:"province,omitempty"`
+	Area             string           `json:"area,omitempty"`
+	Country          string           `json:"country,omitempty"`
+	Operator         *Operator        `json:"operator,omitempty"`
+	EipNetworkID     string           `json:"eip_network_id"`
+	EipTypeName      string           `json:"eip_type_name"`
+	EipCidr          []string         `json:"eip_cidr"`
+	SiteAttributes   []*SiteAttribute `json:"site_attributes"`
 }
 
-type Site struct {
-	ID string `json:"id"`
-	Name string `json:"name"`
-	SiteBase
-	Region string `json:"region"`
-	Az string `json:"az"`
-	Status string `json:"status"`
-	EipNetworkID string `json:"eip_network_id"`
-	EipTypeName string `json:"eip_type_name"`
-	EipCidr []string `json:"eip_cidr"`
-	SiteAttributes []*SiteAttribute `json:"site_attributes"`
+type SiteInfos struct {
+	SiteInfos []SiteInfo `json:"site_infos"`
 }
 
-type Sites struct {
-	Sites []Site `json:"sites"`
+type SiteResource struct {
+	SiteID           string `json:"site_id"`
+	Region           string `json:"region"`
+	AvailabilityZone string `json:"availability_zone"`
+	Hosts            []Host `json:"hosts"`
 }
 
-type SiteNode struct {
-	EdgeSiteID       string		`json:"edge_site_id"`
-	Region           string		`json:"region"`
-	AvailabilityZone string		`json:"availability_zone"`
-	Operator         string		`json:"operator"`
-	Status           string		`json:"status"`
-	Nodes            []NodeInfo	`json:"node_infos"`
-	MaxCount         int		`json:"max_count"`
-}
-
-type SiteNodes struct {
-	SiteNodes []SiteNode `json:"site_nodes"`
+type SiteResources struct {
+	SiteResources []SiteResource `json:"site_resources"`
 }

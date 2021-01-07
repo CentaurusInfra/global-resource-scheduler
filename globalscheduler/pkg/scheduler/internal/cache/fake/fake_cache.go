@@ -41,15 +41,15 @@ func (c *Cache) FilteredList(stackFilter schedulerlisters.StackFilter) ([]*types
 	return nil, nil
 }
 
-func (c *Cache) AddNode(node *types.SiteNode) error {
+func (c *Cache) AddSite(site *types.Site) error {
 	return nil
 }
 
-func (c *Cache) UpdateNode(oldNode, newNode *types.SiteNode) error {
+func (c *Cache) UpdateSite(oldSite, newSite *types.Site) error {
 	return nil
 }
 
-func (c *Cache) RemoveNode(node *types.SiteNode) error {
+func (c *Cache) RemoveSite(site *types.Site) error {
 	return nil
 }
 
@@ -61,7 +61,7 @@ func (c *Cache) UpdateVolumePool(volumePool *typed.RegionVolumePool) error {
 	return nil
 }
 
-func (c *Cache) UpdateNodeWithResInfo(siteID string, resInfo types.AllResInfo) error {
+func (c *Cache) UpdateSiteWithResInfo(siteID string, resInfo types.AllResInfo) error {
 	return nil
 }
 
@@ -69,7 +69,7 @@ func (c *Cache) UpdateQos(siteID string, netMetricData *types.NetMetricDatas) er
 	return nil
 }
 
-func (c *Cache) UpdateNodeWithRatio(region string, az string, ratios []types.AllocationRatio) error {
+func (c *Cache) UpdateSiteWithRatio(region string, az string, ratios []types.AllocationRatio) error {
 	return nil
 }
 
@@ -77,7 +77,7 @@ func (c *Cache) UpdateSpotResources(region string, az string, spotRes map[string
 	return nil
 }
 
-func (c *Cache) UpdateSnapshot(nodeSnapshot *internalcache.Snapshot) error {
+func (c *Cache) UpdateSnapshot(siteCacheInfoSnapshot *internalcache.Snapshot) error {
 	return nil
 }
 

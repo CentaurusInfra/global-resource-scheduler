@@ -25,7 +25,7 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	schedulerlisters "k8s.io/kubernetes/globalscheduler/pkg/scheduler/listers"
-	schedulernodeinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/nodeinfo"
+	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/sets"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/wait"
@@ -45,13 +45,13 @@ func New(ttl time.Duration, stop <-chan struct{}) Cache {
 	return cache
 }
 
-// nodeInfoListItem holds a NodeInfo pointer and acts as an item in a doubly
-// linked list. When a NodeInfo is updated, it goes to the head of the list.
+// siteCacheInfoListItem holds a Host pointer and acts as an item in a doubly
+// linked list. When a Host is updated, it goes to the head of the list.
 // The items closer to the head are the most recently updated items.
-type nodeInfoListItem struct {
-	info *schedulernodeinfo.NodeInfo
-	next *nodeInfoListItem
-	prev *nodeInfoListItem
+type siteCacheInfoListItem struct {
+	info *schedulersitecacheinfo.SiteCacheInfo
+	next *siteCacheInfoListItem
+	prev *siteCacheInfoListItem
 }
 
 type schedulerCache struct {
@@ -65,15 +65,15 @@ type schedulerCache struct {
 	// The key could further be used to get an entry in stackStates.
 	assumedStacks map[string]bool
 	// a map from pod key to stackState.
-	stackStates map[string]*StackState
-	nodes       map[string]*nodeInfoListItem
-	// headNode points to the most recently updated NodeInfo in "nodes". It is the
+	stackStates    map[string]*StackState
+	siteCacheInfos map[string]*siteCacheInfoListItem
+	// headSiteCacheInfo points to the most recently updated Host in "siteIDs". It is the
 	// head of the linked list.
-	headNode *nodeInfoListItem
+	headSiteCacheInfo *siteCacheInfoListItem
 
-	regionToNode map[string]sets.String
+	regionToSite map[string]sets.String
 
-	nodeTree *nodeTree
+	siteTree *siteTree
 }
 
 type StackState struct {
@@ -90,32 +90,32 @@ func newSchedulerCache(ttl, period time.Duration, stop <-chan struct{}) *schedul
 		period: period,
 		stop:   stop,
 
-		nodes:         make(map[string]*nodeInfoListItem),
-		nodeTree:      newNodeTree(nil),
-		assumedStacks: make(map[string]bool),
-		stackStates:   make(map[string]*StackState),
-		regionToNode:  make(map[string]sets.String),
+		siteCacheInfos: make(map[string]*siteCacheInfoListItem),
+		siteTree:       newSiteCacheTree(nil),
+		assumedStacks:  make(map[string]bool),
+		stackStates:    make(map[string]*StackState),
+		regionToSite:   make(map[string]sets.String),
 	}
 }
 
-// newNodeInfoListItem initializes a new nodeInfoListItem.
-func newNodeInfoListItem(ni *schedulernodeinfo.NodeInfo) *nodeInfoListItem {
-	return &nodeInfoListItem{
+// newSiteCacheInfoListItem initializes a new siteCacheInfoListItem.
+func newSiteCacheInfoListItem(ni *schedulersitecacheinfo.SiteCacheInfo) *siteCacheInfoListItem {
+	return &siteCacheInfoListItem{
 		info: ni,
 	}
 }
 
-// moveNodeInfoToHead moves a NodeInfo to the head of "cache.nodes" doubly
-// linked list. The head is the most recently updated NodeInfo.
+// moveSiteCacheInfoToHead moves a Host to the head of "cache.siteIDs" doubly
+// linked list. The head is the most recently updated Host.
 // We assume cache lock is already acquired.
-func (cache *schedulerCache) moveNodeInfoToHead(nodeID string) {
-	ni, ok := cache.nodes[nodeID]
+func (cache *schedulerCache) moveSiteCacheInfoToHead(siteID string) {
+	ni, ok := cache.siteCacheInfos[siteID]
 	if !ok {
-		logger.Errorf("No NodeInfo with name %v found in the cache", nodeID)
+		logger.Errorf("No Host with name %v found in the cache", siteID)
 		return
 	}
-	// if the node info list item is already at the head, we are done.
-	if ni == cache.headNode {
+	// if the site info list item is already at the head, we are done.
+	if ni == cache.headSiteCacheInfo {
 		return
 	}
 
@@ -125,21 +125,21 @@ func (cache *schedulerCache) moveNodeInfoToHead(nodeID string) {
 	if ni.next != nil {
 		ni.next.prev = ni.prev
 	}
-	if cache.headNode != nil {
-		cache.headNode.prev = ni
+	if cache.headSiteCacheInfo != nil {
+		cache.headSiteCacheInfo.prev = ni
 	}
-	ni.next = cache.headNode
+	ni.next = cache.headSiteCacheInfo
 	ni.prev = nil
-	cache.headNode = ni
+	cache.headSiteCacheInfo = ni
 }
 
-// removeNodeInfoFromList removes a NodeInfo from the "cache.nodes" doubly
+// removeSiteCacheInfoFromList removes a Host from the "cache.siteIDs" doubly
 // linked list.
 // We assume cache lock is already acquired.
-func (cache *schedulerCache) removeNodeInfoFromList(nodeID string) {
-	ni, ok := cache.nodes[nodeID]
+func (cache *schedulerCache) removeSiteCacheInfoFromList(siteID string) {
+	ni, ok := cache.siteCacheInfos[siteID]
 	if !ok {
-		logger.Errorf("No NodeInfo with name %v found in the cache", nodeID)
+		logger.Errorf("No site with ID %v found in the cache", siteID)
 		return
 	}
 
@@ -150,10 +150,10 @@ func (cache *schedulerCache) removeNodeInfoFromList(nodeID string) {
 		ni.next.prev = ni.prev
 	}
 	// if the removed item was at the head, we must update the head.
-	if ni == cache.headNode {
-		cache.headNode = ni.next
+	if ni == cache.headSiteCacheInfo {
+		cache.headSiteCacheInfo = ni.next
 	}
-	delete(cache.nodes, nodeID)
+	delete(cache.siteCacheInfos, siteID)
 }
 
 // Snapshot takes a snapshot of the current scheduler cache. This is used for
@@ -164,9 +164,9 @@ func (cache *schedulerCache) Dump() *Dump {
 	cache.mu.RLock()
 	defer cache.mu.RUnlock()
 
-	nodes := make(map[string]*schedulernodeinfo.NodeInfo, len(cache.nodes))
-	for k, v := range cache.nodes {
-		nodes[k] = v.info.Clone()
+	siteCacheInfos := make(map[string]*schedulersitecacheinfo.SiteCacheInfo, len(cache.siteCacheInfos))
+	for k, v := range cache.siteCacheInfos {
+		siteCacheInfos[k] = v.info.Clone()
 	}
 
 	assumedStacks := make(map[string]bool, len(cache.assumedStacks))
@@ -175,103 +175,103 @@ func (cache *schedulerCache) Dump() *Dump {
 	}
 
 	return &Dump{
-		Nodes:         nodes,
-		AssumedStacks: assumedStacks,
+		SiteCacheInfos: siteCacheInfos,
+		AssumedStacks:  assumedStacks,
 	}
 }
 
-// UpdateSnapshot takes a snapshot of cached NodeInfo map. This is called at
+// UpdateSnapshot takes a snapshot of cached Host map. This is called at
 // beginning of every scheduling cycle.
-// This function tracks generation number of NodeInfo and updates only the
+// This function tracks generation number of Host and updates only the
 // entries of an existing snapshot that have changed after the snapshot was taken.
-func (cache *schedulerCache) UpdateSnapshot(nodeSnapshot *Snapshot) error {
+func (cache *schedulerCache) UpdateSnapshot(siteCacheInfoSnapshot *Snapshot) error {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 
 	// Get the last generation of the snapshot.
-	snapshotGeneration := nodeSnapshot.generation
+	snapshotGeneration := siteCacheInfoSnapshot.generation
 
-	// NodeInfoList and HavePodsWithAffinityNodeInfoList must be re-created if a node was added
+	// SiteInfoList and HavePodsWithAffinitySiteInfoList must be re-created if a siteCacheInfo was added
 	// or removed from the cache.
 	updateAllLists := false
 
-	// Start from the head of the NodeInfo doubly linked list and update snapshot
-	// of NodeInfos updated after the last snapshot.
-	for node := cache.headNode; node != nil; node = node.next {
-		if node.info.GetGeneration() <= snapshotGeneration {
-			// all the nodes are updated before the existing snapshot. We are done.
+	// Start from the head of the Host doubly linked list and update snapshot
+	// of SiteCacheInfos updated after the last snapshot.
+	for siteCacheInfo := cache.headSiteCacheInfo; siteCacheInfo != nil; siteCacheInfo = siteCacheInfo.next {
+		if siteCacheInfo.info.GetGeneration() <= snapshotGeneration {
+			// all the siteIDs are updated before the existing snapshot. We are done.
 			break
 		}
 
-		if np := node.info.Node(); np != nil {
-			existing, ok := nodeSnapshot.nodeInfoMap[np.SiteID]
+		if np := siteCacheInfo.info.Site(); np != nil {
+			existing, ok := siteCacheInfoSnapshot.siteCacheInfoMap[np.SiteID]
 			if !ok {
 				updateAllLists = true
-				existing = &schedulernodeinfo.NodeInfo{}
-				nodeSnapshot.nodeInfoMap[np.SiteID] = existing
+				existing = &schedulersitecacheinfo.SiteCacheInfo{}
+				siteCacheInfoSnapshot.siteCacheInfoMap[np.SiteID] = existing
 			}
-			clone := node.info.Clone()
-			// We need to preserve the original pointer of the NodeInfo struct since it
-			// is used in the NodeInfoList, which we may not update.
+			clone := siteCacheInfo.info.Clone()
+			// We need to preserve the original pointer of the Host struct since it
+			// is used in the SiteCacheInfoList, which we may not update.
 			*existing = *clone
 		}
 	}
-	// Update the snapshot generation with the latest NodeInfo generation.
-	if cache.headNode != nil {
-		nodeSnapshot.generation = cache.headNode.info.GetGeneration()
+	// Update the snapshot generation with the latest Host generation.
+	if cache.headSiteCacheInfo != nil {
+		siteCacheInfoSnapshot.generation = cache.headSiteCacheInfo.info.GetGeneration()
 	}
 
-	if len(nodeSnapshot.nodeInfoMap) > len(cache.nodes) {
-		cache.removeDeletedNodesFromSnapshot(nodeSnapshot)
+	if len(siteCacheInfoSnapshot.siteCacheInfoMap) > len(cache.siteCacheInfos) {
+		cache.removeDeletedSiteCacheInfosFromSnapshot(siteCacheInfoSnapshot)
 		updateAllLists = true
 	}
 
 	if updateAllLists {
-		cache.updateNodeInfoSnapshotList(nodeSnapshot, updateAllLists)
+		cache.updateSiteCacheInfoSnapshotList(siteCacheInfoSnapshot, updateAllLists)
 	}
 
-	if len(nodeSnapshot.nodeInfoList) != cache.nodeTree.numNodes {
+	if len(siteCacheInfoSnapshot.siteCacheInfoList) != cache.siteTree.numSites {
 		errMsg := fmt.Sprintf("snapshot state is not consistent"+
-			", length of NodeInfoList=%v not equal to length of nodes in tree=%v "+
-			", length of NodeInfoMap=%v, length of nodes in cache=%v"+
+			", length of SiteCacheInfoList=%v not equal to length of siteIDs in tree=%v "+
+			", length of SiteCacheInfoMap=%v, length of siteIDs in cache=%v"+
 			", trying to recover",
-			len(nodeSnapshot.nodeInfoList), cache.nodeTree.numNodes,
-			len(nodeSnapshot.nodeInfoMap), len(cache.nodes))
+			len(siteCacheInfoSnapshot.siteCacheInfoList), cache.siteTree.numSites,
+			len(siteCacheInfoSnapshot.siteCacheInfoMap), len(cache.siteCacheInfos))
 		logger.Errorf(errMsg)
 		// We will try to recover by re-creating the lists for the next scheduling cycle, but still return an
 		// error to surface the problem, the error will likely cause a failure to the current scheduling cycle.
-		cache.updateNodeInfoSnapshotList(nodeSnapshot, true)
+		cache.updateSiteCacheInfoSnapshotList(siteCacheInfoSnapshot, true)
 		return fmt.Errorf(errMsg)
 	}
 
 	return nil
 }
 
-func (cache *schedulerCache) updateNodeInfoSnapshotList(snapshot *Snapshot, updateAll bool) {
+func (cache *schedulerCache) updateSiteCacheInfoSnapshotList(snapshot *Snapshot, updateAll bool) {
 	if updateAll {
-		// Take a snapshot of the nodes order in the tree
-		snapshot.nodeInfoList = make([]*schedulernodeinfo.NodeInfo, 0, cache.nodeTree.numNodes)
-		for i := 0; i < cache.nodeTree.numNodes; i++ {
-			nodeName := cache.nodeTree.next()
-			if n := snapshot.nodeInfoMap[nodeName]; n != nil {
-				snapshot.nodeInfoList = append(snapshot.nodeInfoList, n)
+		// Take a snapshot of the siteIDs order in the tree
+		snapshot.siteCacheInfoList = make([]*schedulersitecacheinfo.SiteCacheInfo, 0, cache.siteTree.numSites)
+		for i := 0; i < cache.siteTree.numSites; i++ {
+			siteID := cache.siteTree.next()
+			if n := snapshot.siteCacheInfoMap[siteID]; n != nil {
+				snapshot.siteCacheInfoList = append(snapshot.siteCacheInfoList, n)
 			} else {
-				logger.Errorf("node %q exist in nodeTree but not in NodeInfoMap, this should not happen.",
-					nodeName)
+				logger.Errorf("site %q exist in siteTree but not in siteInfoMap, this should not happen.",
+					siteID)
 			}
 		}
 	}
 }
 
-// If certain nodes were deleted after the last snapshot was taken, we should remove them from the snapshot.
-func (cache *schedulerCache) removeDeletedNodesFromSnapshot(snapshot *Snapshot) {
-	toDelete := len(snapshot.nodeInfoMap) - len(cache.nodes)
-	for name := range snapshot.nodeInfoMap {
+// If certain siteCacheInfos were deleted after the last snapshot was taken, we should remove them from the snapshot.
+func (cache *schedulerCache) removeDeletedSiteCacheInfosFromSnapshot(snapshot *Snapshot) {
+	toDelete := len(snapshot.siteCacheInfoMap) - len(cache.siteCacheInfos)
+	for name := range snapshot.siteCacheInfoMap {
 		if toDelete <= 0 {
 			break
 		}
-		if _, ok := cache.nodes[name]; !ok {
-			delete(snapshot.nodeInfoMap, name)
+		if _, ok := cache.siteCacheInfos[name]; !ok {
+			delete(snapshot.siteCacheInfoMap, name)
 			toDelete--
 		}
 	}
@@ -279,7 +279,7 @@ func (cache *schedulerCache) removeDeletedNodesFromSnapshot(snapshot *Snapshot) 
 
 // ForgetStack removes an assumed stack from cache.
 func (cache *schedulerCache) ForgetStack(stack *types.Stack) error {
-	key, err := schedulernodeinfo.GetStackKey(stack)
+	key, err := schedulersitecacheinfo.GetStackKey(stack)
 	if err != nil {
 		return err
 	}
@@ -303,9 +303,9 @@ func (cache *schedulerCache) ForgetStack(stack *types.Stack) error {
 	return nil
 }
 
-//AssumeStack assume stack to node
+//AssumeStack assume stack to site
 func (cache *schedulerCache) AssumeStack(stack *types.Stack) error {
-	key, err := schedulernodeinfo.GetStackKey(stack)
+	key, err := schedulersitecacheinfo.GetStackKey(stack)
 	if err != nil {
 		return err
 	}
@@ -326,13 +326,13 @@ func (cache *schedulerCache) AssumeStack(stack *types.Stack) error {
 
 // Assumes that lock is already acquired.
 func (cache *schedulerCache) addStack(stack *types.Stack) {
-	n, ok := cache.nodes[stack.Selected.NodeID]
+	n, ok := cache.siteCacheInfos[stack.Selected.SiteID]
 	if !ok {
-		n = newNodeInfoListItem(schedulernodeinfo.NewNodeInfo())
-		cache.nodes[stack.Selected.NodeID] = n
+		n = newSiteCacheInfoListItem(schedulersitecacheinfo.NewSiteCacheInfo())
+		cache.siteCacheInfos[stack.Selected.SiteID] = n
 	}
 	n.info.AddStack(stack)
-	cache.moveNodeInfoToHead(stack.Selected.NodeID)
+	cache.moveSiteCacheInfoToHead(stack.Selected.SiteID)
 }
 
 // Assumes that lock is already acquired.
@@ -345,25 +345,25 @@ func (cache *schedulerCache) updateStack(oldStack, newStack *types.Stack) error 
 }
 
 // Assumes that lock is already acquired.
-// Removes a stack from the cached node info. When a node is removed, some pod
+// Removes a stack from the cached site info. When a site is removed, some pod
 // deletion events might arrive later. This is not a problem, as the pods in
-// the node are assumed to be removed already.
+// the site are assumed to be removed already.
 func (cache *schedulerCache) removeStack(stack *types.Stack) error {
-	n, ok := cache.nodes[stack.Selected.NodeID]
+	n, ok := cache.siteCacheInfos[stack.Selected.SiteID]
 	if !ok {
 		return nil
 	}
 	if err := n.info.RemoveStack(stack); err != nil {
 		return err
 	}
-	cache.moveNodeInfoToHead(stack.Selected.NodeID)
+	cache.moveSiteCacheInfoToHead(stack.Selected.SiteID)
 	return nil
 }
 
 //AddStack add stack
 func (cache *schedulerCache) AddStack(stack *types.Stack) error {
 
-	key, err := schedulernodeinfo.GetStackKey(stack)
+	key, err := schedulersitecacheinfo.GetStackKey(stack)
 	if err != nil {
 		return err
 	}
@@ -375,7 +375,7 @@ func (cache *schedulerCache) AddStack(stack *types.Stack) error {
 	switch {
 	case ok && cache.assumedStacks[key]:
 		if currState.stack.Selected != stack.Selected {
-			// The stack was added to a different node than it was assumed to.
+			// The stack was added to a different site than it was assumed to.
 			logger.Warnf("Stack %v was assumed to be on %v but got added to %v", key, stack.Selected, currState.stack.Selected)
 			// Clean this up.
 			if err := cache.removeStack(currState.stack); err != nil {
@@ -401,7 +401,7 @@ func (cache *schedulerCache) AddStack(stack *types.Stack) error {
 
 //UpdateStack update stack
 func (cache *schedulerCache) UpdateStack(oldStack, newStack *types.Stack) error {
-	key, err := schedulernodeinfo.GetStackKey(oldStack)
+	key, err := schedulersitecacheinfo.GetStackKey(oldStack)
 	if err != nil {
 		return err
 	}
@@ -415,7 +415,7 @@ func (cache *schedulerCache) UpdateStack(oldStack, newStack *types.Stack) error 
 	// before Update event, in which case the state would change from Assumed to Added.
 	case ok && !cache.assumedStacks[key]:
 		if currState.stack.Selected != newStack.Selected {
-			logger.Errorf("Stack %v updated on a different node than previously added to.", key)
+			logger.Errorf("Stack %v updated on a different site than previously added to.", key)
 			logger.Errorf("Schedulercache is corrupted and can badly affect scheduling decisions")
 		}
 		if err := cache.updateStack(oldStack, newStack); err != nil {
@@ -430,7 +430,7 @@ func (cache *schedulerCache) UpdateStack(oldStack, newStack *types.Stack) error 
 
 //RemoveStack remove stack
 func (cache *schedulerCache) RemoveStack(stack *types.Stack) error {
-	key, err := schedulernodeinfo.GetStackKey(stack)
+	key, err := schedulersitecacheinfo.GetStackKey(stack)
 	if err != nil {
 		return err
 	}
@@ -443,9 +443,9 @@ func (cache *schedulerCache) RemoveStack(stack *types.Stack) error {
 	// An assumed stack won't have Delete/Remove event. It needs to have Add event
 	// before Remove event, in which case the state would change from Assumed to Added.
 	case ok && !cache.assumedStacks[key]:
-		if currState.stack.Selected.NodeID != stack.Selected.NodeID {
+		if currState.stack.Selected.SiteID != stack.Selected.SiteID {
 			logger.Errorf("Stack %v was assumed to be on %v but got added to %v", key,
-				stack.Selected.NodeID, currState.stack.Selected.NodeID)
+				stack.Selected.SiteID, currState.stack.Selected.SiteID)
 			logger.Errorf("Schedulercache is corrupted and can badly affect scheduling decisions")
 		}
 		err := cache.removeStack(currState.stack)
@@ -461,7 +461,7 @@ func (cache *schedulerCache) RemoveStack(stack *types.Stack) error {
 
 //IsAssumedStack is assume stack
 func (cache *schedulerCache) IsAssumedStack(stack *types.Stack) (bool, error) {
-	key, err := schedulernodeinfo.GetStackKey(stack)
+	key, err := schedulersitecacheinfo.GetStackKey(stack)
 	if err != nil {
 		return false, err
 	}
@@ -476,10 +476,10 @@ func (cache *schedulerCache) IsAssumedStack(stack *types.Stack) (bool, error) {
 	return b, nil
 }
 
-// GetPod might return a pod for which its node has already been deleted from
+// GetPod might return a pod for which its site has already been deleted from
 // the main cache. This is useful to properly process pod update events.
 func (cache *schedulerCache) GetStack(stack *types.Stack) (*types.Stack, error) {
-	key, err := schedulernodeinfo.GetStackKey(stack)
+	key, err := schedulersitecacheinfo.GetStackKey(stack)
 	if err != nil {
 		return nil, err
 	}
@@ -495,130 +495,130 @@ func (cache *schedulerCache) GetStack(stack *types.Stack) (*types.Stack, error) 
 	return stackStates.stack, nil
 }
 
-func (cache *schedulerCache) AddNode(node *types.SiteNode) error {
+func (cache *schedulerCache) AddSite(site *types.Site) error {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 
-	n, ok := cache.nodes[node.SiteID]
+	n, ok := cache.siteCacheInfos[site.SiteID]
 	if !ok {
-		n = newNodeInfoListItem(schedulernodeinfo.NewNodeInfo())
-		cache.nodes[node.SiteID] = n
+		n = newSiteCacheInfoListItem(schedulersitecacheinfo.NewSiteCacheInfo())
+		cache.siteCacheInfos[site.SiteID] = n
 	}
 
-	cache.moveNodeInfoToHead(node.SiteID)
+	cache.moveSiteCacheInfoToHead(site.SiteID)
 
-	cache.nodeTree.addNode(node)
-	cache.updateRegionToNode(node)
-	return n.info.SetNode(node)
+	cache.siteTree.addSite(site)
+	cache.updateRegionToSite(site)
+	return n.info.SetSite(site)
 }
 
-func (cache *schedulerCache) UpdateNode(oldNode, newNode *types.SiteNode) error {
+func (cache *schedulerCache) UpdateSite(oldSite, newSite *types.Site) error {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 
-	n, ok := cache.nodes[newNode.SiteID]
+	n, ok := cache.siteCacheInfos[newSite.SiteID]
 	if !ok {
-		n = newNodeInfoListItem(schedulernodeinfo.NewNodeInfo())
-		cache.nodes[newNode.SiteID] = n
-		cache.nodeTree.addNode(newNode)
+		n = newSiteCacheInfoListItem(schedulersitecacheinfo.NewSiteCacheInfo())
+		cache.siteCacheInfos[newSite.SiteID] = n
+		cache.siteTree.addSite(newSite)
 	}
-	cache.moveNodeInfoToHead(newNode.SiteID)
+	cache.moveSiteCacheInfoToHead(newSite.SiteID)
 
-	cache.nodeTree.updateNode(oldNode, newNode)
-	cache.deleteRegionToNode(oldNode)
-	cache.updateRegionToNode(newNode)
-	return n.info.SetNode(newNode)
+	cache.siteTree.updateSite(oldSite, newSite)
+	cache.deleteRegionToSite(oldSite)
+	cache.updateRegionToSite(newSite)
+	return n.info.SetSite(newSite)
 }
 
-// RemoveNode removes a node from the cache.
-// Some nodes might still have pods because their deletion events didn't arrive
+// RemoveSite removes a site from the cache.
+// Some siteIDs might still have pods because their deletion events didn't arrive
 // yet. For most intents and purposes, those pods are removed from the cache,
-// having it's source of truth in the cached nodes.
+// having it's source of truth in the cached siteIDs.
 // However, some information on pods (assumedPods, podStates) persist. These
 // caches will be eventually consistent as pod deletion events arrive.
-func (cache *schedulerCache) RemoveNode(node *types.SiteNode) error {
+func (cache *schedulerCache) RemoveSite(site *types.Site) error {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 
-	_, ok := cache.nodes[node.SiteID]
+	_, ok := cache.siteCacheInfos[site.SiteID]
 	if !ok {
-		return fmt.Errorf("node %v is not found", node.SiteID)
+		return fmt.Errorf("site %v is not found", site.SiteID)
 	}
-	cache.removeNodeInfoFromList(node.SiteID)
-	if err := cache.nodeTree.removeNode(node); err != nil {
+	cache.removeSiteCacheInfoFromList(site.SiteID)
+	if err := cache.siteTree.removeSite(site); err != nil {
 		return err
 	}
 
-	cache.deleteRegionToNode(node)
+	cache.deleteRegionToSite(site)
 	return nil
 }
 
-func (cache *schedulerCache) updateRegionToNode(newNode *types.SiteNode) {
-	_, ok := cache.regionToNode[newNode.Region]
+func (cache *schedulerCache) updateRegionToSite(site *types.Site) {
+	_, ok := cache.regionToSite[site.Region]
 	if !ok {
-		cache.regionToNode[newNode.Region] = sets.NewString()
+		cache.regionToSite[site.Region] = sets.NewString()
 	}
-	cache.regionToNode[newNode.Region].Insert(newNode.SiteID)
+	cache.regionToSite[site.Region].Insert(site.SiteID)
 }
 
-func (cache *schedulerCache) deleteRegionToNode(newNode *types.SiteNode) {
-	_, ok := cache.regionToNode[newNode.Region]
+func (cache *schedulerCache) deleteRegionToSite(site *types.Site) {
+	_, ok := cache.regionToSite[site.Region]
 	if !ok {
 		return
 	}
-	cache.regionToNode[newNode.Region].Delete(newNode.SiteID)
+	cache.regionToSite[site.Region].Delete(site.SiteID)
 }
 
-//UpdateNodeWithEipPool update eip pool
-func (cache *schedulerCache) UpdateNodeWithEipPool(nodeID string, eipPool *typed.EipPool) error {
-	node, ok := cache.nodes[nodeID]
+//UpdateSiteWithEipPool update eip pool
+func (cache *schedulerCache) UpdateSiteWithEipPool(siteID string, eipPool *typed.EipPool) error {
+	siteCacheInfo, ok := cache.siteCacheInfos[siteID]
 	if !ok {
-		return fmt.Errorf("node %v is not found", nodeID)
+		return fmt.Errorf("site %v is not found", siteID)
 	}
 
-	err := node.info.UpdateNodeWithEipPool(eipPool)
+	err := siteCacheInfo.info.UpdateSiteWithEipPool(eipPool)
 	if err != nil {
-		logger.Errorf("UpdateNodeWithEipPool failed! err: %s", err)
+		logger.Errorf("UpdateSiteWithEipPool failed! err: %s", err)
 		return err
 	}
 
-	cache.moveNodeInfoToHead(nodeID)
+	cache.moveSiteCacheInfoToHead(siteID)
 
 	return nil
 }
 
-//UpdateNodeWithVolumePool update volume pool
-func (cache *schedulerCache) UpdateNodeWithVolumePool(nodeID string, volumePool *typed.RegionVolumePool) error {
-	node, ok := cache.nodes[nodeID]
+//UpdateSiteWithVolumePool update volume pool
+func (cache *schedulerCache) UpdateSiteWithVolumePool(siteID string, volumePool *typed.RegionVolumePool) error {
+	siteCacheInfo, ok := cache.siteCacheInfos[siteID]
 	if !ok {
-		return fmt.Errorf("node %v is not found", nodeID)
+		return fmt.Errorf("siteCacheInfo %v is not found", siteID)
 	}
 
-	err := node.info.UpdateNodeWithVolumePool(volumePool)
+	err := siteCacheInfo.info.UpdateSiteWithVolumePool(volumePool)
 	if err != nil {
-		logger.Errorf("UpdateNodeWithEipPool failed! err: %s", err)
+		logger.Errorf("UpdateSiteWithEipPool failed! err: %s", err)
 		return err
 	}
 
-	cache.moveNodeInfoToHead(nodeID)
+	cache.moveSiteCacheInfoToHead(siteID)
 
 	return nil
 }
 
-//UpdateEipPool updates eip pool info about node
+//UpdateEipPool updates eip pool info about site
 func (cache *schedulerCache) UpdateEipPool(eipPool *typed.EipPool) error {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 
-	nodes, ok := cache.regionToNode[eipPool.Region]
+	siteIDs, ok := cache.regionToSite[eipPool.Region]
 	if !ok {
 		return nil
 	}
 
-	for node := range nodes {
-		err := cache.UpdateNodeWithEipPool(node, eipPool)
+	for siteID := range siteIDs {
+		err := cache.UpdateSiteWithEipPool(siteID, eipPool)
 		if err != nil {
-			logger.Errorf("UpdateNodeWithEipPool failed! err: %s", err)
+			logger.Errorf("UpdateSiteWithEipPool failed! err: %s", err)
 			continue
 		}
 	}
@@ -626,20 +626,20 @@ func (cache *schedulerCache) UpdateEipPool(eipPool *typed.EipPool) error {
 	return nil
 }
 
-//UpdateVolumePool updates volume pool info about node
+//UpdateVolumePool updates volume pool info about site
 func (cache *schedulerCache) UpdateVolumePool(volumePool *typed.RegionVolumePool) error {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 
-	nodes, ok := cache.regionToNode[volumePool.Region]
+	siteIDs, ok := cache.regionToSite[volumePool.Region]
 	if !ok {
 		return nil
 	}
 
-	for node := range nodes {
-		err := cache.UpdateNodeWithVolumePool(node, volumePool)
+	for siteID := range siteIDs {
+		err := cache.UpdateSiteWithVolumePool(siteID, volumePool)
 		if err != nil {
-			logger.Errorf("UpdateNodeWithEipPool failed! err: %s", err)
+			logger.Errorf("UpdateSiteWithEipPool failed! err: %s", err)
 			continue
 		}
 	}
@@ -647,23 +647,23 @@ func (cache *schedulerCache) UpdateVolumePool(volumePool *typed.RegionVolumePool
 	return nil
 }
 
-// UpdateNodeWithResInfo update res info
-func (cache *schedulerCache) UpdateNodeWithResInfo(siteID string, resInfo types.AllResInfo) error {
+// UpdateSiteWithResInfo update res info
+func (cache *schedulerCache) UpdateSiteWithResInfo(siteID string, resInfo types.AllResInfo) error {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 
-	node, ok := cache.nodes[siteID]
+	siteCacheInfo, ok := cache.siteCacheInfos[siteID]
 	if !ok {
 		return nil
 	}
 
-	err := node.info.UpdateNodeWithResInfo(resInfo)
+	err := siteCacheInfo.info.UpdateSiteWithResInfo(resInfo)
 	if err != nil {
-		logger.Errorf("UpdateNodeWithResInfo failed! err: %s", err)
+		logger.Errorf("UpdateSiteWithResInfo failed! err: %s", err)
 		return err
 	}
 
-	cache.moveNodeInfoToHead(siteID)
+	cache.moveSiteCacheInfoToHead(siteID)
 
 	return nil
 }
@@ -672,36 +672,36 @@ func (cache *schedulerCache) UpdateQos(siteID string, netMetricData *types.NetMe
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 
-	node, ok := cache.nodes[siteID]
+	siteCacheInfo, ok := cache.siteCacheInfos[siteID]
 	if !ok {
 		return nil
 	}
 
-	err := node.info.UpdateQos(netMetricData)
+	err := siteCacheInfo.info.UpdateQos(netMetricData)
 	if err != nil {
 		logger.Errorf("UpdateQos failed! err: %s", err)
 		return err
 	}
 
-	cache.moveNodeInfoToHead(siteID)
+	cache.moveSiteCacheInfoToHead(siteID)
 
 	return nil
 }
 
-//UpdateNodeWithVcpuMem update vcpu and mem
-func (cache *schedulerCache) UpdateNodeWithRatio(region string, az string, ratios []types.AllocationRatio) error {
+//UpdateSiteWithVcpuMem update vcpu and mem
+func (cache *schedulerCache) UpdateSiteWithRatio(region string, az string, ratios []types.AllocationRatio) error {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 
-	for _, node := range cache.nodes {
-		if node.info.Node().Region == region && node.info.Node().AvailabilityZone == az {
-			err := node.info.UpdateNodeWithRatio(ratios)
+	for _, siteCacheInfo := range cache.siteCacheInfos {
+		if siteCacheInfo.info.Site().Region == region && siteCacheInfo.info.Site().AvailabilityZone == az {
+			err := siteCacheInfo.info.UpdateSiteWithRatio(ratios)
 			if err != nil {
-				logger.Errorf("UpdateNodeWithRatio failed! err: %s", err)
+				logger.Errorf("UpdateSiteWithRatio failed! err: %s", err)
 				return err
 			}
 
-			cache.moveNodeInfoToHead(node.info.Node().SiteID)
+			cache.moveSiteCacheInfoToHead(siteCacheInfo.info.Site().SiteID)
 			break
 		}
 	}
@@ -714,14 +714,14 @@ func (cache *schedulerCache) UpdateSpotResources(region string, az string, spotR
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 
-	for _, node := range cache.nodes {
-		if node.info.Node().Region == region && node.info.Node().AvailabilityZone == az {
-			err := node.info.UpdateSpotResources(spotRes)
+	for _, siteCacheInfo := range cache.siteCacheInfos {
+		if siteCacheInfo.info.Site().Region == region && siteCacheInfo.info.Site().AvailabilityZone == az {
+			err := siteCacheInfo.info.UpdateSpotResources(spotRes)
 			if err != nil {
-				logger.Errorf("UpdateNodeWithRatio failed! err: %s", err)
+				logger.Errorf("UpdateSiteWithRatio failed! err: %s", err)
 				return err
 			}
-			cache.moveNodeInfoToHead(node.info.Node().SiteID)
+			cache.moveSiteCacheInfoToHead(siteCacheInfo.info.Site().SiteID)
 
 			break
 		}
@@ -736,23 +736,23 @@ func (cache *schedulerCache) GetRegions() map[string]types.CloudRegion {
 	defer cache.mu.RUnlock()
 
 	ret := map[string]types.CloudRegion{}
-	for _, node := range cache.nodes {
-		region := node.info.Node().Region
+	for _, siteInfoCache := range cache.siteCacheInfos {
+		region := siteInfoCache.info.Site().Region
 		cr, ok := ret[region]
 		if !ok {
 			cr = types.CloudRegion{Region: region, AvailabilityZone: []string{}}
 		}
-		cr.AvailabilityZone = append(cr.AvailabilityZone, node.info.Node().AvailabilityZone)
+		cr.AvailabilityZone = append(cr.AvailabilityZone, siteInfoCache.info.Site().AvailabilityZone)
 		ret[region] = cr
 	}
 
 	return ret
 }
 
-//PrintString print node info
+//PrintString print site cache info
 func (cache *schedulerCache) PrintString() {
-	for _, node := range cache.nodes {
-		logger.Infof("siteID: %s, info: %s", node.info.Node().SiteID, node.info.ToString())
+	for _, siteCacheInfo := range cache.siteCacheInfos {
+		logger.Infof("siteID: %s, info: %s", siteCacheInfo.info.Site().SiteID, siteCacheInfo.info.ToString())
 	}
 }
 
@@ -765,7 +765,7 @@ func (cache *schedulerCache) cleanupExpiredAssumedStacks() {
 }
 
 // cleanupAssumedStacks exists for making test deterministic by taking time as input argument.
-// It also reports metrics on the cache size for nodes, stacks, and assumed stacks.
+// It also reports metrics on the cache size for siteCacheInfos, stacks, and assumed stacks.
 func (cache *schedulerCache) cleanupAssumedStacks(now time.Time) {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
@@ -811,11 +811,11 @@ func (cache *schedulerCache) FilteredList(stackFilter schedulerlisters.StackFilt
 	// can avoid expensive array growth without wasting too much memory by
 	// pre-allocating capacity.
 	maxSize := 0
-	for _, n := range cache.nodes {
+	for _, n := range cache.siteCacheInfos {
 		maxSize += len(n.info.Stacks())
 	}
 	stacks := make([]*types.Stack, 0, maxSize)
-	for _, n := range cache.nodes {
+	for _, n := range cache.siteCacheInfos {
 		for _, stack := range n.info.Stacks() {
 			if stackFilter(stack) {
 				stacks = append(stacks, stack)

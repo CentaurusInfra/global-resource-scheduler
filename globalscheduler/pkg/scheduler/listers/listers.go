@@ -17,7 +17,7 @@ limitations under the License.
 package listers
 
 import (
-	schedulernodeinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/nodeinfo"
+	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 )
 
@@ -33,18 +33,18 @@ type StackLister interface {
 	FilteredList(stackFilter StackFilter) ([]*types.Stack, error)
 }
 
-// NodeInfoLister interface represents anything that can list/get NodeInfo objects from node name.
-type NodeInfoLister interface {
-	// Returns the list of NodeInfos.
-	List() ([]*schedulernodeinfo.NodeInfo, error)
-	// Returns the list of NodeInfos of nodes with pods with affinity terms.
-	HavePodsWithAffinityList() ([]*schedulernodeinfo.NodeInfo, error)
-	// Returns the NodeInfo of the given node name.
-	Get(nodeName string) (*schedulernodeinfo.NodeInfo, error)
+// SiteCacheInfoLister interface represents anything that can list/get SiteCacheInfo objects from site name.
+type SiteCacheInfoLister interface {
+	// Returns the list of SiteCacheInfos.
+	List() ([]*schedulersitecacheinfo.SiteCacheInfo, error)
+	// Returns the list of SiteCacheInfos of site with pods with affinity terms.
+	HavePodsWithAffinityList() ([]*schedulersitecacheinfo.SiteCacheInfo, error)
+	// Returns the SiteCacheInfo of the given site ID.
+	Get(siteID string) (*schedulersitecacheinfo.SiteCacheInfo, error)
 }
 
 // SharedLister groups scheduler-specific listers.
 type SharedLister interface {
 	Stacks() StackLister
-	NodeInfos() NodeInfoLister
+	SiteCacheInfos() SiteCacheInfoLister
 }

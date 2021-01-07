@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package nodeavailability
+package siteavailability
 
 import (
 	"context"
@@ -23,35 +23,35 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/nodeinfo"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 )
 
 // Name is the name of the plugin used in the plugin registry and configurations.
-const Name = "NodeAvailability"
+const Name = "SiteAvailability"
 
-// NodeAvailability is a plugin that node availability
-type NodeAvailability struct{}
+// SiteAvailability is a plugin that site availability
+type SiteAvailability struct{}
 
-var _ interfaces.FilterPlugin = &NodeAvailability{}
+var _ interfaces.FilterPlugin = &SiteAvailability{}
 
 // Name returns name of the plugin.
-func (pl *NodeAvailability) Name() string {
+func (pl *SiteAvailability) Name() string {
 	return Name
 }
 
 // Filter invoked at the filter extension point.
-func (pl *NodeAvailability) Filter(ctx context.Context, cycleState *interfaces.CycleState, stack *types.Stack,
-	nodeInfo *nodeinfo.NodeInfo) *interfaces.Status {
+func (pl *SiteAvailability) Filter(ctx context.Context, cycleState *interfaces.CycleState, stack *types.Stack,
+	siteCacheInfo *sitecacheinfo.SiteCacheInfo) *interfaces.Status {
 
-	if nodeInfo.Node().Status == constants.SiteStatusOffline || nodeInfo.Node().Status == constants.SiteStatusSellout {
-		msg := fmt.Sprintf("Node(%s) status is %s, not available!", nodeInfo.Node().SiteID, nodeInfo.Node().Status)
+	if siteCacheInfo.Site().Status == constants.SiteStatusOffline || siteCacheInfo.Site().Status == constants.SiteStatusSellout {
+		msg := fmt.Sprintf("Site(%s) status is %s, not available!", siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Status)
 		logger.Debugf(msg)
 		return interfaces.NewStatus(interfaces.Unschedulable, msg)
 	}
 
-	if stack.Selector.NodeID != "" && stack.Selector.NodeID != nodeInfo.Node().SiteID {
-		msg := fmt.Sprintf("Node(%s) not suitable!", nodeInfo.Node().SiteID)
+	if stack.Selector.SiteID != "" && stack.Selector.SiteID != siteCacheInfo.Site().SiteID {
+		msg := fmt.Sprintf("Site(%s) not suitable!", siteCacheInfo.Site().SiteID)
 		logger.Debugf(msg)
 		return interfaces.NewStatus(interfaces.Unschedulable, msg)
 	}
@@ -61,5 +61,5 @@ func (pl *NodeAvailability) Filter(ctx context.Context, cycleState *interfaces.C
 
 // New initializes a new plugin and returns it.
 func New(handle interfaces.FrameworkHandle) (interfaces.Plugin, error) {
-	return &NodeAvailability{}, nil
+	return &SiteAvailability{}, nil
 }

@@ -42,7 +42,7 @@ import (
 	frameworkplugins "k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins"
 	internalcache "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache"
 	internalqueue "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/queue"
-	schedulernodeinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/nodeinfo"
+	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/wait"
@@ -72,19 +72,19 @@ func GetScheduler() *Scheduler {
 }
 
 // ScheduleResult represents the result of one pod scheduled. It will contain
-// the final selected Node, along with the selected intermediate information.
+// the final selected Site, along with the selected intermediate information.
 type ScheduleResult struct {
 	// Name of the scheduler suggest host
 	SuggestedHost string
 	Stacks        []types.Stack
-	// Number of nodes scheduler evaluated on one stack scheduled
-	EvaluatedNodes int
-	// Number of feasible nodes on one stack scheduled
-	FeasibleNodes int
+	// Number of site scheduler evaluated on one stack scheduled
+	EvaluatedSites int
+	// Number of feasible site on one stack scheduled
+	FeasibleSites int
 }
 
 // Scheduler watches for new unscheduled pods. It attempts to find
-// nodes that they fit on and writes bindings back to the api server.
+// site that they fit on and writes bindings back to the api server.
 type Scheduler struct {
 	// Name of the current scheduler
 	SchedulerName string
@@ -93,7 +93,7 @@ type Scheduler struct {
 	// by NodeLister and Algorithm.
 	SchedulerCache internalcache.Cache
 
-	nodeInfoSnapshot *internalcache.Snapshot
+	siteCacheInfoSnapshot *internalcache.Snapshot
 
 	// Close this to shut down the scheduler.
 	StopEverything <-chan struct{}
@@ -139,7 +139,7 @@ func (sched *Scheduler) scheduleOne() {
 	logger.Infof("Scheduler result: %v", result)
 
 	// bind scheduler result to pod
-	logger.Infof("Try to bind to node, stacks:%v", result.Stacks)
+	logger.Infof("Try to bind to site, stacks:%v", result.Stacks)
 	sched.bindStacks(result.Stacks)
 }
 
@@ -161,28 +161,28 @@ func (sched *Scheduler) Run() {
 	go wait.Until(sched.scheduleOne, 0, sched.StopEverything)
 }
 
-// snapshot snapshots scheduler cache and node infos for all fit and priority
+// snapshot snapshots scheduler cache and site cache infos for all fit and priority
 // functions.
 func (sched *Scheduler) snapshot() error {
 	// Used for all fit and priority funcs.
-	return sched.Cache().UpdateSnapshot(sched.nodeInfoSnapshot)
+	return sched.Cache().UpdateSnapshot(sched.siteCacheInfoSnapshot)
 }
 
-// stackPassesFiltersOnNode checks whether a node given by NodeInfo satisfies the
+// stackPassesFiltersOnSite checks whether a site given by Host satisfies the
 // filter plugins.
 // This function is called from two different places: Schedule and Preempt.
 // When it is called from Schedule, we want to test whether the pod is
-// schedulable on the node with all the existing pods on the node plus higher
-// and equal priority pods nominated to run on the node.
+// schedulable on the site with all the existing pods on the site plus higher
+// and equal priority pods nominated to run on the site.
 // When it is called from Preempt, we should remove the victims of preemption
 // and add the nominated pods. Removal of the victims is done by
 // SelectVictimsOnNode(). Preempt removes victims from PreFilter state and
-// NodeInfo before calling this function.
-func (sched *Scheduler) stackPassesFiltersOnNode(
+// Host before calling this function.
+func (sched *Scheduler) stackPassesFiltersOnSite(
 	ctx context.Context,
 	state *interfaces.CycleState,
 	stack *types.Stack,
-	info *schedulernodeinfo.NodeInfo,
+	info *schedulersitecacheinfo.SiteCacheInfo,
 ) (bool, *interfaces.Status, error) {
 	var status *interfaces.Status
 
@@ -195,21 +195,21 @@ func (sched *Scheduler) stackPassesFiltersOnNode(
 	return status.IsSuccess(), status, nil
 }
 
-// findNodesThatPassFilters finds the nodes that fit the filter plugins.
-func (sched *Scheduler) findNodesThatPassFilters(ctx context.Context, state *interfaces.CycleState,
-	stack *types.Stack, statuses interfaces.NodeToStatusMap) ([]*types.SiteNode, error) {
-	allNodes, err := sched.nodeInfoSnapshot.NodeInfos().List()
+// findSitesThatPassFilters finds the site that fit the filter plugins.
+func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *interfaces.CycleState,
+	stack *types.Stack, statuses interfaces.SiteToStatusMap) ([]*types.Site, error) {
+	allSiteCacheInfos, err := sched.siteCacheInfoSnapshot.SiteCacheInfos().List()
 	if err != nil {
 		return nil, err
 	}
 
 	// Create filtered list with enough space to avoid growing it
 	// and allow assigning.
-	filtered := make([]*types.SiteNode, len(allNodes))
+	filtered := make([]*types.Site, len(allSiteCacheInfos))
 
 	if !sched.SchedFrame.HasFilterPlugins() {
 		for i := range filtered {
-			filtered[i] = allNodes[i].Node()
+			filtered[i] = allSiteCacheInfos[i].Site()
 		}
 		return filtered, nil
 	}
@@ -218,28 +218,28 @@ func (sched *Scheduler) findNodesThatPassFilters(ctx context.Context, state *int
 	var statusesLock sync.Mutex
 	var filteredLen int32
 	ctx, cancel := context.WithCancel(ctx)
-	checkNode := func(i int) {
-		nodeInfo := allNodes[i]
-		fits, status, err := sched.stackPassesFiltersOnNode(ctx, state, stack, nodeInfo)
+	checkSite := func(i int) {
+		siteCacheInfo := allSiteCacheInfos[i]
+		fits, status, err := sched.stackPassesFiltersOnSite(ctx, state, stack, siteCacheInfo)
 		if err != nil {
 			errCh.SendErrorWithCancel(err, cancel)
 			return
 		}
 		if fits {
 			length := atomic.AddInt32(&filteredLen, 1)
-			filtered[length-1] = nodeInfo.Node()
+			filtered[length-1] = siteCacheInfo.Site()
 		} else {
 			statusesLock.Lock()
 			if !status.IsSuccess() {
-				statuses[nodeInfo.Node().SiteID] = status
+				statuses[siteCacheInfo.Site().SiteID] = status
 			}
 			statusesLock.Unlock()
 		}
 	}
 
-	// Stops searching for more nodes once the configured number of feasible nodes
+	// Stops searching for more site once the configured number of feasible site
 	// are found.
-	workqueue.ParallelizeUntil(ctx, 16, len(allNodes), checkNode)
+	workqueue.ParallelizeUntil(ctx, 16, len(allSiteCacheInfos), checkSite)
 
 	filtered = filtered[:filteredLen]
 	if err := errCh.ReceiveError(); err != nil {
@@ -248,41 +248,41 @@ func (sched *Scheduler) findNodesThatPassFilters(ctx context.Context, state *int
 	return filtered, nil
 }
 
-// prioritizeNodes prioritizes the nodes by running the score plugins,
-// which return a score for each node from the call to RunScorePlugins().
-// The scores from each plugin are added together to make the score for that node, then
+// prioritizeSites prioritizes the site by running the score plugins,
+// which return a score for each site from the call to RunScorePlugins().
+// The scores from each plugin are added together to make the score for that site, then
 // any extenders are run as well.
-// All scores are finally combined (added) to get the total weighted scores of all nodes
-func (sched *Scheduler) prioritizeNodes(
+// All scores are finally combined (added) to get the total weighted scores of all site
+func (sched *Scheduler) prioritizeSites(
 	ctx context.Context,
 	state *interfaces.CycleState,
 	pod *types.Stack,
-	nodes []*types.SiteNode,
-) (interfaces.NodeScoreList, error) {
-	// If no priority configs are provided, then all nodes will have a score of one.
+	sites []*types.Site,
+) (interfaces.SiteScoreList, error) {
+	// If no priority configs are provided, then all sites will have a score of one.
 	// This is required to generate the priority list in the required format
 	if !sched.SchedFrame.HasScorePlugins() {
-		result := make(interfaces.NodeScoreList, 0, len(nodes))
-		for i := range nodes {
-			result = append(result, interfaces.NodeScore{
-				Name:  nodes[i].SiteID,
-				Score: 1,
+		result := make(interfaces.SiteScoreList, 0, len(sites))
+		for i := range sites {
+			result = append(result, interfaces.SiteScore{
+				SiteID: sites[i].SiteID,
+				Score:  1,
 			})
 		}
 		return result, nil
 	}
 
 	// Run the Score plugins.
-	scoresMap, scoreStatus := sched.SchedFrame.RunScorePlugins(ctx, state, pod, nodes)
+	scoresMap, scoreStatus := sched.SchedFrame.RunScorePlugins(ctx, state, pod, sites)
 	if !scoreStatus.IsSuccess() {
-		return interfaces.NodeScoreList{}, scoreStatus.AsError()
+		return interfaces.SiteScoreList{}, scoreStatus.AsError()
 	}
 
 	// Summarize all scores.
-	result := make(interfaces.NodeScoreList, 0, len(nodes))
+	result := make(interfaces.SiteScoreList, 0, len(sites))
 
-	for i := range nodes {
-		result = append(result, interfaces.NodeScore{Name: nodes[i].SiteID, AZ: nodes[i].AvailabilityZone, Score: 0})
+	for i := range sites {
+		result = append(result, interfaces.SiteScore{SiteID: sites[i].SiteID, AZ: sites[i].AvailabilityZone, Score: 0})
 		for j := range scoresMap {
 			result[i].Score += scoresMap[j][i].Score
 		}
@@ -291,42 +291,42 @@ func (sched *Scheduler) prioritizeNodes(
 	// sort by score.
 	sort.Sort(sort.Reverse(result))
 
-	logger.Debug(ctx, "score nodes: %v", result)
+	logger.Debug(ctx, "score sites: %v", result)
 
 	return result, nil
 }
 
-// selectHost takes a prioritized list of nodes and then picks one
-// in a reservoir sampling manner from the nodes that had the highest score.
-func (sched *Scheduler) selectHost(nodeScoreList interfaces.NodeScoreList) (string, error) {
-	if len(nodeScoreList) == 0 {
+// selectHost takes a prioritized list of site and then picks one
+// in a reservoir sampling manner from the site that had the highest score.
+func (sched *Scheduler) selectHost(siteScoreList interfaces.SiteScoreList) (string, error) {
+	if len(siteScoreList) == 0 {
 		return "", fmt.Errorf("empty priorityList")
 	}
-	maxScore := nodeScoreList[0].Score
-	selected := nodeScoreList[0].Name
+	maxScore := siteScoreList[0].Score
+	selected := siteScoreList[0].SiteID
 	cntOfMaxScore := 1
-	for _, ns := range nodeScoreList[1:] {
+	for _, ns := range siteScoreList[1:] {
 		if ns.Score > maxScore {
 			maxScore = ns.Score
-			selected = ns.Name
+			selected = ns.SiteID
 			cntOfMaxScore = 1
 		} else if ns.Score == maxScore {
 			cntOfMaxScore++
 			if rand.Intn(cntOfMaxScore) == 0 {
 				// Replace the candidate with probability of 1/cntOfMaxScore
-				selected = ns.Name
+				selected = ns.SiteID
 			}
 		}
 	}
 	return selected, nil
 }
 
-// bind binds a pod to a given node defined in a binding object.
+// bind binds a pod to a given site defined in a binding object.
 // The precedence for binding is: (1) extenders and (2) framework plugins.
 // We expect this to run asynchronously, so we handle binding metrics internally.
-func (sched *Scheduler) bind(ctx context.Context, stack *types.Stack, targetNode string,
+func (sched *Scheduler) bind(ctx context.Context, stack *types.Stack, targetSiteID string,
 	state *interfaces.CycleState) (err error) {
-	bindStatus := sched.SchedFrame.RunBindPlugins(ctx, state, stack, targetNode)
+	bindStatus := sched.SchedFrame.RunBindPlugins(ctx, state, stack, targetSiteID)
 	if bindStatus.IsSuccess() {
 		return nil
 	}
@@ -346,14 +346,14 @@ func (sched *Scheduler) Schedule2(ctx context.Context, allocation *types.Allocat
 	defer cancel()
 
 	start := time.Now()
-	logger.Debug(ctx, "[START] snapshot nodes...")
+	logger.Debug(ctx, "[START] snapshot site...")
 	err = sched.snapshot()
 	if err != nil {
 		logger.Error(ctx, "sched snapshot failed! err : %s", err)
 		return result, err
 	}
 	end := time.Now()
-	logger.Debug(ctx, "[DONE] snapshot nodes, use_time: %d us", end.Sub(start))
+	logger.Debug(ctx, "[DONE] snapshot site, use_time: %d us", end.Sub(start))
 
 	start = end
 	logger.Debug(ctx, "[START] Running prefilter plugins...")
@@ -368,26 +368,26 @@ func (sched *Scheduler) Schedule2(ctx context.Context, allocation *types.Allocat
 	start = end
 
 	logger.Debug(ctx, "[START] Running filter plugins...")
-	filteredNodesStatuses := make(interfaces.NodeToStatusMap)
+	filteredSitesStatuses := make(interfaces.SiteToStatusMap)
 	allocation.Stack.Selector = allocation.Selector
-	filteredNodes, err := sched.findNodesThatPassFilters(ctx, state, &allocation.Stack, filteredNodesStatuses)
+	filteredSites, err := sched.findSitesThatPassFilters(ctx, state, &allocation.Stack, filteredSitesStatuses)
 	if err != nil {
-		logger.Error(ctx, "findNodesThatPassFilters failed! err: %s", err)
+		logger.Error(ctx, "findSitesThatPassFilters failed! err: %s", err)
 		return result, err
 	}
 	end = time.Now()
 	logger.Debug(ctx, "[DONE] Running filter plugins, use_time: %d us", end.Sub(start))
 	start = end
 
-	logger.Debug(ctx, "filteredNodesStatuses = %v", filteredNodesStatuses.ToString())
-	if len(filteredNodes) <= 0 {
-		logger.Error(ctx, "filter none nodes. resultStatus: %s", filteredNodesStatuses.ToString())
+	logger.Debug(ctx, "filteredSitesStatuses = %v", filteredSitesStatuses.ToString())
+	if len(filteredSites) <= 0 {
+		logger.Error(ctx, "filter none site. resultStatus: %s", filteredSitesStatuses.ToString())
 		return result, nil
 	}
 
 	logger.Debug(ctx, "[START] Running preScore plugins...")
 	// Run "prescore" plugins.
-	prescoreStatus := sched.SchedFrame.RunPreScorePlugins(ctx, state, &allocation.Stack, filteredNodes)
+	prescoreStatus := sched.SchedFrame.RunPreScorePlugins(ctx, state, &allocation.Stack, filteredSites)
 	if !prescoreStatus.IsSuccess() {
 		return result, prescoreStatus.AsError()
 	}
@@ -396,36 +396,36 @@ func (sched *Scheduler) Schedule2(ctx context.Context, allocation *types.Allocat
 	logger.Debug(ctx, "[DONE] Running preScore plugins, use_time: %d us", end.Sub(start))
 	start = end
 
-	logger.Debug(ctx, "[START] Running prioritizeNodes plugins...")
-	priorityList, err := sched.prioritizeNodes(ctx, state, &allocation.Stack, filteredNodes)
+	logger.Debug(ctx, "[START] Running prioritizeSites plugins...")
+	priorityList, err := sched.prioritizeSites(ctx, state, &allocation.Stack, filteredSites)
 	if err != nil {
-		logger.Error(ctx, "prioritizeNodes failed! err: %s", err)
+		logger.Error(ctx, "prioritizeSites failed! err: %s", err)
 		return result, err
 	}
 	end = time.Now()
-	logger.Debug(ctx, "[DONE] Running prioritizeNodes plugins, use_time: %d us", end.Sub(start))
+	logger.Debug(ctx, "[DONE] Running prioritizeSites plugins, use_time: %d us", end.Sub(start))
 	start = end
 
 	logger.Debug(ctx, "[START] Running StrategyPlugins plugins...")
-	nodeCount, strategyStatus := sched.SchedFrame.RunStrategyPlugins(ctx, state, allocation, priorityList)
+	siteCount, strategyStatus := sched.SchedFrame.RunStrategyPlugins(ctx, state, allocation, priorityList)
 	if !strategyStatus.IsSuccess() {
 		logger.Error(ctx, "RunStrategyPlugins failed! err: %s", err)
 		return result, err
 	}
 	end = time.Now()
 	logger.Debug(ctx, "[DONE] Running StrategyPlugins plugins, use_time: %d us", end.Sub(start))
-	logger.Debug(ctx, "selected Hosts : %#v", nodeCount)
+	logger.Debug(ctx, "selected Hosts : %#v", siteCount)
 	start = end
 
 	var count = 0
 
-	for _, value := range nodeCount {
+	for _, value := range siteCount {
 		for i := 0; i < value.StackCount; i++ {
 			newStack := allocation.Stack
 			//bind
-			err = sched.bind(ctx, &newStack, value.Name, state)
+			err = sched.bind(ctx, &newStack, value.SiteID, state)
 			if err != nil {
-				logger.Error(ctx, "bind host(%s) failed! err: %s", value.Name, err)
+				logger.Error(ctx, "bind host(%s) failed! err: %s", value.SiteID, err)
 				return result, err
 			}
 			result.Stacks = append(result.Stacks, newStack)
@@ -465,7 +465,7 @@ func (sched *Scheduler) Schedule(ctx context.Context, stack *types.Stack) (resul
 		return result, err
 	}
 
-	logger.Info(ctx, "Snapshotting scheduler cache and node infos done")
+	logger.Info(ctx, "Snapshotting scheduler cache and site infos done")
 	logger.Info(ctx, "Running prefilter plugins...")
 	// Run "prefilter" plugins.
 	preFilterStatus := sched.SchedFrame.RunPreFilterPlugins(schedulingCycleCtx, state, stack)
@@ -474,28 +474,28 @@ func (sched *Scheduler) Schedule(ctx context.Context, stack *types.Stack) (resul
 	}
 	logger.Info(ctx, "Running prefilter plugins done")
 
-	filteredNodesStatuses := make(interfaces.NodeToStatusMap)
-	filteredNodes, err := sched.findNodesThatPassFilters(ctx, state, stack, filteredNodesStatuses)
+	filteredSitesStatuses := make(interfaces.SiteToStatusMap)
+	filteredSites, err := sched.findSitesThatPassFilters(ctx, state, stack, filteredSitesStatuses)
 	if err != nil {
-		logger.Error(ctx, "findNodesThatPassFilters failed! err: %s", err)
+		logger.Error(ctx, "findSitesThatPassFilters failed! err: %s", err)
 		return result, err
 	}
-	logger.Debug(ctx, "Computing predicates done, filteredNodesStatuses = %v", filteredNodesStatuses.ToString())
-	if len(filteredNodes) <= 0 {
-		logger.Debug(ctx, "filter none nodes. resultStatus: %s", filteredNodesStatuses.ToString())
+	logger.Debug(ctx, "Computing predicates done, filteredSitesStatuses = %v", filteredSitesStatuses.ToString())
+	if len(filteredSites) <= 0 {
+		logger.Debug(ctx, "filter none site. resultStatus: %s", filteredSitesStatuses.ToString())
 		return result, nil
 	}
 
 	// Run "prescore" plugins.
-	prescoreStatus := sched.SchedFrame.RunPreScorePlugins(ctx, state, stack, filteredNodes)
+	prescoreStatus := sched.SchedFrame.RunPreScorePlugins(ctx, state, stack, filteredSites)
 	if !prescoreStatus.IsSuccess() {
 		return result, prescoreStatus.AsError()
 	}
 	logger.Info(ctx, "Running prescore plugins done")
 
-	priorityList, err := sched.prioritizeNodes(ctx, state, stack, filteredNodes)
+	priorityList, err := sched.prioritizeSites(ctx, state, stack, filteredSites)
 	if err != nil {
-		logger.Error(ctx, "prioritizeNodes failed! err: %s", err)
+		logger.Error(ctx, "prioritizeSites failed! err: %s", err)
 		return result, err
 	}
 	host, err := sched.selectHost(priorityList)
@@ -510,8 +510,8 @@ func (sched *Scheduler) Schedule(ctx context.Context, stack *types.Stack) (resul
 
 	return ScheduleResult{
 		SuggestedHost:  host,
-		EvaluatedNodes: len(filteredNodes) + len(filteredNodesStatuses),
-		FeasibleNodes:  len(filteredNodes),
+		EvaluatedSites: len(filteredSites) + len(filteredSitesStatuses),
+		FeasibleSites:  len(filteredSites),
 	}, err
 }
 
@@ -533,7 +533,7 @@ func (sched *Scheduler) buildFramework() error {
 
 	defaultPlugins := algorithmprovider.GetPlugins(*policy)
 	sched.SchedFrame, err = interfaces.NewFramework(registry, defaultPlugins,
-		interfaces.WithSnapshotSharedLister(sched.nodeInfoSnapshot),
+		interfaces.WithSnapshotSharedLister(sched.siteCacheInfoSnapshot),
 		interfaces.WithCache(sched.SchedulerCache))
 	if err != nil {
 		logger.Errorf("NewFramework failed! err : %s", err)
@@ -550,9 +550,9 @@ func NewScheduler(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}
 	}
 
 	sched := &Scheduler{
-		SchedulerCache:   internalcache.New(30*time.Second, stopEverything),
-		nodeInfoSnapshot: internalcache.NewEmptySnapshot(),
-		SchedulerName:    config.SchedulerName,
+		SchedulerCache:        internalcache.New(30*time.Second, stopEverything),
+		siteCacheInfoSnapshot: internalcache.NewEmptySnapshot(),
+		SchedulerName:         config.SchedulerName,
 	}
 
 	err := sched.buildFramework()
@@ -608,9 +608,9 @@ func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
 			time.Duration(volumetypeInterval)*time.Second).Informer()
 
 		// init site informer
-		siteInterval := config.DefaultInt(constants.ConfSiteInterval, 600)
-		informers.InformerFac.Sites(informers.SITES, "ID",
-			time.Duration(siteInterval)*time.Second).Informer()
+		siteInfoInterval := config.DefaultInt(constants.ConfSiteInfoInterval, 600)
+		informers.InformerFac.SiteInfo(informers.SITEINFOS, "SITEID",
+			time.Duration(siteInfoInterval)*time.Second).Informer()
 
 		// init flavor informer
 		flavorInterval := config.DefaultInt(constants.ConfFlavorInterval, 600)
@@ -635,20 +635,20 @@ func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
 				ListFunc: updateVolumePools,
 			})
 
-		// init node informer
-		nodeInterval := config.DefaultInt(constants.ConfCommonHypervisorInterval, 86400)
-		nodeInformer := informers.InformerFac.Nodes(informers.NODES, "EdgeSiteID",
-			time.Duration(nodeInterval)*time.Second).Informer()
-		nodeInformer.AddEventHandler(
+		// init site resource informer
+		siteResourceInterval := config.DefaultInt(constants.ConfCommonHypervisorInterval, 86400)
+		siteResourceInformer := informers.InformerFac.SiteResource(informers.SITERESOURCES, "SiteID",
+			time.Duration(siteResourceInterval)*time.Second).Informer()
+		siteResourceInformer.AddEventHandler(
 			cache.ResourceEventHandlerFuncs{
-				ListFunc: addSiteNodesToCache,
+				ListFunc: addSitesToCache,
 			})
 
 		informers.InformerFac.Start(stopCh2)
 
-		// wait until node informer synced
+		// wait until site resource informer synced
 		for {
-			if nodeInformer.HasSynced() {
+			if siteResourceInformer.HasSynced() {
 				break
 			}
 
@@ -714,33 +714,33 @@ func updateVolumePools(obj []interface{}) {
 	}
 }
 
-// add site node to cache
-func addSiteNodesToCache(obj []interface{}) {
+// add site to cache
+func addSitesToCache(obj []interface{}) {
 	if obj == nil {
 		return
 	}
 
-	sites := informers.InformerFac.GetInformer(informers.SITES).GetStore().List()
+	siteInfos := informers.InformerFac.GetInformer(informers.SITEINFOS).GetStore().List()
 
 	for _, sn := range obj {
-		siteNode, ok := sn.(typed.SiteNode)
+		siteResource, ok := sn.(typed.SiteResource)
 		if !ok {
-			logger.Warnf("convert interface to (typed.SiteNode) failed.")
+			logger.Warnf("convert interface to (typed.SiteResource) failed.")
 			continue
 		}
 
 		var isFind = false
-		for _, site := range sites {
-			siteInfo, ok := site.(typed.Site)
+		for _, site := range siteInfos {
+			siteInfo, ok := site.(typed.SiteInfo)
 			if !ok {
 				continue
 			}
 
-			if siteInfo.Region == siteNode.Region && siteInfo.Az == siteNode.AvailabilityZone {
-				info := convertToSiteNode(siteInfo, siteNode)
-				err := scheduler.Cache().AddNode(info)
+			if siteInfo.Region == siteResource.Region && siteInfo.AvailabilityZone == siteResource.AvailabilityZone {
+				info := convertToSite(siteInfo, siteResource)
+				err := scheduler.Cache().AddSite(info)
 				if err != nil {
-					logger.Infof("add node to cache failed! err: %s", err)
+					logger.Infof("add site to cache failed! err: %s", err)
 				}
 
 				isFind = true
@@ -749,19 +749,19 @@ func addSiteNodesToCache(obj []interface{}) {
 		}
 
 		if !isFind {
-			site := &types.SiteNode{
-				SiteID: siteNode.Region + "--" + siteNode.AvailabilityZone,
+			site := &types.Site{
+				SiteID: siteResource.Region + "--" + siteResource.AvailabilityZone,
 				RegionAzMap: types.RegionAzMap{
-					Region:           siteNode.Region,
-					AvailabilityZone: siteNode.AvailabilityZone,
+					Region:           siteResource.Region,
+					AvailabilityZone: siteResource.AvailabilityZone,
 				},
 				Status: constants.SiteStatusNormal,
 			}
 
-			site.Nodes = append(site.Nodes, siteNode.Nodes...)
-			err := scheduler.Cache().AddNode(site)
+			site.Hosts = append(site.Hosts, siteResource.Hosts...)
+			err := scheduler.Cache().AddSite(site)
 			if err != nil {
-				logger.Infof("add node to cache failed! err: %s", err)
+				logger.Infof("add site to cache failed! err: %s", err)
 			}
 		}
 	}
@@ -769,9 +769,9 @@ func addSiteNodesToCache(obj []interface{}) {
 	scheduler.Cache().PrintString()
 }
 
-func convertToSiteNode(site typed.Site, node typed.SiteNode) *types.SiteNode {
-	siteNode := &types.SiteNode{
-		SiteID: site.ID,
+func convertToSite(site typed.SiteInfo, siteResource typed.SiteResource) *types.Site {
+	result := &types.Site{
+		SiteID: site.SiteID,
 		GeoLocation: types.GeoLocation{
 			Country:  site.Country,
 			Area:     site.Area,
@@ -780,7 +780,7 @@ func convertToSiteNode(site typed.Site, node typed.SiteNode) *types.SiteNode {
 		},
 		RegionAzMap: types.RegionAzMap{
 			Region:           site.Region,
-			AvailabilityZone: site.Az,
+			AvailabilityZone: site.AvailabilityZone,
 		},
 		Operator:      site.Operator.Name,
 		EipTypeName:   site.EipTypeName,
@@ -788,6 +788,6 @@ func convertToSiteNode(site typed.Site, node typed.SiteNode) *types.SiteNode {
 		SiteAttribute: site.SiteAttributes,
 	}
 
-	siteNode.Nodes = append(siteNode.Nodes, node.Nodes...)
-	return siteNode
+	result.Hosts = append(result.Hosts, siteResource.Hosts...)
+	return result
 }

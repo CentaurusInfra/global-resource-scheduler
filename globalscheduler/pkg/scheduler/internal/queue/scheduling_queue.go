@@ -67,14 +67,14 @@ type SchedulingQueue interface {
 	Update(oldStack, newStack *types.Stack) error
 	Delete(stack *types.Stack) error
 	MoveAllToActiveQueue()
-	NominatedStacksForNode(nodeName string) []*types.Stack
+	NominatedStacksForSite(siteID string) []*types.Stack
 	PendingStacks() []*types.Stack
 	// Close closes the SchedulingQueue so that the goroutine which is
 	// waiting to pop items can exit gracefully.
 	Close()
-	// UpdateNominatedStackForNode adds the given stack to the nominated stack map or
+	// UpdateNominatedStackForSite adds the given stack to the nominated stack map or
 	// updates it if it already exists.
-	UpdateNominatedStackForNode(stack *types.Stack, nodeName string)
+	UpdateNominatedStackForSite(stack *types.Stack, siteID string)
 	// DeleteNominatedStackIfExists deletes nominatedStack from internal cache
 	DeleteNominatedStackIfExists(stack *types.Stack)
 	// NumUnschedulableStacks returns the number of unschedulable stacks exist in the SchedulingQueue.
@@ -86,9 +86,9 @@ func NewSchedulingQueue(stop <-chan struct{}, fwk framework.Framework) Schedulin
 	return NewPriorityQueue(stop, fwk)
 }
 
-// NominatedNodeName returns nominated node name of a Stack.
-func NominatedNodeName(stack *types.Stack) string {
-	// TODO: original return stack.Status.NominatedNodeName
+// NominatedSiteID returns nominated site name of a Stack.
+func NominatedSiteID(stack *types.Stack) string {
+	// TODO: original return stack.Status.NominatedSiteID
 	return ""
 }
 
@@ -117,7 +117,7 @@ type PriorityQueue struct {
 	// unschedulableQ holds stacks that have been tried and determined unschedulable.
 	unschedulableQ *UnschedulableStacksMap
 	// nominatedStacks is a structures that stores stacks which are nominated to run
-	// on nodes.
+	// on site.
 	nominatedStacks *nominatedStackMap
 	// schedulingCycle represents sequence number of scheduling cycle and is incremented
 	// when a stack is popped.
@@ -532,13 +532,13 @@ func (p *PriorityQueue) moveStacksToActiveQueue(stackInfoList []*framework.Stack
 	p.cond.Broadcast()
 }
 
-// NominatedStacksForNode returns stacks that are nominated to run on the given node,
-// but they are waiting for other stacks to be removed from the node before they
+// NominatedStacksForSite returns stacks that are nominated to run on the given site,
+// but they are waiting for other stacks to be removed from the site before they
 // can be actually scheduled.
-func (p *PriorityQueue) NominatedStacksForNode(nodeName string) []*types.Stack {
+func (p *PriorityQueue) NominatedStacksForSite(siteID string) []*types.Stack {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
-	return p.nominatedStacks.stacksForNode(nodeName)
+	return p.nominatedStacks.stacksForSite(siteID)
 }
 
 // PendingStacks returns all the pending stacks in the queue. This function is
@@ -574,13 +574,13 @@ func (p *PriorityQueue) DeleteNominatedStackIfExists(stack *types.Stack) {
 	p.lock.Unlock()
 }
 
-// UpdateNominatedStackForNode adds a stack to the nominated stacks of the given node.
-// This is called during the preemption process after a node is nominated to run
+// UpdateNominatedStackForSite adds a stack to the nominated stacks of the given site.
+// This is called during the preemption process after a site is nominated to run
 // the stack. We update the structure before sending a request to update the stack
 // object to avoid races with the following scheduling cycles.
-func (p *PriorityQueue) UpdateNominatedStackForNode(stack *types.Stack, nodeName string) {
+func (p *PriorityQueue) UpdateNominatedStackForSite(stack *types.Stack, siteID string) {
 	p.lock.Lock()
-	p.nominatedStacks.add(stack, nodeName)
+	p.nominatedStacks.add(stack, siteID)
 	p.lock.Unlock()
 }
 
@@ -656,33 +656,33 @@ func newUnschedulableStacksMap() *UnschedulableStacksMap {
 	}
 }
 
-// nominatedStackMap is a structure that stores stacks nominated to run on nodes.
-// It exists because nominatedNodeName of stack objects stored in the structure
+// nominatedStackMap is a structure that stores stacks nominated to run on site.
+// It exists because nominatedSiteName of stack objects stored in the structure
 // may be different than what scheduler has here. We should be able to find stacks
 // by their UID and update/delete them.
 type nominatedStackMap struct {
-	// nominatedStacks is a map keyed by a node name and the value is a list of
-	// stacks which are nominated to run on the node. These are stacks which can be in
+	// nominatedStacks is a map keyed by a site name and the value is a list of
+	// stacks which are nominated to run on the site. These are stacks which can be in
 	// the activeQ or unschedulableQ.
 	nominatedStacks map[string][]*types.Stack
-	// nominatedStackToNode is map keyed by a Stack UID to the node name where it is
+	// nominatedStackToSite is map keyed by a Stack UID to the site name where it is
 	// nominated.
-	nominatedStackToNode map[string]string
+	nominatedStackToSite map[string]string
 }
 
-func (npm *nominatedStackMap) add(p *types.Stack, nodeName string) {
+func (npm *nominatedStackMap) add(p *types.Stack, siteID string) {
 	// always delete the stack if it already exist, to ensure we never store more than
 	// one instance of the stack.
 	npm.delete(p)
 
-	nnn := nodeName
+	nnn := siteID
 	if len(nnn) == 0 {
-		nnn = NominatedNodeName(p)
+		nnn = NominatedSiteID(p)
 		if len(nnn) == 0 {
 			return
 		}
 	}
-	npm.nominatedStackToNode[p.UID] = nnn
+	npm.nominatedStackToSite[p.UID] = nnn
 	for _, np := range npm.nominatedStacks[nnn] {
 		if np.UID == p.UID {
 			klog.V(4).Infof("Stack %v/%v/%v already exists in the nominated map!", p.Tenant, p.Namespace, p.Name)
@@ -693,7 +693,7 @@ func (npm *nominatedStackMap) add(p *types.Stack, nodeName string) {
 }
 
 func (npm *nominatedStackMap) delete(p *types.Stack) {
-	nnn, ok := npm.nominatedStackToNode[p.UID]
+	nnn, ok := npm.nominatedStackToSite[p.UID]
 	if !ok {
 		return
 	}
@@ -706,32 +706,32 @@ func (npm *nominatedStackMap) delete(p *types.Stack) {
 			break
 		}
 	}
-	delete(npm.nominatedStackToNode, p.UID)
+	delete(npm.nominatedStackToSite, p.UID)
 }
 
 func (npm *nominatedStackMap) update(oldStack, newStack *types.Stack) {
-	// In some cases, an Update event with no "NominatedNode" present is received right
-	// after a node("NominatedNode") is reserved for this stack in memory.
-	// In this case, we need to keep reserving the NominatedNode when updating the stack pointer.
-	nodeName := ""
+	// In some cases, an Update event with no "NominatedSite" present is received right
+	// after a site("NominatedSite") is reserved for this stack in memory.
+	// In this case, we need to keep reserving the NominatedSite when updating the stack pointer.
+	siteID := ""
 	// We won't fall into below `if` block if the Update event represents:
-	// (1) NominatedNode info is added
-	// (2) NominatedNode info is updated
-	// (3) NominatedNode info is removed
-	if NominatedNodeName(oldStack) == "" && NominatedNodeName(newStack) == "" {
-		if nnn, ok := npm.nominatedStackToNode[oldStack.UID]; ok {
-			// This is the only case we should continue reserving the NominatedNode
-			nodeName = nnn
+	// (1) NominatedSite info is added
+	// (2) NominatedSite info is updated
+	// (3) NominatedSite info is removed
+	if NominatedSiteID(oldStack) == "" && NominatedSiteID(newStack) == "" {
+		if nnn, ok := npm.nominatedStackToSite[oldStack.UID]; ok {
+			// This is the only case we should continue reserving the NominatedSite
+			siteID = nnn
 		}
 	}
-	// We update irrespective of the nominatedNodeName changed or not, to ensure
+	// We update irrespective of the nominatedSiteName changed or not, to ensure
 	// that stack pointer is updated.
 	npm.delete(oldStack)
-	npm.add(newStack, nodeName)
+	npm.add(newStack, siteID)
 }
 
-func (npm *nominatedStackMap) stacksForNode(nodeName string) []*types.Stack {
-	if list, ok := npm.nominatedStacks[nodeName]; ok {
+func (npm *nominatedStackMap) stacksForSite(siteID string) []*types.Stack {
+	if list, ok := npm.nominatedStacks[siteID]; ok {
 		return list
 	}
 	return nil
@@ -740,7 +740,7 @@ func (npm *nominatedStackMap) stacksForNode(nodeName string) []*types.Stack {
 func newNominatedStackMap() *nominatedStackMap {
 	return &nominatedStackMap{
 		nominatedStacks:      make(map[string][]*types.Stack),
-		nominatedStackToNode: make(map[string]string),
+		nominatedStackToSite: make(map[string]string),
 	}
 }
 

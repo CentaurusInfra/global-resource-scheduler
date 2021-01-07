@@ -325,7 +325,7 @@ func (sched *Scheduler) skipStackUpdate(stack *types.Stack) bool {
 
 	// TODO(wangjun): We should re-define stack as pods, and implement the DeepCopy function.
 	//                Here if stack is changed, we just go the stack update process without compare
-	//                node name or something else.
+	//                site name or something else.
 	assumedStackCopy, stackCopy := assumedStack.DeepCopy(), stack.DeepCopy()
 	if !reflect.DeepEqual(assumedStackCopy, stackCopy) {
 		return false
@@ -336,17 +336,17 @@ func (sched *Scheduler) skipStackUpdate(stack *types.Stack) bool {
 
 func (sched *Scheduler) bindStacks(assumedStacks []types.Stack) {
 	for _, newStack := range assumedStacks {
-		nodeName := newStack.Selected.AvailabilityZone
-		sched.bindToNode(nodeName, &newStack)
+		siteID := newStack.Selected.AvailabilityZone
+		sched.bindToSite(siteID, &newStack)
 	}
 }
 
-func (sched *Scheduler) bindToNode(nodeName string, assumedStack *types.Stack) error {
+func (sched *Scheduler) bindToSite(siteID string, assumedStack *types.Stack) error {
 	binding := &v1.Binding{
 		ObjectMeta: metav1.ObjectMeta{Tenant: assumedStack.Tenant, Namespace: assumedStack.Namespace, Name: assumedStack.Name, UID: apitypes.UID(assumedStack.UID)},
 		Target: v1.ObjectReference{
-			Kind: "Node",
-			Name: nodeName,
+			Kind: "Site",
+			Name: siteID,
 		},
 	}
 

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package noderesources
+package siteresources
 
 import (
 	"context"
@@ -24,7 +24,7 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 )
 
-// LeastAllocated is a score plugin that favors nodes with fewer allocation requested resources
+// LeastAllocated is a score plugin that favors site with fewer allocation requested resources
 // based on requested resources.
 type LeastAllocated struct {
 	handle interfaces.FrameworkHandle
@@ -34,7 +34,7 @@ type LeastAllocated struct {
 var _ = interfaces.ScorePlugin(&LeastAllocated{})
 
 // LeastAllocatedName is the name of the plugin used in the plugin registry and configurations.
-const LeastAllocatedName = "NodeResourcesLeastAllocated"
+const LeastAllocatedName = "SiteResourcesLeastAllocated"
 
 // Name returns name of the plugin. It is used in logs, etc.
 func (la *LeastAllocated) Name() string {
@@ -43,20 +43,20 @@ func (la *LeastAllocated) Name() string {
 
 // Score invoked at the score extension point.
 func (la *LeastAllocated) Score(ctx context.Context, state *interfaces.CycleState, stack *types.Stack,
-	nodeID string) (int64, *interfaces.Status) {
-	nodeInfo, err := la.handle.SnapshotSharedLister().NodeInfos().Get(nodeID)
+	siteID string) (int64, *interfaces.Status) {
+	siteCacheInfo, err := la.handle.SnapshotSharedLister().SiteCacheInfos().Get(siteID)
 	if err != nil {
-		return 0, interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting node %q from Snapshot: %v",
-			nodeID, err))
+		return 0, interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %q from Snapshot: %v",
+			siteID, err))
 	}
 
-	// la.score favors nodes with fewer requested resources.
-	// It calculates the percentage of memory and CPU requested by pods scheduled on the node, and
+	// la.score favors site with fewer requested resources.
+	// It calculates the percentage of memory and CPU requested by pods scheduled on the site, and
 	// prioritizes based on the minimum of the average of the fraction of requested to capacity.
 	//
 	// Details:
 	// (cpu((capacity-sum(requested))*10/capacity) + memory((capacity-sum(requested))*10/capacity))/2
-	return la.score(stack, nodeInfo)
+	return la.score(stack, siteCacheInfo)
 }
 
 // NewLeastAllocated initializes a new plugin and returns it.
@@ -73,13 +73,13 @@ func NewLeastAllocated(h interfaces.FrameworkHandle) (interfaces.Plugin, error) 
 
 func leastResourceScorer(requested, allocable resourceToValueMap, includeVolumes bool, requestedVolumes int,
 	allocatableVolumes int) int64 {
-	var nodeScore, weightSum int64
+	var score, weightSum int64
 	for resource, weight := range defaultRequestedRatioResources {
 		resourceScore := leastRequestedScore(requested[resource], allocable[resource])
-		nodeScore += resourceScore * weight
+		score += resourceScore * weight
 		weightSum += weight
 	}
-	return nodeScore / weightSum
+	return score / weightSum
 }
 
 // The unused capacity is calculated on a scale of 0-10
@@ -93,5 +93,5 @@ func leastRequestedScore(requested, capacity int64) int64 {
 		return 0
 	}
 
-	return ((capacity - requested) * int64(interfaces.MaxNodeScore)) / capacity
+	return ((capacity - requested) * int64(interfaces.MaxSiteScore)) / capacity
 }

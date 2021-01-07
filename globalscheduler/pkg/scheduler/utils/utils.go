@@ -141,10 +141,10 @@ func MergeMap(args ...map[string]interface{}) map[string]interface{} {
 	return newMap
 }
 
-func GetZoneKey(node *types.SiteNode) string {
+func GetZoneKey(site *types.Site) string {
 
-	region := node.Region
-	zone := node.AvailabilityZone
+	region := site.Region
+	zone := site.AvailabilityZone
 
 	if region == "" && zone == "" {
 		return ""

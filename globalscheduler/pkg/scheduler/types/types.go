@@ -33,9 +33,9 @@ const (
 	ResourceStorage = "storage"
 	// ResourceEip eip type
 	ResourceEip = "eip"
-	// MaxNodeScore is the maximum score a Score plugin is expected to return.
-	MaxNodeScore int64 = 100
-	NodeTempSelectorKey = "NodeTempSelected"
+	// MaxSiteScore is the maximum score a Score plugin is expected to return.
+	MaxSiteScore        int64 = 100
+	SiteTempSelectorKey       = "SiteTempSelected"
 )
 
 // GeoLocation struct
@@ -89,14 +89,14 @@ type Flavor struct {
 
 // Resource is reource
 type Resource struct {
-	Name string `json:"name" required:"true"`
-	ResourceType string `json:"resource_type" required:"true"`
-	Flavors []Flavor `json:"flavors" required:"true"`
-	Storage map[string]int64 `json:"storage,omitempty"`
+	Name         string           `json:"name" required:"true"`
+	ResourceType string           `json:"resource_type" required:"true"`
+	Flavors      []Flavor         `json:"flavors" required:"true"`
+	Storage      map[string]int64 `json:"storage,omitempty"`
 	// NeedEip, if the value is false, no EIP is bound. If the value is true, an EIP is bound.
 	NeedEip bool `json:"need_eip,omitempty"`
 	// Number of ECSs to be created.
-	Count int `json:"count,omitempty"`
+	Count            int    `json:"count,omitempty"`
 	FlavorIDSelected string `json:"-"`
 }
 
@@ -105,7 +105,7 @@ type Selector struct {
 	GeoLocation       GeoLocation        `json:"geo_location,omitempty"`
 	Regions           []CloudRegion      `json:"regions,omitempty"`
 	Operator          string             `json:"operator,omitempty"`
-	NodeID            string             `json:"node_id,omitempty"`
+	SiteID            string             `json:"site_id,omitempty"`
 	Strategy          Strategy           `json:"strategy,omitempty"`
 	StackAffinity     []LabelRequirement `json:"stack_affinity,omitempty"`
 	StackAntiAffinity []LabelRequirement `json:"stack_antiaffinity,omitempty"`
@@ -143,14 +143,14 @@ type AllocationReq struct {
 
 // RespResource
 type RespResource struct {
-	Name string `json:"name"`
+	Name     string `json:"name"`
 	FlavorID string `json:"flavor_id"`
-	Count int `json:"count,omitempty"`
+	Count    int    `json:"count,omitempty"`
 }
 
-// Selected node
+// Selected site
 type Selected struct {
-	NodeID string `json:"node_id,omitempty"`
+	SiteID string `json:"site_id,omitempty"`
 	//Region info
 	Region string `json:"region,omitempty"`
 	//az info
@@ -187,21 +187,21 @@ type SpotResource struct {
 	MemoryImmediateResource      PreemptibleResource
 }
 
-// SiteNode site info
-type SiteNode struct {
+// Site struct
+type Site struct {
 	SiteID string `json:"site_id"`
 	GeoLocation
 	RegionAzMap
-	Operator string `json:"operator"`
-	Status   string `json:"status"`
-	SiteAttribute []*typed.SiteAttribute        `json:"site_attributes"`
+	Operator      string                  `json:"operator"`
+	Status        string                  `json:"status"`
+	SiteAttribute []*typed.SiteAttribute  `json:"site_attributes"`
 	EipTypeName   string                  `json:"eiptype_name"`
 	SpotResources map[string]SpotResource `json:"spot_resources"`
-	Nodes         []typed.NodeInfo        `json:"-"`
+	Hosts         []typed.Host            `json:"-"`
 }
 
-func (sn *SiteNode) Clone() *SiteNode {
-	ret := &SiteNode{
+func (sn *Site) Clone() *Site {
+	ret := &Site{
 		SiteID:      sn.SiteID,
 		GeoLocation: sn.GeoLocation,
 		RegionAzMap: sn.RegionAzMap,
@@ -210,11 +210,11 @@ func (sn *SiteNode) Clone() *SiteNode {
 		EipTypeName: sn.EipTypeName,
 	}
 
-	ret.Nodes = append(ret.Nodes, sn.Nodes...)
+	ret.Hosts = append(ret.Hosts, sn.Hosts...)
 	return ret
 }
 
-func (sn *SiteNode) ToString() string {
+func (sn *Site) ToString() string {
 	ret, err := json.Marshal(sn)
 	if err != nil {
 		return ""
@@ -235,16 +235,16 @@ type Plugins struct {
 	// PreFilter is a list of plugins that should be invoked at "PreFilter" extension point of the scheduling framework.
 	PreFilter *PluginSet
 
-	// Filter is a list of plugins that should be invoked when filtering out nodes that cannot run the Pod.
+	// Filter is a list of plugins that should be invoked when filtering out site that cannot run the Pod.
 	Filter *PluginSet
 
 	// PreScore is a list of plugins that are invoked before scoring.
 	PreScore *PluginSet
 
-	// Score is a list of plugins that should be invoked when ranking nodes that have passed the filtering phase.
+	// Score is a list of plugins that should be invoked when ranking site that have passed the filtering phase.
 	Score *PluginSet
 
-	// Reserve is a list of plugins invoked when reserving a node to run the pod.
+	// Reserve is a list of plugins invoked when reserving a site to run the pod.
 	Reserve *PluginSet
 
 	// Permit is a list of plugins that control binding of a Pod. These plugins can prevent or delay binding of a Pod.
@@ -395,5 +395,5 @@ type ListSiteOpts struct {
 // GSSchedulerConfiguration contains the configuration for the gs-scheduler
 type GSSchedulerConfiguration struct {
 	// Scheduler Name Differentiating Schedulers
-	SchedulerName       string
+	SchedulerName string
 }

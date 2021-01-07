@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package nodeinfo
+package sitecacheinfo
 
 import (
 	"errors"
@@ -40,25 +40,25 @@ var (
 
 // nextGeneration: Let's make sure history never forgets the name...
 // Increments the generation number monotonically ensuring that generation numbers never collide.
-// Collision of the generation numbers would be particularly problematic if a node was deleted and
+// Collision of the generation numbers would be particularly problematic if a site was deleted and
 // added back with the same name. See issue#63262.
 func nextGeneration() int64 {
 	return atomic.AddInt64(&generation, 1)
 }
 
-// NodeInfo is node level aggregated information.
-type NodeInfo struct {
-	node *types.SiteNode
+// SiteCacheInfo is site level aggregated information.
+type SiteCacheInfo struct {
+	site *types.Site
 
-	// Total requested  of all resources on this node. This includes assumed
+	// Total requested  of all resources on this site. This includes assumed
 	// resources, which scheduler has sent for binding, but may not be scheduled yet.
 	RequestedResources map[string]*types.CPUAndMemory `json:"requestedCPUAndMemory"`
 
-	// We store TotalResources (which is Node.Status.Allocatable.*) explicitly
+	// We store TotalResources (which is Site.Status.Allocatable.*) explicitly
 	// as int64, to avoid conversions and accessing map.
 	TotalResources map[string]*types.CPUAndMemory `json:"allocatableCPUAndMemory"`
 
-	// Total requested resources of all resources on this node. This includes assumed
+	// Total requested resources of all resources on this site. This includes assumed
 	RequestedStorage map[string]float64 `json:"requestedStorage"`
 
 	// We store TotalStorage  explicitly
@@ -83,24 +83,24 @@ type NodeInfo struct {
 
 	Qos map[string]float64
 
-	// Whenever NodeInfo changes, generation is bumped.
+	// Whenever SiteCacheInfo changes, generation is bumped.
 	// This is used to avoid cloning it if the object didn't change.
 	generation int64
 }
 
-// GetGeneration returns the generation on this node.
-func (n *NodeInfo) GetGeneration() int64 {
+// GetGeneration returns the generation on this site.
+func (n *SiteCacheInfo) GetGeneration() int64 {
 	if n == nil {
 		return 0
 	}
 	return n.generation
 }
 
-// Clone returns a copy of this node.
-func (n *NodeInfo) ToString() string {
-	ret := fmt.Sprintf("nodeInfo: %#v, totalResources: %#v, RequestedResources: %#v, allocatableFlavor: %#v, "+
+// Clone returns a copy of this site.
+func (n *SiteCacheInfo) ToString() string {
+	ret := fmt.Sprintf("siteInfo: %#v, totalResources: %#v, RequestedResources: %#v, allocatableFlavor: %#v, "+
 		"allocatableSpotFlavor: %#v, allocatablStorage: %#v, requestedStorage: %#v ",
-		n.node.ToString(), n.TotalResources, n.RequestedResources, n.AllocatableFlavor, n.AllocatableSpotFlavor, n.TotalStorage, n.RequestedStorage)
+		n.site.ToString(), n.TotalResources, n.RequestedResources, n.AllocatableFlavor, n.AllocatableSpotFlavor, n.TotalStorage, n.RequestedStorage)
 	if n.eipPool != nil {
 		ret += fmt.Sprintf("eipPool: %#v", n.eipPool.ToString())
 	}
@@ -108,10 +108,10 @@ func (n *NodeInfo) ToString() string {
 	return ret
 }
 
-// Clone returns a copy of this node.
-func (n *NodeInfo) Clone() *NodeInfo {
-	clone := &NodeInfo{
-		node:                  n.node.Clone(),
+// Clone returns a copy of this site.
+func (n *SiteCacheInfo) Clone() *SiteCacheInfo {
+	clone := &SiteCacheInfo{
+		site:                  n.site.Clone(),
 		RequestedResources:    make(map[string]*types.CPUAndMemory),
 		TotalResources:        make(map[string]*types.CPUAndMemory),
 		RequestedStorage:      make(map[string]float64),
@@ -173,18 +173,18 @@ func (n *NodeInfo) Clone() *NodeInfo {
 	return clone
 }
 
-// AddStack adds stack information to this NodeInfo.
-func (n *NodeInfo) AddStack(stack *types.Stack) {
+// AddStack adds stack information to this SiteCacheInfo.
+func (n *SiteCacheInfo) AddStack(stack *types.Stack) {
 	n.stacks = append(n.stacks, stack)
 	n.generation = nextGeneration()
 }
 
-// RemoveStack subtracts pod information from this NodeInfo.
-func (n *NodeInfo) RemoveStack(stack *types.Stack) error {
+// RemoveStack subtracts pod information from this SiteCacheInfo.
+func (n *SiteCacheInfo) RemoveStack(stack *types.Stack) error {
 	return nil
 }
 
-func (n *NodeInfo) getCondOperationAz(condAzStr string) map[string]string {
+func (n *SiteCacheInfo) getCondOperationAz(condAzStr string) map[string]string {
 	var azMaps = map[string]string{}
 
 	azArray := strings.Split(condAzStr, ",")
@@ -200,7 +200,7 @@ func (n *NodeInfo) getCondOperationAz(condAzStr string) map[string]string {
 	return azMaps
 }
 
-func (n *NodeInfo) getSupportFlavorsByNode() []typed.Flavor {
+func (n *SiteCacheInfo) getSupportFlavorsBySite() []typed.Flavor {
 	var flavorSlice []typed.Flavor
 
 	addFlavrFunc := func(flv typed.Flavor) {
@@ -224,23 +224,23 @@ func (n *NodeInfo) getSupportFlavorsByNode() []typed.Flavor {
 			continue
 		}
 
-		for _, node := range n.Node().Nodes {
-			if node.Region != regionFlv.Region {
+		for _, host := range n.Site().Hosts {
+			if host.Region != regionFlv.Region {
 				continue
 			}
 			flavorExtraSpecs := regionFlv.OsExtraSpecs
-			resTypes := strings.Split(node.ResourceType, "||")
+			resTypes := strings.Split(host.ResourceType, "||")
 			if utils.IsContain(resTypes, flavorExtraSpecs.ResourceType) {
 				flavorStatus := flavorExtraSpecs.CondOperationStatus
 				azMaps := n.getCondOperationAz(flavorExtraSpecs.CondOperationAz)
 				if flavorStatus == "abandon" {
-					if flag, ok := azMaps[node.AvailabilityZone]; ok {
+					if flag, ok := azMaps[host.AvailabilityZone]; ok {
 						if flag != "sellout" && flag != "abandon" {
 							addFlavrFunc(regionFlv.Flavor)
 						}
 					}
 				} else {
-					if flag, ok := azMaps[node.AvailabilityZone]; ok {
+					if flag, ok := azMaps[host.AvailabilityZone]; ok {
 						if flag != "sellout" && flag != "abandon" {
 							addFlavrFunc(regionFlv.Flavor)
 						}
@@ -255,7 +255,7 @@ func (n *NodeInfo) getSupportFlavorsByNode() []typed.Flavor {
 	return flavorSlice
 }
 
-func (n *NodeInfo) getTotalResourceByResType(resType string) types.CPUAndMemory {
+func (n *SiteCacheInfo) getTotalResourceByResType(resType string) types.CPUAndMemory {
 	ret := types.CPUAndMemory{}
 	for tempResType, resInfo := range n.TotalResources {
 		tempResTypes := strings.Split(tempResType, "||")
@@ -268,7 +268,7 @@ func (n *NodeInfo) getTotalResourceByResType(resType string) types.CPUAndMemory 
 	return ret
 }
 
-func (n *NodeInfo) getRequestResourceByResType(resType string) types.CPUAndMemory {
+func (n *SiteCacheInfo) getRequestResourceByResType(resType string) types.CPUAndMemory {
 	ret := types.CPUAndMemory{}
 	for tempResType, resInfo := range n.RequestedResources {
 		tempResTypes := strings.Split(tempResType, "||")
@@ -281,7 +281,7 @@ func (n *NodeInfo) getRequestResourceByResType(resType string) types.CPUAndMemor
 	return ret
 }
 
-func (n *NodeInfo) updateRequestResourceByResType(resType string, res *types.CPUAndMemory) {
+func (n *SiteCacheInfo) updateRequestResourceByResType(resType string, res *types.CPUAndMemory) {
 	for tempResType := range n.RequestedResources {
 		tempResTypes := strings.Split(tempResType, "||")
 		if utils.IsContain(tempResTypes, resType) {
@@ -292,9 +292,9 @@ func (n *NodeInfo) updateRequestResourceByResType(resType string, res *types.CPU
 	n.RequestedResources[resType] = res
 }
 
-func (n *NodeInfo) updateFlavor() {
+func (n *SiteCacheInfo) updateFlavor() {
 	n.AllocatableFlavor = map[string]int64{}
-	supportFlavors := n.getSupportFlavorsByNode()
+	supportFlavors := n.getSupportFlavorsBySite()
 
 	for _, flv := range supportFlavors {
 		vCPUInt, err := strconv.ParseInt(flv.Vcpus, 10, 64)
@@ -328,16 +328,16 @@ func (n *NodeInfo) updateFlavor() {
 
 }
 
-// SetNode sets the overall node information.
-func (n *NodeInfo) SetNode(node *types.SiteNode) error {
-	n.node = node
+// SetSite sets the overall site information.
+func (n *SiteCacheInfo) SetSite(site *types.Site) error {
+	n.site = site
 	n.RequestedResources = make(map[string]*types.CPUAndMemory)
 	n.TotalResources = make(map[string]*types.CPUAndMemory)
 	n.AllocatableFlavor = make(map[string]int64)
 	n.RequestedFlavor = make(map[string]int64)
-	n.AllocatableSpotFlavor = node.SpotResources
+	n.AllocatableSpotFlavor = site.SpotResources
 
-	for _, no := range node.Nodes {
+	for _, no := range site.Hosts {
 		if _, ok := n.RequestedResources[no.ResourceType]; !ok {
 			n.RequestedResources[no.ResourceType] = &types.CPUAndMemory{VCPU: 0, Memory: 0}
 		}
@@ -367,20 +367,20 @@ func (n *NodeInfo) SetNode(node *types.SiteNode) error {
 	return nil
 }
 
-// UpdateNodeWithEipPool update eip pool
-func (n *NodeInfo) UpdateNodeWithEipPool(eipPool *typed.EipPool) error {
+// UpdateSiteWithEipPool update eip pool
+func (n *SiteCacheInfo) UpdateSiteWithEipPool(eipPool *typed.EipPool) error {
 	n.eipPool = eipPool
 
 	n.generation = nextGeneration()
 	return nil
 }
 
-// UpdateNodeWithVolumePool update volume pool
-func (n *NodeInfo) UpdateNodeWithVolumePool(volumePool *typed.RegionVolumePool) error {
+// UpdateSiteWithVolumePool update volume pool
+func (n *SiteCacheInfo) UpdateSiteWithVolumePool(volumePool *typed.RegionVolumePool) error {
 	var allocatableStorage = map[string]float64{}
 	var requestedStorage = map[string]float64{}
 	for _, storage := range volumePool.StoragePools {
-		if n.Node().AvailabilityZone == storage.AvailabilityZone {
+		if n.Site().AvailabilityZone == storage.AvailabilityZone {
 			var voType = storage.Capabilities.VolumeType
 			if _, ok := allocatableStorage[voType]; !ok {
 				allocatableStorage[voType] = 0
@@ -402,9 +402,8 @@ func (n *NodeInfo) UpdateNodeWithVolumePool(volumePool *typed.RegionVolumePool) 
 	return nil
 }
 
-// UpdateNodeWithResInfo update res info
-func (n *NodeInfo) UpdateNodeWithResInfo(resInfo types.AllResInfo) error {
-
+// UpdateSiteWithResInfo update res info
+func (n *SiteCacheInfo) UpdateSiteWithResInfo(resInfo types.AllResInfo) error {
 	for resType, res := range resInfo.CpuAndMem {
 		for reqType, reqRes := range n.RequestedResources {
 			resTypes := strings.Split(reqType, "||")
@@ -435,7 +434,7 @@ func (n *NodeInfo) UpdateNodeWithResInfo(resInfo types.AllResInfo) error {
 }
 
 // UpdateQos update qos
-func (n *NodeInfo) UpdateQos(netMetricData *types.NetMetricDatas) error {
+func (n *SiteCacheInfo) UpdateQos(netMetricData *types.NetMetricDatas) error {
 	var qosMap = map[string]float64{}
 	for _, metric := range netMetricData.MetricDatas {
 		qos := metric.Delay + config.DefaultFloat64(constants.ConfQosWeight, 0.5)*metric.Lossrate
@@ -447,11 +446,11 @@ func (n *NodeInfo) UpdateQos(netMetricData *types.NetMetricDatas) error {
 	return nil
 }
 
-// UpdateNodeWithRatio update requested cpu and mem
-func (n *NodeInfo) UpdateNodeWithRatio(ratios []types.AllocationRatio) error {
+// UpdateSiteWithRatio update requested cpu and mem
+func (n *SiteCacheInfo) UpdateSiteWithRatio(ratios []types.AllocationRatio) error {
 	var resTypeMapRatio = map[string]types.AllocationRatio{}
 	for _, resAllo := range ratios {
-		flavorInfo, find := informers.InformerFac.GetFlavor(resAllo.Flavor, n.Node().Region)
+		flavorInfo, find := informers.InformerFac.GetFlavor(resAllo.Flavor, n.Site().Region)
 		if !find {
 			continue
 		}
@@ -463,20 +462,20 @@ func (n *NodeInfo) UpdateNodeWithRatio(ratios []types.AllocationRatio) error {
 
 		if totalRes.VCPU <= 0 || totalRes.Memory <= 0 {
 			logger.Warnf("region: %s, az: %s, resType:%s has invalid totalCpu(%d) or totalMem(%d)",
-				n.Node().Region, n.Node().AvailabilityZone, resType, totalRes.VCPU, totalRes.Memory)
+				n.Site().Region, n.Site().AvailabilityZone, resType, totalRes.VCPU, totalRes.Memory)
 			continue
 		}
 
 		cpuRatio, err := strconv.ParseFloat(value.AllocationRatioByType.CoreAllocationRatio, 64)
 		if err != nil {
 			logger.Warnf("region: %s, az: %s, resType:%s has invalid cpuRatio(%s)",
-				n.Node().Region, n.Node().AvailabilityZone, resType, value.AllocationRatioByType.CoreAllocationRatio)
+				n.Site().Region, n.Site().AvailabilityZone, resType, value.AllocationRatioByType.CoreAllocationRatio)
 			continue
 		}
 		memRatio, err := strconv.ParseFloat(value.AllocationRatioByType.MemAllocationRatio, 64)
 		if err != nil {
 			logger.Warnf("region: %s, az: %s, resType:%s has invalid memRatio(%s)",
-				n.Node().Region, n.Node().AvailabilityZone, resType, value.AllocationRatioByType.MemAllocationRatio)
+				n.Site().Region, n.Site().AvailabilityZone, resType, value.AllocationRatioByType.MemAllocationRatio)
 			continue
 		}
 		var usedCpu = int64(float64(totalRes.VCPU) * cpuRatio)
@@ -491,42 +490,42 @@ func (n *NodeInfo) UpdateNodeWithRatio(ratios []types.AllocationRatio) error {
 }
 
 //UpdateSpotResources update spot resources
-func (n *NodeInfo) UpdateSpotResources(spotRes map[string]types.SpotResource) error {
+func (n *SiteCacheInfo) UpdateSpotResources(spotRes map[string]types.SpotResource) error {
 	n.AllocatableSpotFlavor = spotRes
 
 	n.generation = nextGeneration()
 	return nil
 }
 
-// StackWithAffinity return all pods with (anti)affinity constraints on this node.
-func (n *NodeInfo) StackWithAffinity() []*types.Stack {
+// StackWithAffinity return all pods with (anti)affinity constraints on this site.
+func (n *SiteCacheInfo) StackWithAffinity() []*types.Stack {
 	if n == nil {
 		return nil
 	}
 	return n.stacksWithAffinity
 }
 
-// Stacks return all stacks scheduled (including assumed to be) on this node.
-func (n *NodeInfo) Stacks() []*types.Stack {
+// Stacks return all stacks scheduled (including assumed to be) on this site.
+func (n *SiteCacheInfo) Stacks() []*types.Stack {
 	if n == nil {
 		return nil
 	}
 	return n.stacks
 }
 
-// Node returns overall information about this node.
-func (n *NodeInfo) Node() *types.SiteNode {
+// Site returns overall information about this site.
+func (n *SiteCacheInfo) Site() *types.Site {
 	if n == nil {
 		return nil
 	}
-	return n.node
+	return n.site
 }
 
-// NewNodeInfo returns a ready to use empty NodeInfo object.
+// NewSiteCacheInfo returns a ready to use empty SiteCacheInfo object.
 // If any pods are given in arguments, their information will be aggregated in
 // the returned object.
-func NewNodeInfo(stacks ...*types.Stack) *NodeInfo {
-	ni := &NodeInfo{
+func NewSiteCacheInfo(stacks ...*types.Stack) *SiteCacheInfo {
+	ni := &SiteCacheInfo{
 		RequestedResources: make(map[string]*types.CPUAndMemory),
 		TotalResources:     make(map[string]*types.CPUAndMemory),
 		AllocatableFlavor:  make(map[string]int64),

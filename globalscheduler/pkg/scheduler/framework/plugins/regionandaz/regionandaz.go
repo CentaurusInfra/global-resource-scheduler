@@ -22,7 +22,7 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/nodeinfo"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/sets"
 )
@@ -37,8 +37,8 @@ type RegionAndAz struct {
 
 //RegionMap region mapping
 type RegionMap struct {
-	count    int
-	nodeList interfaces.NodeScoreList
+	count         int
+	siteScoreList interfaces.SiteScoreList
 }
 
 var _ interfaces.FilterPlugin = &RegionAndAz{}
@@ -49,18 +49,18 @@ func (pl *RegionAndAz) Name() string {
 	return Name
 }
 
-func (pl *RegionAndAz) regionEqual(region types.CloudRegion, nodeInfo *nodeinfo.NodeInfo) bool {
-	if nodeInfo == nil {
+func (pl *RegionAndAz) regionEqual(region types.CloudRegion, siteCacheInfo *sitecacheinfo.SiteCacheInfo) bool {
+	if siteCacheInfo == nil {
 		return false
 	}
 
-	if region.Region != "" && region.Region != nodeInfo.Node().Region {
+	if region.Region != "" && region.Region != siteCacheInfo.Site().Region {
 		return false
 	}
 
 	if region.AvailabilityZone != nil && len(region.AvailabilityZone) > 0 {
 		azSets := sets.NewString(region.AvailabilityZone...)
-		if !azSets.Has(nodeInfo.Node().AvailabilityZone) {
+		if !azSets.Has(siteCacheInfo.Site().AvailabilityZone) {
 			return false
 		}
 	}
@@ -70,7 +70,7 @@ func (pl *RegionAndAz) regionEqual(region types.CloudRegion, nodeInfo *nodeinfo.
 
 // Filter invoked at the filter extension point.
 func (pl *RegionAndAz) Filter(ctx context.Context, cycleState *interfaces.CycleState,
-	stack *types.Stack, nodeInfo *nodeinfo.NodeInfo) *interfaces.Status {
+	stack *types.Stack, siteCacheInfo *sitecacheinfo.SiteCacheInfo) *interfaces.Status {
 
 	if len(stack.Selector.Regions) <= 0 {
 		return nil
@@ -78,14 +78,14 @@ func (pl *RegionAndAz) Filter(ctx context.Context, cycleState *interfaces.CycleS
 
 	var match = false
 	for _, region := range stack.Selector.Regions {
-		if pl.regionEqual(region, nodeInfo) {
+		if pl.regionEqual(region, siteCacheInfo) {
 			match = true
 			break
 		}
 	}
 
 	if !match {
-		return interfaces.NewStatus(interfaces.Unschedulable, "stack region not equal node region.")
+		return interfaces.NewStatus(interfaces.Unschedulable, "stack region not equal site region.")
 	}
 
 	return nil
@@ -93,34 +93,34 @@ func (pl *RegionAndAz) Filter(ctx context.Context, cycleState *interfaces.CycleS
 
 //Strategy run strategy
 func (pl *RegionAndAz) Strategy(ctx context.Context, state *interfaces.CycleState,
-	allocations *types.Allocation, nodeList interfaces.NodeScoreList) (interfaces.NodeScoreList, *interfaces.Status) {
+	allocations *types.Allocation, siteScoreList interfaces.SiteScoreList) (interfaces.SiteScoreList, *interfaces.Status) {
 
 	if allocations.Selector.Strategy.RegionStrategy != constants.StrategyRegionAlone {
-		return nodeList, nil
+		return siteScoreList, nil
 	}
 
 	var regionMap = map[string]RegionMap{}
-	for _, node := range nodeList {
-		selectorInfo, err := interfaces.GetNodeSelectorState(state, node.Name)
+	for _, siteScore := range siteScoreList {
+		selectorInfo, err := interfaces.GetSiteSelectorState(state, siteScore.SiteID)
 		if err != nil {
-			logger.Error(ctx, "GetNodeSelectorState %s failed! err: %s", node.Name, err)
+			logger.Error(ctx, "GetSiteSelectorState %s failed! err: %s", siteScore.SiteID, err)
 			continue
 		}
 
-		nodeInfo, err := pl.handle.SnapshotSharedLister().NodeInfos().Get(node.Name)
+		siteCacheInfo, err := pl.handle.SnapshotSharedLister().SiteCacheInfos().Get(siteScore.SiteID)
 		if err != nil {
-			logger.Error(ctx, "get node info %s failed! err: %s", node.Name, err)
+			logger.Error(ctx, "get siteScore info %s failed! err: %s", siteScore.SiteID, err)
 			continue
 		}
 
-		if _, ok := regionMap[nodeInfo.Node().Region]; !ok {
-			regionMap[nodeInfo.Node().Region] = RegionMap{count: 0, nodeList: interfaces.NodeScoreList{}}
+		if _, ok := regionMap[siteCacheInfo.Site().Region]; !ok {
+			regionMap[siteCacheInfo.Site().Region] = RegionMap{count: 0, siteScoreList: interfaces.SiteScoreList{}}
 		}
 
-		tempRegion := regionMap[nodeInfo.Node().Region]
+		tempRegion := regionMap[siteCacheInfo.Site().Region]
 		tempRegion.count += selectorInfo.StackMaxCount
-		tempRegion.nodeList = append(tempRegion.nodeList, node)
-		regionMap[nodeInfo.Node().Region] = tempRegion
+		tempRegion.siteScoreList = append(tempRegion.siteScoreList, siteScore)
+		regionMap[siteCacheInfo.Site().Region] = tempRegion
 	}
 
 	var finalRegion string
@@ -141,7 +141,7 @@ func (pl *RegionAndAz) Strategy(ctx context.Context, state *interfaces.CycleStat
 		return nil, interfaces.NewStatus(interfaces.Unschedulable, "region Capability cannot meet the needs")
 	}
 
-	return regionMap[finalRegion].nodeList, nil
+	return regionMap[finalRegion].siteScoreList, nil
 }
 
 // New initializes a new plugin and returns it.
