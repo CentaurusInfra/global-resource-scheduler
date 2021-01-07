@@ -80,6 +80,18 @@ func Run(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}) error {
 	// start scheduler resource cache informer and run
 	sched.StartInformersAndRun(stopCh)
 
+	// start allocation API here
+	// StartAPI(stopCh)
+	select {
+	case <-stopCh:
+		break
+	}
+
+	return nil
+}
+
+// Start allocation API for gs-scheduler
+func StartAPI(stopCh <-chan struct{}) error {
 	router.Register()
 	hs, err := apiserver.NewHTTPServer()
 	if err != nil {
