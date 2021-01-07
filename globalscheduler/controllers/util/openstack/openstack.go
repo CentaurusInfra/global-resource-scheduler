@@ -32,6 +32,9 @@ type server struct {
 	FlavorRef      string              `json:"flavorRef"`
 	Networks       []map[string]string `json:"networks"`
 	SecurityGroups []map[string]string `json:"security_groups"`
+
+	// Display the name of a cluster
+	Metadata map[string]string `json:"metadata"`
 }
 
 /*
@@ -85,6 +88,9 @@ func ServerCreate(host string, authToken string, manifest *v1.PodSpec) (string, 
 		},
 		SecurityGroups: []map[string]string{
 			{"name": manifest.WorkloadInfo[0].SecurityGroupId},
+		},
+		Metadata: map[string]string{
+			"ClusterName": manifest.ClusterName,
 		},
 	}
 	serverJson := map[string]server{}
