@@ -1,0 +1,6 @@
+apiVersion: globalscheduler.com/v1
+kind: Scheduler
+metadata:
+  name: sample-scheduler
+spec:
+  tag: "1"

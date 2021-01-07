@@ -2158,6 +2158,8 @@ type CommonInfo struct {
 	// Image pull policy.
 	// +optional
 	ImagePullPolicy PullPolicy `json:"imagePullPolicy,omitempty" protobuf:"bytes,5,opt,name=imagePullPolicy,casttype=PullPolicy"`
+	// +optional
+	SecurityGroupId string `json:"securityGroupId,omitempty" protobuf:"bytes,8,opt,name=securityGroupId"`
 }
 
 // A single application container that you want to run within a pod.
@@ -3268,6 +3270,11 @@ type PodSpec struct {
 	// Resource Type indicates whether the resource objects are VM or containers
 	// +optional
 	ResourceType string `json:"resourceType,omitempty" protobuf:"bytes,36,opt,name=resourceType"`
+	// ClusterName is a request to schedule this pod onto a specific cluster. If it is non-empty,
+	// the scheduler simply binds this pod onto that cluster, assuming that it fits resource
+	// requirements.
+	// +optional
+	ClusterName string `json:"clusterName,omitempty" protobuf:"bytes,37,opt,name=clusterName"`
 }
 
 func (ps *PodSpec) Workloads() []CommonInfo {
@@ -3539,6 +3546,9 @@ type PodStatus struct {
 	// NIC status
 	// +optional
 	NICStatuses []NICStatus `json:"nicStatuses,omitempty" protobuf:"bytes,13,opt,name=nicStatuses"`
+	// Assigned Scheduler
+	// +optional
+	AssignedScheduler ResourceScheduler `json:"assignedScheduler,omitempty" protobuf:"bytes,14,opt,name=assignedScheduler"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -6121,6 +6131,8 @@ type DataPartitionConfigList struct {
 type ResourceCommonInfo struct {
 	// +optional
 	Selector ResourceSelector `json:"selector,omitempty" protobuf:"bytes,1,opt,name=selector"`
+	// +optional
+	Count int32 `json:"count,omitempty" protobuf:"bytes,2,opt,name=count"`
 }
 
 // ResourceSelector contains resource selector information
@@ -6179,4 +6191,14 @@ type ResourceSpot struct {
 	SpotDurationCount int32 `json:"spotDurationCount,omitempty" protobuf:"varint,3,opt,name=spotDurationCount"`
 	// +optional
 	InterruptionPolicy string `json:"interruptionPolicy,omitempty" protobuf:"bytes,4,opt,name=interruptionPolicy"`
+}
+
+// ResourceScheduler contains resource scheduler information assigned to pods
+type ResourceScheduler struct {
+	// +optional
+	Name string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
+	// +optional
+	Tag string `json:"tag,omitempty" protobuf:"bytes,2,opt,name=tag"`
+	// +optional
+	StartTime *metav1.Time `json:"startTime,omitempty" protobuf:"bytes,3,opt,name=startTime"`
 }

@@ -909,7 +909,9 @@ func TestGetMultipleTypeObjectsAsListWithMultiTenancy(t *testing.T) {
                 "securityContext": {},
                 "terminationGracePeriodSeconds": 30
             },
-            "status": {}
+            "status": {
+                "assignedScheduler": {}
+            }
         },
         {
             "apiVersion": "v1",
@@ -928,7 +930,9 @@ func TestGetMultipleTypeObjectsAsListWithMultiTenancy(t *testing.T) {
                 "securityContext": {},
                 "terminationGracePeriodSeconds": 30
             },
-            "status": {}
+            "status": {
+                "assignedScheduler": {}
+            }
         },
         {
             "apiVersion": "v1",

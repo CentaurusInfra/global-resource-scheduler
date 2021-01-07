@@ -152,7 +152,7 @@ func (r *BindingREST) New() runtime.Object {
 
 var _ = rest.Creater(&BindingREST{})
 
-// Create ensures a pod is bound to a specific host.
+// Create ensures a pod is bound to a specific target(host, scheduler, or cluster).
 func (r *BindingREST) Create(ctx context.Context, obj runtime.Object, createValidation rest.ValidateObjectFunc, options *metav1.CreateOptions) (out runtime.Object, err error) {
 	binding := obj.(*api.Binding)
 
@@ -167,15 +167,15 @@ func (r *BindingREST) Create(ctx context.Context, obj runtime.Object, createVali
 		}
 	}
 
-	err = r.assignPod(ctx, binding.Name, binding.Target.Name, binding.Annotations, dryrun.IsDryRun(options.DryRun))
+	err = r.assignPod(ctx, binding.Name, binding.Target.Kind, binding.Target.Name, binding.Annotations, dryrun.IsDryRun(options.DryRun))
 	out = &metav1.Status{Status: metav1.StatusSuccess}
 	return
 }
 
-// setPodHostAndAnnotations sets the given pod's host to 'machine' if and only if it was
+// setPodHostAndAnnotations sets the given pod's host to target(machine, cluster, or scheduler) if and only if it was
 // previously 'oldMachine' and merges the provided annotations with those of the pod.
 // Returns the current state of the pod, or an error.
-func (r *BindingREST) setPodHostAndAnnotations(ctx context.Context, podID, oldMachine, machine string, annotations map[string]string, dryRun bool) (finalPod *api.Pod, err error) {
+func (r *BindingREST) setPodHostAndAnnotations(ctx context.Context, podID, oldMachine, targetKind, targetName string, annotations map[string]string, dryRun bool) (finalPod *api.Pod, err error) {
 	podKey, err := r.store.KeyFunc(ctx, podID)
 	if err != nil {
 		return nil, err
@@ -188,10 +188,20 @@ func (r *BindingREST) setPodHostAndAnnotations(ctx context.Context, podID, oldMa
 		if pod.DeletionTimestamp != nil {
 			return nil, fmt.Errorf("pod %s is being deleted, cannot be assigned to a host", pod.Name)
 		}
-		if pod.Spec.VirtualMachine == nil && pod.Spec.NodeName != oldMachine {
-			return nil, fmt.Errorf("pod %v is already assigned to node %q", pod.Name, pod.Spec.NodeName)
+
+		switch targetKind {
+		case "Scheduler":
+			pod.Status.AssignedScheduler.Name = targetName
+			pod.Status.Phase = api.SchedulerAssigned
+		case "Cluster":
+			pod.Spec.ClusterName = targetName
+			pod.Status.Phase = api.ClusterBinded
+		default:
+			if pod.Spec.VirtualMachine == nil && pod.Spec.NodeName != oldMachine {
+				return nil, fmt.Errorf("pod %v is already assigned to node %q", pod.Name, pod.Spec.NodeName)
+			}
+			pod.Spec.NodeName = targetName
 		}
-		pod.Spec.NodeName = machine
 		if pod.Annotations == nil {
 			pod.Annotations = make(map[string]string)
 		}
@@ -208,9 +218,9 @@ func (r *BindingREST) setPodHostAndAnnotations(ctx context.Context, podID, oldMa
 	return finalPod, err
 }
 
-// assignPod assigns the given pod to the given machine.
-func (r *BindingREST) assignPod(ctx context.Context, podID string, machine string, annotations map[string]string, dryRun bool) (err error) {
-	if _, err = r.setPodHostAndAnnotations(ctx, podID, "", machine, annotations, dryRun); err != nil {
+// assignPod assigns the given pod to the given target(machine, cluster, or scheduler).
+func (r *BindingREST) assignPod(ctx context.Context, podID, targetKind, targetName string, annotations map[string]string, dryRun bool) (err error) {
+	if _, err = r.setPodHostAndAnnotations(ctx, podID, "", targetKind, targetName, annotations, dryRun); err != nil {
 		err = storeerr.InterpretGetError(err, api.Resource("pods"), podID)
 		err = storeerr.InterpretUpdateError(err, api.Resource("pods"), podID)
 		if _, ok := err.(*errors.StatusError); !ok {

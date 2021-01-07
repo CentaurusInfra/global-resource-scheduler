@@ -2054,6 +2054,8 @@ type CommonInfo struct {
 	// Policy for pulling images for this container
 	// +optional
 	ImagePullPolicy PullPolicy
+	// +optional
+	SecurityGroupId string
 }
 
 // Container represents a single container that is expected to be run on the host.
@@ -2411,6 +2413,10 @@ const (
 	// PodUnknown means that for some reason the state of the pod could not be obtained, typically due
 	// to an error in communicating with the host of the pod.
 	PodUnknown PodPhase = "Unknown"
+	// SchedulerAssigned represents status of the assigned scheduler for this pod.
+	SchedulerAssigned PodPhase = "assigned"
+	// ClusterBinded represents status of the binded cluster for this pod.
+	ClusterBinded PodPhase = "binded"
 )
 
 type PodConditionType string
@@ -2939,6 +2945,11 @@ type PodSpec struct {
 	// Resource Type indicates whether the resource objects are VM or containers
 	// +optional
 	ResourceType string
+	// ClusterName is a request to schedule this pod onto a specific cluster.  If it is non-empty,
+	// the scheduler simply binds this pod onto that cluster, assuming that it fits resource
+	// requirements.
+	// +optional
+	ClusterName string
 }
 
 func (ps *PodSpec) Workloads() []CommonInfo {
@@ -3206,6 +3217,9 @@ type PodStatus struct {
 	// NIC status
 	// +optional
 	NICStatuses []NICStatus
+	// Assigned scheduler
+	// +optional
+	AssignedScheduler ResourceScheduler
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -5415,6 +5429,8 @@ type DataPartitionConfigList struct {
 type ResourceCommonInfo struct {
 	// +optional
 	Selector ResourceSelector
+	// +optional
+	Count int32
 }
 
 // ResourceSelector holds the resource selector information
@@ -5456,4 +5472,17 @@ type ResourceSpot struct {
 	SpotDurationHours  int32   //1(default,0-6)
 	SpotDurationCount  int32   //2(default)
 	InterruptionPolicy string  //immediate(default)
+}
+
+// ResourceScheduler holds the scheduler information assigned to the pod
+type ResourceScheduler struct {
+	// Name of scheduler
+	// +optional
+	Name string
+	// Tag of scheduler
+	// +optional
+	Tag string
+	// Date and time at which the pod was assigned
+	// +optional
+	StartTime *metav1.Time
 }
