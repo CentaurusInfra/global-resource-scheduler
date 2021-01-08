@@ -25,7 +25,6 @@ import (
 	"time"
 )
 
-
 func (dc *DispatcherController) doesDispatcherCRDExist() (bool, error) {
 	dispatcherCrd, err := dc.apiextensionsclientset.ApiextensionsV1beta1().CustomResourceDefinitions().Get("dispatchers.globalscheduler.com", metav1.GetOptions{})
 
