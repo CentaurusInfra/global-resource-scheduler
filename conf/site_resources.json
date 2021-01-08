@@ -1,13 +1,10 @@
 {
-    "site_nodes": [{
-            "edge_site_id": "region1|az1",
+    "site_resources": [{
+            "site_id": "region1|az1",
             "region": "region1",
             "availability_zone": "az1",
-            "operator": "opera1",
-            "status": "active",
-            "max_count": 1000,
-            "node_infos": [{
-                "edge_node_id": "edge_node_id",
+            "hosts": [{
+                "host_id": "host_id",
                 "host_name": "name1",
                 "region": "region1",
                 "availability_zone": "az1",
