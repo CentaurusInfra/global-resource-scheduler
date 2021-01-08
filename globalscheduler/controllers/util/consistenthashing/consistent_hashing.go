@@ -27,7 +27,7 @@ import (
 	"sync"
 )
 
-const VIRTUAL_NODE_NUMBER = 1000
+const VIRTUAL_NODE_NUMBER = 131072
 
 type uints []uint32
 
@@ -184,14 +184,11 @@ func (ch *ConsistentHash) Insert(names []string) error {
 	}
 
 	for _, v := range names {
-		res, ok := ch.Members[v]
-		if !ok || res == "nil" {
-			key := ch.fnv32Hash(v)
-			// find the first index of hash value that is greater than key
-			idx := ch.search(key)
-			ch.Members[v] = ch.HashCircle[ch.SortedHashes[idx]]
-			ch.Results[ch.HashCircle[ch.SortedHashes[idx]]] = append(ch.Results[ch.HashCircle[ch.SortedHashes[idx]]], v)
-		}
+		key := ch.fnv32Hash(v)
+		// find the first index of hash value that is greater than key
+		idx := ch.search(key)
+		ch.Members[v] = ch.HashCircle[ch.SortedHashes[idx]]
+		ch.Results[ch.HashCircle[ch.SortedHashes[idx]]] = append(ch.Results[ch.HashCircle[ch.SortedHashes[idx]]], v)
 	}
 
 	return nil
