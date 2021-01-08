@@ -98,12 +98,7 @@ func assignedPod(pod *v1.Pod) bool {
 
 // responsibleForPod returns true if the pod has asked to be scheduled by the given scheduler.
 func responsibleForPod(pod *v1.Pod, schedulerName string) bool {
-	return schedulerName == pod.Spec.SchedulerName
-}
-
-// vmPodShouldSleep returns true if the pod status is set ot PodNoSchedule
-func vmPodShouldSleep(pod *v1.Pod) bool {
-	return pod.Status.Phase == v1.PodNoSchedule
+	return schedulerName == pod.Status.AssignedScheduler.Name
 }
 
 // addPodToCache add pod to the stack cache of the scheduler
@@ -345,7 +340,7 @@ func (sched *Scheduler) bindToSite(siteID string, assumedStack *types.Stack) err
 	binding := &v1.Binding{
 		ObjectMeta: metav1.ObjectMeta{Tenant: assumedStack.Tenant, Namespace: assumedStack.Namespace, Name: assumedStack.Name, UID: apitypes.UID(assumedStack.UID)},
 		Target: v1.ObjectReference{
-			Kind: "Site",
+			Kind: "Cluster",
 			Name: siteID,
 		},
 	}
