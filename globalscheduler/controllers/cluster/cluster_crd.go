@@ -133,6 +133,7 @@ func (c *ClusterController) CreateClusterCRD() error {
 								"memcapacity":   {Type: "integer"},
 								"serverprice":   {Type: "integer"},
 								"homescheduler": {Type: "string"},
+								"homedispatcher": {Type: "string"},
 							},
 						},
 					},
