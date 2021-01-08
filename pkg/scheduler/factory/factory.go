@@ -126,6 +126,9 @@ type Config struct {
 
 	// SchedulingQueue holds pods to be scheduled
 	SchedulingQueue internalqueue.SchedulingQueue
+
+	// Tag represent the Nth scheduler
+	Tag string
 }
 
 // PodPreemptor has methods needed to delete a pod and to update 'NominatedPod'

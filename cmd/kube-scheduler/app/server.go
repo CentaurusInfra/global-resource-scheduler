@@ -111,7 +111,8 @@ through the API as necessary.`,
 // runCommand runs the scheduler.
 func runCommand(cmd *cobra.Command, args []string, opts *options.Options) error {
 	verflag.PrintAndExitIfRequested()
-	utilflag.PrintFlags(cmd.Flags())
+	flags := cmd.Flags()
+	utilflag.PrintFlags(flags)
 
 	if len(args) != 0 {
 		fmt.Fprint(os.Stderr, "arguments are not supported\n")
@@ -131,6 +132,13 @@ func runCommand(cmd *cobra.Command, args []string, opts *options.Options) error 
 	}
 
 	c, err := opts.Config()
+
+	schedulerTag := flags.Lookup("scheduler-tag")
+	if schedulerTag != nil {
+		schedulerTagValue := schedulerTag.Value.String()
+		c.SchedulerTag = schedulerTagValue
+	}
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
@@ -189,6 +197,11 @@ func Run(cc schedulerserverconfig.CompletedConfig, stopCh <-chan struct{}) error
 		scheduler.WithBindTimeoutSeconds(*cc.ComponentConfig.BindTimeoutSeconds))
 	if err != nil {
 		return err
+	}
+
+	// Assign the current scheduler with the Tag value
+	if cc.SchedulerTag != "" {
+		sched.Config().Tag = cc.SchedulerTag
 	}
 
 	// Prepare the event broadcaster.

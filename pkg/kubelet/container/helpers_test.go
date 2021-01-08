@@ -534,7 +534,7 @@ func TestHashContainer(t *testing.T) {
 				ResizePolicy: []v1.ResizePolicy{cpuPolicyRestart, memPolicyNoRestart},
 			},
 			false,
-			0x8f232301,
+			0x461bc5,
 		},
 		{
 			&v1.Container{
@@ -547,7 +547,7 @@ func TestHashContainer(t *testing.T) {
 				ResizePolicy: []v1.ResizePolicy{cpuPolicyNoRestart, memPolicyRestart},
 			},
 			false,
-			0xf8e6921,
+			0x846271a5,
 		},
 		{
 			&v1.Container{
@@ -560,7 +560,7 @@ func TestHashContainer(t *testing.T) {
 				ResizePolicy: []v1.ResizePolicy{cpuPolicyRestart, memPolicyNoRestart},
 			},
 			false,
-			0xacb5e21f,
+			0x4c1ac4c3,
 		},
 		{
 			&v1.Container{
@@ -573,7 +573,7 @@ func TestHashContainer(t *testing.T) {
 				ResizePolicy: []v1.ResizePolicy{cpuPolicyNoRestart, memPolicyRestart},
 			},
 			false,
-			0xec52dfef,
+			0xa18fb613,
 		},
 		{
 			&v1.Container{
@@ -586,7 +586,7 @@ func TestHashContainer(t *testing.T) {
 				ResizePolicy: []v1.ResizePolicy{cpuPolicyRestart, memPolicyNoRestart},
 			},
 			true,
-			0xf7d736c3,
+			0xb8b9775f,
 		},
 		{
 			&v1.Container{
@@ -599,7 +599,7 @@ func TestHashContainer(t *testing.T) {
 				ResizePolicy: []v1.ResizePolicy{cpuPolicyNoRestart, memPolicyRestart},
 			},
 			true,
-			0xcdcd563,
+			0x36bb38bf,
 		},
 		{
 			&v1.Container{
@@ -612,7 +612,7 @@ func TestHashContainer(t *testing.T) {
 				ResizePolicy: []v1.ResizePolicy{cpuPolicyRestart, memPolicyNoRestart},
 			},
 			true,
-			0xf7d736c3,
+			0xb8b9775f,
 		},
 		{
 			&v1.Container{
@@ -625,7 +625,7 @@ func TestHashContainer(t *testing.T) {
 				ResizePolicy: []v1.ResizePolicy{cpuPolicyNoRestart, memPolicyRestart},
 			},
 			true,
-			0xcdcd563,
+			0x36bb38bf,
 		},
 	}
 

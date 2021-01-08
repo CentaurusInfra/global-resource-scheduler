@@ -446,11 +446,13 @@ if [[ "${START_MODE}" != "kubeletonly" ]]; then
 
   #cluster/kubectl.sh create -f hack/runtime/workload-controller-manager-clusterrolebinding.yaml
 
+  # ${KUBECTL} --kubeconfig="${CERT_DIR}/admin.kubeconfig" apply -f "${KUBE_ROOT}/globalscheduler/test/yaml/scheduler.yaml"
+  # ${KUBECTL} --kubeconfig="${CERT_DIR}/admin.kubeconfig" apply -f "${KUBE_ROOT}/globalscheduler/test/yaml/cluster.yaml"
   kube::common::start_controller_manager
   if [[ "${START_MODE}" != "nokubeproxy" ]]; then
     kube::common::start_kubeproxy
   fi
-  kube::common::start_kubescheduler
+  # kube::common::start_kubescheduler
   start_kubedns
   if [[ "${ENABLE_NODELOCAL_DNS:-}" == "true" ]]; then
     start_nodelocaldns

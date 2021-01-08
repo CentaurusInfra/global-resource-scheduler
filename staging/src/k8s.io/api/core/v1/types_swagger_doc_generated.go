@@ -1682,6 +1682,7 @@ var map_PodSpec = map[string]string{
 	"enableServiceLinks":            "EnableServiceLinks indicates whether information about services should be injected into pod's environment variables, matching the syntax of Docker links. Optional: Defaults to true.",
 	"preemptionPolicy":              "PreemptionPolicy is the Policy for preempting pods with lower priority. One of Never, PreemptLowerPriority. Defaults to PreemptLowerPriority if unset. This field is alpha-level and is only honored by servers that enable the NonPreemptingPriority feature.",
 	"resourceType":                  "Resource Type indicates whether the resource objects are VM or containers",
+	"clusterName":                   "ClusterName is a request to schedule this pod onto a specific cluster. If it is non-empty, the scheduler simply binds this pod onto that cluster, assuming that it fits resource requirements.",
 }
 
 func (PodSpec) SwaggerDoc() map[string]string {
@@ -1703,6 +1704,7 @@ var map_PodStatus = map[string]string{
 	"qosClass":              "The Quality of Service (QOS) classification assigned to the pod based on resource requirements See PodQOSClass type for available QOS classes More info: https://git.k8s.io/community/contributors/design-proposals/node/resource-qos.md",
 	"virtualMachineStatus":  "Virtual machine status currently a pod can only have one virtual machine",
 	"nicStatuses":           "NIC status",
+	"assignedScheduler":     "Assigned Scheduler",
 }
 
 func (PodStatus) SwaggerDoc() map[string]string {
@@ -2035,6 +2037,14 @@ var map_ResourceRequirements = map[string]string{
 
 func (ResourceRequirements) SwaggerDoc() map[string]string {
 	return map_ResourceRequirements
+}
+
+var map_ResourceScheduler = map[string]string{
+	"": "ResourceScheduler contains resource scheduler information assigned to pods",
+}
+
+func (ResourceScheduler) SwaggerDoc() map[string]string {
+	return map_ResourceScheduler
 }
 
 var map_ResourceSelector = map[string]string{
