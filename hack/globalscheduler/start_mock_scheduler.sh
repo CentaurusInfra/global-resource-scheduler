@@ -70,16 +70,18 @@ kube::common::set_service_accounts
 ### to replace gs-controllers for missing service account
 ### kube::common::start_controller_manager
 
-${KUBECTL} --kubeconfig "${CERT_DIR}/admin.kubeconfig" apply -f ${KUBE_ROOT}/globalscheduler/test/mock/scheduler_def.yaml
+### The following commented ones are to set up a pod to bind to  a cluster for quick testing only
 
-${KUBECTL} --kubeconfig "${CERT_DIR}/admin.kubeconfig" apply -f ${KUBE_ROOT}/globalscheduler/test/mock/pod.json
+#${KUBECTL} --kubeconfig "${CERT_DIR}/admin.kubeconfig" apply -f ${KUBE_ROOT}/globalscheduler/test/mock/scheduler_def.yaml
+
+#${KUBECTL} --kubeconfig "${CERT_DIR}/admin.kubeconfig" apply -f ${KUBE_ROOT}/globalscheduler/test/mock/pod.json
 
 ### it takes time for scheduler CRD to get registered
-sleep 5
+#sleep 5
 
 ${KUBECTL} --kubeconfig "${CERT_DIR}/admin.kubeconfig" apply -f ${KUBE_ROOT}/globalscheduler/test/mock/mock_scheduler.yaml
 
-curl -X POST http://127.0.0.1:8080/api/v1/namespaces/default/pods/nginx/binding -H "Content-Type: application/json" -d @${KUBE_ROOT}/globalscheduler/test/mock/assign_scheduler.json
+#curl -X POST http://127.0.0.1:8080/api/v1/namespaces/default/pods/nginx/binding -H "Content-Type: application/json" -d @${KUBE_ROOT}/globalscheduler/test/mock/assign_scheduler.json
 
 CONTROLPLANE_SUDO=$(test -w "${CERT_DIR}" || echo "sudo -E")
 
