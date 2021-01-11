@@ -2415,8 +2415,8 @@ const (
 	PodUnknown PodPhase = "Unknown"
 	// SchedulerAssigned represents status of the assigned scheduler for this pod.
 	SchedulerAssigned PodPhase = "assigned"
-	// ClusterBinded represents status of the binded cluster for this pod.
-	ClusterBinded PodPhase = "binded"
+	// ClusterBound represents status of the bound cluster for this pod.
+	ClusterBound PodPhase = "bound"
 )
 
 type PodConditionType string
