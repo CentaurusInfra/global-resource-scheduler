@@ -22,171 +22,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog"
-	clusterv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 	"time"
 )
-
-func (sc *SchedulerController) doesClusterCRDExist() (bool, error) {
-	clusterCrd, err := sc.apiextensionsclientset.ApiextensionsV1beta1().CustomResourceDefinitions().Get(clusterv1.Name, metav1.GetOptions{})
-
-	if err != nil {
-		return false, err
-	}
-
-	// Check whether the CRD is accepted.
-	for _, condition := range clusterCrd.Status.Conditions {
-		if condition.Type == apiextensions.Established &&
-			condition.Status == apiextensions.ConditionTrue {
-			return true, nil
-		}
-	}
-
-	return false, fmt.Errorf("CRD is not accepted")
-}
-
-func (sc *SchedulerController) waitClusterCRDAccepted() error {
-	err := wait.Poll(1*time.Second, 10*time.Second, func() (bool, error) {
-		return sc.doesClusterCRDExist()
-	})
-
-	return err
-}
-
-// CreateCRD creates a custom resource definition, Cluster.
-func (sc *SchedulerController) CreateClusterCRD() error {
-	if result, _ := sc.doesClusterCRDExist(); result {
-		return nil
-	}
-	clusterCrd := &apiextensions.CustomResourceDefinition{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: clusterv1.Name,
-		},
-		Spec: apiextensions.CustomResourceDefinitionSpec{
-			Group:   clusterv1.GroupName,
-			Version: clusterv1.Version,
-			Scope:   apiextensions.NamespaceScoped,
-			Names: apiextensions.CustomResourceDefinitionNames{
-				Plural:     clusterv1.Plural,
-				Singular:   clusterv1.Singluar,
-				Kind:       clusterv1.Kind,
-				ShortNames: []string{clusterv1.ShortName},
-			},
-			Validation: &apiextensions.CustomResourceValidation{
-				OpenAPIV3Schema: &apiextensions.JSONSchemaProps{
-					Type: "object",
-					Properties: map[string]apiextensions.JSONSchemaProps{
-						"spec": {
-							Type: "object",
-							Properties: map[string]apiextensions.JSONSchemaProps{
-								"ipaddress": {Type: "string"},
-								"geolocation": {
-									Type: "object",
-									Properties: map[string]apiextensions.JSONSchemaProps{
-										"city":     {Type: "string"},
-										"province": {Type: "string"},
-										"area":     {Type: "string"},
-										"country":  {Type: "string"},
-									},
-								},
-								"region": {
-									Type: "object",
-									Properties: map[string]apiextensions.JSONSchemaProps{
-										"region":           {Type: "string"},
-										"availabilityzone": {Type: "string"},
-									},
-								},
-								"operator": {
-									Type: "object",
-									Properties: map[string]apiextensions.JSONSchemaProps{
-										"operator": {Type: "string"},
-									},
-								},
-								"flavors": {
-									Type: "array",
-									Items: &apiextensions.JSONSchemaPropsOrArray{
-										Schema: &apiextensions.JSONSchemaProps{
-											Type: "object",
-											Properties: map[string]apiextensions.JSONSchemaProps{
-												"flavorid":      {Type: "string"},
-												"totalcapacity": {Type: "integer"},
-											},
-										},
-									},
-								},
-								"storage": {
-									Type: "array",
-									Items: &apiextensions.JSONSchemaPropsOrArray{
-										Schema: &apiextensions.JSONSchemaProps{
-											Type: "object",
-											Properties: map[string]apiextensions.JSONSchemaProps{
-												"typeid":          {Type: "string"},
-												"storagecapacity": {Type: "integer"},
-											},
-										},
-									},
-								},
-								"eipcapacity":   {Type: "integer"},
-								"cpucapacity":   {Type: "integer"},
-								"memcapacity":   {Type: "integer"},
-								"serverprice":   {Type: "integer"},
-								"homescheduler": {Type: "string"},
-							},
-						},
-					},
-				},
-			},
-			AdditionalPrinterColumns: []apiextensions.CustomResourceColumnDefinition{
-				{
-					Name:     "ipaddress",
-					Type:     "string",
-					JSONPath: ".spec.ipaddress",
-				},
-				{
-					Name:     "region",
-					Type:     "string",
-					JSONPath: ".spec.region",
-				},
-				{
-					Name:     "eipcapacity",
-					Type:     "integer",
-					JSONPath: ".spec.eipcapacity",
-				},
-				{
-					Name:     "cpucapacity",
-					Type:     "integer",
-					JSONPath: ".spec.cpucapacity",
-				},
-				{
-					Name:     "memcapacity",
-					Type:     "integer",
-					JSONPath: ".spec.memcapacity",
-				},
-				{
-					Name:     "serverprice",
-					Type:     "integer",
-					JSONPath: ".spec.serverprice",
-				},
-				{
-					Name:     "homescheduler",
-					Type:     "string",
-					JSONPath: ".spec.homescheduler",
-				},
-				{
-					Name:     "age",
-					Type:     "date",
-					JSONPath: ".metadata.createTimestamp",
-				},
-			},
-		},
-	}
-
-	_, err := sc.apiextensionsclientset.ApiextensionsV1beta1().CustomResourceDefinitions().Create(clusterCrd)
-
-	if err != nil {
-		klog.Fatalf(err.Error())
-	}
-	return sc.waitClusterCRDAccepted()
-}
 
 func (sc *SchedulerController) doesSchedulerCRDExist() (bool, error) {
 	schedulerCrd, err := sc.apiextensionsclientset.ApiextensionsV1beta1().CustomResourceDefinitions().Get("schedulers.globalscheduler.com", metav1.GetOptions{})
@@ -247,6 +84,102 @@ func (sc *SchedulerController) CreateSchedulerCRD() error {
 									},
 								},
 								"tag": {Type: "string"},
+								"cluster": {
+									Type: "array",
+									Items: &apiextensions.JSONSchemaPropsOrArray{
+										Schema: &apiextensions.JSONSchemaProps{Type: "string"},
+									},
+								},
+								"union": {
+									Type: "object",
+									Properties: map[string]apiextensions.JSONSchemaProps{
+										"geolocation": {
+											Type: "array",
+											Items: &apiextensions.JSONSchemaPropsOrArray{
+												Schema: &apiextensions.JSONSchemaProps{
+													Type: "object",
+													Properties: map[string]apiextensions.JSONSchemaProps{
+														"city":     {Type: "string"},
+														"province": {Type: "string"},
+														"area":     {Type: "string"},
+														"country":  {Type: "string"},
+													},
+												},
+											},
+										},
+										"region": {
+											Type: "array",
+											Items: &apiextensions.JSONSchemaPropsOrArray{
+												Schema: &apiextensions.JSONSchemaProps{
+													Type: "object",
+													Properties: map[string]apiextensions.JSONSchemaProps{
+														"region":           {Type: "string"},
+														"availabilityzone": {Type: "string"},
+													},
+												},
+											},
+										},
+										"operator": {
+											Type: "array",
+											Items: &apiextensions.JSONSchemaPropsOrArray{
+												Schema: &apiextensions.JSONSchemaProps{
+													Type: "object",
+													Properties: map[string]apiextensions.JSONSchemaProps{
+														"operator": {Type: "string"},
+													},
+												},
+											},
+										},
+										"flavors": {
+											Type: "array",
+											Items: &apiextensions.JSONSchemaPropsOrArray{
+												Schema: &apiextensions.JSONSchemaProps{
+													Type: "object",
+													Properties: map[string]apiextensions.JSONSchemaProps{
+														"flavorid":      {Type: "string"},
+														"totalcapacity": {Type: "integer"},
+													},
+												},
+											},
+										},
+										"storage": {
+											Type: "array",
+											Items: &apiextensions.JSONSchemaPropsOrArray{
+												Schema: &apiextensions.JSONSchemaProps{
+													Type: "object",
+													Properties: map[string]apiextensions.JSONSchemaProps{
+														"typeid":          {Type: "string"},
+														"storagecapacity": {Type: "integer"},
+													},
+												},
+											},
+										},
+										"eipcapacity": {
+											Type: "array",
+											Items: &apiextensions.JSONSchemaPropsOrArray{
+												Schema: &apiextensions.JSONSchemaProps{Type: "integer"},
+											},
+										},
+										"cpucapacity": {
+											Type: "array",
+											Items: &apiextensions.JSONSchemaPropsOrArray{
+												Schema: &apiextensions.JSONSchemaProps{Type: "integer"},
+											},
+										},
+										"memcapacity": {
+											Type: "array",
+											Items: &apiextensions.JSONSchemaPropsOrArray{
+												Schema: &apiextensions.JSONSchemaProps{Type: "integer"},
+											},
+										},
+										"serverprice": {
+											Type: "array",
+											Items: &apiextensions.JSONSchemaPropsOrArray{
+												Schema: &apiextensions.JSONSchemaProps{Type: "integer"},
+											},
+										},
+									},
+								},
 							},
 						},
 					},
