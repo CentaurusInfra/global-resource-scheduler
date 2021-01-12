@@ -192,10 +192,10 @@ func (r *BindingREST) setPodHostAndAnnotations(ctx context.Context, podID, oldMa
 		switch targetKind {
 		case "Scheduler":
 			pod.Status.AssignedScheduler.Name = targetName
-			pod.Status.Phase = api.SchedulerAssigned
+			pod.Status.Phase = api.PodAssigned
 		case "Cluster":
 			pod.Spec.ClusterName = targetName
-			pod.Status.Phase = api.ClusterBinded
+			pod.Status.Phase = api.PodBound
 		default:
 			if pod.Spec.VirtualMachine == nil && pod.Spec.NodeName != oldMachine {
 				return nil, fmt.Errorf("pod %v is already assigned to node %q", pod.Name, pod.Spec.NodeName)

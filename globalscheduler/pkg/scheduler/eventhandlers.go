@@ -88,12 +88,12 @@ func AddAllEventHandlers(sched *Scheduler) {
 
 // needToSchedule selects pods that need to be scheduled
 func needToSchedule(pod *v1.Pod) bool {
-	return pod.Spec.VirtualMachine != nil && pod.Status.Phase == v1.PodPending
+	return pod.Spec.VirtualMachine != nil && pod.Status.Phase == v1.PodAssigned
 }
 
 // assignedPod selects pods that are assigned (scheduled and running).
 func assignedPod(pod *v1.Pod) bool {
-	return pod.Spec.VirtualMachine != nil && pod.Status.Phase == v1.PodBinded
+	return pod.Spec.VirtualMachine != nil && pod.Status.Phase == v1.PodBound
 }
 
 // responsibleForPod returns true if the pod has asked to be scheduled by the given scheduler.

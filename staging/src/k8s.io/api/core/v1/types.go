@@ -2658,8 +2658,10 @@ const (
 	// PodNoSchedule means pod should not be scheduled to any node
 	PodNoSchedule PodPhase = "NoSchedule"
 
-	// PodClusterBind means pod is finish bind operation in scheuler
-	PodBinded PodPhase = "Binded"
+	// PodAssigned means that the pod has a scheduler assigned to.
+	PodAssigned PodPhase = "Assigned"
+	// PodBound means that the pod has a cluster bound to.
+	PodBound PodPhase = "Bound"
 )
 
 // PodConditionType is a valid value for PodCondition.Type

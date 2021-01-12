@@ -1,0 +1,12 @@
+{
+  "apiVersion":"v1",
+  "kind":"Binding",
+  "metadata": {
+    "name":"nginx"
+  },
+  "target": {
+    "apiVersion":"v1",
+    "kind":"Scheduler",
+    "name":"mockscheduler"
+  }
+}

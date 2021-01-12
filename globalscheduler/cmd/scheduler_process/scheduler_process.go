@@ -91,11 +91,6 @@ func StartSchedulerController() {
 		klog.Fatalf("error - register scheduler crd: %s", err.Error())
 	}
 
-	err = schedulerController.CreateClusterCRD()
-	if err != nil {
-		klog.Fatalf("error - register cluster crd: %s", err.Error())
-	}
-
 	go schedulerInformerFactory.Start(stopCh)
 	go clusterInformerFactory.Start(stopCh)
 
