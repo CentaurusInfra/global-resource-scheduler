@@ -225,7 +225,7 @@ func (n *SiteCacheInfo) getSupportFlavorsBySite() []typed.Flavor {
 		}
 
 		for _, host := range n.Site().Hosts {
-			if host.Region != regionFlv.Region {
+			if n.Site().Region != regionFlv.Region {
 				continue
 			}
 			flavorExtraSpecs := regionFlv.OsExtraSpecs
@@ -234,13 +234,13 @@ func (n *SiteCacheInfo) getSupportFlavorsBySite() []typed.Flavor {
 				flavorStatus := flavorExtraSpecs.CondOperationStatus
 				azMaps := n.getCondOperationAz(flavorExtraSpecs.CondOperationAz)
 				if flavorStatus == "abandon" {
-					if flag, ok := azMaps[host.AvailabilityZone]; ok {
+					if flag, ok := azMaps[n.Site().AvailabilityZone]; ok {
 						if flag != "sellout" && flag != "abandon" {
 							addFlavrFunc(regionFlv.Flavor)
 						}
 					}
 				} else {
-					if flag, ok := azMaps[host.AvailabilityZone]; ok {
+					if flag, ok := azMaps[n.Site().AvailabilityZone]; ok {
 						if flag != "sellout" && flag != "abandon" {
 							addFlavrFunc(regionFlv.Flavor)
 						}
