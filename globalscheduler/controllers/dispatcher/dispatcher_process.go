@@ -155,7 +155,7 @@ func (p *Process) addDeletedPodsToQueue(resetCh chan struct{}, clusterIds []stri
 }
 
 func (p *Process) addBoundedPodsToQueue(resetCh chan struct{}, clusterIds []string) {
-	podInformer := p.initPodInformer(clusterIds, "binded")
+	podInformer := p.initPodInformer(clusterIds, v1.PodBound)
 	podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		UpdateFunc: func(old, new interface{}) {
 			oldPod, ok := old.(*v1.Pod)
