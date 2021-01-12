@@ -124,10 +124,10 @@ func (p *Process) Run(quit chan struct{}) {
 	wait.Until(p.SendPodToCluster, 0, quit)
 }
 
-func (p *Process) initPodInformer(clusterIds []string, statusPhase string) cache.SharedIndexInformer {
+func (p *Process) initPodInformer(clusterIds []string, statusPhase v1.PodPhase) cache.SharedIndexInformer {
 	close(p.resetCh)
 	p.resetCh = make(chan struct{})
-	conditions := "status.phase=" + statusPhase + ","
+	conditions := "status.phase=" + string(statusPhase) + ","
 
 	for _, clusterId := range clusterIds {
 		conditions = conditions + "spec.clusterName=" + clusterId + ";"
@@ -140,7 +140,7 @@ func (p *Process) initPodInformer(clusterIds []string, statusPhase string) cache
 
 func (p *Process) addDeletedPodsToQueue(resetCh chan struct{}, clusterIds []string) {
 	//Since we did not set up scheduler, we don't know its actual status, using Running for now
-	podInformer := p.initPodInformer(clusterIds, "Running")
+	podInformer := p.initPodInformer(clusterIds, v1.PodRunning)
 	podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		DeleteFunc: func(obj interface{}) {
 			pod, ok := obj.(*v1.Pod)
@@ -155,7 +155,7 @@ func (p *Process) addDeletedPodsToQueue(resetCh chan struct{}, clusterIds []stri
 }
 
 func (p *Process) addBoundedPodsToQueue(resetCh chan struct{}, clusterIds []string) {
-	podInformer := p.initPodInformer(clusterIds, "binded")
+	podInformer := p.initPodInformer(clusterIds, v1.PodBound)
 	podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		UpdateFunc: func(old, new interface{}) {
 			oldPod, ok := old.(*v1.Pod)
