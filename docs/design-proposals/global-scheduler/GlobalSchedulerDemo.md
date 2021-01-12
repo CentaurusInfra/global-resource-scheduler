@@ -82,12 +82,12 @@ root@arktos-wj-dev:~/yaml# curl -X POST http://127.0.0.1:8080/api/v1/namespaces/
 # check the schedule result
 root@arktos-wj-dev:~/yaml# kubectl get pods
 NAME       HASHKEY               READY   STATUS   RESTARTS   AGE
-demovm01   8970278610605413590   0/1     Binded   0          4m47s
+demovm01   8970278610605413590   0/1     Bound   0          4m47s
 
 # check the clustername
 root@arktos-wj-dev:~/yaml# kubectl get pods  --field-selector spec.clusterName="az1"
 NAME       HASHKEY               READY   STATUS   RESTARTS   AGE
-demovm01   8970278610605413590   0/1     Binded   0          5m52s
+demovm01   8970278610605413590   0/1     Bound   0          5m52s
 
 # here we can see the schedule destination in the spec.clusterName parameter az1
 ```
