@@ -106,9 +106,9 @@ func (s *Scheduler) initInformers(quit chan struct{}) {
 		},
 	})
 
-	podSelector := fields.ParseSelectorOrDie("status.phase=assigned,status.assignedScheduler.name!=''")
+	podSelector := fields.ParseSelectorOrDie("status.phase=" + string(v1.PodAssigned) + ",status.assignedScheduler.name!=''")
 	if len(s.name) > 0 {
-		podSelector = fields.ParseSelectorOrDie("status.phase=assigned,status.assignedScheduler.name=" + s.name)
+		podSelector = fields.ParseSelectorOrDie("status.phase=" + string(v1.PodAssigned) + ",status.assignedScheduler.name=" + s.name)
 	}
 
 	lw := cache.NewListWatchFromClient(s.clientset.CoreV1(), string(v1.ResourcePods), metav1.NamespaceAll, podSelector)
@@ -139,7 +139,7 @@ func (s *Scheduler) initInformers(quit chan struct{}) {
 				return
 			}
 			fmt.Printf("A  pod %s has been updated\n", newPod.Name)
-			if oldPod.Status.Phase != "assigned" && newPod.Status.Phase == "assigned" {
+			if oldPod.Status.Phase != v1.PodAssigned && newPod.Status.Phase == v1.PodAssigned {
 				s.podQueue <- newPod
 			}
 		},
