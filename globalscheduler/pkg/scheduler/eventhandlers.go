@@ -367,7 +367,7 @@ func (sched *Scheduler) bindToSite(siteID string, assumedStack *types.Stack) err
 	}
 
 	newStatus := v1.PodStatus{
-		Phase: v1.PodBinded,
+		Phase: v1.PodBound,
 	}
 
 	// update pod status to Binded

@@ -1,15 +1,6 @@
-#scheduler info
-address: 0.0.0.0
-port: 13443
-
 #api server info
 master: 127.0.0.1:8080
-kubeconfig: /var/run/kubernetes/admin.kubeconfig
+kubeconfig: {filepath}/admin.kubeconfig
 
 scheduler_policy: edgecloud
-scheduler_policy_file: /root/work/src/k8s.io/kubernetes/conf/edgecloud_policy.yaml
-
-spot_region_mapping:
-  - region: region1
-    spot_region: region1
-    
+scheduler_policy_file: {filepath}/edgecloud_policy.yaml

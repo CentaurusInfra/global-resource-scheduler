@@ -6,8 +6,6 @@
             "hosts": [{
                 "host_id": "host_id",
                 "host_name": "name1",
-                "region": "region1",
-                "availability_zone": "az1",
                 "total_disk": 2000,
                 "used_disk": 1000,
                 "total_vcpus": 2000,

@@ -385,7 +385,7 @@ func NewControllerInitializers(loopMode ControllerLoopMode) map[string]InitFunc 
 	controllers["endpoint"] = startEndpointController
 	// NOTE(nkwangjun): we should disable podgc for gs-scheduler, if we binding a cluster to the pod,
 	// it will be deleted by the podgc.
-	//controllers["podgc"] = startPodGCController
+	controllers["podgc"] = startPodGCController
 	controllers["vmpod"] = startVMPodController
 	controllers["namespace"] = startNamespaceController
 	controllers["tenant"] = startTenantController
