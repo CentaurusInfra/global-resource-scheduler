@@ -2413,10 +2413,11 @@ const (
 	// PodUnknown means that for some reason the state of the pod could not be obtained, typically due
 	// to an error in communicating with the host of the pod.
 	PodUnknown PodPhase = "Unknown"
-	// SchedulerAssigned represents status of the assigned scheduler for this pod.
-	SchedulerAssigned PodPhase = "assigned"
-	// ClusterBound represents status of the bound cluster for this pod.
-	ClusterBound PodPhase = "bound"
+
+	// PodAssigned means that the pod has a scheduler assigned to.
+	PodAssigned PodPhase = "Assigned"
+	// PodBound means that the pod has a cluster bound to.
+	PodBound PodPhase = "Bound"
 )
 
 type PodConditionType string

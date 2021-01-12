@@ -99,7 +99,7 @@ func (gcc *PodGCController) gc() {
 }
 
 func isPodTerminated(pod *v1.Pod) bool {
-	if phase := pod.Status.Phase; phase != v1.PodPending && phase != v1.PodRunning && phase != v1.PodUnknown && phase != v1.SchedulerAssigned && phase != v1.ClusterBound {
+	if phase := pod.Status.Phase; phase != v1.PodPending && phase != v1.PodRunning && phase != v1.PodUnknown && phase != v1.PodAssigned && phase != v1.PodBound {
 		return true
 	}
 	return false
