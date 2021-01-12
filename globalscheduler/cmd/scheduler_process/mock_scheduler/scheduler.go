@@ -55,17 +55,16 @@ func NewScheduler(config *rest.Config, podQueue chan *v1.Pod, name string, quit 
 		if err != nil {
 			klog.Fatal(err)
 		}
-		clusterMap[name] =  scheduler.Spec.Cluster
+		clusterMap[name] = scheduler.Spec.Cluster
 	} else {
 		schedulerList, err := schedulerclientset.GlobalschedulerV1().Schedulers("default").List(metav1.ListOptions{})
 		if err != nil {
 			klog.Fatal(err)
 		}
-		for _,scheduler := range schedulerList.Items {
-			clusterMap[scheduler.Name] =  scheduler.Spec.Cluster
+		for _, scheduler := range schedulerList.Items {
+			clusterMap[scheduler.Name] = scheduler.Spec.Cluster
 		}
 	}
-
 
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
@@ -107,9 +106,9 @@ func (s *Scheduler) initInformers(quit chan struct{}) {
 		},
 	})
 
-	podSelector := fields.ParseSelectorOrDie("status.phase="+string(v1.PodAssigned)+",status.assignedScheduler.name!=''")
+	podSelector := fields.ParseSelectorOrDie("status.phase=" + string(v1.PodAssigned) + ",status.assignedScheduler.name!=''")
 	if len(s.name) > 0 {
-		podSelector = fields.ParseSelectorOrDie("status.phase="+string(v1.PodAssigned)+",status.assignedScheduler.name=" + s.name)
+		podSelector = fields.ParseSelectorOrDie("status.phase=" + string(v1.PodAssigned) + ",status.assignedScheduler.name=" + s.name)
 	}
 
 	lw := cache.NewListWatchFromClient(s.clientset.CoreV1(), string(v1.ResourcePods), metav1.NamespaceAll, podSelector)
