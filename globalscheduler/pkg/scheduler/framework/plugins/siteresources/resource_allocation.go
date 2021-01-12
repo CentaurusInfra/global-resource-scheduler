@@ -102,7 +102,7 @@ func getResourceType(flavorID string, siteCacheInfo *schedulersitecacheinfo.Site
 		}
 
 		for _, host := range siteCacheInfo.Site().Hosts {
-			if host.Region != regionFlv.Region {
+			if siteCacheInfo.Site().Region != regionFlv.Region {
 				continue
 			}
 			flavorExtraSpecs := regionFlv.OsExtraSpecs
