@@ -273,8 +273,6 @@ func (iep EipPool) ToString() string {
 type Host struct {
 	HostID             string `json:"host_id"`
 	HostName           string `json:"host_name"`
-	Region             string `json:"region"`
-	AvailabilityZone   string `json:"availability_zone"`
 	TotalDisk          int    `json:"total_disk"`
 	UsedDisk           int    `json:"used_disk"`
 	TotalVCPUs         int    `json:"total_vcpus"`
