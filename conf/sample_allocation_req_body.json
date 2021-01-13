@@ -1,0 +1,31 @@
+{
+  "allocation": {
+    "resource_group": {
+      "name": "RTC",
+      "resources": [{
+          "name": "rtc-name",
+          "resource_type": "vm",
+          "flavors": [{
+              "flavor_id": "c6.large.2"
+            }
+          ],
+          "storage": {
+            "SAS": 40
+          },
+          "need_eip": false,
+          "count": 1
+        }
+      ]
+    },
+    "selector": {
+      "regions": [{
+          "region": "region1"
+        }
+      ],
+      "strategy": {
+        "location_strategy": "centralize"
+      }
+    },
+    "replicas": 1
+  }
+}

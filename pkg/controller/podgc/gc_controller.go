@@ -1,5 +1,6 @@
 /*
 Copyright 2015 The Kubernetes Authors.
+Copyright 2020 Authors of Arktos - file modified.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -99,7 +100,7 @@ func (gcc *PodGCController) gc() {
 }
 
 func isPodTerminated(pod *v1.Pod) bool {
-	if phase := pod.Status.Phase; phase != v1.PodPending && phase != v1.PodRunning && phase != v1.PodUnknown {
+	if phase := pod.Status.Phase; phase != v1.PodPending && phase != v1.PodRunning && phase != v1.PodUnknown && phase != v1.PodAssigned && phase != v1.PodBound {
 		return true
 	}
 	return false

@@ -104,7 +104,7 @@ do
 done
 
 if [ "x${GO_OUT}" == "x" ]; then
-    make -C "${KUBE_ROOT}" WHAT="cmd/kubectl cmd/hyperkube cmd/kube-apiserver cmd/kubelet cmd/kube-proxy cmd/kube-controller-manager cmd/kube-scheduler globalscheduler/cmd/gs-controllers globalscheduler/cmd/dispatcher_process  globalscheduler/cmd/distributor_process globalscheduler/cmd/scheduler_process globalscheduler/cmd/grpc-server"
+    make -C "${KUBE_ROOT}" WHAT="cmd/kubectl cmd/hyperkube cmd/kube-apiserver cmd/kubelet cmd/kube-proxy cmd/kube-controller-manager globalscheduler/cmd/gs-controllers globalscheduler/cmd/dispatcher_process  globalscheduler/cmd/distributor_process globalscheduler/cmd/scheduler_process globalscheduler/cmd/grpc-server"
 else
     echo "skipped the build."
 fi
@@ -447,6 +447,9 @@ if [[ "${START_MODE}" != "kubeletonly" ]]; then
   #cluster/kubectl.sh create -f hack/runtime/workload-controller-manager-clusterrole.yaml
 
   #cluster/kubectl.sh create -f hack/runtime/workload-controller-manager-clusterrolebinding.yaml
+  echo "Starting controller manager..."
+  kube::common::start_controller_manager
+
   echo "Starting global scheduler controllers..."
   kube::common::start_gs_controllers
   echo "Starting grpc server..."

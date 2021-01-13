@@ -1,0 +1,18 @@
+{
+  "volume_types": [{
+      "id": "SAS",
+      "region": "region1",
+      "name": "SAS",
+      "description": "",
+      "extra_specs": {
+        "key1": "value1"
+      },
+      "is_public": true,
+      "qos_specs_id": "qos_sepcs_id1",
+      "volume_backend_name": "backend_name_1",
+      "availability-zone": "az1",
+      "RESKEY:availability_zone": "",
+      "os-vender-extended:sold_out_availability_zones": ""
+    }
+  ]
+}
