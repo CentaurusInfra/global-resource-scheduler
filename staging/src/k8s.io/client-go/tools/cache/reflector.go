@@ -736,7 +736,6 @@ func (r *Reflector) waitForSelector(stopCh <-chan struct{}) bool {
 				return false
 			}
 			r.selector = msg
-			fmt.Printf("****The new input selector is %s\n", r.selector)
 		case <-stopCh:
 			return false
 		}

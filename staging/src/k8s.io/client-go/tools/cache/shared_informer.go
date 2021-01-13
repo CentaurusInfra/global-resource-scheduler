@@ -134,7 +134,6 @@ func NewSharedInformer(lw ListerWatcher, objType runtime.Object, resyncPeriod ti
 
 // NewSharedIndexInformer creates a new instance for the listwatcher.
 func NewSharedIndexInformer(lw ListerWatcher, objType runtime.Object, defaultEventHandlerResyncPeriod time.Duration, indexers Indexers) SharedIndexInformer {
-	fmt.Println("Informer")
 	realClock := &clock.RealClock{}
 
 	sharedIndexInformer := &sharedIndexInformer{
@@ -269,7 +268,6 @@ type deleteNotification struct {
 }
 
 func (s *sharedIndexInformer) Run(stopCh <-chan struct{}) {
-	fmt.Println("Running")
 	defer utilruntime.HandleCrash()
 
 	fifo := NewDeltaFIFO(MetaNamespaceKeyFunc, s.indexer)
@@ -306,7 +304,6 @@ func (s *sharedIndexInformer) Run(stopCh <-chan struct{}) {
 		defer s.startedLock.Unlock()
 		s.stopped = true // Don't want any new listeners
 	}()
-	fmt.Printf("************Run %v %v\n", len(s.filterBounds), s.selectorCh)
 	if len(s.filterBounds) > 0 {
 		klog.V(4).Infof("start informer with reset channel. %v", s.objectType)
 		s.controller.RunWithReset(stopCh, s.filterBounds)
@@ -371,7 +368,6 @@ func (s *sharedIndexInformer) AddResetCh(resetCh *bcast.Member, sourceName strin
 
 func (s *sharedIndexInformer) AddSelectorCh(selectorCh <-chan string) {
 	s.selectorCh = selectorCh
-	fmt.Printf("The AddSelectorCh is %v\n", s.selectorCh)
 }
 
 func (s *sharedIndexInformer) GetController() Controller {
