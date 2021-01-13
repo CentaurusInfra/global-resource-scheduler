@@ -18,6 +18,7 @@ limitations under the License.
 package cache
 
 import (
+	"fmt"
 	"k8s.io/klog"
 	"sync"
 	"time"
@@ -84,6 +85,7 @@ type controller struct {
 type Controller interface {
 	Run(stopCh <-chan struct{})
 	RunWithReset(stopCh <-chan struct{}, filterBounds []filterBound)
+	RunWithSelectorCh(stopCh <-chan struct{}, selectorCh <-chan string)
 	HasSynced() bool
 	LastSyncResourceVersion() string
 }
@@ -104,18 +106,35 @@ func (c *controller) Run(stopCh <-chan struct{}) {
 	c.RunWithReset(stopCh, nil)
 }
 
+// Run begins processing items, and will continue until a value is sent down stopCh.
+// It will restart after the selectorCh has new input coming
+// It's an error to call Run more than once.
+// Run blocks; call via go.
+func (c *controller) RunWithSelectorCh(stopCh <-chan struct{}, selectorCh <-chan string) {
+	c.RunWithResetAndSelectorCh(stopCh, nil, selectorCh)
+}
+
 // RunWithReset begins processing items, and will continue until a value is sent down stopCh.
+// It will restart after the filterBounds has new input coming
 // It's an error to call Run more than once.
 // Run blocks; call via go.
 func (c *controller) RunWithReset(stopCh <-chan struct{}, filterBounds []filterBound) {
-	klog.V(4).Infof("start controller run with reset %+v. %v", filterBounds, c.config.ObjectType)
+	c.RunWithResetAndSelectorCh(stopCh, filterBounds, nil)
+}
 
+// RunWithReset begins processing items, and will continue until a value is sent down stopCh.
+// It will restart after the selectorCh or the filterBounds has new input coming
+// It's an error to call Run more than once.
+// Run blocks; call via go.
+func (c *controller) RunWithResetAndSelectorCh(stopCh <-chan struct{}, filterBounds []filterBound, selectorCh <-chan string) {
+	klog.V(4).Infof("start controller run with reset %+v. %v", filterBounds, c.config.ObjectType)
+	fmt.Println("RunWithResetAndSelectorCh")
 	defer utilruntime.HandleCrash()
 	go func() {
 		<-stopCh
 		c.config.Queue.Close()
 	}()
-
+	fmt.Printf("filterBounds %v  selectorCh %v", len(filterBounds), selectorCh)
 	var r *Reflector
 	if len(filterBounds) > 0 {
 		r = NewReflectorWithReset(
@@ -124,6 +143,15 @@ func (c *controller) RunWithReset(stopCh <-chan struct{}, filterBounds []filterB
 			c.config.Queue,
 			c.config.FullResyncPeriod,
 			filterBounds,
+		)
+	} else if selectorCh != nil {
+		fmt.Println("Here is reflector")
+		r = NewReflectorWithSelectorCh(
+			c.config.ListerWatcher,
+			c.config.ObjectType,
+			c.config.Queue,
+			c.config.FullResyncPeriod,
+			selectorCh,
 		)
 	} else {
 		r = NewReflector(

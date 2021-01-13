@@ -124,6 +124,7 @@ type SharedIndexInformer interface {
 	AddIndexers(indexers Indexers) error
 	GetIndexer() Indexer
 	AddResetCh(member *bcast.Member, sourceName string, ownerKind string)
+	AddSelectorCh(selectorCh <-chan string)
 }
 
 // NewSharedInformer creates a new instance for the listwatcher.
@@ -133,6 +134,7 @@ func NewSharedInformer(lw ListerWatcher, objType runtime.Object, resyncPeriod ti
 
 // NewSharedIndexInformer creates a new instance for the listwatcher.
 func NewSharedIndexInformer(lw ListerWatcher, objType runtime.Object, defaultEventHandlerResyncPeriod time.Duration, indexers Indexers) SharedIndexInformer {
+	fmt.Println("Informer")
 	realClock := &clock.RealClock{}
 
 	sharedIndexInformer := &sharedIndexInformer{
@@ -218,6 +220,9 @@ type sharedIndexInformer struct {
 
 	// filterBounds are a list of list/watch filtering bounds
 	filterBounds []filterBound
+
+	// selectorCh is a channel to get updated selectors
+	selectorCh <-chan string
 }
 
 // dummyController hides the fact that a SharedInformer is different from a dedicated one
@@ -233,6 +238,9 @@ func (v *dummyController) Run(stopCh <-chan struct{}) {
 }
 
 func (v *dummyController) RunWithReset(stopCh <-chan struct{}, filterBounds []filterBound) {
+}
+
+func (v *dummyController) RunWithSelectorCh(stopCh <-chan struct{}, resetCh <-chan string) {
 }
 
 func (v *dummyController) HasSynced() bool {
@@ -261,6 +269,7 @@ type deleteNotification struct {
 }
 
 func (s *sharedIndexInformer) Run(stopCh <-chan struct{}) {
+	fmt.Println("Running")
 	defer utilruntime.HandleCrash()
 
 	fifo := NewDeltaFIFO(MetaNamespaceKeyFunc, s.indexer)
@@ -297,9 +306,12 @@ func (s *sharedIndexInformer) Run(stopCh <-chan struct{}) {
 		defer s.startedLock.Unlock()
 		s.stopped = true // Don't want any new listeners
 	}()
+	fmt.Printf("************Run %v %v\n", len(s.filterBounds), s.selectorCh)
 	if len(s.filterBounds) > 0 {
 		klog.V(4).Infof("start informer with reset channel. %v", s.objectType)
 		s.controller.RunWithReset(stopCh, s.filterBounds)
+	} else if s.selectorCh != nil {
+		s.controller.RunWithSelectorCh(stopCh, s.selectorCh)
 	} else {
 		klog.V(4).Infof("start informer without reset channel. %v", s.objectType)
 		s.controller.Run(stopCh)
@@ -355,6 +367,11 @@ func (s *sharedIndexInformer) AddResetCh(resetCh *bcast.Member, sourceName strin
 		ownerKind:  ownerKind,
 	}
 	s.filterBounds = append(s.filterBounds, filterBound)
+}
+
+func (s *sharedIndexInformer) AddSelectorCh(selectorCh <-chan string) {
+	s.selectorCh = selectorCh
+	fmt.Printf("The AddSelectorCh is %v\n", s.selectorCh)
 }
 
 func (s *sharedIndexInformer) GetController() Controller {
