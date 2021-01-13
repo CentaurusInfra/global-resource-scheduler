@@ -58,6 +58,7 @@ type Process struct {
 	pid                  int
 }
 
+// NewProcess creates a process to handle pods whose status phase is pending and resource type is vm
 func NewProcess(config *rest.Config, namespace string, name string, quit chan struct{}) Process {
 	podQueue := make(chan *v1.Pod, 300)
 
@@ -107,6 +108,7 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 	}
 }
 
+// Run gets all the distributor, scheduler, and pod information and assign schedulers to pods
 func (p *Process) Run(quit chan struct{}) {
 
 	distributorSelector := fields.ParseSelectorOrDie("metadata.name=" + p.name)
@@ -119,7 +121,6 @@ func (p *Process) Run(quit chan struct{}) {
 			}
 		},
 		UpdateFunc: func(old, new interface{}) {
-			fmt.Printf("The new %v\n", new)
 			oldDistributor, ok := old.(*distributorv1.Distributor)
 			if !ok {
 				klog.Warningf("Failed to convert a old object  %+v to a distributor", old)
@@ -131,9 +132,9 @@ func (p *Process) Run(quit chan struct{}) {
 				return
 			}
 			if oldDistributor.Spec.Range.Start != newDistributor.Spec.Range.Start || oldDistributor.Spec.Range.End != newDistributor.Spec.Range.End {
-				fmt.Printf("The new range is %v\n", newDistributor.Spec.Range)
+				// Update reflector selector for load balancing
 				p.resetCh <- fmt.Sprintf("status.phase=%s, metadata.hashkey=gte:%s,metadata.hashkey=lte:%s",
-					string(v1.PodPending), strconv.FormatInt(newDistributor.Spec.Range.Start, 10), strconv.FormatInt(newDistributor.Spec.Range.End, 10))
+					string(v1.PodPending), strconv.FormatInt(newDistributor.Spec.Range.Start, 10),  strconv.FormatInt(newDistributor.Spec.Range.End, 10))
 			}
 		},
 	})
@@ -168,11 +169,13 @@ func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
 		},
 	})
 	podInformer.AddSelectorCh(p.resetCh)
+	// ParseSelectorOrDie has issues for handling gte and lte selectors. Update directly through channels
 	p.resetCh <- fmt.Sprintf("status.phase=%s, metadata.hashkey=gte:%s,metadata.hashkey=lte:%s",
-		string(v1.PodPending), strconv.FormatInt(start, 10), strconv.FormatInt(end, 10))
+		string(v1.PodPending), strconv.FormatInt(start, 10),  strconv.FormatInt(end, 10))
 	return podInformer
 }
 
+// ScheduleOne is to process pods by assign a scheduler to it
 func (p *Process) ScheduleOne() {
 	pod := <-p.podQueue
 	if pod != nil {
@@ -243,6 +246,7 @@ func (p *Process) predicatesApply(scheduler schedulerv1.Scheduler, pod *v1.Pod) 
 	return true
 }
 
+// GeoLocationPredicate is to find if schedulers match a pod based on their geoLocations
 func GeoLocationPredicate(scheduler schedulerv1.Scheduler, pod *v1.Pod) bool {
 	schedulerLoc := scheduler.Spec.Location
 	podLoc := pod.Spec.VirtualMachine.ResourceCommonInfo.Selector.GeoLocation
@@ -288,6 +292,7 @@ func (p *Process) findBestScheduler(priorities map[string]int) string {
 	return bestschheduler
 }
 
+// GeoLocationPriority is to prioritize schedulers on their geoLocations
 func GeoLocationPriority(scheduler schedulerv1.Scheduler, pod *v1.Pod) int {
 	schedulerLoc := scheduler.Spec.Location
 	podLoc := pod.Spec.VirtualMachine.ResourceCommonInfo.Selector.GeoLocation
