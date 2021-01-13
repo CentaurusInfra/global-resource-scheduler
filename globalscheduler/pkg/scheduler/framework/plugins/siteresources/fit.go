@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package noderesources
+package siteresources
 
 import (
 	"context"
@@ -24,7 +24,7 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
-	schedulernodeinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/nodeinfo"
+	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/sets"
 )
@@ -34,20 +34,20 @@ var _ interfaces.FilterPlugin = &Fit{}
 
 const (
 	// FitName is the name of the plugin used in the plugin registry and configurations.
-	FitName = "NodeResourcesFit"
+	FitName = "SiteResourcesFit"
 
-	// preFilterStateKey is the key in CycleState to NodeResourcesFit pre-computed data.
+	// preFilterStateKey is the key in CycleState to SiteResourcesFit pre-computed data.
 	// Using the name of the plugin will likely help us avoid collisions with other plugins.
 	preFilterStateKey = "PreFilter" + FitName
 )
 
-// Fit is a plugin that checks if a node has sufficient resources.
+// Fit is a plugin that checks if a site has sufficient resources.
 type Fit struct {
 }
 
 // FitArgs holds the args that are used to configure the plugin.
 type FitArgs struct {
-	// IgnoredResources is the list of resources that NodeResources fit filter
+	// IgnoredResources is the list of resources that SiteResources fit filter
 	// should ignore.
 	IgnoredResources []string `json:"ignoredResources,omitempty"`
 }
@@ -68,12 +68,12 @@ func addFlavorInfo(flvInfos *FlavorInfos, flavorID string, spot *types.Spot) {
 }
 
 // preFilterState computed at PreFilter and used at Filter.
-type NodeResFilterState struct {
+type SiteResFilterState struct {
 	FlavorInfos []FlavorInfos
 }
 
 // Clone the prefilter state.
-func (s *NodeResFilterState) Clone() interfaces.StateData {
+func (s *SiteResFilterState) Clone() interfaces.StateData {
 	return s
 }
 
@@ -113,15 +113,15 @@ func calculateStackResourceRequest(stack *types.Stack) []FlavorInfos {
 	return ret
 }
 
-// computeStackResourceRequest returns a schedulernodeinfo.Resource that covers the largest
+// computeStackResourceRequest returns a schedulersitecacheinfo.Resource that covers the largest
 // width in each resource dimension. Because init-containers run sequentially, we collect
 // the max in each dimension iteratively. In contrast, we sum the resource vectors for
 // regular containers since they run simultaneously.
 //
 // If Pod Overhead is specified and the feature gate is set, the resources defined for Overhead
 // are added to the calculated Resource request sum
-func computeStackResourceRequest(stack *types.Stack) *NodeResFilterState {
-	result := &NodeResFilterState{}
+func computeStackResourceRequest(stack *types.Stack) *SiteResFilterState {
+	result := &SiteResFilterState{}
 	result.FlavorInfos = calculateStackResourceRequest(stack)
 
 	return result
@@ -136,27 +136,27 @@ func (f *Fit) PreFilter(ctx context.Context, cycleState *interfaces.CycleState,
 	return nil
 }
 
-func GetPreFilterState(cycleState *interfaces.CycleState) (*NodeResFilterState, error) {
+func GetPreFilterState(cycleState *interfaces.CycleState) (*SiteResFilterState, error) {
 	cycleState.RLock()
 	defer cycleState.RUnlock()
 	c, err := cycleState.Read(preFilterStateKey)
 	if err != nil {
-		// NodeResFilterState doesn't exist, likely PreFilter wasn't invoked.
+		// SiteResFilterState doesn't exist, likely PreFilter wasn't invoked.
 		return nil, fmt.Errorf("error reading %q from cycleState: %v", preFilterStateKey, err)
 	}
 
-	s, ok := c.(*NodeResFilterState)
+	s, ok := c.(*SiteResFilterState)
 	if !ok {
-		return nil, fmt.Errorf("%+v  convert to NodeResourcesFit.preFilterState error", c)
+		return nil, fmt.Errorf("%+v  convert to SiteResourcesFit.preFilterState error", c)
 	}
 	return s, nil
 }
 
 // Filter invoked at the filter extension point.
-// Checks if a node has sufficient resources, such as cpu, memory, gpu, opaque int resources etc to run a pod.
-// It returns a list of insufficient resources, if empty, then the node has all the resources requested by the pod.
+// Checks if a site has sufficient resources, such as cpu, memory, gpu, opaque int resources etc to run a pod.
+// It returns a list of insufficient resources, if empty, then the site has all the resources requested by the pod.
 func (f *Fit) Filter(ctx context.Context, cycleState *interfaces.CycleState, stack *types.Stack,
-	nodeInfo *schedulernodeinfo.NodeInfo) *interfaces.Status {
+	siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) *interfaces.Status {
 	s, err := GetPreFilterState(cycleState)
 	if err != nil {
 		return interfaces.NewStatus(interfaces.Error, err.Error())
@@ -170,17 +170,17 @@ func (f *Fit) Filter(ctx context.Context, cycleState *interfaces.CycleState, sta
 			if flv.Spot != nil && flv.Spot.MaxPrice != "" {
 				// TODO: spot instance
 			} else {
-				if totalCount, ok := nodeInfo.AllocatableFlavor[flv.FlavorID]; ok {
+				if totalCount, ok := siteCacheInfo.AllocatableFlavor[flv.FlavorID]; ok {
 					var requestedCount int64 = 0
-					if value, exist := nodeInfo.RequestedFlavor[flv.FlavorID]; exist {
+					if value, exist := siteCacheInfo.RequestedFlavor[flv.FlavorID]; exist {
 						requestedCount = value
 					}
 
 					if flvs.Count < totalCount-requestedCount {
-						if _, exist := nodeInfo.RequestedFlavor[flv.FlavorID]; !exist {
-							nodeInfo.RequestedFlavor[flv.FlavorID] = 0
+						if _, exist := siteCacheInfo.RequestedFlavor[flv.FlavorID]; !exist {
+							siteCacheInfo.RequestedFlavor[flv.FlavorID] = 0
 						}
-						nodeInfo.RequestedFlavor[flv.FlavorID] += flvs.Count
+						siteCacheInfo.RequestedFlavor[flv.FlavorID] += flvs.Count
 						isMatch = true
 						break
 					}
@@ -188,8 +188,8 @@ func (f *Fit) Filter(ctx context.Context, cycleState *interfaces.CycleState, sta
 			}
 		}
 		if !isMatch {
-			msg := fmt.Sprintf("Node (%s-%s) do not support required flavor (%+v).",
-				nodeInfo.Node().SiteID, nodeInfo.Node().Region, flvs.Flavors)
+			msg := fmt.Sprintf("Site (%s-%s) do not support required flavor (%+v).",
+				siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region, flvs.Flavors)
 			logger.Info(ctx, msg)
 			return interfaces.NewStatus(interfaces.Unschedulable, msg)
 		}
@@ -198,7 +198,7 @@ func (f *Fit) Filter(ctx context.Context, cycleState *interfaces.CycleState, sta
 	return nil
 }
 
-// InsufficientResource describes what kind of resource limit is hit and caused the pod to not fit the node.
+// InsufficientResource describes what kind of resource limit is hit and caused the pod to not fit the site.
 type InsufficientResource struct {
 	ResourceName string
 	// We explicitly have a parameter for reason to avoid formatting a message on the fly
@@ -209,13 +209,13 @@ type InsufficientResource struct {
 	Capacity  int64
 }
 
-// Fits checks if node have enough resources to host the pod.
-func Fits(stack *types.Stack, nodeInfo *schedulernodeinfo.NodeInfo,
+// Fits checks if site have enough resources to host the pod.
+func Fits(stack *types.Stack, siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo,
 	ignoredExtendedResources sets.String) []InsufficientResource {
-	return fitsRequest(computeStackResourceRequest(stack), nodeInfo, ignoredExtendedResources)
+	return fitsRequest(computeStackResourceRequest(stack), siteCacheInfo, ignoredExtendedResources)
 }
 
-func fitsRequest(podRequest *NodeResFilterState, nodeInfo *schedulernodeinfo.NodeInfo,
+func fitsRequest(podRequest *SiteResFilterState, siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo,
 	ignoredExtendedResources sets.String) []InsufficientResource {
 	insufficientResources := make([]InsufficientResource, 0, 4)
 

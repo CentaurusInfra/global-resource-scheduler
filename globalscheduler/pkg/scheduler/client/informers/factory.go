@@ -26,8 +26,8 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/eipavailability"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/flavor"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/internalinterfaces"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/nodes"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/sites"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/siteinfos"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/siteresources"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/volumepool"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/volumetype"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
@@ -42,14 +42,14 @@ const (
 	// FLAVOR is the symbol of informer flavor
 	FLAVOR = "flavor"
 
-	// NODES is the symbol of informer nodes
-	NODES = "nodes"
+	// SITERESOURCES is the symbol of informer site
+	SITERESOURCES = "siteResources"
 
 	// VOLUMETYPE is the symbol of informer volumeType
 	VOLUMETYPE = "volumeType"
 
-	// Sites is the symbol of informer site
-	SITES = "sites"
+	// SiteInfos is the symbol of informer site
+	SITEINFOS = "siteInfos"
 
 	// EIPPOOLS eip pool
 	EIPPOOLS = "eipools"
@@ -65,8 +65,8 @@ type SharedInformerFactory interface {
 
 	GetFlavor(flavorID string, region string) (typed.Flavor, bool)
 	Flavor(name, key string, period time.Duration) flavor.InformerFlavor
-	Sites(name, key string, period time.Duration) sites.InformerSite
-	Nodes(name, key string, period time.Duration) nodes.InformerNodes
+	SiteInfo(name, key string, period time.Duration) siteinfos.InformerSiteInfo
+	SiteResource(name, key string, period time.Duration) siteresources.InformerSiteResource
 	VolumeType(name, key string, period time.Duration) volumetype.InformerVolumeType
 	EipPools(name, key string, period time.Duration) eipavailability.InformerEipAvailability
 	VolumePools(name, key string, period time.Duration) volumepool.InformerVolumePool
@@ -174,9 +174,8 @@ func (f *sharedInformerFactory) Flavor(name, key string, period time.Duration) f
 	return flavor.New(f, name, key, period)
 }
 
-//Nodes new nodes informer
-func (f *sharedInformerFactory) Nodes(name, key string, period time.Duration) nodes.InformerNodes {
-	return nodes.New(f, name, key, period)
+func (f *sharedInformerFactory) SiteResource(name, key string, period time.Duration) siteresources.InformerSiteResource {
+	return siteresources.New(f, name, key, period)
 }
 
 //VolumeType new volume type informer
@@ -185,8 +184,8 @@ func (f *sharedInformerFactory) VolumeType(name, key string, period time.Duratio
 }
 
 //Sites new site informer
-func (f *sharedInformerFactory) Sites(name, key string, period time.Duration) sites.InformerSite {
-	return sites.New(f, name, key, period)
+func (f *sharedInformerFactory) SiteInfo(name, key string, period time.Duration) siteinfos.InformerSiteInfo {
+	return siteinfos.New(f, name, key, period)
 }
 
 //EipPools new eip pool informer
