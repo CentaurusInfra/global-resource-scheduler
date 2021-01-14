@@ -30,12 +30,11 @@ import (
 	distributorclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/client/clientset/versioned"
 	distributorv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/v1"
 	schedulerclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
-	schedulerinformer "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/informers/externalversions"
 	schedulerv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
 	"os"
+	"reflect"
 	"strconv"
 	"syscall"
-	"time"
 )
 
 const distributorName = "distributor"
@@ -48,6 +47,7 @@ type Process struct {
 	name                 string
 	distributorClientset *distributorclientset.Clientset
 	schedulerClientset   *schedulerclientset.Clientset
+	schedulers           []schedulerv1.Scheduler
 	clientset            *kubernetes.Clientset
 	podQueue             chan *v1.Pod
 	resetCh              chan string
@@ -105,6 +105,7 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		rangeStart: distributor.Spec.Range.Start,
 		rangeEnd:   distributor.Spec.Range.End,
 		pid:        os.Getgid(),
+		schedulers: make([]schedulerv1.Scheduler, 0),
 	}
 }
 
@@ -138,8 +139,32 @@ func (p *Process) Run(quit chan struct{}) {
 			}
 		},
 	})
-	schedulerFactory := schedulerinformer.NewSharedInformerFactory(p.schedulerClientset, 1*time.Minute)
-	schedulerFactory.Start(quit)
+	schedulerLW := cache.NewListWatchFromClient(p.schedulerClientset.GlobalschedulerV1(), "schedulers", p.namespace, fields.Everything())
+	schedulerInformer := cache.NewSharedIndexInformer(schedulerLW, &schedulerv1.Scheduler{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
+	schedulerInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			scheduler, ok := obj.(*schedulerv1.Scheduler)
+			if !ok {
+				klog.Warningf("Failed to convert the object  %+v to a scheduler", obj)
+				return
+			}
+			p.schedulers = append(p.schedulers, *scheduler)
+		},
+		DeleteFunc: func(obj interface{}) {
+			scheduler, ok := obj.(*schedulerv1.Scheduler)
+			if !ok {
+				klog.Warningf("Failed to convert the object  %+v to a scheduler", obj)
+				return
+			}
+			for _, item := range p.schedulers {
+				if reflect.DeepEqual(item, scheduler) {
+					_, p.schedulers = p.schedulers[len(p.schedulers) - 1], p.schedulers[:len(p.schedulers) - 1]
+					return
+				}
+			}
+		},
+	})
+	go schedulerInformer.Run(quit)
 	podInformer := p.initPodInformers(p.rangeStart, p.rangeEnd)
 	go podInformer.Run(quit)
 	go distributorInformer.Run(quit)
@@ -198,12 +223,7 @@ func (p *Process) ScheduleOne() {
 }
 
 func (p *Process) findFit(pod *v1.Pod) (string, error) {
-	schedulers, err := p.schedulerClientset.GlobalschedulerV1().Schedulers(p.namespace).List(metav1.ListOptions{})
-	if err != nil {
-		return "", err
-	}
-
-	filteredSchedulers := p.runPredicates(schedulers.Items, pod)
+	filteredSchedulers := p.runPredicates(p.schedulers, pod)
 	if len(filteredSchedulers) == 0 {
 		return "", errors.New("failed to find a scheduler that fits pod")
 	}
