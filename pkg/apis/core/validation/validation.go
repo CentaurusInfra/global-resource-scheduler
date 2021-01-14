@@ -3106,6 +3106,11 @@ func validateVirtualMachine(
 	if len(vm.UserData) > 65535 {
 		allErrs = append(allErrs, field.TooLong(fldPath.Child("userData"), "", 65535))
 	}
+	if vm.Flavors == nil || len(vm.Flavors) == 0 {
+		allErrs = append(allErrs, field.Required(fldPath.Child("Flavors"), "Flavors can't be empty"))
+	}
+
+	allErrs = append(allErrs, ValidateResourceCommonInfo(vm.ResourceCommonInfo, fldPath.Child("resourceCommonInfo"))...)
 
 	return allErrs
 }
@@ -3243,6 +3248,9 @@ func ValidatePodSpec(spec *core.PodSpec, fldPath *field.Path) field.ErrorList {
 		allErrs = append(allErrs, ValidatePreemptionPolicy(spec.PreemptionPolicy, fldPath.Child("preemptionPolicy"))...)
 	}
 
+	if len(spec.ResourceType) == 0 {
+		allErrs = append(allErrs, field.Required(fldPath.Child("resourceType"), "ResourceType can't be empty"))
+	}
 	return allErrs
 }
 
@@ -5749,4 +5757,26 @@ func ValidateProcMountType(fldPath *field.Path, procMountType core.ProcMountType
 	default:
 		return field.NotSupported(fldPath, procMountType, []string{string(core.DefaultProcMount), string(core.UnmaskedProcMount)})
 	}
+}
+
+// ValidateResourceCommonInfo tests that the argument is a valid ResourceCommonInfo.
+func ValidateResourceCommonInfo(commonInfo core.ResourceCommonInfo, fldPath *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	if commonInfo.Count == 0 {
+		allErrs = append(allErrs, field.Required(fldPath.Child("count"), "Count requires a non-zero value"))
+	}
+	if reflect.DeepEqual(commonInfo.Selector, core.ResourceSelector{}) {
+		allErrs = append(allErrs, field.Required(fldPath.Child("selector"), "Selector can't be empty"))
+	}
+	if len(commonInfo.Selector.Regions) > 0 {
+		for _, region := range commonInfo.Selector.Regions {
+			if len(region.Region) == 0 {
+				allErrs = append(allErrs, field.Required(fldPath.Child("selector.regions.region"), "Region can't be empty"))
+				break
+			}
+		}
+	}
+
+	return allErrs
 }
