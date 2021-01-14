@@ -23,20 +23,20 @@ import (
 	"strings"
 )
 
-// NodeScoreList declares a list of nodes and their scores.
-type NodeScoreList []NodeScore
+// SiteScoreList declares a list of site and their scores.
+type SiteScoreList []SiteScore
 
-// NodeScore is a struct with node name and score.
-type NodeScore struct {
+// SiteScore is a struct with site name and score.
+type SiteScore struct {
 	Name  string
 	Score int64
 }
 
-// PluginToNodeScores declares a map from plugin name to its NodeScoreList.
-type PluginToNodeScores map[string]NodeScoreList
+// PluginToSiteScores declares a map from plugin name to its SiteScoreList.
+type PluginToSiteScores map[string]SiteScoreList
 
-// NodeToStatusMap declares map from node name to its status.
-type NodeToStatusMap map[string]*Status
+// SiteToStatusMap declares map from site name to its status.
+type SiteToStatusMap map[string]*Status
 
 // Code is the Status code/type which is returned from plugins.
 type Code int
@@ -72,11 +72,11 @@ func (c Code) String() string {
 }
 
 const (
-	// MaxNodeScore is the maximum score a Score plugin is expected to return.
-	MaxNodeScore int64 = 100
+	// MaxSiteScore is the maximum score a Score plugin is expected to return.
+	MaxSiteScore int64 = 100
 
-	// MinNodeScore is the minimum score a Score plugin is expected to return.
-	MinNodeScore int64 = 0
+	// MinSiteScore is the minimum score a Score plugin is expected to return.
+	MinSiteScore int64 = 0
 
 	// MaxTotalScore is the maximum total score.
 	MaxTotalScore int64 = math.MaxInt64

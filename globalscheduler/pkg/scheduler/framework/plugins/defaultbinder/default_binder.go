@@ -30,7 +30,7 @@ import (
 // Name of the plugin used in the plugin registry and configurations.
 const Name = "DefaultBinder"
 
-// DefaultBinder binds pods to nodes using a k8s client.
+// DefaultBinder binds pods to site using a k8s client.
 type DefaultBinder struct {
 	handle interfaces.FrameworkHandle
 }
@@ -47,37 +47,37 @@ func (b DefaultBinder) Name() string {
 	return Name
 }
 
-// Bind binds pods to nodes using the k8s client.
+// Bind binds pods to site using the k8s client.
 func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, stack *types.Stack,
-	nodeID string) *interfaces.Status {
-	nodeInfo, err := b.handle.SnapshotSharedLister().NodeInfos().Get(nodeID)
+	siteID string) *interfaces.Status {
+	siteCacheInfo, err := b.handle.SnapshotSharedLister().SiteCacheInfos().Get(siteID)
 	if err != nil {
-		logger.Error(ctx, "get node(%s) failed! err: %s", nodeID, err)
-		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting node %q from Snapshot: %v",
-			nodeID, err))
+		logger.Error(ctx, "get site(%s) failed! err: %s", siteID, err)
+		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %q from Snapshot: %v",
+			siteID, err))
 	}
 
-	region := nodeInfo.Node().Region
+	region := siteCacheInfo.Site().Region
 	resInfo := types.AllResInfo{CpuAndMem: map[string]types.CPUAndMemory{}, Storage: map[string]float64{}}
 
-	stack.Selected.NodeID = nodeID
+	stack.Selected.SiteID = siteID
 	stack.Selected.Region = region
-	stack.Selected.AvailabilityZone = nodeInfo.Node().AvailabilityZone
+	stack.Selected.AvailabilityZone = siteCacheInfo.Site().AvailabilityZone
 
-	nodeSelectedInfo, err := interfaces.GetNodeSelectorState(state, nodeID)
+	siteSelectedInfo, err := interfaces.GetSiteSelectorState(state, siteID)
 	if err != nil {
-		logger.Error(ctx, "GetNodeSelectorState failed! err: %s", err)
-		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting node %q info failed: %v", nodeID, err))
+		logger.Error(ctx, "GetSiteSelectorState failed! err: %s", err)
+		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %q info failed: %v", siteID, err))
 	}
 
-	if len(stack.Resources) != len(nodeSelectedInfo.Flavors) {
+	if len(stack.Resources) != len(siteSelectedInfo.Flavors) {
 		logger.Error(ctx, "flavor count not equal to server count! err: %s", err)
-		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("nodeID(%s) flavor count not equal to "+
-			"server count!", nodeID))
+		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("siteID(%s) flavor count not equal to "+
+			"server count!", siteID))
 	}
 
 	for i := 0; i < len(stack.Resources); i++ {
-		flavorID := nodeSelectedInfo.Flavors[i].FlavorID
+		flavorID := siteSelectedInfo.Flavors[i].FlavorID
 		stack.Resources[i].FlavorIDSelected = flavorID
 		flv, ok := informers.InformerFac.GetFlavor(flavorID, region)
 		if !ok {
@@ -99,7 +99,7 @@ func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, s
 		resInfo.CpuAndMem[flv.OsExtraSpecs.ResourceType] = reqRes
 	}
 
-	b.handle.Cache().UpdateNodeWithResInfo(nodeID, resInfo)
+	b.handle.Cache().UpdateSiteWithResInfo(siteID, resInfo)
 
 	return nil
 }

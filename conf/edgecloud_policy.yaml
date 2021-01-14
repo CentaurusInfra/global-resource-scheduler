@@ -1,15 +1,15 @@
 predicates:
-- name: NodeAvailability
+- name: SiteAvailability
 - name: LocationAndOperator
 - name: regionandaz
 - name: Flavor
 - name: Volume
 - name: EipAvailability
-- name: ExclusiveNode
+- name: ExclusiveSite
 priorities:
 - name: StackAffinity
   weight: 1
 - name: Flavor
   weight: 1
-- name: NodeResourcesLeastAllocated
+- name: SiteResourcesLeastAllocated
   weight: 1
