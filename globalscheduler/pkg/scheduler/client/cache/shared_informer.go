@@ -49,7 +49,7 @@ func (r ResourceEventHandlerFuncs) OnList(obj []interface{}) {
 	}
 }
 
-// SharedInformer is the cache in order to not get the flavor, nodes info, volume type etc.
+// SharedInformer is the cache in order to not get the flavor, site info, volume type etc.
 // from OpenStack each time
 type SharedInformer interface {
 	// AddEventHandler adds an event handler to the shared informer using the shared informer's resync

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package noderesources
+package siteresources
 
 import (
 	"fmt"
@@ -24,7 +24,7 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
-	schedulernodeinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/nodeinfo"
+	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 )
@@ -50,10 +50,10 @@ var defaultRequestedRatioResources = resourceToWeightMap{types.ResourceMemory: 1
 // score will use `scorer` function to calculate the score.
 func (r *resourceAllocationScorer) score(
 	stack *types.Stack,
-	nodeInfo *schedulernodeinfo.NodeInfo) (int64, *interfaces.Status) {
-	node := nodeInfo.Node()
-	if node == nil {
-		return 0, interfaces.NewStatus(interfaces.Error, "node not found")
+	siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) (int64, *interfaces.Status) {
+	site := siteCacheInfo.Site()
+	if site == nil {
+		return 0, interfaces.NewStatus(interfaces.Error, "site not found")
 	}
 	if r.resourceToWeightMap == nil {
 		return 0, interfaces.NewStatus(interfaces.Error, "resources not found")
@@ -61,13 +61,13 @@ func (r *resourceAllocationScorer) score(
 	requested := make(resourceToValueMap, len(r.resourceToWeightMap))
 	allocatable := make(resourceToValueMap, len(r.resourceToWeightMap))
 	for resource := range r.resourceToWeightMap {
-		allocatable[resource], requested[resource] = calculateResourceAllocatableRequest(nodeInfo, stack, resource)
+		allocatable[resource], requested[resource] = calculateResourceAllocatableRequest(siteCacheInfo, stack, resource)
 	}
 
 	var score = r.scorer(requested, allocatable, false, 0, 0)
 	logger.Infof(
 		"%v -> %v: %v, map of allocatable resources %v, map of requested resources %v ,score %d,",
-		stack.Name, node.SiteID, r.Name,
+		stack.Name, site.SiteID, r.Name,
 		allocatable, requested, score,
 	)
 
@@ -89,7 +89,7 @@ func calculateStackStorageRequest(stack *types.Stack) map[string]int64 {
 	return ret
 }
 
-func getResourceType(flavorID string, nodeInfo *schedulernodeinfo.NodeInfo) string {
+func getResourceType(flavorID string, siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) string {
 	flavors := informers.InformerFac.GetInformer(informers.FLAVOR).GetStore().List()
 	for _, fla := range flavors {
 		regionFlv, ok := fla.(typed.RegionFlavor)
@@ -101,12 +101,12 @@ func getResourceType(flavorID string, nodeInfo *schedulernodeinfo.NodeInfo) stri
 			continue
 		}
 
-		for _, node := range nodeInfo.Node().Nodes {
-			if node.Region != regionFlv.Region {
+		for _, host := range siteCacheInfo.Site().Hosts {
+			if siteCacheInfo.Site().Region != regionFlv.Region {
 				continue
 			}
 			flavorExtraSpecs := regionFlv.OsExtraSpecs
-			resTypes := strings.Split(node.ResourceType, "||")
+			resTypes := strings.Split(host.ResourceType, "||")
 			if utils.IsContain(resTypes, flavorExtraSpecs.ResourceType) {
 				return flavorExtraSpecs.ResourceType
 			}
@@ -116,23 +116,23 @@ func getResourceType(flavorID string, nodeInfo *schedulernodeinfo.NodeInfo) stri
 	return ""
 }
 
-func calculateCpuAllocatableRequest(nodeInfo *schedulernodeinfo.NodeInfo, stack *types.Stack) (int64, int64) {
+func calculateCpuAllocatableRequest(siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo, stack *types.Stack) (int64, int64) {
 	stackInfo := calculateStackResourceRequest(stack)
 	var allocatableCpu int64
 	var requestedCpu int64
 
 	for _, one := range stackInfo {
 		for _, flv := range one.Flavors {
-			resourceType := getResourceType(flv.FlavorID, nodeInfo)
+			resourceType := getResourceType(flv.FlavorID, siteCacheInfo)
 
-			for key, value := range nodeInfo.TotalResources {
+			for key, value := range siteCacheInfo.TotalResources {
 				resTypes := strings.Split(key, "||")
 				if utils.IsContain(resTypes, resourceType) {
 					allocatableCpu += value.VCPU
 				}
 			}
 
-			for key, value := range nodeInfo.RequestedResources {
+			for key, value := range siteCacheInfo.RequestedResources {
 				resTypes := strings.Split(key, "||")
 				if utils.IsContain(resTypes, resourceType) {
 					requestedCpu += value.VCPU
@@ -143,22 +143,22 @@ func calculateCpuAllocatableRequest(nodeInfo *schedulernodeinfo.NodeInfo, stack 
 	return allocatableCpu, requestedCpu
 }
 
-func calculateMemoryAllocatableRequest(nodeInfo *schedulernodeinfo.NodeInfo, stack *types.Stack) (int64, int64) {
+func calculateMemoryAllocatableRequest(siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo, stack *types.Stack) (int64, int64) {
 	stackInfo := calculateStackResourceRequest(stack)
 	var allocatableMem int64
 	var requestedMem int64
 	for _, one := range stackInfo {
 		for _, flv := range one.Flavors {
-			resourceType := getResourceType(flv.FlavorID, nodeInfo)
+			resourceType := getResourceType(flv.FlavorID, siteCacheInfo)
 
-			for key, value := range nodeInfo.TotalResources {
+			for key, value := range siteCacheInfo.TotalResources {
 				resTypes := strings.Split(key, "||")
 				if utils.IsContain(resTypes, resourceType) {
 					allocatableMem += value.Memory
 				}
 			}
 
-			for key, value := range nodeInfo.RequestedResources {
+			for key, value := range siteCacheInfo.RequestedResources {
 				resTypes := strings.Split(key, "||")
 				if utils.IsContain(resTypes, resourceType) {
 					requestedMem += value.Memory
@@ -169,15 +169,15 @@ func calculateMemoryAllocatableRequest(nodeInfo *schedulernodeinfo.NodeInfo, sta
 	return allocatableMem, requestedMem
 }
 
-func calculateStorageAllocatableRequest(nodeInfo *schedulernodeinfo.NodeInfo, stack *types.Stack) (int64, int64) {
+func calculateStorageAllocatableRequest(siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo, stack *types.Stack) (int64, int64) {
 	var allocatableStorage int64
 	var requestedStroage int64
 	stackStorageRequest := calculateStackStorageRequest(stack)
 	for volType, size := range stackStorageRequest {
-		if value, ok := nodeInfo.TotalStorage[volType]; ok {
+		if value, ok := siteCacheInfo.TotalStorage[volType]; ok {
 			allocatableStorage += int64(value)
 		}
-		if value, ok := nodeInfo.RequestedStorage[volType]; ok {
+		if value, ok := siteCacheInfo.RequestedStorage[volType]; ok {
 			requestedStroage += int64(value)
 		}
 		requestedStroage += size
@@ -185,7 +185,7 @@ func calculateStorageAllocatableRequest(nodeInfo *schedulernodeinfo.NodeInfo, st
 	return allocatableStorage, requestedStroage
 }
 
-func calculateEipAllocatableRequest(nodeInfo *schedulernodeinfo.NodeInfo, stack *types.Stack) (int64, int64) {
+func calculateEipAllocatableRequest(siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo, stack *types.Stack) (int64, int64) {
 
 	var eipCount = 0
 	for _, server := range stack.Resources {
@@ -194,15 +194,15 @@ func calculateEipAllocatableRequest(nodeInfo *schedulernodeinfo.NodeInfo, stack 
 		}
 	}
 
-	eipPoolsInterface, ok := informers.InformerFac.GetInformer(informers.EIPPOOLS).GetStore().Get(nodeInfo.Node().Region)
+	eipPoolsInterface, ok := informers.InformerFac.GetInformer(informers.EIPPOOLS).GetStore().Get(siteCacheInfo.Site().Region)
 	if !ok {
-		logger.Warnf("Node (%s/%s) has no eip pools.", nodeInfo.Node().SiteID, nodeInfo.Node().Region)
+		logger.Warnf("Site (%s/%s) has no eip pools.", siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region)
 		return 0, 0
 	}
 
 	eipPool, ok := eipPoolsInterface.(typed.EipPool)
 	if !ok {
-		msg := fmt.Sprintf("Node (%s/%s) eipPoolConvert failed.", nodeInfo.Node().SiteID, nodeInfo.Node().Region)
+		msg := fmt.Sprintf("Site (%s/%s) eipPoolConvert failed.", siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region)
 		logger.Errorf(msg)
 		return 0, 0
 	}
@@ -210,7 +210,7 @@ func calculateEipAllocatableRequest(nodeInfo *schedulernodeinfo.NodeInfo, stack 
 	var find = false
 	var findEipPool = typed.IPCommonPool{}
 	for _, pool := range eipPool.CommonPools {
-		if nodeInfo.Node().EipTypeName == pool.Name {
+		if siteCacheInfo.Site().EipTypeName == pool.Name {
 			find = true
 			findEipPool = pool
 			break
@@ -218,7 +218,7 @@ func calculateEipAllocatableRequest(nodeInfo *schedulernodeinfo.NodeInfo, stack 
 	}
 
 	if !find {
-		msg := fmt.Sprintf("Node (%s/%s) has no eip pools.", nodeInfo.Node().SiteID, nodeInfo.Node().Region)
+		msg := fmt.Sprintf("Site (%s/%s) has no eip pools.", siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region)
 		logger.Infof(msg)
 		return 0, 0
 	}
@@ -231,21 +231,21 @@ func calculateEipAllocatableRequest(nodeInfo *schedulernodeinfo.NodeInfo, stack 
 }
 
 // calculateResourceAllocatableRequest returns resources Allocatable and Requested values
-func calculateResourceAllocatableRequest(nodeInfo *schedulernodeinfo.NodeInfo, stack *types.Stack,
+func calculateResourceAllocatableRequest(siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo, stack *types.Stack,
 	resource string) (int64, int64) {
 
 	switch resource {
 	case types.ResourceCPU:
-		return calculateCpuAllocatableRequest(nodeInfo, stack)
+		return calculateCpuAllocatableRequest(siteCacheInfo, stack)
 	case types.ResourceMemory:
-		return calculateMemoryAllocatableRequest(nodeInfo, stack)
+		return calculateMemoryAllocatableRequest(siteCacheInfo, stack)
 	case types.ResourceStorage:
-		return calculateStorageAllocatableRequest(nodeInfo, stack)
+		return calculateStorageAllocatableRequest(siteCacheInfo, stack)
 	case types.ResourceEip:
-		return calculateEipAllocatableRequest(nodeInfo, stack)
+		return calculateEipAllocatableRequest(siteCacheInfo, stack)
 	}
 
-	logger.Infof("requested resource %v not considered for node score calculation", resource)
+	logger.Infof("requested resource %v not considered for site score calculation", resource)
 
 	return 0, 0
 }

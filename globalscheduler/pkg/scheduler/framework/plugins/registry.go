@@ -19,12 +19,12 @@ package plugins
 import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/defaultbinder"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/exclusivenode"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/exclusivesite"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/flavor"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/locationandoperator"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/network"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/nodeavailability"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/noderesources"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/siteavailability"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/siteresources"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/queuesort"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/regionandaz"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/stackaffinity"
@@ -40,13 +40,13 @@ func NewRegistry() interfaces.Registry {
 		flavor.Name:                      flavor.New,
 		locationandoperator.Name:         locationandoperator.New,
 		network.Name:                     network.New,
-		nodeavailability.Name:            nodeavailability.New,
-		noderesources.FitName:            noderesources.NewFit,
+		siteavailability.Name:            siteavailability.New,
+		siteresources.FitName:            siteresources.NewFit,
 		queuesort.Name:                   queuesort.New,
 		regionandaz.Name:                 regionandaz.New,
 		volume.Name:                      volume.New,
-		noderesources.LeastAllocatedName: noderesources.NewLeastAllocated,
+		siteresources.LeastAllocatedName: siteresources.NewLeastAllocated,
 		stackaffinity.Name:               stackaffinity.New,
-		exclusivenode.Name:               exclusivenode.New,
+		exclusivesite.Name:               exclusivesite.New,
 	}
 }

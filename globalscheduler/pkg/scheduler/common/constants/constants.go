@@ -74,8 +74,8 @@ const (
 	//ConfVolumeTypeInterval volumetype_interval, default 600s
 	ConfVolumeTypeInterval = "volumetype_interval"
 
-	//ConfSiteInterval site_interval, default 600s
-	ConfSiteInterval = "site_interval"
+	//ConfSiteInfoInterval site_interval, default 600s
+	ConfSiteInfoInterval = "siteinfo_interval"
 
 	//ConfFlavorInterval flavor_interval, default 600s
 	ConfFlavorInterval = "flavor_interval"
