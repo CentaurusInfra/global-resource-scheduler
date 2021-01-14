@@ -17,7 +17,6 @@ go_library(
         "//globalscheduler/pkg/apis/distributor/v1:go_default_library",
         "//globalscheduler/pkg/apis/scheduler/client/clientset/versioned:go_default_library",
         "//globalscheduler/pkg/apis/scheduler/client/informers/externalversions:go_default_library",
-        "//globalscheduler/pkg/apis/scheduler/client/listers/scheduler/v1:go_default_library",
         "//globalscheduler/pkg/apis/scheduler/v1:go_default_library",
         "//pkg/controller:go_default_library",
         "//staging/src/k8s.io/api/core/v1:go_default_library",
