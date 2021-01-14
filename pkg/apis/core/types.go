@@ -2418,6 +2418,8 @@ const (
 	PodAssigned PodPhase = "Assigned"
 	// PodBound means that the pod has a cluster bound to.
 	PodBound PodPhase = "Bound"
+	// PodScheduled means that openstack vms has been created for the pod
+	PodScheduled PodPhase = "Scheduled"
 )
 
 type PodConditionType string

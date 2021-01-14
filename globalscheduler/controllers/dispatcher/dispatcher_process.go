@@ -199,7 +199,7 @@ func (p *Process) SendPodToCluster() {
 			if err == nil {
 				klog.V(3).Infof("Creating request for pod %v has been sent to %v", pod.ObjectMeta.Name, host)
 				pod.Spec.Hostname = instanceId
-				pod.Status.Phase = v1.PodRunning
+				pod.Status.Phase = v1.PodScheduled
 				updatedPod, err := p.clientset.CoreV1().Pods(pod.ObjectMeta.Namespace).Update(pod)
 				if err == nil {
 					klog.V(3).Infof("Creating request for pod %v returned successfully with %v", updatedPod, instanceId)
