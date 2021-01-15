@@ -17,11 +17,10 @@ limitations under the License.
 package v1
 
 import (
-	"k8s.io/kubernetes/globalscheduler/pkg/apis/distributor"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/kubernetes/globalscheduler/pkg/apis/distributor"
 )
 
 var (
@@ -33,8 +32,8 @@ var (
 
 // SchemeGroupVersion is group version used to register these objects.
 var SchemeGroupVersion = schema.GroupVersion{
-	Group:   cluster.GroupName,
-	Version: cluster.Version,
+	Group:   distributor.GroupName,
+	Version: distributor.Version,
 }
 
 func Resource(resource string) schema.GroupResource {
