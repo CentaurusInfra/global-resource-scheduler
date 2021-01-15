@@ -23,7 +23,7 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/labels"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/nodeinfo"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 )
 
@@ -41,7 +41,7 @@ func (pl *StackAffinity) Name() string {
 	return Name
 }
 
-func getAffinityScore(ctx context.Context, stack *types.Stack, nodeInfo *nodeinfo.NodeInfo) (int64, *interfaces.Status) {
+func getAffinityScore(ctx context.Context, stack *types.Stack, siteCacheInfo *sitecacheinfo.SiteCacheInfo) (int64, *interfaces.Status) {
 	selector := labels.NewSelector()
 	if len(stack.Selector.StackAffinity) > 0 {
 		for _, aff := range stack.Selector.StackAffinity {
@@ -54,14 +54,14 @@ func getAffinityScore(ctx context.Context, stack *types.Stack, nodeInfo *nodeinf
 		}
 	}
 
-	if len(nodeInfo.Stacks()) == 0 || selector.Empty() {
+	if len(siteCacheInfo.Stacks()) == 0 || selector.Empty() {
 		return 0, nil
 	}
 
 	var score int64
-	for _, existingStack := range nodeInfo.Stacks() {
+	for _, existingStack := range siteCacheInfo.Stacks() {
 		if selector.Matches(labels.Set(existingStack.Labels)) {
-			score += types.MaxNodeScore
+			score += types.MaxSiteScore
 			break
 		}
 	}
@@ -69,7 +69,7 @@ func getAffinityScore(ctx context.Context, stack *types.Stack, nodeInfo *nodeinf
 	return score, nil
 }
 
-func getAntiAffinityScore(ctx context.Context, stack *types.Stack, nodeInfo *nodeinfo.NodeInfo) (int64, *interfaces.Status) {
+func getAntiAffinityScore(ctx context.Context, stack *types.Stack, siteCacheInfo *sitecacheinfo.SiteCacheInfo) (int64, *interfaces.Status) {
 	selector := labels.NewSelector()
 	if len(stack.Selector.StackAntiAffinity) > 0 {
 		for _, aff := range stack.Selector.StackAntiAffinity {
@@ -82,40 +82,40 @@ func getAntiAffinityScore(ctx context.Context, stack *types.Stack, nodeInfo *nod
 		}
 	}
 
-	if len(nodeInfo.Stacks()) == 0 || selector.Empty() {
-		return types.MaxNodeScore, nil
+	if len(siteCacheInfo.Stacks()) == 0 || selector.Empty() {
+		return types.MaxSiteScore, nil
 	}
 
-	for _, existingStack := range nodeInfo.Stacks() {
+	for _, existingStack := range siteCacheInfo.Stacks() {
 		if selector.Matches(labels.Set(existingStack.Labels)) {
 			return 0, nil
 		}
 	}
 
-	return types.MaxNodeScore, nil
+	return types.MaxSiteScore, nil
 }
 
 // Score invoked at the score extension point.
 func (pl *StackAffinity) Score(ctx context.Context, state *interfaces.CycleState,
-	stack *types.Stack, nodeID string) (int64, *interfaces.Status) {
-	nodeInfo, err := pl.handle.SnapshotSharedLister().NodeInfos().Get(nodeID)
+	stack *types.Stack, siteID string) (int64, *interfaces.Status) {
+	siteCacheInfo, err := pl.handle.SnapshotSharedLister().SiteCacheInfos().Get(siteID)
 	if err != nil {
-		return 0, interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting node %s from Snapshot: %v",
-			nodeInfo.Node().SiteID, err))
+		return 0, interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %s from Snapshot: %v",
+			siteCacheInfo.Site().SiteID, err))
 	}
 
-	node := nodeInfo.Node()
-	if node == nil {
-		return 0, interfaces.NewStatus(interfaces.Error, fmt.Sprintf("node not found"))
+	site := siteCacheInfo.Site()
+	if site == nil {
+		return 0, interfaces.NewStatus(interfaces.Error, fmt.Sprintf("site not found"))
 	}
 
-	affinityScore, status := getAffinityScore(ctx, stack, nodeInfo)
+	affinityScore, status := getAffinityScore(ctx, stack, siteCacheInfo)
 	if status != nil {
 		logger.Error(ctx, "getAffinityScore failed! err: %s", state)
 		return 0, status
 	}
 
-	AntiaffinityScore, status := getAntiAffinityScore(ctx, stack, nodeInfo)
+	AntiaffinityScore, status := getAntiAffinityScore(ctx, stack, siteCacheInfo)
 	if status != nil {
 		logger.Error(ctx, "getAffinityScore failed! err: %s", state)
 		return 0, status

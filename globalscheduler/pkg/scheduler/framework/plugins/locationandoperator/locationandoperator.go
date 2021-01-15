@@ -23,7 +23,7 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/nodeinfo"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 )
 
@@ -40,28 +40,28 @@ func (pl *LocationAndOperator) Name() string {
 	return Name
 }
 
-func (pl *LocationAndOperator) locationEqual(stack *types.Stack, nodeInfo *nodeinfo.NodeInfo) (bool, *interfaces.Status) {
-	if stack == nil || nodeInfo == nil {
+func (pl *LocationAndOperator) locationEqual(stack *types.Stack, siteCacheInfo *sitecacheinfo.SiteCacheInfo) (bool, *interfaces.Status) {
+	if stack == nil || siteCacheInfo == nil {
 		return false, interfaces.NewStatus(interfaces.Unschedulable, "locationEqual has invalid args.")
 	}
 
 	country := stack.Selector.GeoLocation.Country
-	if country != "" && country != nodeInfo.Node().Country {
-		return false, interfaces.NewStatus(interfaces.Unschedulable, "stack country not equal node county.")
+	if country != "" && country != siteCacheInfo.Site().Country {
+		return false, interfaces.NewStatus(interfaces.Unschedulable, "stack country not equal site county.")
 	}
 
 	area := stack.Selector.GeoLocation.Area
-	if area != "" && area != nodeInfo.Node().Area {
-		return false, interfaces.NewStatus(interfaces.Unschedulable, "stack area not equal node area.")
+	if area != "" && area != siteCacheInfo.Site().Area {
+		return false, interfaces.NewStatus(interfaces.Unschedulable, "stack area not equal site area.")
 	}
 	province := stack.Selector.GeoLocation.Province
-	if province != "" && province != nodeInfo.Node().Province {
-		return false, interfaces.NewStatus(interfaces.Unschedulable, "stack province not equal node province.")
+	if province != "" && province != siteCacheInfo.Site().Province {
+		return false, interfaces.NewStatus(interfaces.Unschedulable, "stack province not equal site province.")
 	}
 
 	city := stack.Selector.GeoLocation.City
-	if city != "" && city != nodeInfo.Node().City {
-		return false, interfaces.NewStatus(interfaces.Unschedulable, "stack city not equal node city.")
+	if city != "" && city != siteCacheInfo.Site().City {
+		return false, interfaces.NewStatus(interfaces.Unschedulable, "stack city not equal site city.")
 	}
 
 	return true, nil
@@ -69,14 +69,14 @@ func (pl *LocationAndOperator) locationEqual(stack *types.Stack, nodeInfo *nodei
 
 // Filter invoked at the filter extension point.
 func (pl *LocationAndOperator) Filter(ctx context.Context, cycleState *interfaces.CycleState, stack *types.Stack,
-	nodeInfo *nodeinfo.NodeInfo) *interfaces.Status {
+	siteCacheInfo *sitecacheinfo.SiteCacheInfo) *interfaces.Status {
 
-	if ok, status := pl.locationEqual(stack, nodeInfo); !ok {
+	if ok, status := pl.locationEqual(stack, siteCacheInfo); !ok {
 		return status
 	}
 
-	if stack.Selector.Operator != "" && stack.Selector.Operator != nodeInfo.Node().Operator {
-		return interfaces.NewStatus(interfaces.Unschedulable, "stack operator not equal node operator.")
+	if stack.Selector.Operator != "" && stack.Selector.Operator != siteCacheInfo.Site().Operator {
+		return interfaces.NewStatus(interfaces.Unschedulable, "stack operator not equal site operator.")
 	}
 
 	return nil
@@ -84,16 +84,16 @@ func (pl *LocationAndOperator) Filter(ctx context.Context, cycleState *interface
 
 //Strategy run strategy
 func (pl *LocationAndOperator) Strategy(ctx context.Context, state *interfaces.CycleState,
-	allocations *types.Allocation, nodeList interfaces.NodeScoreList) (interfaces.NodeScoreList, *interfaces.Status) {
+	allocations *types.Allocation, siteScoreList interfaces.SiteScoreList) (interfaces.SiteScoreList, *interfaces.Status) {
 	var count = allocations.Replicas
 	var currentCount = count
-	var nodeCount interfaces.NodeScoreList
+	var siteCount interfaces.SiteScoreList
 
 	var totalCount = 0
-	for _, node := range nodeList {
-		selectorInfo, err := interfaces.GetNodeSelectorState(state, node.Name)
+	for _, siteScore := range siteScoreList {
+		selectorInfo, err := interfaces.GetSiteSelectorState(state, siteScore.SiteID)
 		if err != nil {
-			logger.Error(ctx, "GetNodeSelectorState %s failed! err: %s", node.Name, err)
+			logger.Error(ctx, "GetSiteSelectorState %s failed! err: %s", siteScore.SiteID, err)
 			continue
 		}
 
@@ -106,26 +106,26 @@ func (pl *LocationAndOperator) Strategy(ctx context.Context, state *interfaces.C
 	}
 
 	if allocations.Selector.Strategy.LocationStrategy == constants.StrategyCentralize {
-		for _, node := range nodeList {
-			selectorInfo, err := interfaces.GetNodeSelectorState(state, node.Name)
+		for _, siteScore := range siteScoreList {
+			selectorInfo, err := interfaces.GetSiteSelectorState(state, siteScore.SiteID)
 			if err != nil {
-				logger.Error(ctx, "GetNodeSelectorState %s failed! err: %s", node.Name, err)
+				logger.Error(ctx, "GetSiteSelectorState %s failed! err: %s", siteScore.SiteID, err)
 				continue
 			}
 
 			stackCount := math.Min(float64(count), float64(selectorInfo.StackMaxCount))
-			node.StackCount = int(stackCount)
-			nodeCount = append(nodeCount, node)
+			siteScore.StackCount = int(stackCount)
+			siteCount = append(siteCount, siteScore)
 			count -= int(stackCount)
 			if count <= 0 {
 				break
 			}
 		}
 	} else {
-		for _, node := range nodeList {
-			selectorInfo, err := interfaces.GetNodeSelectorState(state, node.Name)
+		for _, siteScore := range siteScoreList {
+			selectorInfo, err := interfaces.GetSiteSelectorState(state, siteScore.SiteID)
 			if err != nil {
-				logger.Error(ctx, "GetNodeSelectorState %s failed! err: %s", node.Name, err)
+				logger.Error(ctx, "GetSiteSelectorState %s failed! err: %s", siteScore.SiteID, err)
 				continue
 			}
 
@@ -133,8 +133,8 @@ func (pl *LocationAndOperator) Strategy(ctx context.Context, state *interfaces.C
 				1)
 
 			stackCount = math.Min(stackCount, float64(selectorInfo.StackMaxCount))
-			node.StackCount = int(stackCount)
-			nodeCount = append(nodeCount, node)
+			siteScore.StackCount = int(stackCount)
+			siteCount = append(siteCount, siteScore)
 
 			currentCount -= int(stackCount)
 			if currentCount <= 0 {
@@ -143,7 +143,7 @@ func (pl *LocationAndOperator) Strategy(ctx context.Context, state *interfaces.C
 		}
 	}
 
-	return nodeCount, nil
+	return siteCount, nil
 }
 
 // New initializes a new plugin and returns it.

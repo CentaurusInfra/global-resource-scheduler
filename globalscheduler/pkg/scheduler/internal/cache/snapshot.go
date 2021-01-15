@@ -21,20 +21,20 @@ import (
 	"fmt"
 
 	schedulerlisters "k8s.io/kubernetes/globalscheduler/pkg/scheduler/listers"
-	schedulernodeinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/nodeinfo"
+	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 )
 
-// Snapshot is a snapshot of cache NodeInfo and NodeTree order. The scheduler takes a
+// Snapshot is a snapshot of cache SiteCacheInfo and SiteTree order. The scheduler takes a
 // snapshot at the beginning of each scheduling cycle and uses it for its operations in that cycle.
 type Snapshot struct {
-	// nodeInfoMap a map of node name to a snapshot of its NodeInfo.
-	nodeInfoMap map[string]*schedulernodeinfo.NodeInfo
-	// nodeInfoList is the list of nodes as ordered in the cache's nodeTree.
-	nodeInfoList []*schedulernodeinfo.NodeInfo
-	// havePodsWithAffinityNodeInfoList is the list of nodes with at least one pod declaring affinity terms.
-	havePodsWithAffinityNodeInfoList []*schedulernodeinfo.NodeInfo
-	generation                       int64
+	// siteCacheInfoMap a map of site name to a snapshot of its SiteCacheInfo.
+	siteCacheInfoMap map[string]*schedulersitecacheinfo.SiteCacheInfo
+	// siteCacheInfoList is the list of siteIDs as ordered in the cache's siteTree.
+	siteCacheInfoList []*schedulersitecacheinfo.SiteCacheInfo
+	// havePodsWithAffinitySiteCacheInfoList is the list of siteIDs with at least one pod declaring affinity terms.
+	havePodsWithAffinitySiteCacheInfoList []*schedulersitecacheinfo.SiteCacheInfo
+	generation                            int64
 }
 
 var _ schedulerlisters.SharedLister = &Snapshot{}
@@ -42,69 +42,69 @@ var _ schedulerlisters.SharedLister = &Snapshot{}
 // NewEmptySnapshot initializes a Snapshot struct and returns it.
 func NewEmptySnapshot() *Snapshot {
 	return &Snapshot{
-		nodeInfoMap: make(map[string]*schedulernodeinfo.NodeInfo),
+		siteCacheInfoMap: make(map[string]*schedulersitecacheinfo.SiteCacheInfo),
 	}
 }
 
 // NewSnapshot initializes a Snapshot struct and returns it.
-func NewSnapshot(pods []*types.Stack, nodes []*types.SiteNode) *Snapshot {
-	nodeInfoMap := createNodeInfoMap(pods, nodes)
-	nodeInfoList := make([]*schedulernodeinfo.NodeInfo, 0, len(nodeInfoMap))
-	havePodsWithAffinityNodeInfoList := make([]*schedulernodeinfo.NodeInfo, 0, len(nodeInfoMap))
-	for _, v := range nodeInfoMap {
-		nodeInfoList = append(nodeInfoList, v)
+func NewSnapshot(stacks []*types.Stack, sites []*types.Site) *Snapshot {
+	siteCacheInfoMap := createSiteInfoCacheMap(stacks, sites)
+	siteCacheInfoList := make([]*schedulersitecacheinfo.SiteCacheInfo, 0, len(siteCacheInfoMap))
+	havePodsWithAffinitySiteCacheInfoList := make([]*schedulersitecacheinfo.SiteCacheInfo, 0, len(siteCacheInfoMap))
+	for _, v := range siteCacheInfoMap {
+		siteCacheInfoList = append(siteCacheInfoList, v)
 		if len(v.StackWithAffinity()) > 0 {
-			havePodsWithAffinityNodeInfoList = append(havePodsWithAffinityNodeInfoList, v)
+			havePodsWithAffinitySiteCacheInfoList = append(havePodsWithAffinitySiteCacheInfoList, v)
 		}
 	}
 
 	s := NewEmptySnapshot()
-	s.nodeInfoMap = nodeInfoMap
-	s.nodeInfoList = nodeInfoList
-	s.havePodsWithAffinityNodeInfoList = havePodsWithAffinityNodeInfoList
+	s.siteCacheInfoMap = siteCacheInfoMap
+	s.siteCacheInfoList = siteCacheInfoList
+	s.havePodsWithAffinitySiteCacheInfoList = havePodsWithAffinitySiteCacheInfoList
 
 	return s
 }
 
-// createNodeInfoMap obtains a list of pods and pivots that list into a map
-// where the keys are node names and the values are the aggregated information
-// for that node.
-func createNodeInfoMap(stacks []*types.Stack, nodes []*types.SiteNode) map[string]*schedulernodeinfo.NodeInfo {
-	nodeNameToInfo := make(map[string]*schedulernodeinfo.NodeInfo)
+// createSiteInfoCacheMap obtains a list of pods and pivots that list into a map
+// where the keys are site names and the values are the aggregated information
+// for that site.
+func createSiteInfoCacheMap(stacks []*types.Stack, sites []*types.Site) map[string]*schedulersitecacheinfo.SiteCacheInfo {
+	siteIDToInfo := make(map[string]*schedulersitecacheinfo.SiteCacheInfo)
 	for _, stack := range stacks {
-		nodeName := stack.Selected.NodeID
-		if _, ok := nodeNameToInfo[nodeName]; !ok {
-			nodeNameToInfo[nodeName] = schedulernodeinfo.NewNodeInfo()
+		siteID := stack.Selected.SiteID
+		if _, ok := siteIDToInfo[siteID]; !ok {
+			siteIDToInfo[siteID] = schedulersitecacheinfo.NewSiteCacheInfo()
 		}
-		nodeNameToInfo[nodeName].AddStack(stack)
+		siteIDToInfo[siteID].AddStack(stack)
 	}
 
-	for _, node := range nodes {
-		if _, ok := nodeNameToInfo[node.SiteID]; !ok {
-			nodeNameToInfo[node.SiteID] = schedulernodeinfo.NewNodeInfo()
+	for _, site := range sites {
+		if _, ok := siteIDToInfo[site.SiteID]; !ok {
+			siteIDToInfo[site.SiteID] = schedulersitecacheinfo.NewSiteCacheInfo()
 		}
-		nodeInfo := nodeNameToInfo[node.SiteID]
-		nodeInfo.SetNode(node)
+		siteCacheInfo := siteIDToInfo[site.SiteID]
+		siteCacheInfo.SetSite(site)
 	}
-	return nodeNameToInfo
+	return siteIDToInfo
 }
 
 // Stacks returns a StackLister
 func (s *Snapshot) Stacks() schedulerlisters.StackLister {
-	return stackLister(s.nodeInfoList)
+	return stackLister(s.siteCacheInfoList)
 }
 
-// NodeInfos returns a NodeInfoLister.
-func (s *Snapshot) NodeInfos() schedulerlisters.NodeInfoLister {
+// SiteCacheInfos returns a SiteCacheInfoLister.
+func (s *Snapshot) SiteCacheInfos() schedulerlisters.SiteCacheInfoLister {
 	return s
 }
 
-// NumNodes returns the number of nodes in the snapshot.
-func (s *Snapshot) NumNodes() int {
-	return len(s.nodeInfoList)
+// NumSites returns the number of siteIDs in the snapshot.
+func (s *Snapshot) NumSites() int {
+	return len(s.siteCacheInfoList)
 }
 
-type stackLister []*schedulernodeinfo.NodeInfo
+type stackLister []*schedulersitecacheinfo.SiteCacheInfo
 
 // List returns the list of stacks in the snapshot.
 func (p stackLister) List() ([]*types.Stack, error) {
@@ -132,20 +132,20 @@ func (p stackLister) FilteredList(filter schedulerlisters.StackFilter) ([]*types
 	return stacks, nil
 }
 
-// List returns the list of nodes in the snapshot.
-func (s *Snapshot) List() ([]*schedulernodeinfo.NodeInfo, error) {
-	return s.nodeInfoList, nil
+// List returns the list of siteIDs in the snapshot.
+func (s *Snapshot) List() ([]*schedulersitecacheinfo.SiteCacheInfo, error) {
+	return s.siteCacheInfoList, nil
 }
 
-// HavePodsWithAffinityList returns the list of nodes with at least one pods with inter-pod affinity
-func (s *Snapshot) HavePodsWithAffinityList() ([]*schedulernodeinfo.NodeInfo, error) {
-	return s.havePodsWithAffinityNodeInfoList, nil
+// HavePodsWithAffinityList returns the list of siteIDs with at least one pods with inter-pod affinity
+func (s *Snapshot) HavePodsWithAffinityList() ([]*schedulersitecacheinfo.SiteCacheInfo, error) {
+	return s.havePodsWithAffinitySiteCacheInfoList, nil
 }
 
-// Get returns the NodeInfo of the given node name.
-func (s *Snapshot) Get(nodeID string) (*schedulernodeinfo.NodeInfo, error) {
-	if v, ok := s.nodeInfoMap[nodeID]; ok {
+// Get returns the SiteCacheInfo of the given site ID.
+func (s *Snapshot) Get(siteID string) (*schedulersitecacheinfo.SiteCacheInfo, error) {
+	if v, ok := s.siteCacheInfoMap[siteID]; ok {
 		return v, nil
 	}
-	return nil, fmt.Errorf("nodeinfo not found for node name %q", nodeID)
+	return nil, fmt.Errorf("sitecacheinfo not found for site ID %q", siteID)
 }

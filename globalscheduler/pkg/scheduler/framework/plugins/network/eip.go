@@ -24,7 +24,7 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/nodeinfo"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 )
 
@@ -42,7 +42,7 @@ func (pl *EipAvailability) Name() string {
 }
 
 // Filter invoked at the filter extension point.
-func (pl *EipAvailability) Filter(ctx context.Context, cycleState *interfaces.CycleState, stack *types.Stack, nodeInfo *nodeinfo.NodeInfo) *interfaces.Status {
+func (pl *EipAvailability) Filter(ctx context.Context, cycleState *interfaces.CycleState, stack *types.Stack, siteCacheInfo *sitecacheinfo.SiteCacheInfo) *interfaces.Status {
 	var eipCount = 0
 	for _, server := range stack.Resources {
 		if server.NeedEip {
@@ -55,15 +55,15 @@ func (pl *EipAvailability) Filter(ctx context.Context, cycleState *interfaces.Cy
 	}
 
 	// TODO:check quota for each eip
-	eipPoolsInterface, ok := informers.InformerFac.GetInformer(informers.EIPPOOLS).GetStore().Get(nodeInfo.Node().Region)
+	eipPoolsInterface, ok := informers.InformerFac.GetInformer(informers.EIPPOOLS).GetStore().Get(siteCacheInfo.Site().Region)
 	if !ok {
-		logger.Warn(ctx, "Node (%s/%s) has no eip pools.", nodeInfo.Node().SiteID, nodeInfo.Node().Region)
+		logger.Warn(ctx, "Site (%s/%s) has no eip pools.", siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region)
 		return nil
 	}
 
 	eipPool, ok := eipPoolsInterface.(typed.EipPool)
 	if !ok {
-		msg := fmt.Sprintf("Node (%s/%s) eipPoolConvert failed.", nodeInfo.Node().SiteID, nodeInfo.Node().Region)
+		msg := fmt.Sprintf("Site (%s/%s) eipPoolConvert failed.", siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region)
 		logger.Error(ctx, msg)
 		return interfaces.NewStatus(interfaces.Unschedulable, msg)
 	}
@@ -71,7 +71,7 @@ func (pl *EipAvailability) Filter(ctx context.Context, cycleState *interfaces.Cy
 	var find = false
 	var findEipPool = typed.IPCommonPool{}
 	for _, pool := range eipPool.CommonPools {
-		if nodeInfo.Node().EipTypeName == pool.Name {
+		if siteCacheInfo.Site().EipTypeName == pool.Name {
 			find = true
 			findEipPool = pool
 			break
@@ -79,7 +79,7 @@ func (pl *EipAvailability) Filter(ctx context.Context, cycleState *interfaces.Cy
 	}
 
 	if !find {
-		msg := fmt.Sprintf("Node (%s/%s) has no eip pools.", nodeInfo.Node().SiteID, nodeInfo.Node().Region)
+		msg := fmt.Sprintf("Site (%s/%s) has no eip pools.", siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region)
 		logger.Debug(ctx, msg)
 		return interfaces.NewStatus(interfaces.Unschedulable, msg)
 	}
@@ -87,14 +87,14 @@ func (pl *EipAvailability) Filter(ctx context.Context, cycleState *interfaces.Cy
 	freeEipCount := findEipPool.Size - findEipPool.Used
 
 	if eipCount > freeEipCount {
-		msg := fmt.Sprintf("Node (%s/%s) has no enough eips, requestCount(%d), freeCount(%d).",
-			nodeInfo.Node().SiteID, nodeInfo.Node().Region, freeEipCount, eipCount)
+		msg := fmt.Sprintf("Site (%s/%s) has no enough eips, requestCount(%d), freeCount(%d).",
+			siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region, freeEipCount, eipCount)
 		logger.Debug(ctx, msg)
 		return interfaces.NewStatus(interfaces.Unschedulable, msg)
 	}
 
 	maxCount := freeEipCount / eipCount
-	interfaces.UpdateNodeSelectorState(cycleState, nodeInfo.Node().SiteID,
+	interfaces.UpdateSiteSelectorState(cycleState, siteCacheInfo.Site().SiteID,
 		map[string]interface{}{"StackMaxCount": maxCount})
 
 	return nil
