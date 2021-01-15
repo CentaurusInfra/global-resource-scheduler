@@ -81,7 +81,7 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		resetCh:             resetCh,
 		clusterIdList:       clusterIdList,
 		clusterIpMap:        clusterIpMap,
-		tokenMap:            make(map[string]string,0),
+		tokenMap:            make(map[string]string, 0),
 		pid:                 os.Getgid(),
 	}
 }
@@ -129,7 +129,7 @@ func (p *Process) Run(quit chan struct{}) {
 func (p *Process) buildSelector() string {
 	selector := ""
 	for _, clusterId := range p.clusterIdList {
-		selector = selector +  fmt.Sprintf("spec.clusterName=%s;", clusterId)
+		selector = selector + fmt.Sprintf("spec.clusterName=%s;", clusterId)
 	}
 	if len(selector) > 0 {
 		selector = selector[:len(selector)-1]
@@ -137,7 +137,7 @@ func (p *Process) buildSelector() string {
 	return selector
 }
 func (p *Process) initPodInformer() cache.SharedIndexInformer {
-	podSelector := fields.ParseSelectorOrDie("status.phase=" + string(v1.PodBound)+";status.phase=" + string(v1.ClusterScheduled))
+	podSelector := fields.ParseSelectorOrDie("status.phase=" + string(v1.PodBound) + ";status.phase=" + string(v1.ClusterScheduled))
 
 	lw := cache.NewListWatchFromClient(p.clientset.CoreV1(), string(v1.ResourcePods), metav1.NamespaceAll, podSelector)
 	podInformer := cache.NewSharedIndexInformer(lw, &v1.Pod{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
@@ -148,7 +148,7 @@ func (p *Process) initPodInformer() cache.SharedIndexInformer {
 				klog.Warningf("Failed to convert a deleted object  %+v to a pod", obj)
 				return
 			}
-			if _, existed := p.clusterIpMap[pod.Spec.ClusterName]; existed && pod.Status.Phase == v1.PodBound{
+			if _, existed := p.clusterIpMap[pod.Spec.ClusterName]; existed && pod.Status.Phase == v1.PodBound {
 				go func() {
 					p.podQueue <- pod
 				}()
@@ -167,7 +167,6 @@ func (p *Process) initPodInformer() cache.SharedIndexInformer {
 				}()
 			}
 		},
-
 	})
 	//podInformer.AddSelectorCh(p.resetCh)
 	//p.resetCh <- p.buildSelector()
