@@ -17,6 +17,7 @@ limitations under the License.
 package dispatcher
 
 import (
+	"fmt"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -42,7 +43,7 @@ type Process struct {
 	dispatcherClientset *dispatcherclientset.Clientset
 	clientset           *kubernetes.Clientset
 	podQueue            chan *v1.Pod
-	resetCh             chan struct{}
+	resetCh             chan string
 	clusterIdList       []string
 	clusterIpMap        map[string]string
 	tokenMap            map[string]string
@@ -51,7 +52,6 @@ type Process struct {
 
 func NewProcess(config *rest.Config, namespace string, name string, quit chan struct{}) Process {
 	podQueue := make(chan *v1.Pod, 300)
-	defer close(podQueue)
 
 	dispatcherClientset, err := dispatcherclientset.NewForConfig(config)
 	if err != nil {
@@ -70,7 +70,7 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		klog.Fatal(err)
 	}
 
-	resetCh := make(chan struct{})
+	resetCh := make(chan string)
 
 	return Process{
 		namespace:           namespace,
@@ -81,6 +81,7 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		resetCh:             resetCh,
 		clusterIdList:       clusterIdList,
 		clusterIpMap:        clusterIpMap,
+		tokenMap:            make(map[string]string,0),
 		pid:                 os.Getgid(),
 	}
 }
@@ -112,68 +113,65 @@ func (p *Process) Run(quit chan struct{}) {
 				clusterIdList, clusterIpMap := convertClustersToMap(newDispatcher.Spec.Cluster)
 				p.clusterIdList = clusterIdList
 				p.clusterIpMap = clusterIpMap
-				p.addBoundedPodsToQueue(p.resetCh, p.clusterIdList)
-				p.addDeletedPodsToQueue(p.resetCh, p.clusterIdList)
+				go func() {
+					p.resetCh <- p.buildSelector()
+				}()
 			}
 		},
 	})
 
-	p.addBoundedPodsToQueue(p.resetCh, p.clusterIdList)
-	p.addDeletedPodsToQueue(p.resetCh, p.clusterIdList)
+	podInformer := p.initPodInformer()
+	go podInformer.Run(quit)
 	go dispatcherInformer.Run(quit)
+
 	wait.Until(p.SendPodToCluster, 0, quit)
 }
-
-func (p *Process) initPodInformer(clusterIds []string, statusPhase v1.PodPhase) cache.SharedIndexInformer {
-	close(p.resetCh)
-	p.resetCh = make(chan struct{})
-	conditions := "status.phase=" + string(statusPhase) + ","
-
-	for _, clusterId := range clusterIds {
-		conditions = conditions + "spec.clusterName=" + clusterId + ";"
+func (p *Process) buildSelector() string {
+	selector := ""
+	for _, clusterId := range p.clusterIdList {
+		selector = selector +  fmt.Sprintf("spec.clusterName=%s;", clusterId)
 	}
-	clusterSelector := fields.ParseSelectorOrDie(conditions)
-	lw := cache.NewListWatchFromClient(p.clientset.CoreV1(), string(v1.ResourcePods), metav1.NamespaceAll, clusterSelector)
-
-	return cache.NewSharedIndexInformer(lw, &v1.Pod{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
+	if len(selector) > 0 {
+		selector = selector[:len(selector)-1]
+	}
+	return selector
 }
+func (p *Process) initPodInformer() cache.SharedIndexInformer {
+	podSelector := fields.ParseSelectorOrDie("status.phase=" + string(v1.PodBound)+";status.phase=" + string(v1.ClusterScheduled))
 
-func (p *Process) addDeletedPodsToQueue(resetCh chan struct{}, clusterIds []string) {
-	//Since we did not set up scheduler, we don't know its actual status, using Running for now
-	podInformer := p.initPodInformer(clusterIds, v1.PodRunning)
+	lw := cache.NewListWatchFromClient(p.clientset.CoreV1(), string(v1.ResourcePods), metav1.NamespaceAll, podSelector)
+	podInformer := cache.NewSharedIndexInformer(lw, &v1.Pod{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
 	podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-		DeleteFunc: func(obj interface{}) {
+		AddFunc: func(obj interface{}) {
 			pod, ok := obj.(*v1.Pod)
 			if !ok {
 				klog.Warningf("Failed to convert a deleted object  %+v to a pod", obj)
 				return
 			}
-			p.podQueue <- pod
+			if _, existed := p.clusterIpMap[pod.Spec.ClusterName]; existed && pod.Status.Phase == v1.PodBound{
+				go func() {
+					p.podQueue <- pod
+				}()
+			}
 		},
-	})
-	podInformer.Run(resetCh)
-}
+		DeleteFunc: func(obj interface{}) {
 
-func (p *Process) addBoundedPodsToQueue(resetCh chan struct{}, clusterIds []string) {
-	podInformer := p.initPodInformer(clusterIds, v1.PodBound)
-	podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-		UpdateFunc: func(old, new interface{}) {
-			oldPod, ok := old.(*v1.Pod)
+			pod, ok := obj.(*v1.Pod)
 			if !ok {
-				klog.Warningf("Failed to convert a old object  %+v to a pod", old)
+				klog.Warningf("Failed to convert a deleted object  %+v to a pod", obj)
 				return
 			}
-			newPod, ok := new.(*v1.Pod)
-			if !ok {
-				klog.Warningf("Failed to convert a new object  %+v to a pod", new)
-				return
-			}
-			if oldPod.ClusterName == "" && newPod.ClusterName != "" {
-				p.podQueue <- newPod
+			if _, existed := p.clusterIpMap[pod.Spec.ClusterName]; existed && pod.Status.Phase == v1.ClusterScheduled {
+				go func() {
+					p.podQueue <- pod
+				}()
 			}
 		},
+
 	})
-	podInformer.Run(resetCh)
+	//podInformer.AddSelectorCh(p.resetCh)
+	//p.resetCh <- p.buildSelector()
+	return podInformer
 }
 
 func (p *Process) SendPodToCluster() {
@@ -188,7 +186,7 @@ func (p *Process) SendPodToCluster() {
 			return
 		}
 		if pod.ObjectMeta.DeletionTimestamp != nil {
-			err = openstack.DeleteInstance(host, token, pod.Spec.Hostname)
+			err = openstack.DeleteInstance(host, token, pod.Status.PodIP)
 			if err == nil {
 				klog.V(3).Infof("Deleting request for pod %v has been sent to %v", pod.ObjectMeta.Name, host)
 			} else {
@@ -198,9 +196,9 @@ func (p *Process) SendPodToCluster() {
 			instanceId, err := openstack.ServerCreate(host, token, &pod.Spec)
 			if err == nil {
 				klog.V(3).Infof("Creating request for pod %v has been sent to %v", pod.ObjectMeta.Name, host)
-				pod.Spec.Hostname = instanceId
+				pod.Status.PodIP = instanceId
 				pod.Status.Phase = v1.ClusterScheduled
-				updatedPod, err := p.clientset.CoreV1().Pods(pod.ObjectMeta.Namespace).Update(pod)
+				updatedPod, err := p.clientset.CoreV1().Pods(pod.ObjectMeta.Namespace).UpdateStatus(pod)
 				if err == nil {
 					klog.V(3).Infof("Creating request for pod %v returned successfully with %v", updatedPod, instanceId)
 				} else {
@@ -229,16 +227,15 @@ func convertClustersToMap(clusters []string) ([]string, map[string]string) {
 }
 
 func (p *Process) getToken(ip string) (string, error) {
-	if token, ok := p.tokenMap[ip]; ok {
-		if !openstack.TokenExpired(token, ip) {
-			return token, nil
-		}
-	}
+	//if token, ok := p.tokenMap[ip]; ok {
+	//	if !openstack.TokenExpired(token, ip) {
+	//		return token, nil
+	//	}
+	//}
 	token, err := openstack.RequestToken(ip)
 	if err != nil {
 		return "", err
 	}
 	p.tokenMap[ip] = token
 	return token, nil
-	return "", nil
 }
