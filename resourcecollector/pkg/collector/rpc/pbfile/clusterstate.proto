@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+//option go_package = "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto";
+
+package pbfile;
+
+// service
+service ResourceCollectorProtocol { 
+    rpc UpdateClusterStatus(ClusterState) returns (ReturnMessageClusterState) {}  
+}                                                                                               
+message ClusterState {
+    string NameSpace = 1;  
+    string Name = 2;
+    int64 State = 3; 	     //1: ready, 2: down, 3: unreachable…
+}
+
+//message from ClusterController
+message ReturnMessageClusterState {
+    string NameSpace = 1;  
+    string Name = 2;
+    int64 ReturnCode = 3;	 //0: Error, 1: OK 
+}
