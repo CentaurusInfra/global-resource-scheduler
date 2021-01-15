@@ -3106,11 +3106,6 @@ func validateVirtualMachine(
 	if len(vm.UserData) > 65535 {
 		allErrs = append(allErrs, field.TooLong(fldPath.Child("userData"), "", 65535))
 	}
-	if vm.Flavors == nil || len(vm.Flavors) == 0 {
-		allErrs = append(allErrs, field.Required(fldPath.Child("Flavors"), "Flavors can't be empty"))
-	}
-
-	allErrs = append(allErrs, ValidateResourceCommonInfo(vm.ResourceCommonInfo, fldPath.Child("resourceCommonInfo"))...)
 
 	return allErrs
 }
@@ -3187,6 +3182,16 @@ func ValidatePodSpec(spec *core.PodSpec, fldPath *field.Path) field.ErrorList {
 		allErrs = append(allErrs, validateInitContainers(true, spec.InitContainers, spec.Containers, vols, fldPath.Child("initContainers"))...)
 		allErrs = append(allErrs, validateWorkloadInfo(true, spec.WorkloadInfo, fldPath.Child("workloadInfo"))...)
 		allErrs = append(allErrs, validateVirtualMachine(spec.VirtualMachine, fldPath.Child("virtualMachine"))...)
+		if spec.ResourceType == "" {
+			if spec.VirtualMachine.Flavors != nil && len(spec.VirtualMachine.Flavors) == 0 {
+				allErrs = append(allErrs, field.Required(fldPath.Child("VirtualMachine.Flavors"), "VirtualMachine Flavors can't be empty when resource type is not empty"))
+
+			}
+			if reflect.DeepEqual(spec.VirtualMachine.ResourceCommonInfo, core.ResourceCommonInfo{}) {
+				allErrs = append(allErrs, field.Required(fldPath.Child("VirtualMachine.ResourceCommonInfo"), "VirtualMachine ResourceCommonInfo can't be empty when resource type is not empty"))
+
+			}
+		}
 	} else {
 		allErrs = append(allErrs, validateContainers(false, spec.Containers, false, vols, fldPath.Child("containers"))...)
 		allErrs = append(allErrs, validateInitContainers(false, spec.InitContainers, spec.Containers, vols, fldPath.Child("initContainers"))...)
@@ -3248,9 +3253,6 @@ func ValidatePodSpec(spec *core.PodSpec, fldPath *field.Path) field.ErrorList {
 		allErrs = append(allErrs, ValidatePreemptionPolicy(spec.PreemptionPolicy, fldPath.Child("preemptionPolicy"))...)
 	}
 
-	if len(spec.ResourceType) == 0 {
-		allErrs = append(allErrs, field.Required(fldPath.Child("resourceType"), "ResourceType can't be empty"))
-	}
 	return allErrs
 }
 
@@ -3943,7 +3945,7 @@ func validatePodConditions(conditions []core.PodCondition, fldPath *field.Path) 
 func ValidatePodBinding(binding *core.Binding) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	if len(binding.Target.Kind) != 0 && binding.Target.Kind != "Node" && binding.Target.Kind != "Scheduler" && binding.Target.Kind != "Cluster" {
+	if len(binding.Target.Kind) != 0 && binding.Target.Kind != "Node" && binding.Target.Kind != "Scheduler" && binding.Target.Kind != "Cluster"  {
 		// TODO: When validation becomes versioned, this gets more complicated.
 		allErrs = append(allErrs, field.NotSupported(field.NewPath("target", "kind"), binding.Target.Kind, []string{"Node", "Scheduler", "Cluster", "<empty>"}))
 	}
