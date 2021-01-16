@@ -23,7 +23,7 @@ import (
 
 // ServerRunOptions contains required server running options
 type ServerRunOptions struct {
-	KubeConfig  string
+	KubeConfig string
 
 	// Scheduler Name Differentiating Schedulers
 	SchedulerName string

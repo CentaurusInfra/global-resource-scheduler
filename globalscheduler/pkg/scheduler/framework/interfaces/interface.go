@@ -36,7 +36,7 @@ type SiteScoreList []SiteScore
 
 // SiteScore is a struct with sites name and score.
 type SiteScore struct {
-	SiteID       string
+	SiteID     string
 	AZ         string
 	Score      int64
 	StackCount int
