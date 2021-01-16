@@ -135,7 +135,7 @@ func (p *Process) Run(quit chan struct{}) {
 			if oldDistributor.Spec.Range.Start != newDistributor.Spec.Range.Start || oldDistributor.Spec.Range.End != newDistributor.Spec.Range.End {
 				// Update reflector selector for load balancing
 				p.resetCh <- fmt.Sprintf("status.phase=%s, metadata.hashkey=gte:%s,metadata.hashkey=lte:%s",
-					string(v1.PodPending), strconv.FormatInt(newDistributor.Spec.Range.Start, 10),  strconv.FormatInt(newDistributor.Spec.Range.End, 10))
+					string(v1.PodPending), strconv.FormatInt(newDistributor.Spec.Range.Start, 10), strconv.FormatInt(newDistributor.Spec.Range.End, 10))
 			}
 		},
 	})
@@ -158,7 +158,7 @@ func (p *Process) Run(quit chan struct{}) {
 			}
 			for _, item := range p.schedulers {
 				if reflect.DeepEqual(item, scheduler) {
-					_, p.schedulers = p.schedulers[len(p.schedulers) - 1], p.schedulers[:len(p.schedulers) - 1]
+					_, p.schedulers = p.schedulers[len(p.schedulers)-1], p.schedulers[:len(p.schedulers)-1]
 					return
 				}
 			}
@@ -196,7 +196,7 @@ func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
 	podInformer.AddSelectorCh(p.resetCh)
 	// ParseSelectorOrDie has issues for handling gte and lte selectors. Update directly through channels
 	p.resetCh <- fmt.Sprintf("status.phase=%s, metadata.hashkey=gte:%s,metadata.hashkey=lte:%s",
-		string(v1.PodPending), strconv.FormatInt(start, 10),  strconv.FormatInt(end, 10))
+		string(v1.PodPending), strconv.FormatInt(start, 10), strconv.FormatInt(end, 10))
 	return podInformer
 }
 
