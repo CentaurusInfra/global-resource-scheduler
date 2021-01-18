@@ -22,6 +22,7 @@ filegroup(
         "//globalscheduler/pkg/apis/dispatcher:all-srcs",
         "//globalscheduler/pkg/apis/distributor:all-srcs",
         "//globalscheduler/pkg/apis/scheduler:all-srcs",
+        "//globalscheduler/pkg/scheduler:all-srcs",
     ],
     tags = ["automanaged"],
 )

@@ -615,6 +615,7 @@ spec:
             8Ƥ熪军g>郵[+: "449"
         resourcesAllocated:
           荙JLĹ]佱¿>犵殇ŕ: "971"
+        securityGroupId: "327"
         shutdownBehavior: "312"
         trustedImageCertificate:
         - "311"
@@ -828,9 +829,9 @@ spec:
           volumePath: "118"
       vpc: "53"
       workloadInfo:
-      - image: "328"
+      - image: "329"
         imagePullPolicy: '{屿oiɥ嵐sC8?Ǻ'
-        name: "327"
+        name: "328"
         resizePolicy:
         - policy: 'ƿ頀"冓鍓贯澔 '
           resourceName: +SÄ蚃ɣľ)酊龨Î
@@ -841,14 +842,13 @@ spec:
             4Ǒ輂,ŕĪ: "398"
         resourcesAllocated:
           V訆Ǝżŧ: "915"
-        securityGroupId: "333"
         volumeMounts:
-        - mountPath: "330"
+        - mountPath: "331"
           mountPropagation: 6Ɖ飴ɎiǨź'
-          name: "329"
+          name: "330"
           readOnly: true
-          subPath: "331"
-          subPathExpr: "332"
+          subPath: "332"
+          subPathExpr: "333"
   ttlSecondsAfterFinished: 217833402
 status:
   active: -68737405
