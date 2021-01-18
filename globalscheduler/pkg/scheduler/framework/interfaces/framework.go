@@ -351,8 +351,8 @@ func (f *framework) RunScorePlugins(ctx context.Context, state *CycleState, stac
 				return
 			}
 			pluginToSiteScores[pl.Name()][index] = SiteScore{
-				SiteID:  siteID,
-				Score: int64(s),
+				SiteID: siteID,
+				Score:  int64(s),
 			}
 		}
 	})

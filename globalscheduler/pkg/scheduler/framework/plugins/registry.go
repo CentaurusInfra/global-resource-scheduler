@@ -23,10 +23,10 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/flavor"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/locationandoperator"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/network"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/siteavailability"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/siteresources"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/queuesort"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/regionandaz"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/siteavailability"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/siteresources"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/stackaffinity"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins/volume"
 )
