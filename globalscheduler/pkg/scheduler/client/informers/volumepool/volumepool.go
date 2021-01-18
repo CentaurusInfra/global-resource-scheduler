@@ -69,7 +69,7 @@ func NewVolumePoolInformer(client client.Interface, resyncPeriod time.Duration, 
 				return nil, fmt.Errorf("unmarshal volume pool data error:%v", err)
 			}
 			var interfaceSlice []interface{}
-			for _, volumePools := range volumePools.VolumePools{
+			for _, volumePools := range volumePools.VolumePools {
 				interfaceSlice = append(interfaceSlice, volumePools)
 			}
 

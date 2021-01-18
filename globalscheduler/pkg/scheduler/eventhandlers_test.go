@@ -29,14 +29,14 @@ func TestSkipStackUpdate(t *testing.T) {
 		name               string
 		stack              *types.Stack
 		isAssumedStackFunc func(*types.Stack) bool
-		getStackFunc         func(*types.Stack) *types.Stack
+		getStackFunc       func(*types.Stack) *types.Stack
 		expected           bool
 	}{
 		{
-			name: "Non-assumed stack",
-			stack: &types.Stack{},
+			name:               "Non-assumed stack",
+			stack:              &types.Stack{},
 			isAssumedStackFunc: func(*types.Stack) bool { return false },
-			expected: false,
+			expected:           false,
 		},
 		{
 			name: "Assumed stack with same stack",
@@ -44,9 +44,11 @@ func TestSkipStackUpdate(t *testing.T) {
 				Name: "stack01",
 			},
 			isAssumedStackFunc: func(*types.Stack) bool { return true },
-			getStackFunc: func(*types.Stack) *types.Stack { return &types.Stack{
-				Name: "stack01",
-			}},
+			getStackFunc: func(*types.Stack) *types.Stack {
+				return &types.Stack{
+					Name: "stack01",
+				}
+			},
 			expected: true,
 		},
 		{
@@ -55,9 +57,11 @@ func TestSkipStackUpdate(t *testing.T) {
 				Name: "stack01",
 			},
 			isAssumedStackFunc: func(*types.Stack) bool { return true },
-			getStackFunc: func(*types.Stack) *types.Stack { return &types.Stack{
-				Name: "stack02",
-			}},
+			getStackFunc: func(*types.Stack) *types.Stack {
+				return &types.Stack{
+					Name: "stack02",
+				}
+			},
 			expected: false,
 		},
 	}
