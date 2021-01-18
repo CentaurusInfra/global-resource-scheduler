@@ -17,41 +17,41 @@ limitations under the License.
 package options
 
 import (
-	"os"
-	"path"
-	"path/filepath"
-
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
-
-	"github.com/spf13/pflag"
+	cliflag "k8s.io/component-base/cli/flag"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 )
 
 // ServerRunOptions contains required server running options
 type ServerRunOptions struct {
-	ConfFile    string
-	LogConfFile string
+	KubeConfig string
+
+	// Scheduler Name Differentiating Schedulers
+	SchedulerName string
 }
 
 // NewServerRunOptions constructs a new ServerRunOptions if existed.
 func NewServerRunOptions() *ServerRunOptions {
-	s := &ServerRunOptions{}
-
-	//default
-	configDir := path.Join(filepath.Dir(os.Args[0]), "..", "conf")
-	configDirAbs, err := filepath.Abs(configDir)
-	if err != nil {
-		logger.Errorf("Initial config file is not correct. %v", err.Error())
-		return s
-	}
-
-	s.ConfFile = path.Join(configDirAbs, "conf-odin.yaml")
-	s.LogConfFile = path.Join(configDirAbs, "logging.yaml")
-
-	return s
+	return &ServerRunOptions{}
 }
 
-// AddFlags add flags to FlagSet
-func (s *ServerRunOptions) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVar(&s.ConfFile, "conffile", s.ConfFile, "config file")
-	fs.StringVar(&s.LogConfFile, "log-conffile", s.LogConfFile, "log config file")
+// Flags returns flags for a specific GSScheduler by section name
+func (s *ServerRunOptions) Flags() (fss cliflag.NamedFlagSets) {
+	fs := fss.FlagSet("gs-scheduler")
+	fs.StringVar(&s.KubeConfig, "kubeconfig", s.KubeConfig, "Path to kubeconfig files, specifying how to connect to  API servers. Providing --kubeconfig enables API server mode, omitting --kubeconfig enables standalone mode.")
+	fs.StringVar(&s.SchedulerName, "schedulername", s.SchedulerName, "Scheduler name of the gs-scheduler, specifying the name of the scheduler.")
+	return fss
+}
+
+func (s *ServerRunOptions) Config() *types.GSSchedulerConfiguration {
+	config := NewGSSchedulerConfiguration()
+	config.SchedulerName = s.SchedulerName
+	return config
+}
+
+// NewGSSchedulerConfiguration will create a new KubeletConfiguration with default values
+func NewGSSchedulerConfiguration() *types.GSSchedulerConfiguration {
+	config := &types.GSSchedulerConfiguration{
+		SchedulerName: "DefaultScheduler",
+	}
+	return config
 }

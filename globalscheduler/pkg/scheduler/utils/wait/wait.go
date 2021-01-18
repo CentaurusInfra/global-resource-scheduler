@@ -618,4 +618,3 @@ func poller(interval, timeout time.Duration) WaitFunc {
 		return ch
 	})
 }
-

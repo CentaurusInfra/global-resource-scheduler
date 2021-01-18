@@ -26,7 +26,7 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	internalcache "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache"
 	schedulerlisters "k8s.io/kubernetes/globalscheduler/pkg/scheduler/listers"
-	schedulernodeinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/nodeinfo"
+	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/sets"
@@ -168,10 +168,10 @@ func NewFramework(r Registry, plugins *types.Plugins, opts ...Option) (Framework
 			f.pluginNameToWeightMap[name] = 1
 		}
 		// Checks totalPriority against MaxTotalScore to avoid overflow
-		if int64(f.pluginNameToWeightMap[name])*MaxNodeScore > MaxTotalScore-totalPriority {
+		if int64(f.pluginNameToWeightMap[name])*MaxSiteScore > MaxTotalScore-totalPriority {
 			return nil, fmt.Errorf("total score of Score plugins could overflow")
 		}
-		totalPriority += int64(f.pluginNameToWeightMap[name]) * MaxNodeScore
+		totalPriority += int64(f.pluginNameToWeightMap[name]) * MaxSiteScore
 	}
 
 	for _, e := range f.getExtensionPoints(plugins) {
@@ -251,19 +251,19 @@ func (f *framework) runPreFilterPlugin(ctx context.Context, pl PreFilterPlugin, 
 }
 
 // RunFilterPlugins runs the set of configured Filter plugins for pod on
-// the given node. If any of these plugins doesn't return "Success", the
-// given node is not suitable for running pod.
-// Meanwhile, the failure message and status are set for the given node.
+// the given site. If any of these plugins doesn't return "Success", the
+// given site is not suitable for running pod.
+// Meanwhile, the failure message and status are set for the given site.
 func (f *framework) RunFilterPlugins(
 	ctx context.Context,
 	state *CycleState,
 	stack *types.Stack,
-	nodeInfo *schedulernodeinfo.NodeInfo,
+	siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo,
 ) PluginToStatus {
 	var firstFailedStatus *Status
 	statuses := make(PluginToStatus)
 	for _, pl := range f.filterPlugins {
-		pluginStatus := f.runFilterPlugin(ctx, pl, state, stack, nodeInfo)
+		pluginStatus := f.runFilterPlugin(ctx, pl, state, stack, siteCacheInfo)
 		if len(statuses) == 0 {
 			firstFailedStatus = pluginStatus
 		}
@@ -287,12 +287,12 @@ func (f *framework) RunFilterPlugins(
 }
 
 func (f *framework) runFilterPlugin(ctx context.Context, pl FilterPlugin, state *CycleState, stack *types.Stack,
-	nodeInfo *schedulernodeinfo.NodeInfo) *Status {
+	siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) *Status {
 	if !state.ShouldRecordPluginMetrics() {
-		return pl.Filter(ctx, state, stack, nodeInfo)
+		return pl.Filter(ctx, state, stack, siteCacheInfo)
 	}
 
-	status := pl.Filter(ctx, state, stack, nodeInfo)
+	status := pl.Filter(ctx, state, stack, siteCacheInfo)
 	return status
 }
 
@@ -302,11 +302,11 @@ func (f *framework) RunPreScorePlugins(
 	ctx context.Context,
 	state *CycleState,
 	stack *types.Stack,
-	nodes []*types.SiteNode,
+	sites []*types.Site,
 ) (status *Status) {
 
 	for _, pl := range f.preScorePlugins {
-		status = f.runPreScorePlugin(ctx, pl, state, stack, nodes)
+		status = f.runPreScorePlugin(ctx, pl, state, stack, sites)
 		if !status.IsSuccess() {
 			msg := fmt.Sprintf("error while running %q prescore plugin for pod %q: %v", pl.Name(),
 				stack.Name, status.Message())
@@ -319,40 +319,40 @@ func (f *framework) RunPreScorePlugins(
 }
 
 func (f *framework) runPreScorePlugin(ctx context.Context, pl PreScorePlugin, state *CycleState, stack *types.Stack,
-	nodes []*types.SiteNode) *Status {
+	sites []*types.Site) *Status {
 	if !state.ShouldRecordPluginMetrics() {
-		return pl.PreScore(ctx, state, stack, nodes)
+		return pl.PreScore(ctx, state, stack, sites)
 	}
-	status := pl.PreScore(ctx, state, stack, nodes)
+	status := pl.PreScore(ctx, state, stack, sites)
 	return status
 }
 
 // RunScorePlugins runs the set of configured scoring plugins. It returns a list that
-// stores for each scoring plugin name the corresponding NodeScoreList(s).
+// stores for each scoring plugin name the corresponding SiteScoreList(s).
 // It also returns *Status, which is set to non-success if any of the plugins returns
 // a non-success status.
 func (f *framework) RunScorePlugins(ctx context.Context, state *CycleState, stack *types.Stack,
-	nodes []*types.SiteNode) (ps PluginToNodeScores, status *Status) {
+	sites []*types.Site) (ps PluginToSiteScores, status *Status) {
 
-	pluginToNodeScores := make(PluginToNodeScores, len(f.scorePlugins))
+	pluginToSiteScores := make(PluginToSiteScores, len(f.scorePlugins))
 	for _, pl := range f.scorePlugins {
-		pluginToNodeScores[pl.Name()] = make(NodeScoreList, len(nodes))
+		pluginToSiteScores[pl.Name()] = make(SiteScoreList, len(sites))
 	}
 	ctx, cancel := context.WithCancel(ctx)
 	errCh := utils.NewErrorChannel()
 
-	// Run Score method for each node in parallel.
-	workqueue.ParallelizeUntil(ctx, 16, len(nodes), func(index int) {
+	// Run Score method for each site in parallel.
+	workqueue.ParallelizeUntil(ctx, 16, len(sites), func(index int) {
 		for _, pl := range f.scorePlugins {
-			nodeName := nodes[index].SiteID
-			s, status := f.runScorePlugin(ctx, pl, state, stack, nodeName)
+			siteID := sites[index].SiteID
+			s, status := f.runScorePlugin(ctx, pl, state, stack, siteID)
 			if !status.IsSuccess() {
 				errCh.SendErrorWithCancel(fmt.Errorf(status.Message()), cancel)
 				return
 			}
-			pluginToNodeScores[pl.Name()][index] = NodeScore{
-				Name:  nodeName,
-				Score: int64(s),
+			pluginToSiteScores[pl.Name()][index] = SiteScore{
+				SiteID: siteID,
+				Score:  int64(s),
 			}
 		}
 	})
@@ -367,18 +367,18 @@ func (f *framework) RunScorePlugins(ctx context.Context, state *CycleState, stac
 		pl := f.scorePlugins[index]
 		// Score plugins' weight has been checked when they are initialized.
 		weight := f.pluginNameToWeightMap[pl.Name()]
-		nodeScoreList := pluginToNodeScores[pl.Name()]
+		siteScoreList := pluginToSiteScores[pl.Name()]
 
-		for i, nodeScore := range nodeScoreList {
+		for i, siteScore := range siteScoreList {
 			// return error if score plugin returns invalid score.
-			if nodeScore.Score > int64(MaxNodeScore) || nodeScore.Score < int64(MinNodeScore) {
+			if siteScore.Score > int64(MaxSiteScore) || siteScore.Score < int64(MinSiteScore) {
 				err := fmt.Errorf("score plugin %q returns an invalid score %v"+
 					", it should in the range of [%v, %v] after normalizing", pl.Name(),
-					nodeScore.Score, MinNodeScore, MaxNodeScore)
+					siteScore.Score, MinSiteScore, MaxSiteScore)
 				errCh.SendErrorWithCancel(err, cancel)
 				return
 			}
-			nodeScoreList[i].Score = nodeScore.Score * int64(weight)
+			siteScoreList[i].Score = siteScore.Score * int64(weight)
 		}
 	})
 	if err := errCh.ReceiveError(); err != nil {
@@ -387,16 +387,16 @@ func (f *framework) RunScorePlugins(ctx context.Context, state *CycleState, stac
 		return nil, NewStatus(Error, msg)
 	}
 
-	return pluginToNodeScores, nil
+	return pluginToSiteScores, nil
 }
 
 func (f *framework) runScorePlugin(ctx context.Context, pl ScorePlugin, state *CycleState, stack *types.Stack,
-	nodeName string) (int64, *Status) {
+	siteID string) (int64, *Status) {
 	if !state.ShouldRecordPluginMetrics() {
-		return pl.Score(ctx, state, stack, nodeName)
+		return pl.Score(ctx, state, stack, siteID)
 	}
 
-	s, status := pl.Score(ctx, state, stack, nodeName)
+	s, status := pl.Score(ctx, state, stack, siteID)
 	return s, status
 }
 
@@ -404,10 +404,10 @@ func (f *framework) runScorePlugin(ctx context.Context, pl ScorePlugin, state *C
 // failure (bool) if any of the plugins returns an error. It also returns an
 // error containing the rejection message or the error occurred in the plugin.
 func (f *framework) RunPreBindPlugins(ctx context.Context, state *CycleState, stack *types.Stack,
-	nodeName string) (status *Status) {
+	siteID string) (status *Status) {
 
 	for _, pl := range f.preBindPlugins {
-		status = f.runPreBindPlugin(ctx, pl, state, stack, nodeName)
+		status = f.runPreBindPlugin(ctx, pl, state, stack, siteID)
 		if !status.IsSuccess() {
 			msg := fmt.Sprintf("error while running %q prebind plugin for pod %q: %v", pl.Name(),
 				stack.Name, status.Message())
@@ -419,24 +419,24 @@ func (f *framework) RunPreBindPlugins(ctx context.Context, state *CycleState, st
 }
 
 func (f *framework) runPreBindPlugin(ctx context.Context, pl PreBindPlugin, state *CycleState, stack *types.Stack,
-	nodeName string) *Status {
+	siteID string) *Status {
 	if !state.ShouldRecordPluginMetrics() {
-		return pl.PreBind(ctx, state, stack, nodeName)
+		return pl.PreBind(ctx, state, stack, siteID)
 	}
 
-	status := pl.PreBind(ctx, state, stack, nodeName)
+	status := pl.PreBind(ctx, state, stack, siteID)
 
 	return status
 }
 
 // RunBindPlugins runs the set of configured bind plugins until one returns a non `Skip` status.
 func (f *framework) RunBindPlugins(ctx context.Context, state *CycleState, stack *types.Stack,
-	nodeName string) (status *Status) {
+	siteID string) (status *Status) {
 	if len(f.bindPlugins) == 0 {
 		return NewStatus(Skip, "")
 	}
 	for _, bp := range f.bindPlugins {
-		status = f.runBindPlugin(ctx, bp, state, stack, nodeName)
+		status = f.runBindPlugin(ctx, bp, state, stack, siteID)
 		if status != nil && status.Code() == Skip {
 			continue
 		}
@@ -451,29 +451,29 @@ func (f *framework) RunBindPlugins(ctx context.Context, state *CycleState, stack
 }
 
 func (f *framework) runBindPlugin(ctx context.Context, bp BindPlugin, state *CycleState, stack *types.Stack,
-	nodeName string) *Status {
+	siteID string) *Status {
 	if !state.ShouldRecordPluginMetrics() {
-		return bp.Bind(ctx, state, stack, nodeName)
+		return bp.Bind(ctx, state, stack, siteID)
 	}
 
-	status := bp.Bind(ctx, state, stack, nodeName)
+	status := bp.Bind(ctx, state, stack, siteID)
 	return status
 }
 
 // RunPostBindPlugins runs the set of configured postbind plugins.
-func (f *framework) RunPostBindPlugins(ctx context.Context, state *CycleState, stack *types.Stack, nodeName string) {
+func (f *framework) RunPostBindPlugins(ctx context.Context, state *CycleState, stack *types.Stack, siteID string) {
 	for _, pl := range f.postBindPlugins {
-		f.runPostBindPlugin(ctx, pl, state, stack, nodeName)
+		f.runPostBindPlugin(ctx, pl, state, stack, siteID)
 	}
 }
 
 func (f *framework) runPostBindPlugin(ctx context.Context, pl PostBindPlugin, state *CycleState,
-	stack *types.Stack, nodeName string) {
+	stack *types.Stack, siteID string) {
 	if !state.ShouldRecordPluginMetrics() {
-		pl.PostBind(ctx, state, stack, nodeName)
+		pl.PostBind(ctx, state, stack, siteID)
 		return
 	}
-	pl.PostBind(ctx, state, stack, nodeName)
+	pl.PostBind(ctx, state, stack, siteID)
 
 }
 
@@ -481,9 +481,9 @@ func (f *framework) runPostBindPlugin(ctx context.Context, pl PostBindPlugin, st
 // plugins returns an error, it does not continue running the remaining ones and
 // returns the error. In such case, pod will not be scheduled.
 func (f *framework) RunReservePlugins(ctx context.Context, state *CycleState, stack *types.Stack,
-	nodeName string) (status *Status) {
+	siteID string) (status *Status) {
 	for _, pl := range f.reservePlugins {
-		status = f.runReservePlugin(ctx, pl, state, stack, nodeName)
+		status = f.runReservePlugin(ctx, pl, state, stack, siteID)
 		if !status.IsSuccess() {
 			msg := fmt.Sprintf("error while running %q reserve plugin for pod %q: %v", pl.Name(),
 				stack.Name, status.Message())
@@ -495,29 +495,29 @@ func (f *framework) RunReservePlugins(ctx context.Context, state *CycleState, st
 }
 
 func (f *framework) runReservePlugin(ctx context.Context, pl ReservePlugin, state *CycleState, stack *types.Stack,
-	nodeName string) *Status {
+	siteID string) *Status {
 	if !state.ShouldRecordPluginMetrics() {
-		return pl.Reserve(ctx, state, stack, nodeName)
+		return pl.Reserve(ctx, state, stack, siteID)
 	}
-	status := pl.Reserve(ctx, state, stack, nodeName)
+	status := pl.Reserve(ctx, state, stack, siteID)
 	return status
 }
 
 // RunUnreservePlugins runs the set of configured unreserve plugins.
-func (f *framework) RunUnreservePlugins(ctx context.Context, state *CycleState, stack *types.Stack, nodeName string) {
+func (f *framework) RunUnreservePlugins(ctx context.Context, state *CycleState, stack *types.Stack, siteID string) {
 	for _, pl := range f.unreservePlugins {
-		f.runUnreservePlugin(ctx, pl, state, stack, nodeName)
+		f.runUnreservePlugin(ctx, pl, state, stack, siteID)
 	}
 }
 
 func (f *framework) runUnreservePlugin(ctx context.Context, pl UnreservePlugin, state *CycleState,
-	stack *types.Stack, nodeName string) {
+	stack *types.Stack, siteID string) {
 	if !state.ShouldRecordPluginMetrics() {
-		pl.Unreserve(ctx, state, stack, nodeName)
+		pl.Unreserve(ctx, state, stack, siteID)
 		return
 	}
 
-	pl.Unreserve(ctx, state, stack, nodeName)
+	pl.Unreserve(ctx, state, stack, siteID)
 }
 
 // RunPermitPlugins runs the set of configured permit plugins. If any of these
@@ -527,20 +527,20 @@ func (f *framework) runUnreservePlugin(ctx context.Context, pl UnreservePlugin, 
 // to a map of currently waiting pods and return status with "Wait" code.
 // Pod will remain waiting pod for the minimum duration returned by the permit plugins.
 func (f *framework) RunPermitPlugins(ctx context.Context, state *CycleState, stack *types.Stack,
-	nodeName string) (status *Status) {
+	siteID string) (status *Status) {
 	return nil
 }
 
 func (f *framework) runPermitPlugin(ctx context.Context, pl PermitPlugin, state *CycleState, stack *types.Stack,
-	nodeName string) (*Status, time.Duration) {
+	siteID string) (*Status, time.Duration) {
 	return nil, time.Duration(1 * time.Second)
 }
 
 //RunStrategyPlugins runs the set of configured strategy plugins
 func (f *framework) RunStrategyPlugins(ctx context.Context, state *CycleState,
-	allocations *types.Allocation, nodeList NodeScoreList) (NodeScoreList, *Status) {
+	allocations *types.Allocation, siteScoreList SiteScoreList) (SiteScoreList, *Status) {
 
-	countList := nodeList
+	countList := siteScoreList
 
 	for _, pl := range f.strategyPlugins {
 		var status *Status
@@ -556,7 +556,7 @@ func (f *framework) RunStrategyPlugins(ctx context.Context, state *CycleState,
 	return countList, nil
 }
 
-// SnapshotSharedLister returns the scheduler's SharedLister of the latest NodeInfo
+// SnapshotSharedLister returns the scheduler's SharedLister of the latest SiteCacheInfo
 // snapshot. The snapshot is taken at the beginning of a scheduling cycle and remains
 // unchanged until a pod finishes "Reserve". There is no guarantee that the information
 // remains unchanged after "Reserve".
@@ -564,7 +564,7 @@ func (f *framework) SnapshotSharedLister() schedulerlisters.SharedLister {
 	return f.snapshotSharedLister
 }
 
-// SnapshotSharedLister returns the scheduler's SharedLister of the latest NodeInfo
+// SnapshotSharedLister returns the scheduler's SharedLister of the latest SiteCacheInfo
 // snapshot. The snapshot is taken at the beginning of a scheduling cycle and remains
 // unchanged until a pod finishes "Reserve". There is no guarantee that the information
 // remains unchanged after "Reserve".

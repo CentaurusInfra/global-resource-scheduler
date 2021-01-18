@@ -648,6 +648,7 @@ template:
               'ơŸ8T ': "218"
           resourcesAllocated:
             ĵ: "958"
+          securityGroupId: "342"
           shutdownBehavior: "327"
           trustedImageCertificate:
           - "326"
@@ -861,9 +862,9 @@ template:
             volumePath: "139"
         vpc: "74"
         workloadInfo:
-        - image: "343"
+        - image: "344"
           imagePullPolicy: Âɘɢ鬍熖B芭花ª瘡蟦JBʟ
-          name: "342"
+          name: "343"
           resizePolicy:
           - policy: ə娯Ȱ囌{
             resourceName: ' ƺ蛜6Ɖ飴Ɏ'
@@ -874,12 +875,11 @@ template:
               ²sNƗ¸g: "50"
           resourcesAllocated:
             酊龨Î´摖ȱğ_<: "118"
-          securityGroupId: "348"
           volumeMounts:
-          - mountPath: "345"
+          - mountPath: "346"
             mountPropagation: iɥ嵐sC8
-            name: "344"
+            name: "345"
             readOnly: true
-            subPath: "346"
-            subPathExpr: "347"
+            subPath: "347"
+            subPathExpr: "348"
     ttlSecondsAfterFinished: -172900943

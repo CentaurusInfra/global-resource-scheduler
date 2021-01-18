@@ -21,13 +21,13 @@ import (
 	"fmt"
 	"math"
 
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/nodeinfo"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 )
 
 const (
@@ -117,7 +117,7 @@ func GetPreFilterState(cycleState *interfaces.CycleState) (*FlavorAggregates, er
 	c, err := cycleState.Read(preFilterStateKey)
 	if err != nil {
 		logger.Errorf("error reading %q from cycleState: %s", preFilterStateKey, err)
-		// NodeResFilterState doesn't exist, likely PreFilter wasn't invoked.
+		// siteResFilterState doesn't exist, likely PreFilter wasn't invoked.
 		return nil, fmt.Errorf("error reading %q from cycleState: %v", preFilterStateKey, err)
 	}
 
@@ -182,21 +182,21 @@ func getFlavorToCount(flvAg FlavorAggregate) (map[string]int, map[string]*spotHo
 	return flavorMap, spotFlavorMap
 }
 
-func isComFlavorMatch(ctx context.Context, flavorMap map[string]int, nodeInfo *nodeinfo.NodeInfo) (bool, int) {
+func isComFlavorMatch(ctx context.Context, flavorMap map[string]int, siteCacheInfo *sitecacheinfo.SiteCacheInfo) (bool, int) {
 
 	var maxCount = math.MaxFloat64
 
 	for flavorID, count := range flavorMap {
-		totalCount, ok := nodeInfo.AllocatableFlavor[flavorID]
+		totalCount, ok := siteCacheInfo.AllocatableFlavor[flavorID]
 		if !ok {
-			logger.Debug(ctx, "Node (%s-%s) do not support required flavor (%s).",
-				nodeInfo.Node().SiteID, nodeInfo.Node().Region, flavorID)
+			logger.Debug(ctx, "Site (%s-%s) do not support required flavor (%s).",
+				siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region, flavorID)
 			return false, 0
 		}
 
 		if totalCount < int64(count) {
-			logger.Debug(ctx, "Node (%s-%s) flavor (%s) support Count(%d), required Count(%d).",
-				nodeInfo.Node().SiteID, nodeInfo.Node().Region, flavorID, totalCount, count)
+			logger.Debug(ctx, "Site (%s-%s) flavor (%s) support Count(%d), required Count(%d).",
+				siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region, flavorID, totalCount, count)
 			return false, 0
 		}
 
@@ -207,7 +207,7 @@ func isComFlavorMatch(ctx context.Context, flavorMap map[string]int, nodeInfo *n
 }
 
 func isSpotFlavorMatch(ctx context.Context, spotFlavorMap map[string]*spotHours,
-	nodeInfo *nodeinfo.NodeInfo) (bool, int) {
+	siteCacheInfo *sitecacheinfo.SiteCacheInfo) (bool, int) {
 	if config.DefaultBool("spot_fake", false) {
 		return true, 1000
 	}
@@ -215,10 +215,10 @@ func isSpotFlavorMatch(ctx context.Context, spotFlavorMap map[string]*spotHours,
 	var maxCount = math.MaxFloat64
 
 	for flavorID, requestSpot := range spotFlavorMap {
-		spotFlv, ok := nodeInfo.AllocatableSpotFlavor[flavorID]
+		spotFlv, ok := siteCacheInfo.AllocatableSpotFlavor[flavorID]
 		if !ok {
-			logger.Debug(ctx, "Node (%s-%s) do not support required spot flavor (%s).",
-				nodeInfo.Node().SiteID, nodeInfo.Node().Region, flavorID)
+			logger.Debug(ctx, "Site (%s-%s) do not support required spot flavor (%s).",
+				siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region, flavorID)
 			return false, 0
 		}
 
@@ -235,15 +235,15 @@ func isSpotFlavorMatch(ctx context.Context, spotFlavorMap map[string]*spotHours,
 				}
 				cpuHourValue, ok := cpuResource.Finite[key]
 				if !ok {
-					logger.Debug(ctx, "Node (%s-%s),flavor(%s), spot hours key(%s) not exist.",
-						nodeInfo.Node().SiteID, nodeInfo.Node().Region, flavorID, key)
+					logger.Debug(ctx, "Site (%s-%s),flavor(%s), spot hours key(%s) not exist.",
+						siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region, flavorID, key)
 					return false, 0
 				}
 
 				if cpuHourValue < float32(value) {
-					logger.Debug(ctx, "Node (%s-%s),flavor(%s), spot hours key(%s), "+
+					logger.Debug(ctx, "Site (%s-%s),flavor(%s), spot hours key(%s), "+
 						"totalCount: %d, requestCount: %d.",
-						nodeInfo.Node().SiteID, nodeInfo.Node().Region, flavorID, key, cpuHourValue, value)
+						siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region, flavorID, key, cpuHourValue, value)
 					return false, 0
 				}
 
@@ -251,15 +251,15 @@ func isSpotFlavorMatch(ctx context.Context, spotFlavorMap map[string]*spotHours,
 
 				memHourValue, ok := memResource.Finite[key]
 				if !ok {
-					logger.Debug(ctx, "Node (%s-%s),flavor(%s), spot hours key(%s) not exist.",
-						nodeInfo.Node().SiteID, nodeInfo.Node().Region, flavorID, key)
+					logger.Debug(ctx, "Site (%s-%s),flavor(%s), spot hours key(%s) not exist.",
+						siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region, flavorID, key)
 					return false, 0
 				}
 
 				if memHourValue < float32(value) {
-					logger.Debug(ctx, "Node (%s-%s),flavor(%s), spot hours key(%s), "+
+					logger.Debug(ctx, "Site (%s-%s),flavor(%s), spot hours key(%s), "+
 						"totalCount: %d, requestCount: %d.",
-						nodeInfo.Node().SiteID, nodeInfo.Node().Region, flavorID, key, memHourValue, value)
+						siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region, flavorID, key, memHourValue, value)
 					return false, 0
 				}
 
@@ -276,15 +276,15 @@ func isSpotFlavorMatch(ctx context.Context, spotFlavorMap map[string]*spotHours,
 				memResource = spotFlv.MemoryBlockImmediateResource
 			}
 			if float32(requestSpot.Infinite) < cpuResource.Infinite {
-				logger.Debug(ctx, "Node (%s-%s),flavor(%s), totalCount: %d, requestCount: %d.",
-					nodeInfo.Node().SiteID, nodeInfo.Node().Region, flavorID, cpuResource.Infinite, requestSpot.Infinite)
+				logger.Debug(ctx, "Site (%s-%s),flavor(%s), totalCount: %d, requestCount: %d.",
+					siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region, flavorID, cpuResource.Infinite, requestSpot.Infinite)
 				return false, 0
 			}
 			maxCount = math.Min(maxCount, float64(float32(requestSpot.Infinite)/cpuResource.Infinite))
 
 			if float32(requestSpot.Infinite) < memResource.Infinite {
-				logger.Debug(ctx, "Node (%s-%s),flavor(%s), totalCount: %d, requestCount: %d.",
-					nodeInfo.Node().SiteID, nodeInfo.Node().Region, flavorID, memResource.Infinite, requestSpot.Infinite)
+				logger.Debug(ctx, "Site (%s-%s),flavor(%s), totalCount: %d, requestCount: %d.",
+					siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region, flavorID, memResource.Infinite, requestSpot.Infinite)
 				return false, 0
 			}
 
@@ -296,7 +296,7 @@ func isSpotFlavorMatch(ctx context.Context, spotFlavorMap map[string]*spotHours,
 }
 
 func (f *Flavor) Filter(ctx context.Context, cycleState *interfaces.CycleState, stack *types.Stack,
-	nodeInfo *nodeinfo.NodeInfo) *interfaces.Status {
+	siteCacheInfo *sitecacheinfo.SiteCacheInfo) *interfaces.Status {
 	s, err := GetPreFilterState(cycleState)
 	if err != nil {
 		return interfaces.NewStatus(interfaces.Error, err.Error())
@@ -305,26 +305,26 @@ func (f *Flavor) Filter(ctx context.Context, cycleState *interfaces.CycleState, 
 	for _, agg := range s.Aggregates {
 		flavorMap, spotFlavorMap := getFlavorToCount(agg)
 
-		var isCommonMatch, _ = isComFlavorMatch(ctx, flavorMap, nodeInfo)
-		var isSpotMatch, _ = isSpotFlavorMatch(ctx, spotFlavorMap, nodeInfo)
+		var isCommonMatch, _ = isComFlavorMatch(ctx, flavorMap, siteCacheInfo)
+		var isSpotMatch, _ = isSpotFlavorMatch(ctx, spotFlavorMap, siteCacheInfo)
 		if isCommonMatch && isSpotMatch {
 			return nil
 		}
 	}
 
-	msg := fmt.Sprintf("Node (%s-%s) do not support required flavor (%+v).",
-		nodeInfo.Node().SiteID, nodeInfo.Node().Region, s.Aggregates)
+	msg := fmt.Sprintf("Site (%s-%s) do not support required flavor (%+v).",
+		siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region, s.Aggregates)
 	logger.Info(ctx, msg)
 	return interfaces.NewStatus(interfaces.Unschedulable, msg)
 }
 
 // Score invoked at the score extension point.
 func (pl *Flavor) Score(ctx context.Context, state *interfaces.CycleState, stack *types.Stack,
-	nodeID string) (int64, *interfaces.Status) {
-	nodeInfo, err := pl.handle.SnapshotSharedLister().NodeInfos().Get(nodeID)
+	siteID string) (int64, *interfaces.Status) {
+	siteCacheInfo, err := pl.handle.SnapshotSharedLister().SiteCacheInfos().Get(siteID)
 	if err != nil {
-		return 0, interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting node %q from Snapshot: %v",
-			nodeID, err))
+		return 0, interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %q from Snapshot: %v",
+			siteID, err))
 	}
 
 	s, err := GetPreFilterState(state)
@@ -336,8 +336,8 @@ func (pl *Flavor) Score(ctx context.Context, state *interfaces.CycleState, stack
 		flavorMap, spotFlavorMap := getFlavorToCount(agg)
 
 		var maxCount = 0
-		var isCommonMatch, maxComCount = isComFlavorMatch(ctx, flavorMap, nodeInfo)
-		var isSpotMatch, maxSpotCount = isSpotFlavorMatch(ctx, spotFlavorMap, nodeInfo)
+		var isCommonMatch, maxComCount = isComFlavorMatch(ctx, flavorMap, siteCacheInfo)
+		var isSpotMatch, maxSpotCount = isSpotFlavorMatch(ctx, spotFlavorMap, siteCacheInfo)
 		if isCommonMatch && isSpotMatch {
 
 			if len(flavorMap) > 0 && len(spotFlavorMap) > 0 {
@@ -348,7 +348,7 @@ func (pl *Flavor) Score(ctx context.Context, state *interfaces.CycleState, stack
 				maxCount = maxSpotCount
 			}
 
-			interfaces.UpdateNodeSelectorState(state, nodeID,
+			interfaces.UpdateSiteSelectorState(state, siteID,
 				map[string]interface{}{"Flavors": agg.Flavors, "StackMaxCount": maxCount})
 
 			var score int64 = 0

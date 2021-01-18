@@ -2054,8 +2054,6 @@ type CommonInfo struct {
 	// Policy for pulling images for this container
 	// +optional
 	ImagePullPolicy PullPolicy
-	// +optional
-	SecurityGroupId string
 }
 
 // Container represents a single container that is expected to be run on the host.
@@ -2231,6 +2229,8 @@ type VirtualMachine struct {
 	// resource flavor information
 	// +optional
 	Flavors []ResourceFlavor
+	// +optional
+	SecurityGroupId string
 }
 
 // Handler defines a specific action that should be taken
@@ -2418,6 +2418,8 @@ const (
 	PodAssigned PodPhase = "Assigned"
 	// PodBound means that the pod has a cluster bound to.
 	PodBound PodPhase = "Bound"
+	// ClusterScheduled means that openstack vms has been created for the pod
+	ClusterScheduled PodPhase = "Scheduled"
 )
 
 type PodConditionType string

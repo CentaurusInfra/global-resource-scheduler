@@ -606,6 +606,7 @@ spec:
             Ĭ4y£軶: "707"
         resourcesAllocated:
           r蛏豈ɃHŠ: "572"
+        securityGroupId: "325"
         shutdownBehavior: "310"
         trustedImageCertificate:
         - "309"
@@ -823,9 +824,9 @@ spec:
           volumePath: "113"
       vpc: "48"
       workloadInfo:
-      - image: "326"
+      - image: "327"
         imagePullPolicy: 讼ɓȌʟni酛3ƁÀ*f<鴒翁杙Ŧ
-        name: "325"
+        name: "326"
         resizePolicy:
         - policy: Ȣ幟ļ腻Ŭ
           resourceName: zvt莭琽§
@@ -836,14 +837,13 @@ spec:
             -uƻ悖ȩ0Ƹ[Ęİ榌U髷裎$M: "739"
         resourcesAllocated:
           熷谟þ蛯ɰ荶ǉʁ揆ɘȌ脾嚏吐ĠLƐȤ: "322"
-        securityGroupId: "331"
         volumeMounts:
-        - mountPath: "328"
+        - mountPath: "329"
           mountPropagation: 0矀Kʝ瘴I\p[ħsĨɆâĺɗŹ倗S
-          name: "327"
+          name: "328"
           readOnly: true
-          subPath: "329"
-          subPathExpr: "330"
+          subPath: "330"
+          subPathExpr: "331"
 status:
   availableReplicas: 1455943158
   conditions:

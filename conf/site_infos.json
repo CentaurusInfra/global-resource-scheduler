@@ -1,0 +1,27 @@
+{
+  "site_infos": [{
+      "site_id": "site1",
+      "name": "site1",
+      "region": "region1",
+      "availability_zone": "az1",
+      "status": "active",
+      "city": "shenzhen",
+      "province": "guangdong",
+      "area": "huanan",
+      "country": "china",
+      "operator": {
+        "id": "opera1",
+        "name": "unicom",
+        "sa": ""
+      },
+      "eip_network_id": "eip_network_id1",
+      "eip_type_name": "eip_type_name",
+      "eip_cidr": ["10.0.0.0/8", "100.1.0.0/24"],
+      "site_attributes": [{
+        "id": "attr_id1",
+        "site_attr": "key1",
+        "site_attr_value": "value1"
+      }]
+    }
+  ]
+}

@@ -27,37 +27,37 @@ import (
 
 	internalcache "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache"
 	schedulerlisters "k8s.io/kubernetes/globalscheduler/pkg/scheduler/listers"
-	schedulernodeinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/nodeinfo"
+	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 )
 
-// NodeScoreList declares a list of nodes and their scores.
-type NodeScoreList []NodeScore
+// SiteScoreList declares a list of sites and their scores.
+type SiteScoreList []SiteScore
 
-// NodeScore is a struct with node name and score.
-type NodeScore struct {
-	Name       string
+// SiteScore is a struct with sites name and score.
+type SiteScore struct {
+	SiteID     string
 	AZ         string
 	Score      int64
 	StackCount int
 }
 
-func (f NodeScoreList) Len() int { return len(f) }
+func (f SiteScoreList) Len() int { return len(f) }
 
-func (f NodeScoreList) Swap(i, j int) { f[i], f[j] = f[j], f[i] }
+func (f SiteScoreList) Swap(i, j int) { f[i], f[j] = f[j], f[i] }
 
-func (f NodeScoreList) Less(i, j int) bool {
+func (f SiteScoreList) Less(i, j int) bool {
 	return f[i].Score < f[j].Score
 }
 
-// PluginToNodeScores declares a map from plugin name to its NodeScoreList.
-type PluginToNodeScores map[string]NodeScoreList
+// PluginToSiteScores declares a map from plugin name to its SiteScoreList.
+type PluginToSiteScores map[string]SiteScoreList
 
-// NodeToStatusMap declares map from node name to its status.
-type NodeToStatusMap map[string]*Status
+// SiteToStatusMap declares map from siteID to its status.
+type SiteToStatusMap map[string]*Status
 
 // ToString returns string
-func (s NodeToStatusMap) ToString() string {
+func (s SiteToStatusMap) ToString() string {
 	var retStr = ""
 	for key, value := range s {
 		retStr += fmt.Sprintf("%s:[%s]", key, value.Message())
@@ -99,11 +99,11 @@ func (c Code) String() string {
 }
 
 const (
-	// MaxNodeScore is the maximum score a Score plugin is expected to return.
-	MaxNodeScore int64 = 100
+	// MaxSiteScore is the maximum score a Score plugin is expected to return.
+	MaxSiteScore int64 = 100
 
-	// MinNodeScore is the minimum score a Score plugin is expected to return.
-	MinNodeScore int64 = 0
+	// MinSiteScore is the minimum score a Score plugin is expected to return.
+	MinSiteScore int64 = 0
 
 	// MaxTotalScore is the maximum total score.
 	MaxTotalScore int64 = math.MaxInt64
@@ -271,50 +271,50 @@ type FilterPlugin interface {
 	Plugin
 	// Filter is called by the scheduling framework.
 	// All FilterPlugins should return "Success" to declare that
-	// the given node fits the pod. If Filter doesn't return "Success",
+	// the given site fits the pod. If Filter doesn't return "Success",
 	// please refer scheduler/algorithm/predicates/error.go
 	// to set error message.
-	// For the node being evaluated, Filter plugins should look at the passed
-	// nodeInfo reference for this particular node's information (e.g., pods
-	// considered to be running on the node) instead of looking it up in the
-	// NodeInfoSnapshot because we don't guarantee that they will be the same.
+	// For the site being evaluated, Filter plugins should look at the passed
+	// siteCacheInfo reference for this particular site's information (e.g., pods
+	// considered to be running on the site) instead of looking it up in the
+	// siteCacheInfoSnapshot because we don't guarantee that they will be the same.
 	// For example, during preemption, we may pass a copy of the original
-	// nodeInfo object that has some pods removed from it to evaluate the
+	// siteCacheInfo object that has some pods removed from it to evaluate the
 	// possibility of preempting them to schedule the target pod.
-	Filter(ctx context.Context, state *CycleState, stack *types.Stack, nodeInfo *schedulernodeinfo.NodeInfo) *Status
+	Filter(ctx context.Context, state *CycleState, stack *types.Stack, siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) *Status
 }
 
 // PreScorePlugin is an interface for Pre-score plugin. Pre-score is an
-// informational extension point. Plugins will be called with a list of nodes
+// informational extension point. Plugins will be called with a list of sites
 // that passed the filtering phase. A plugin may use this data to update internal
 // state or to generate logs/metrics.
 type PreScorePlugin interface {
 	Plugin
-	// PreScore is called by the scheduling framework after a list of nodes
+	// PreScore is called by the scheduling framework after a list of sites
 	// passed the filtering phase. All prescore plugins must return success or
 	// the pod will be rejected
-	PreScore(ctx context.Context, state *CycleState, pod *types.Stack, nodes []*types.SiteNode) *Status
+	PreScore(ctx context.Context, state *CycleState, pod *types.Stack, sites []*types.Site) *Status
 }
 
 // ScorePlugin is an interface that must be implemented by "score" plugins to rank
-// nodes that passed the filtering phase.
+// sites that passed the filtering phase.
 type ScorePlugin interface {
 	Plugin
-	// Score is called on each filtered node. It must return success and an integer
-	// indicating the rank of the node. All scoring plugins must return success or
+	// Score is called on each filtered site. It must return success and an integer
+	// indicating the rank of the site. All scoring plugins must return success or
 	// the pod will be rejected.
-	Score(ctx context.Context, state *CycleState, p *types.Stack, nodeName string) (int64, *Status)
+	Score(ctx context.Context, state *CycleState, p *types.Stack, siteID string) (int64, *Status)
 }
 
 // PostScorePlugin is an interface that must be implemented by "PostScore" plugins to rank
-// nodes that passed the filtering phase.
+// sites that passed the filtering phase.
 type PostScorePlugin interface {
 	Plugin
-	// Score is called on each filtered node. It must return success and an integer
-	// indicating the rank of the node. All scoring plugins must return success or
+	// Score is called on each filtered site. It must return success and an integer
+	// indicating the rank of the site. All scoring plugins must return success or
 	// the pod will be rejected.
 	PostScore(ctx context.Context, state *CycleState, p *types.Stack,
-		nodeScoreList NodeScoreList) (NodeScoreList, *Status)
+		siteScoreList SiteScoreList) (SiteScoreList, *Status)
 }
 
 // ReservePlugin is an interface for Reserve plugins. These plugins are called
@@ -327,7 +327,7 @@ type ReservePlugin interface {
 	Plugin
 	// Reserve is called by the scheduling framework when the scheduler cache is
 	// updated.
-	Reserve(ctx context.Context, state *CycleState, p *types.Stack, nodeName string) *Status
+	Reserve(ctx context.Context, state *CycleState, p *types.Stack, siteID string) *Status
 }
 
 // PreBindPlugin is an interface that must be implemented by "prebind" plugins.
@@ -336,18 +336,18 @@ type PreBindPlugin interface {
 	Plugin
 	// PreBind is called before binding a pod. All prebind plugins must return
 	// success or the pod will be rejected and won't be sent for binding.
-	PreBind(ctx context.Context, state *CycleState, p *types.Stack, nodeName string) *Status
+	PreBind(ctx context.Context, state *CycleState, p *types.Stack, siteID string) *Status
 }
 
 // PostBindPlugin is an interface that must be implemented by "postbind" plugins.
-// These plugins are called after a pod is successfully bound to a node.
+// These plugins are called after a pod is successfully bound to a site.
 type PostBindPlugin interface {
 	Plugin
 	// PostBind is called after a pod is successfully bound. These plugins are
 	// informational. A common application of this extension point is for cleaning
 	// up. If a plugin needs to clean-up its state after a pod is scheduled and
 	// bound, PostBind is the extension point that it should register.
-	PostBind(ctx context.Context, state *CycleState, p *types.Stack, nodeName string)
+	PostBind(ctx context.Context, state *CycleState, p *types.Stack, siteID string)
 }
 
 // UnreservePlugin is an interface for Unreserve plugins. This is an informational
@@ -358,11 +358,11 @@ type UnreservePlugin interface {
 	Plugin
 	// Unreserve is called by the scheduling framework when a reserved pod was
 	// rejected in a later phase.
-	Unreserve(ctx context.Context, state *CycleState, p *types.Stack, nodeName string)
+	Unreserve(ctx context.Context, state *CycleState, p *types.Stack, siteID string)
 }
 
 // PermitPlugin is an interface that must be implemented by "permit" plugins.
-// These plugins are called before a pod is bound to a node.
+// These plugins are called before a pod is bound to a site.
 type PermitPlugin interface {
 	Plugin
 	// Permit is called before binding a pod (and before prebind plugins). Permit
@@ -371,11 +371,11 @@ type PermitPlugin interface {
 	// The pod will also be rejected if the wait timeout or the pod is rejected while
 	// waiting. Note that if the plugin returns "wait", the framework will wait only
 	// after running the remaining plugins given that no other plugin rejects the pod.
-	Permit(ctx context.Context, state *CycleState, p *types.Stack, nodeName string) (*Status, time.Duration)
+	Permit(ctx context.Context, state *CycleState, p *types.Stack, siteID string) (*Status, time.Duration)
 }
 
 // BindPlugin is an interface that must be implemented by "bind" plugins. Bind
-// plugins are used to bind a pod to a Node.
+// plugins are used to bind a pod to a Site.
 type BindPlugin interface {
 	Plugin
 	// Bind plugins will not be called until all pre-bind plugins have completed. Each
@@ -384,7 +384,7 @@ type BindPlugin interface {
 	// remaining bind plugins are skipped. When a bind plugin does not handle a pod,
 	// it must return Skip in its Status code. If a bind plugin returns an Error, the
 	// pod is rejected and will not be bound.
-	Bind(ctx context.Context, state *CycleState, p *types.Stack, nodeName string) *Status
+	Bind(ctx context.Context, state *CycleState, p *types.Stack, siteID string) *Status
 }
 
 // StrategyPlugin is an interface that must be implemented by "strategy" plugins. strategy
@@ -394,7 +394,7 @@ type StrategyPlugin interface {
 
 	//Strategy plugins will will not be called until all score plugins have completed
 	Strategy(ctx context.Context, state *CycleState,
-		allocations *types.Allocation, nodeList NodeScoreList) (NodeScoreList, *Status)
+		allocations *types.Allocation, siteScoreList SiteScoreList) (SiteScoreList, *Status)
 }
 
 // Framework manages the set of plugins in use by the scheduling framework.
@@ -411,40 +411,40 @@ type Framework interface {
 	RunPreFilterPlugins(ctx context.Context, state *CycleState, stack *types.Stack) *Status
 
 	// RunFilterPlugins runs the set of configured filter plugins for pod on
-	// the given node. Note that for the node being evaluated, the passed nodeInfo
-	// reference could be different from the one in NodeInfoSnapshot map (e.g., pods
-	// considered to be running on the node could be different). For example, during
-	// preemption, we may pass a copy of the original nodeInfo object that has some pods
+	// the given site. Note that for the site being evaluated, the passed site
+	// reference could be different from the one in Snapshot map (e.g., pods
+	// considered to be running on the site could be different). For example, during
+	// preemption, we may pass a copy of the original site object that has some pods
 	// removed from it to evaluate the possibility of preempting them to
 	// schedule the target pod.
 	RunFilterPlugins(ctx context.Context, state *CycleState, stack *types.Stack,
-		nodeInfo *schedulernodeinfo.NodeInfo) PluginToStatus
+		siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) PluginToStatus
 
 	// RunPreScorePlugins runs the set of configured pre-score plugins. If any
 	// of these plugins returns any status other than "Success", the given pod is rejected.
-	RunPreScorePlugins(ctx context.Context, state *CycleState, stack *types.Stack, nodes []*types.SiteNode) *Status
+	RunPreScorePlugins(ctx context.Context, state *CycleState, stack *types.Stack, sites []*types.Site) *Status
 
 	// RunScorePlugins runs the set of configured scoring plugins. It returns a map that
-	// stores for each scoring plugin name the corresponding NodeScoreList(s).
+	// stores for each scoring plugin name the corresponding SiteScoreList(s).
 	// It also returns *Status, which is set to non-success if any of the plugins returns
 	// a non-success status.
 	RunScorePlugins(ctx context.Context, state *CycleState, stack *types.Stack,
-		nodes []*types.SiteNode) (PluginToNodeScores, *Status)
+		sites []*types.Site) (PluginToSiteScores, *Status)
 
 	// RunPreBindPlugins runs the set of configured prebind plugins. It returns
 	// *Status and its code is set to non-success if any of the plugins returns
 	// anything but Success. If the Status code is "Unschedulable", it is
 	// considered as a scheduling check failure, otherwise, it is considered as an
 	// internal error. In either case the pod is not going to be bound.
-	RunPreBindPlugins(ctx context.Context, state *CycleState, stack *types.Stack, nodeName string) *Status
+	RunPreBindPlugins(ctx context.Context, state *CycleState, stack *types.Stack, siteID string) *Status
 
 	// RunReservePlugins runs the set of configured reserve plugins. If any of these
 	// plugins returns an error, it does not continue running the remaining ones and
 	// returns the error. In such case, pod will not be scheduled.
-	RunReservePlugins(ctx context.Context, state *CycleState, stack *types.Stack, nodeName string) *Status
+	RunReservePlugins(ctx context.Context, state *CycleState, stack *types.Stack, siteID string) *Status
 
 	// RunUnreservePlugins runs the set of configured unreserve plugins.
-	RunUnreservePlugins(ctx context.Context, state *CycleState, stack *types.Stack, nodeName string)
+	RunUnreservePlugins(ctx context.Context, state *CycleState, stack *types.Stack, siteID string)
 
 	// RunPermitPlugins runs the set of configured permit plugins. If any of these
 	// plugins returns a status other than "Success" or "Wait", it does not continue
@@ -452,17 +452,17 @@ type Framework interface {
 	// plugins returns "Wait", then this function will create and add waiting pod
 	// to a map of currently waiting pods and return status with "Wait" code.
 	// Pod will remain waiting pod for the minimum duration returned by the permit plugins.
-	RunPermitPlugins(ctx context.Context, state *CycleState, stack *types.Stack, nodeName string) *Status
+	RunPermitPlugins(ctx context.Context, state *CycleState, stack *types.Stack, siteID string) *Status
 
 	// RunBindPlugins runs the set of configured bind plugins. A bind plugin may choose
 	// whether or not to handle the given Pod. If a bind plugin chooses to skip the
 	// binding, it should return code=5("skip") status. Otherwise, it should return "Error"
 	// or "Success". If none of the plugins handled binding, RunBindPlugins returns code=5("skip") status.
-	RunBindPlugins(ctx context.Context, state *CycleState, stack *types.Stack, nodeName string) *Status
+	RunBindPlugins(ctx context.Context, state *CycleState, stack *types.Stack, siteID string) *Status
 
 	//RunStrategyPlugins runs the set of configured strategy plugins.
 	RunStrategyPlugins(ctx context.Context, state *CycleState,
-		allocations *types.Allocation, nodeList NodeScoreList) (NodeScoreList, *Status)
+		allocations *types.Allocation, siteScoreList SiteScoreList) (SiteScoreList, *Status)
 
 	// HasFilterPlugins returns true if at least one filter plugin is defined.
 	HasFilterPlugins() bool
@@ -475,7 +475,7 @@ type Framework interface {
 // passed to the plugin factories at the time of plugin initialization. Plugins
 // must store and use this handle to call framework functions.
 type FrameworkHandle interface {
-	// SnapshotSharedLister returns listers from the latest NodeInfo Snapshot. The snapshot
+	// SnapshotSharedLister returns listers from the latest SiteCacheInfo Snapshot. The snapshot
 	// is taken at the beginning of a scheduling cycle and remains unchanged until
 	// a pod finishes "Permit" point. There is no guarantee that the information
 	// remains unchanged in the binding phase of scheduling, so plugins in the binding

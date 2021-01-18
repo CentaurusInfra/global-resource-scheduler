@@ -1,0 +1,26 @@
+{
+    "site_resources": [{
+            "site_id": "region1|az1",
+            "region": "region1",
+            "availability_zone": "az1",
+            "hosts": [{
+                "host_id": "host_id",
+                "host_name": "name1",
+                "total_disk": 2000,
+                "used_disk": 1000,
+                "total_vcpus": 2000,
+                "used_vcpus": 1000,
+                "total_mem": 2000,
+                "used_mem": 1000,
+                "state": "active",
+                "status": "running",
+                "resource_type": "resource_type_1",
+                "cpu_allocation_ratio": "2.0",
+                "ecs_performance_type": "ecs_performance_type1",
+                "max_count": 100
+            }
+            ]
+        }
+    ]
+}
+
