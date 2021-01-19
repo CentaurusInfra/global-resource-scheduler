@@ -29,5 +29,8 @@ func InitKlog(namespace, name, logfile, loglevel string) {
 	flag.Set("log_file", logfile+"."+namespace+"_"+name)
 	flag.Set("v", loglevel)
 	go wait.Forever(klog.Flush, 5*time.Second)
-	defer klog.Flush()
+}
+
+func FlushKlog() {
+	klog.Flush()
 }

@@ -88,7 +88,7 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		clusterIpMap:        make(map[string]string),
 		tokenMap:            make(map[string]string),
 		pid:                 os.Getgid(),
-		clusterRange:        dispatcher.Spec.Range,
+		clusterRange:        dispatcher.Spec.ClusterRange,
 	}
 }
 
@@ -115,10 +115,10 @@ func (p *Process) Run(quit chan struct{}) {
 				klog.Warningf("Failed to convert a new object  %+v to a dispatcher", new)
 				return
 			}
-			if !reflect.DeepEqual(oldDispatcher.Spec.Range, newDispatcher.Spec.Range) {
-				p.clusterRange = newDispatcher.Spec.Range
+			if !reflect.DeepEqual(oldDispatcher.Spec.ClusterRange, newDispatcher.Spec.ClusterRange) {
+				p.clusterRange = newDispatcher.Spec.ClusterRange
 				p.clusterSelectorCh <- fmt.Sprintf("metadata.name=gte:%s,metadata.name=lte:%s",
-					newDispatcher.Spec.Range.Start, newDispatcher.Spec.Range.End)
+					newDispatcher.Spec.ClusterRange.Start, newDispatcher.Spec.ClusterRange.End)
 				p.podSelectorCh <- fmt.Sprintf("spec.clusterName=gte:%s,spec.clusterName=lte:%s",
 					p.clusterRange.Start, p.clusterRange.End)
 			}

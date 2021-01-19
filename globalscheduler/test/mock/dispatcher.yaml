@@ -3,6 +3,6 @@ kind: Dispatcher
 metadata:
   name: d1
 spec:
-  range:
+  clusterRange:
     start: "a"
     end: "d"

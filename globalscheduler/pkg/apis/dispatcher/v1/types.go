@@ -28,7 +28,7 @@ type DispatcherRange struct {
 // DispatcherSpec defines the desired state of dispatcher
 type DispatcherSpec struct {
 	// Cluster is an array that stores the name of clusters
-	Range DispatcherRange `json:"range,omitempty"`
+	ClusterRange DispatcherRange `json:"clusterRange,omitempty"`
 }
 
 // +genclient

@@ -34,6 +34,7 @@ func main() {
 
 	flag.Parse()
 	util.InitKlog(*namespace, *name, *logFile, *logLevel)
+	defer util.FlushKlog()
 
 	config, err := clientcmd.BuildConfigFromFlags("", *configFile)
 	if err != nil {

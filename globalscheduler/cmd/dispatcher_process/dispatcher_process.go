@@ -33,7 +33,7 @@ func main() {
 
 	flag.Parse()
 	util.InitKlog(*namespace, *name, *logFile, *logLevel)
-
+	defer util.FlushKlog()
 	config, err := clientcmd.BuildConfigFromFlags("", *configFile)
 	if err != nil {
 		klog.Fatal("Failed to load config %v with errors %v", *configFile, err)

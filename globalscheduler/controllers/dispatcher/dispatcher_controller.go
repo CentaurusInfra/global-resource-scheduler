@@ -452,7 +452,7 @@ func (dc *DispatcherController) balance() error {
 	if len(dispatchers) > 0 && len(clusters) > 0 {
 		ranges := util.EvenlyDivide(len(dispatchers), int64(len(clusters)-1))
 		for idx, dispatcher := range dispatchers {
-			dispatcher.Spec.Range = dispatchercrdv1.DispatcherRange{Start: clusters[ranges[idx][0]].GetName(), End: clusters[ranges[idx][1]].GetName()}
+			dispatcher.Spec.ClusterRange = dispatchercrdv1.DispatcherRange{Start: clusters[ranges[idx][0]].GetName(), End: clusters[ranges[idx][1]].GetName()}
 			if _, err = dc.dispatcherclient.GlobalschedulerV1().Dispatchers(corev1.NamespaceDefault).Update(dispatcher); err != nil {
 				return fmt.Errorf("updating clusters got error %v", err)
 			}
