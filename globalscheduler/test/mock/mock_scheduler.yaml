@@ -4,4 +4,4 @@ metadata:
   name: mockscheduler
 spec:
   tag: "1"
-  cluster: ["c1", "c2"]
+  cluster: ["c1"]
