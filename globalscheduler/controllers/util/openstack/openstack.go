@@ -80,14 +80,14 @@ func DeleteInstance(host string, authToken string, instanceID string) error {
 func ServerCreate(host string, authToken string, manifest *v1.PodSpec) (string, error) {
 	serverCreateRequestURL := "http://" + host + "/compute/v2.1/servers"
 	serverStruct := server{
-		Name:      manifest.WorkloadInfo[0].Name,
-		ImageRef:  manifest.WorkloadInfo[0].Image,
+		Name:      manifest.VirtualMachine.Name,
+		ImageRef:  manifest.VirtualMachine.Image,
 		FlavorRef: manifest.VirtualMachine.Flavors[0].FlavorID,
 		Networks: []map[string]string{
 			{"uuid": manifest.Nics[0].Name},
 		},
 		SecurityGroups: []map[string]string{
-			{"name": manifest.WorkloadInfo[0].SecurityGroupId},
+			{"name": manifest.VirtualMachine.SecurityGroupId},
 		},
 		Metadata: map[string]string{
 			"ClusterName": manifest.ClusterName,

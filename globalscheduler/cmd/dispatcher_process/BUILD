@@ -7,8 +7,8 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//globalscheduler/controllers/dispatcher:go_default_library",
+        "//globalscheduler/controllers/util:go_default_library",
         "//staging/src/k8s.io/client-go/tools/clientcmd:go_default_library",
-        "//staging/src/k8s.io/component-base/logs:go_default_library",
         "//vendor/k8s.io/klog:go_default_library",
     ],
 )

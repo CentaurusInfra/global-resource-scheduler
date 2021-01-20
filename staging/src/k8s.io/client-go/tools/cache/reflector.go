@@ -196,12 +196,21 @@ var internalPackages = []string{"client-go/tools/cache/"}
 func (r *Reflector) Run(stopCh <-chan struct{}) {
 	klog.V(3).Infof("Starting reflector %v (%s) from %s", r.expectedType, r.resyncPeriod, r.name)
 	wait.Until(func() {
-		if len(r.filterBounds) == 0 {
+		if len(r.filterBounds) == 0 && r.selectorCh == nil {
 			if err := r.ListAndWatch(stopCh); err != nil {
 				utilruntime.HandleError(err)
 			}
 		} else if r.selectorCh != nil {
-
+			for {
+				if err := r.ListAndWatch(stopCh); err != nil {
+					if err == errorResetFilterSelectorRequested {
+						klog.V(4).Infof("Filter selector reset message received, redo ListAndWatch with selectorCh")
+						continue
+					}
+					utilruntime.HandleError(err)
+					break
+				}
+			}
 		} else {
 			for i, fb := range r.filterBounds {
 				go func(index int, fB filterBound) {
