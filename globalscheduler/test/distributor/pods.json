@@ -1,0 +1,43 @@
+{
+  "kind":"Pod",
+  "apiVersion":"v1",
+  "metadata":{
+    "name":"nginx",
+    "labels":{
+      "run":"nginx"
+    }
+  },
+  "spec":{
+    "resourceType": "vm",
+    "virtualMachine":{
+      "name": "testvm",
+      "image": "9e2b5eb9-3bb0-469b-b901-a75d87e4d958",
+      "securityGroupId": "5e9513a8-b779-4cb9-825b-a1e994f28ddc",
+      "keyPairName": "demo-keypair",
+      "flavors":[
+        {
+          "flavorID": "3"
+        }
+      ],
+      "resourceCommonInfo":{
+        "count": 1,
+        "selector": {
+          "geoLocation": {
+              "city": "Renton"
+          },
+          "regions": [
+            {
+              "region": "NE"
+            }
+          ]
+        }
+      }
+    },
+    "nics":[
+      {
+        "name": "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+      }
+    ]
+  }
+}
+
