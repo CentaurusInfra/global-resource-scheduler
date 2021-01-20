@@ -16,8 +16,7 @@ spec:
     city: NewYork
     country: US
     province: NewYork
-  homescheduler: scheduler2
-  ipaddress: 10.0.0.1
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -47,8 +46,7 @@ spec:
     city: Boston
     country: US
     province: Massachusettes
-  homescheduler: scheduler2
-  ipaddress: 10.0.0.2
+  ipaddress: 34.218.224.247
   memcapacity: 512
   operator:
     operator: globalscheduler
@@ -76,8 +74,7 @@ spec:
     city: Bellevue
     country: US
     province: Washington
-  homescheduler: scheduler2
-  ipaddress: 10.0.0.2
+  ipaddress: 34.218.224.247
   memcapacity: 512
   operator:
     operator: globalscheduler
@@ -109,8 +106,7 @@ spec:
     city: SanFrancisco
     country: US
     province: California
-  homescheduler: scheduler1
-  ipaddress: 10.0.0.4
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -139,8 +135,7 @@ spec:
     city: Orlando
     country: US
     province: Florida
-  homescheduler: scheduler2
-  ipaddress: 10.0.0.5
+  ipaddress: 34.218.224.247
   memcapacity: 512
   region:
     availabilityzone: us-south-1
@@ -168,8 +163,7 @@ spec:
     city: Atlanta
     country: US
     province: Georgia
-  homescheduler: scheduler1
-  ipaddress: 10.0.0.6
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -203,8 +197,7 @@ spec:
     city: TwinCity
     country: US
     province: Minnesota
-  homescheduler: scheduler1
-  ipaddress: 10.0.0.7
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -238,8 +231,7 @@ spec:
     city: Ankorage
     country: US
     province: Alaska
-  homescheduler: scheduler1
-  ipaddress: 10.0.0.8
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -273,8 +265,7 @@ spec:
     city: Chicago
     country: US
     province: Illinois
-  homescheduler: scheduler3
-  ipaddress: 10.0.0.9
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -308,8 +299,7 @@ spec:
     city: Omaha
     country: US
     province: Nebraska
-  homescheduler: scheduler3
-  ipaddress: 10.0.0.10
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -343,8 +333,7 @@ spec:
     city: Omaha
     country: US
     province: Nebraska
-  homescheduler: scheduler3
-  ipaddress: 10.0.0.11
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -378,8 +367,7 @@ spec:
     city: Chicago
     country: US
     province: Illinois
-  homescheduler: scheduler1
-  ipaddress: 10.0.0.12
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -413,8 +401,7 @@ spec:
     city: Ankorage
     country: US
     province: Alaska
-  homescheduler: scheduler1
-  ipaddress: 10.0.0.13
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -448,8 +435,7 @@ spec:
     city: TwinCity
     country: US
     province: Minnesota
-  homescheduler: scheduler1
-  ipaddress: 10.0.0.14
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -483,8 +469,7 @@ spec:
     city: Atlanta
     country: US
     province: Georgia
-  homescheduler: scheduler1
-  ipaddress: 10.0.0.15
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -518,8 +503,7 @@ spec:
     city: Orlando
     country: US
     province: Florida
-  homescheduler: scheduler2
-  ipaddress: 10.0.0.16
+  ipaddress: 34.218.224.247
   memcapacity: 512
   region:
     availabilityzone: us-south-1
@@ -547,8 +531,7 @@ spec:
     city: Bellevue
     country: US
     province: Washington
-  homescheduler: scheduler1
-  ipaddress: 10.0.0.18
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -578,8 +561,7 @@ spec:
     city: Boston
     country: US
     province: Massachusettes
-  homescheduler: scheduler2
-  ipaddress: 10.0.0.19
+  ipaddress: 34.218.224.247
   memcapacity: 512
   operator:
     operator: globalscheduler
@@ -611,8 +593,7 @@ spec:
     city: NewYork
     country: US
     province: NewYork
-  homescheduler: scheduler1
-  ipaddress: 10.0.0.20
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -642,8 +623,7 @@ spec:
     city: Boston
     country: US
     province: Massachusettes
-  homescheduler: scheduler2
-  ipaddress: 10.0.0.21
+  ipaddress: 34.218.224.247
   memcapacity: 512
   operator:
     operator: globalscheduler
@@ -675,8 +655,7 @@ spec:
     city: SanFrancisco
     country: US
     province: California
-  homescheduler: scheduler1
-  ipaddress: 10.0.0.22
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -705,8 +684,7 @@ spec:
     city: Atlanta
     country: US
     province: Georgia
-  homescheduler: scheduler1
-  ipaddress: 10.0.0.23
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -740,8 +718,7 @@ spec:
     city: Ankorage
     country: US
     province: Alaska
-  homescheduler: scheduler1
-  ipaddress: 10.0.0.24
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -775,8 +752,7 @@ spec:
     city: Omaha
     country: US
     province: Nebraska
-  homescheduler: scheduler1
-  ipaddress: 10.0.0.25
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -810,8 +786,7 @@ spec:
     city: NewYork
     country: US
     province: NewYork
-  homescheduler: scheduler1
-  ipaddress: 10.0.0.26
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -845,8 +820,7 @@ spec:
     city: Bellevue
     country: US
     province: Washington
-  homescheduler: scheduler1
-  ipaddress: 10.0.0.27
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -880,8 +854,7 @@ spec:
     city: Orlando
     country: US
     province: Florida
-  homescheduler: scheduler2
-  ipaddress: 10.0.0.28
+  ipaddress: 34.218.224.247
   memcapacity: 512
   region:
     availabilityzone: us-south-1
@@ -909,8 +882,7 @@ spec:
     city: TwinCity
     country: US
     province: Minnesota
-  homescheduler: scheduler1
-  ipaddress: 10.0.0.29
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
@@ -944,8 +916,7 @@ spec:
     city: Chicago
     country: US
     province: Illinois
-  homescheduler: scheduler3
-  ipaddress: 10.0.0.30
+  ipaddress: 34.218.224.247
   memcapacity: 256
   operator:
     operator: globalscheduler
