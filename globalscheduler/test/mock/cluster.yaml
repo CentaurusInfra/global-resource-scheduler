@@ -1,0 +1,34 @@
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: c1
+  labels:
+    app: test
+spec:
+  ipaddress: "34.218.224.247"
+  geolocation:
+    city: "BBB"
+    province: "King"
+    area: "Downtown"
+    country: "USA"
+  region:
+    region: "NW"
+    availabilityzone: "az"
+  operator:
+    operator: "None"
+  flavors:
+    - flavorid: "1"
+      totalcapacity: 100
+    - flavorid: "2"
+      totalcapacity: 200
+  storage:
+    - typeid: "ssd"
+      storagecapacity: 12
+    - typeid: "sas"
+      storagecapacity: 2200
+  eipcapacity: 100
+  cpucapacity: 200
+  memcapacity: 300
+  serverprice: 400
+  homescheduler: "mockscheduler"
+  homedispatcher: "mockdispatcher"
