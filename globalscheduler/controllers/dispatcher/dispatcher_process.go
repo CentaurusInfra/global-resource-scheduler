@@ -44,7 +44,6 @@ type Process struct {
 	clusterclientset    *clusterclientset.Clientset
 	clientset           *kubernetes.Clientset
 	podQueue            chan *v1.Pod
-	podSelectorCh       chan string
 	clusterIpMap        map[string]string
 	tokenMap            map[string]string
 	clusterRange        dispatcherv1.DispatcherRange
@@ -81,7 +80,6 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		clusterclientset:    clusterClientset,
 		dispatcherClientset: dispatcherClientset,
 		podQueue:            podQueue,
-		podSelectorCh:       make(chan string, 1),
 		clusterIpMap:        make(map[string]string),
 		tokenMap:            make(map[string]string),
 		pid:                 os.Getgid(),
@@ -102,20 +100,16 @@ func (p *Process) Run(quit chan struct{}) {
 			}
 		},
 		UpdateFunc: func(old, new interface{}) {
-			oldDispatcher, ok := old.(*dispatcherv1.Dispatcher)
-			if !ok {
-				klog.Warningf("Failed to convert a old object  %+v to a dispatcher", old)
-				return
-			}
 			newDispatcher, ok := new.(*dispatcherv1.Dispatcher)
 			if !ok {
 				klog.Warningf("Failed to convert a new object  %+v to a dispatcher", new)
 				return
 			}
-			if !reflect.DeepEqual(oldDispatcher.Spec.ClusterRange, newDispatcher.Spec.ClusterRange) {
+			if !reflect.DeepEqual(p.clusterRange, newDispatcher.Spec.ClusterRange) {
 				p.clusterRange = newDispatcher.Spec.ClusterRange
-				p.podSelectorCh <- fmt.Sprintf("spec.clusterName=gte:%s,spec.clusterName=lte:%s",
-					p.clusterRange.Start, p.clusterRange.End)
+				if err := syscall.Exec(os.Args[0], os.Args, os.Environ()); err != nil {
+					klog.Fatal(err)
+				}
 			}
 		},
 	})
@@ -128,6 +122,7 @@ func (p *Process) Run(quit chan struct{}) {
 				klog.Warningf("Failed to convert an added object  %+v to a pod", obj)
 				return
 			}
+			klog.V(4).Infof("Pod %s with cluster %s has been added", pod.Name, pod.Spec.ClusterName)
 			go func() {
 				p.podQueue <- pod
 			}()
@@ -141,6 +136,7 @@ func (p *Process) Run(quit chan struct{}) {
 				klog.Warningf("Failed to convert an deleted object  %+v to a pod", obj)
 				return
 			}
+			klog.V(4).Infof("Pod %s with cluster %s has been deleted", pod.Name, pod.Spec.ClusterName)
 			go func() {
 				p.podQueue <- pod
 			}()
@@ -151,12 +147,11 @@ func (p *Process) Run(quit chan struct{}) {
 }
 
 func (p *Process) initPodInformer(phase v1.PodPhase, funcs cache.ResourceEventHandlerFuncs) cache.SharedIndexInformer {
-	lw := cache.NewListWatchFromClient(p.clientset.CoreV1(), string(v1.ResourcePods), metav1.NamespaceAll, fields.Everything())
+	podSelector := fields.ParseSelectorOrDie(fmt.Sprintf("status.phase=%s,spec.clusterName=gte:%s,spec.clusterName=lte:%s", string(phase),
+		p.clusterRange.Start, p.clusterRange.End))
+	lw := cache.NewListWatchFromClient(p.clientset.CoreV1(), string(v1.ResourcePods), metav1.NamespaceAll, podSelector)
 	podInformer := cache.NewSharedIndexInformer(lw, &v1.Pod{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
 	podInformer.AddEventHandler(funcs)
-	podInformer.AddSelectorCh(p.podSelectorCh)
-	p.podSelectorCh <- fmt.Sprintf("status.phase=%s, spec.clusterName=gte:%s,spec.clusterName=lte:%s", string(phase),
-		p.clusterRange.Start, p.clusterRange.End)
 	return podInformer
 }
 
