@@ -84,7 +84,7 @@ type controller struct {
 type Controller interface {
 	Run(stopCh <-chan struct{})
 	RunWithReset(stopCh <-chan struct{}, filterBounds []filterBound)
-	RunWithSelectorCh(stopCh <-chan struct{}, selectorCh <- chan string)
+	RunWithSelectorCh(stopCh <-chan struct{}, selectorCh <-chan string)
 	HasSynced() bool
 	LastSyncResourceVersion() string
 }

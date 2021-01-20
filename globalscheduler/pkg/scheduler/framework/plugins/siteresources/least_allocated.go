@@ -19,7 +19,7 @@ package siteresources
 import (
 	"context"
 	"fmt"
-	
+
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 )

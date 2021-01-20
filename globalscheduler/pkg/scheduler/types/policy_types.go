@@ -69,4 +69,3 @@ type PredicatePolicy struct {
 	// Holds the parameters to configure the given predicate
 	Argument *PredicateArgument
 }
-

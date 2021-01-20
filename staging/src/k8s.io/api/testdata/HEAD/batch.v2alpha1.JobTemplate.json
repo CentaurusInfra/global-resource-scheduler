@@ -1016,12 +1016,13 @@
                   "interruptionPolicy": "341"
                 }
               }
-            ]
+            ],
+            "securityGroupId": "342"
           },
           "workloadInfo": [
             {
-              "name": "342",
-              "image": "343",
+              "name": "343",
+              "image": "344",
               "resources": {
                 "limits": {
                   "KŅ/": "674"
@@ -1041,16 +1042,15 @@
               ],
               "volumeMounts": [
                 {
-                  "name": "344",
+                  "name": "345",
                   "readOnly": true,
-                  "mountPath": "345",
-                  "subPath": "346",
+                  "mountPath": "346",
+                  "subPath": "347",
                   "mountPropagation": "iɥ嵐sC8",
-                  "subPathExpr": "347"
+                  "subPathExpr": "348"
                 }
               ],
-              "imagePullPolicy": "Âɘɢ鬍熖B芭花ª瘡蟦JBʟ",
-              "securityGroupId": "348"
+              "imagePullPolicy": "Âɘɢ鬍熖B芭花ª瘡蟦JBʟ"
             }
           ],
           "restartPolicy": "録²Ŏ)/灩聋3趐囨鏻砅邻爥",
