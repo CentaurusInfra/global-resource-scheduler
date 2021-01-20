@@ -215,6 +215,10 @@ func (p *Process) ScheduleOne() {
 		err = p.bindPod(pod, scheduler)
 		if err != nil {
 			klog.Warningf("Failed to assign scheduler %v to pod %v with the error %vs", scheduler, pod, err)
+			pod.Status.Phase = v1.PodFailed
+			if _, err = p.clientset.CoreV1().Pods(p.namespace).UpdateStatus(pod); err != nil {
+				klog.Warningf("Failed to update pod %v - %v status to failed", pod.Namespace, pod.Name)
+			}
 			return
 		}
 

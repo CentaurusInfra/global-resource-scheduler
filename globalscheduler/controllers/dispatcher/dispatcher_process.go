@@ -28,7 +28,6 @@ import (
 	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/controllers/util/openstack"
 	clusterclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
-	clusterv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 	dispatcherclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/client/clientset/versioned"
 	dispatcherv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/v1"
 	"os"
@@ -46,7 +45,6 @@ type Process struct {
 	clientset           *kubernetes.Clientset
 	podQueue            chan *v1.Pod
 	podSelectorCh       chan string
-	clusterSelectorCh   chan string
 	clusterIpMap        map[string]string
 	tokenMap            map[string]string
 	clusterRange        dispatcherv1.DispatcherRange
@@ -84,7 +82,6 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		dispatcherClientset: dispatcherClientset,
 		podQueue:            podQueue,
 		podSelectorCh:       make(chan string, 1),
-		clusterSelectorCh:   make(chan string, 1),
 		clusterIpMap:        make(map[string]string),
 		tokenMap:            make(map[string]string),
 		pid:                 os.Getgid(),
@@ -117,8 +114,6 @@ func (p *Process) Run(quit chan struct{}) {
 			}
 			if !reflect.DeepEqual(oldDispatcher.Spec.ClusterRange, newDispatcher.Spec.ClusterRange) {
 				p.clusterRange = newDispatcher.Spec.ClusterRange
-				p.clusterSelectorCh <- fmt.Sprintf("metadata.name=gte:%s,metadata.name=lte:%s",
-					newDispatcher.Spec.ClusterRange.Start, newDispatcher.Spec.ClusterRange.End)
 				p.podSelectorCh <- fmt.Sprintf("spec.clusterName=gte:%s,spec.clusterName=lte:%s",
 					p.clusterRange.Start, p.clusterRange.End)
 			}
@@ -126,71 +121,41 @@ func (p *Process) Run(quit chan struct{}) {
 	})
 
 	go dispatcherInformer.Run(quit)
-	podInformer := p.initPodInformer()
-	go podInformer.Run(quit)
-	clusterInfomer := p.initClusterInformer()
-	go clusterInfomer.Run(quit)
-	wait.Until(p.SendPodToCluster, 0, quit)
-}
-
-func (p *Process) initClusterInformer() cache.SharedIndexInformer {
-	lw := cache.NewListWatchFromClient(p.clusterclientset.GlobalschedulerV1(), "clusters", metav1.NamespaceAll, fields.Everything())
-	clusterInformer := cache.NewSharedIndexInformer(lw, &v1.Pod{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
-	clusterInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-		UpdateFunc: func(old, new interface{}) {
-			oldCluster, ok := old.(*clusterv1.Cluster)
-			if !ok {
-				klog.Warningf("Failed to convert a old object  %+v to a cluster", old)
-				return
-			}
-			newCluster, ok := new.(*clusterv1.Cluster)
-			if !ok {
-				klog.Warningf("Failed to convert a new object  %+v to a cluster", new)
-				return
-			}
-			if !reflect.DeepEqual(oldCluster.Spec.IpAddress, newCluster.Spec.IpAddress) {
-				p.clusterIpMap[newCluster.GetName()] = newCluster.Spec.IpAddress
-			}
-		},
-	})
-	clusterInformer.AddSelectorCh(p.clusterSelectorCh)
-	p.clusterSelectorCh <- fmt.Sprintf("metadata.name=gte:%s,metadata.name=lte:%s",
-		p.clusterRange.Start, p.clusterRange.End)
-	return clusterInformer
-
-}
-func (p *Process) initPodInformer() cache.SharedIndexInformer {
-	podSelector := fields.ParseSelectorOrDie("spec.clusterName!=''")
-	lw := cache.NewListWatchFromClient(p.clientset.CoreV1(), string(v1.ResourcePods), metav1.NamespaceAll, podSelector)
-	podInformer := cache.NewSharedIndexInformer(lw, &v1.Pod{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
-	podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+	boundPodnformer := p.initPodInformer(v1.PodBound, cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			pod, ok := obj.(*v1.Pod)
 			if !ok {
 				klog.Warningf("Failed to convert an added object  %+v to a pod", obj)
 				return
 			}
-			if pod.Status.Phase == v1.PodBound {
-				go func() {
-					p.podQueue <- pod
-				}()
-			}
+			go func() {
+				p.podQueue <- pod
+			}()
 		},
+	})
+	go boundPodnformer.Run(quit)
+	scheduledPodnformer := p.initPodInformer(v1.ClusterScheduled, cache.ResourceEventHandlerFuncs{
 		DeleteFunc: func(obj interface{}) {
 			pod, ok := obj.(*v1.Pod)
 			if !ok {
-				klog.Warningf("Failed to convert a deleted object  %+v to a pod", obj)
+				klog.Warningf("Failed to convert an deleted object  %+v to a pod", obj)
 				return
 			}
-			if pod.Status.Phase == v1.ClusterScheduled {
-				go func() {
-					p.podQueue <- pod
-				}()
-			}
+			go func() {
+				p.podQueue <- pod
+			}()
 		},
 	})
+	go scheduledPodnformer.Run(quit)
+	wait.Until(p.SendPodToCluster, 0, quit)
+}
+
+func (p *Process) initPodInformer(phase v1.PodPhase, funcs cache.ResourceEventHandlerFuncs) cache.SharedIndexInformer {
+	lw := cache.NewListWatchFromClient(p.clientset.CoreV1(), string(v1.ResourcePods), metav1.NamespaceAll, fields.Everything())
+	podInformer := cache.NewSharedIndexInformer(lw, &v1.Pod{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
+	podInformer.AddEventHandler(funcs)
 	podInformer.AddSelectorCh(p.podSelectorCh)
-	p.podSelectorCh <- fmt.Sprintf("spec.clusterName=gte:%s,spec.clusterName=lte:%s",
+	p.podSelectorCh <- fmt.Sprintf("status.phase=%s, spec.clusterName=gte:%s,spec.clusterName=lte:%s", string(phase),
 		p.clusterRange.Start, p.clusterRange.End)
 	return podInformer
 }
@@ -200,7 +165,7 @@ func (p *Process) SendPodToCluster() {
 	pod := <-p.podQueue
 	if pod != nil {
 		klog.V(3).Infof("Processing the item %v", pod)
-		host, err := p.getHost(pod.Spec.ClusterName)
+		host, err := p.getHostIP(pod.Spec.ClusterName)
 		if err != nil {
 			klog.Warningf("Failed to get host from the cluster %v", pod.Spec.ClusterName)
 			return
@@ -254,7 +219,7 @@ func (p *Process) getToken(ip string) (string, error) {
 
 }
 
-func (p *Process) getHost(clusterName string) (string, error) {
+func (p *Process) getHostIP(clusterName string) (string, error) {
 	if ipAddress, ok := p.clusterIpMap[clusterName]; ok {
 		return ipAddress, nil
 	}
