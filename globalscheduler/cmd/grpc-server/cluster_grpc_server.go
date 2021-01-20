@@ -19,6 +19,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"net"
 
 	grpc "google.golang.org/grpc"
@@ -117,7 +118,7 @@ func main() {
 	defer klog.Flush()
 	addressport := *address + ":" + *port
 	klog.Infof("Server started: address:port %s", addressport)
-
+	fmt.Printf("cluster gRPC server started: address:port %s \n", addressport)
 	lis, err := net.Listen("tcp", addressport)
 	if err != nil {
 		klog.Errorf("failed to listen: %v", err)

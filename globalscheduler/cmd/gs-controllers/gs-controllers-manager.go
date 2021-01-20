@@ -18,6 +18,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"sync"
 	"time"
 
@@ -148,30 +149,35 @@ func main() {
 	//10. start controllers, independent controller first
 	var wg sync.WaitGroup
 	klog.Infof("Start controllers")
+	fmt.Println("Start controllers")
 
 	//distributor
 	klog.Infof("Start distributor controller")
 	wg.Add(1)
 	distributorFactory.Start(quit)
 	go distributorController.RunController(quit, &wg)
+	fmt.Println("distributor controller started")
 
 	//cluster
 	klog.Infof("Start cluster controller")
 	wg.Add(1)
 	clusterInformerFactory.Start(stopCh)
 	go clusterController.RunController(*workers, stopCh, &wg)
+	fmt.Println("cluster controller started")
 
 	//dispatcher
 	klog.Infof("Start dispatcher controller")
 	wg.Add(1)
 	dispatcherInformerFactory.Start(stopCh)
 	go dispatcherController.RunController(*workers, stopCh, &wg)
+	fmt.Println("dispatcher controller started")
 
 	//scheduler
 	klog.Infof("Start scheduler controller")
 	wg.Add(1)
 	schedulerInformerFactory.Start(stopCh)
 	go schedulerController.RunController(*workers, stopCh, &wg)
+	fmt.Println("scheduler controller started")
 
 	klog.Info("Main: Waiting for controllers to start")
 	wg.Wait()
