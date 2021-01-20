@@ -198,6 +198,7 @@
     "assignedScheduler": {
       "name": "67",
       "tag": "68"
-    }
+    },
+    "clusterInstanceId": "69"
   }
 }

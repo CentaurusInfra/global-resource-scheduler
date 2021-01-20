@@ -50,7 +50,6 @@ type Process struct {
 	schedulers           []schedulerv1.Scheduler
 	clientset            *kubernetes.Clientset
 	podQueue             chan *v1.Pod
-	resetCh              chan string
 	predicates           []predicateFunc
 	priorities           []priorityFunc
 	rangeStart           int64
@@ -82,7 +81,6 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		klog.Fatal(err)
 	}
 
-	resetCh := make(chan string, 1)
 
 	if err != nil {
 		klog.Warningf("Failed to run distributor process %v - %v with the err %v", namespace, distributorName, err)
@@ -95,7 +93,6 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		distributorClientset: distributorClientset,
 		schedulerClientset:   schedulerClientset,
 		podQueue:             podQueue,
-		resetCh:              resetCh,
 		predicates: []predicateFunc{
 			GeoLocationPredicate,
 		},
@@ -122,20 +119,18 @@ func (p *Process) Run(quit chan struct{}) {
 			}
 		},
 		UpdateFunc: func(old, new interface{}) {
-			oldDistributor, ok := old.(*distributorv1.Distributor)
-			if !ok {
-				klog.Warningf("Failed to convert a old object  %+v to a distributor", old)
-				return
-			}
+
 			newDistributor, ok := new.(*distributorv1.Distributor)
 			if !ok {
 				klog.Warningf("Failed to convert a new object  %+v to a distributor", new)
 				return
 			}
-			if oldDistributor.Spec.Range.Start != newDistributor.Spec.Range.Start || oldDistributor.Spec.Range.End != newDistributor.Spec.Range.End {
-				// Update reflector selector for load balancing
-				p.resetCh <- fmt.Sprintf("status.phase=%s, metadata.hashkey=gte:%s,metadata.hashkey=lte:%s",
-					string(v1.PodPending), strconv.FormatInt(newDistributor.Spec.Range.Start, 10), strconv.FormatInt(newDistributor.Spec.Range.End, 10))
+			if newDistributor.Spec.Range.Start != p.rangeStart || newDistributor.Spec.Range.End != p.rangeEnd  {
+				p.rangeStart = newDistributor.Spec.Range.Start
+				p.rangeEnd = newDistributor.Spec.Range.End
+				if err := syscall.Exec(os.Args[0], os.Args, os.Environ()); err != nil {
+					klog.Fatal(err)
+				}
 			}
 		},
 	})
@@ -158,7 +153,7 @@ func (p *Process) Run(quit chan struct{}) {
 			}
 			for _, item := range p.schedulers {
 				if reflect.DeepEqual(item, scheduler) {
-					_, p.schedulers = p.schedulers[len(p.schedulers)-1], p.schedulers[:len(p.schedulers)-1]
+					_, p.schedulers = p.schedulers[len(p.schedulers) - 1], p.schedulers[:len(p.schedulers) - 1]
 					return
 				}
 			}
@@ -173,7 +168,8 @@ func (p *Process) Run(quit chan struct{}) {
 }
 
 func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
-	podSelector := fields.ParseSelectorOrDie("status.phase=" + string(v1.PodPending))
+	podSelector := fields.ParseSelectorOrDie(fmt.Sprintf("status.phase=%s,metadata.hashkey=gte:%s,metadata.hashkey=lte:%s",
+		string(v1.PodPending), strconv.FormatInt(start, 10),  strconv.FormatInt(end, 10)))
 
 	lw := cache.NewListWatchFromClient(p.clientset.CoreV1(), string(v1.ResourcePods), metav1.NamespaceAll, podSelector)
 
@@ -193,10 +189,6 @@ func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
 			}()
 		},
 	})
-	podInformer.AddSelectorCh(p.resetCh)
-	// ParseSelectorOrDie has issues for handling gte and lte selectors. Update directly through channels
-	p.resetCh <- fmt.Sprintf("status.phase=%s, metadata.hashkey=gte:%s,metadata.hashkey=lte:%s",
-		string(v1.PodPending), strconv.FormatInt(start, 10), strconv.FormatInt(end, 10))
 	return podInformer
 }
 
@@ -215,6 +207,10 @@ func (p *Process) ScheduleOne() {
 		err = p.bindPod(pod, scheduler)
 		if err != nil {
 			klog.Warningf("Failed to assign scheduler %v to pod %v with the error %vs", scheduler, pod, err)
+			pod.Status.Phase = v1.PodFailed
+			if _, err = p.clientset.CoreV1().Pods(p.namespace).UpdateStatus(pod); err != nil {
+				klog.Warningf("Failed to update pod %v - %v status to failed", pod.Namespace, pod.Name)
+			}
 			return
 		}
 
