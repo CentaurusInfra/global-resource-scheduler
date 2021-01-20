@@ -33,9 +33,13 @@ import (
 	"os"
 	"reflect"
 	"syscall"
+	"time"
 )
 
 const dispatcherName = "dispatcher"
+
+var TotalLatency int64 = 0
+var TotalPodNum = 0
 
 type Process struct {
 	namespace           string
@@ -186,6 +190,15 @@ func (p *Process) SendPodToCluster() {
 				updatedPod, err := p.clientset.CoreV1().Pods(pod.ObjectMeta.Namespace).UpdateStatus(pod)
 				if err == nil {
 					klog.V(3).Infof("Creating request for pod %v returned successfully with %v", updatedPod, instanceId)
+
+					// Calculate latency
+					podCreateTime := pod.CreationTimestamp
+					currentTime := time.Now().UTC()
+					duration := currentTime.Unix() - podCreateTime.Unix()
+					TotalLatency += duration
+					TotalPodNum += 1
+					latency := int(duration) / 60
+					klog.V(3).Infof("************************************ Pod Name: %s, Latency: %d min ************************************", pod.Name, latency)
 				} else {
 					klog.Warningf("Failed to update the pod %v with error %v", pod.ObjectMeta.Name, err)
 				}
@@ -195,6 +208,10 @@ func (p *Process) SendPodToCluster() {
 					klog.Warningf("Failed to create the pod %v with error %v", pod.ObjectMeta.Name, err)
 				}
 			}
+
+			// Calculate average latency
+			averageLatency := int(TotalLatency) / TotalPodNum / 60
+			klog.V(3).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Pod Number: %d, Latency: %d min %%%%%%%%%%%%%%%%%%%%%%%%%%", TotalPodNum, averageLatency)
 		}
 	}
 }
