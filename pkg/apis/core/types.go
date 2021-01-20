@@ -3223,6 +3223,8 @@ type PodStatus struct {
 	// Assigned scheduler
 	// +optional
 	AssignedScheduler ResourceScheduler
+	// +optional
+	ClusterInstanceId string
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
