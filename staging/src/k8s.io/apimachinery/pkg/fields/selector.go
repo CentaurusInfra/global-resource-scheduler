@@ -219,7 +219,7 @@ func (t *lessTerm) Requirements() Requirements {
 }
 
 func (t *lessTerm) String() string {
-	return fmt.Sprintf("%v<%v", t.field, EscapeValue(t.value))
+	return fmt.Sprintf("%v=lt:%v", t.field, EscapeValue(t.value))
 }
 
 func (t *lessTerm) DeepCopySelector() Selector {
@@ -274,7 +274,7 @@ func (t *lessEqualTerm) Requirements() Requirements {
 }
 
 func (t *lessEqualTerm) String() string {
-	return fmt.Sprintf("%v<=%v", t.field, EscapeValue(t.value))
+	return fmt.Sprintf("%v=lte:%v", t.field, EscapeValue(t.value))
 }
 
 func (t *lessEqualTerm) DeepCopySelector() Selector {
@@ -329,7 +329,7 @@ func (t *greaterTerm) Requirements() Requirements {
 }
 
 func (t *greaterTerm) String() string {
-	return fmt.Sprintf("%v>%v", t.field, EscapeValue(t.value))
+	return fmt.Sprintf("%v=gt:%v", t.field, EscapeValue(t.value))
 }
 
 func (t *greaterTerm) DeepCopySelector() Selector {
@@ -384,7 +384,7 @@ func (t *greaterEqualTerm) Requirements() Requirements {
 }
 
 func (t *greaterEqualTerm) String() string {
-	return fmt.Sprintf("%v>=%v", t.field, EscapeValue(t.value))
+	return fmt.Sprintf("%v=gte:%v", t.field, EscapeValue(t.value))
 }
 
 func (t *greaterEqualTerm) DeepCopySelector() Selector {
@@ -716,7 +716,6 @@ func splitAndTermsAndSort(fieldSelector string) []string {
 	if len(fieldSelector) == 0 {
 		return nil
 	}
-
 	terms := make([]string, 0, 1)
 	startIndex := 0
 	inSlash := false
@@ -734,7 +733,6 @@ func splitAndTermsAndSort(fieldSelector string) []string {
 
 	terms = append(terms, fieldSelector[startIndex:])
 	sort.StringSlice(terms).Sort()
-
 	return terms
 }
 
@@ -770,7 +768,6 @@ func splitTerm(term string) (lhs, op, rhs string, ok bool) {
 
 func parseSelector(selector string, fn TransformFunc) (Selector, error) {
 	parts := splitTermsAndSort(selector)
-
 	var items []Selector
 	for _, part := range parts {
 		if len(part) == 0 {
