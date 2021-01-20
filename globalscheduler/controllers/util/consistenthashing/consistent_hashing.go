@@ -22,18 +22,12 @@ package consistenthashing
 
 import (
 	"hash/fnv"
-	"math/rand"
 	"sort"
 	"strconv"
 	"sync"
-	"time"
 )
 
-const (
-	VIRTUAL_NODE_NUMBER = 131072
-	MIN = 10
-	MAX = 100
-)
+const VIRTUAL_NODE_NUMBER = 131072
 
 type uints []uint32
 
@@ -71,12 +65,7 @@ func New() *ConsistentHash {
 func (ch *ConsistentHash) fnv32Hash(key string) uint32 {
 	new32Hash := fnv.New32()
 	new32Hash.Write([]byte(key))
-	rand.Seed(time.Now().UnixNano())
-	
-	// Make hashkey more randomly
-	b := int(new32Hash.Sum32())
-	ran := rand.Intn(MAX - MIN + 1) * MIN * rand.Intn(b)
-	return uint32(ran)
+	return new32Hash.Sum32()
 }
 
 func (ch *ConsistentHash) generateKey(elt string, idx int) string {
