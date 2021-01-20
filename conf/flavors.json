@@ -1,0 +1,57 @@
+{
+  "flavors": [{
+      "region_flavor_id": "region1|c6.large.2",
+      "region": "region1",
+      "id": "c6.large.2",
+      "name": "c6.large.2",
+      "vcpus": "2",
+      "ram": 2,
+      "disk": "20",
+      "links": [{
+        "rel": "link_rel",
+        "href": "link_href",
+        "type": "link_type"
+        }
+      ],
+      "os_extra_specs": {
+        "ecs:performancetype": "type1",
+        "resource_type": "resource_type_1",
+        "ecs:generation": "generation1",
+        "ecs:virtualization_env_types": "virtual_env_type1",
+        "pci_passthrough:enable_gpu": "true",
+        "pci_passthrough:gpu_specs": "spec1",
+        "pci_passthrough:alias": "alias1",
+        "info:gpu:name": "name1",
+        "cond:operation:status": "status1",
+        "cond:operation:az": "az1",
+        "cond:compute": "com1",
+        "cond:image": "image1",
+        "quota:vif_max_num": "8",
+        "quota:physics_max_rate": "2000",
+        "quota:vif_multiqueue_num": "12",
+        "quota:min_rate": "12",
+        "quota:max_rate": "1000",
+        "quota:max_pps": "100",
+        "hw:cpu_sockets": "12",
+        "hw:numa_nodes": "1",
+        "hw:cpu_threads": "12",
+        "hw:mem_page_size": "1024",
+        "quota:conn_limit_total": "2048",
+        "hw:cpu_cores": "12",
+        "cond:spot_block:operation:az": "az1",
+        "cond:spot_block:operation:longest_duration_hours": "12",
+        "cond:spot_block:operation:longest_duration_count": "12",
+        "cond:spot_block:operation:interrupt_policy": "immediatly",
+        "cond:spot:operation:az": "az1",
+        "cond:spot:operation:status": "active"
+      },
+      "swap": "1024",
+      "OS-FLV-EXT-DATA:ephemeral": 0,
+      "OS-FLV-DISABLED:disabled": false,
+      "rxtx_factor": 0,
+      "rxtx_quota": "123",
+      "rxtx_cap": "111",
+      "os-flavor-access:is_public": true
+    }
+  ]
+}

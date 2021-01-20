@@ -2377,61 +2377,63 @@ type VirtualMachine struct {
 	Resources ResourceRequirements `json:"resources,omitempty" protobuf:"bytes,3,opt,name=resources"`
 	// Node compute resources allocated to the container.
 	// +optional
-	ResourcesAllocated ResourceList `json:"resourcesAllocated,omitempty" protobuf:"bytes,15,rep,name=resourcesAllocated,casttype=ResourceList,castkey=ResourceName"`
+	ResourcesAllocated ResourceList `json:"resourcesAllocated,omitempty" protobuf:"bytes,4,rep,name=resourcesAllocated,casttype=ResourceList,castkey=ResourceName"`
 	// Resources resize policy for the container.
 	// +optional
-	ResizePolicy []ResizePolicy `json:"resizePolicy,omitempty" protobuf:"bytes,16,rep,name=resizePolicy"`
+	ResizePolicy []ResizePolicy `json:"resizePolicy,omitempty" protobuf:"bytes,5,rep,name=resizePolicy"`
 	// Pod volumes to mount into the workload's filesystem.
 	// Cannot be updated.
 	// +optional
 	// +patchMergeKey=mountPath
 	// +patchStrategy=merge
-	VolumeMounts []VolumeMount `json:"volumeMounts,omitempty" patchStrategy:"merge" patchMergeKey:"mountPath" protobuf:"bytes,4,rep,name=volumeMounts"`
+	VolumeMounts []VolumeMount `json:"volumeMounts,omitempty" patchStrategy:"merge" patchMergeKey:"mountPath" protobuf:"bytes,6,rep,name=volumeMounts"`
 	// Image pull policy.
 	// One of Always, Never, IfNotPresent.
 	// Defaults to Always if :latest tag is specified, or IfNotPresent otherwise.
 	// Cannot be updated.
 	// More info: https://kubernetes.io/docs/concepts/containers/images#updating-images
 	// +optional
-	ImagePullPolicy PullPolicy `json:"imagePullPolicy,omitempty" protobuf:"bytes,5,opt,name=imagePullPolicy,casttype=PullPolicy"`
+	ImagePullPolicy PullPolicy `json:"imagePullPolicy,omitempty" protobuf:"bytes,7,opt,name=imagePullPolicy,casttype=PullPolicy"`
 	// either keyPair or the publicKeystring must be provided, used to logon to the VM
 	// +optional
-	KeyPairName string `json:"keyPairName,omitempty" protobuf:"bytes,6,opt,name=keyPairName"`
+	KeyPairName string `json:"keyPairName,omitempty" protobuf:"bytes,8,opt,name=keyPairName"`
 	// +optional
-	PublicKey string `json:"publicKey,omitempty" protobuf:"bytes,7,opt,name=publicKey"`
+	PublicKey string `json:"publicKey,omitempty" protobuf:"bytes,9,opt,name=publicKey"`
 	// Configuration information or scripts to use upon launch. Must be Base64 encoded. Restricted to 65535 bytes.
 	// +optional
-	UserData []byte `json:"userData,omitempty" protobuf:"bytes,8,opt,name=userData"`
+	UserData []byte `json:"userData,omitempty" protobuf:"bytes,10,opt,name=userData"`
 	// default none, array cert ID that used to verify the image
 	// +optional
-	TrustedImageCertificate []string `json:"trustedImageCertificate,omitempty" protobuf:"bytes,9,opt,name=trustedImageCertificate"`
+	TrustedImageCertificate []string `json:"trustedImageCertificate,omitempty" protobuf:"bytes,11,opt,name=trustedImageCertificate"`
 	// stop | terminate VM. default to stop
 	// +optional
-	ShutdownBehavior string `json:"shutdownBehavior,omitempty" protobuf:"bytes,10,opt,name=shutdownBehavior"`
+	ShutdownBehavior string `json:"shutdownBehavior,omitempty" protobuf:"bytes,12,opt,name=shutdownBehavior"`
 	// if not specified, the first volume in the volume slice will be used
 	// +optional
-	BootVolume string `json:"bootVolume,omitempty" protobuf:"bytes,11,opt,name=bootVolume"`
+	BootVolume string `json:"bootVolume,omitempty" protobuf:"bytes,13,opt,name=bootVolume"`
 	// default running
 	// +optional
-	PowerSpec VmPowerSpec `json:"powerSpec,omitempty" protobuf:"bytes,12,opt,name=powerSpec,casttype=VmPowerSpec"`
+	PowerSpec VmPowerSpec `json:"powerSpec,omitempty" protobuf:"bytes,14,opt,name=powerSpec,casttype=VmPowerSpec"`
 	// volumeDevices is the list of block devices to be used by the container.
 	// This is a beta feature.
 	// +patchMergeKey=devicePath
 	// +patchStrategy=merge
 	// +optional
-	VolumeDevices []VolumeDevice `json:"volumeDevices,omitempty" patchStrategy:"merge" patchMergeKey:"devicePath" protobuf:"bytes,13,rep,name=volumeDevices"`
+	VolumeDevices []VolumeDevice `json:"volumeDevices,omitempty" patchStrategy:"merge" patchMergeKey:"devicePath" protobuf:"bytes,15,rep,name=volumeDevices"`
 	// cloud-init user data script
 	// +optional
-	CloudInitUserDataScript string `json:"cloudInitUserDataScript,omitempty" protobuf:"bytes,14,opt,name=cloudInitUserDataScript"`
+	CloudInitUserDataScript string `json:"cloudInitUserDataScript,omitempty" protobuf:"bytes,16,opt,name=cloudInitUserDataScript"`
 	// resource common information for vms or containers
 	// +optional
-	ResourceCommonInfo ResourceCommonInfo `json:"resourceCommonInfo,omitempty" protobuf:"bytes,18,opt,name=resourceCommonInfo"`
+	ResourceCommonInfo ResourceCommonInfo `json:"resourceCommonInfo,omitempty" protobuf:"bytes,17,opt,name=resourceCommonInfo"`
 	// flag that if the vm needs any external ip address
 	// +optional
-	NeedEIP bool `json:"needEIP,omitempty" protobuf:"varint,19,opt,name=needEIP"`
+	NeedEIP bool `json:"needEIP,omitempty" protobuf:"varint,18,opt,name=needEIP"`
 	// resource flavor information
 	// +optional
-	Flavors []ResourceFlavor `json:"flavors,omitempty" protobuf:"bytes,20,rep,name=flavors"`
+	Flavors []ResourceFlavor `json:"flavors,omitempty" protobuf:"bytes,19,rep,name=flavors"`
+	// +optional
+	SecurityGroupId string `json:"securityGroupId,omitempty" protobuf:"bytes,20,opt,name=securityGroupId"`
 }
 
 // Handler defines a specific action that should be taken
@@ -2655,6 +2657,13 @@ const (
 
 	// PodNoSchedule means pod should not be scheduled to any node
 	PodNoSchedule PodPhase = "NoSchedule"
+
+	// PodAssigned means that the pod has a scheduler assigned to.
+	PodAssigned PodPhase = "Assigned"
+	// PodBound means that the pod has a cluster bound to.
+	PodBound PodPhase = "Bound"
+	// ClusterScheduled means that openstack vms has been created for the pod
+	ClusterScheduled PodPhase = "Scheduled"
 )
 
 // PodConditionType is a valid value for PodCondition.Type
@@ -3265,6 +3274,11 @@ type PodSpec struct {
 	// Resource Type indicates whether the resource objects are VM or containers
 	// +optional
 	ResourceType string `json:"resourceType,omitempty" protobuf:"bytes,36,opt,name=resourceType"`
+	// ClusterName is a request to schedule this pod onto a specific cluster. If it is non-empty,
+	// the scheduler simply binds this pod onto that cluster, assuming that it fits resource
+	// requirements.
+	// +optional
+	ClusterName string `json:"clusterName,omitempty" protobuf:"bytes,37,opt,name=clusterName"`
 }
 
 func (ps *PodSpec) Workloads() []CommonInfo {

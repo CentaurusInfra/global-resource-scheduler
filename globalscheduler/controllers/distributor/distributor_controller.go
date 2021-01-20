@@ -48,6 +48,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -124,6 +125,11 @@ func NewController(
 	return distributorController
 }
 
+func (c *DistributorController) RunController(stopCh <-chan struct{}, wg *sync.WaitGroup) {
+	defer wg.Done()
+	c.Run(stopCh)
+}
+
 // Run will set up the event handlers for types we are interested in, as well
 // as syncing informer caches and starting workers. It will block until stopCh
 // is closed, at which point it will shutdown the workqueue and wait for
@@ -159,7 +165,6 @@ func (c *DistributorController) processNextItem() bool {
 	// if a shutdown is requested then return out of this to stop
 	// processing
 	key, quit := c.queue.Get()
-
 	// stop the worker loop from running as this indicates we
 	// have sent a shutdown message that the queue has indicated
 	// from the Get method
@@ -175,26 +180,27 @@ func (c *DistributorController) processNextItem() bool {
 		c.queue.AddRateLimited(key)
 		utilruntime.HandleError(fmt.Errorf("Handle %v of key %v failed with %v", "serivce", key, err))
 	}
-
+	c.queue.Forget(key)
 	klog.Infof("Successfully synced '%s'", key)
 	return true
 }
 
 func (c *DistributorController) syncHandlerAndUpdate(key string) error {
-
 	startTime := time.Now()
 	defer func() {
 		klog.V(4).Infof("Finished syncing  %q (%v)", key, time.Since(startTime))
 	}()
 	namespace, distributorName, err := cache.SplitMetaNamespaceKey(key)
 	distributor, err := c.lister.Distributors(namespace).Get(distributorName)
-
 	if err != nil || distributor == nil {
 		return err
 	}
 
 	err = c.rebalance(namespace)
-	args := strings.Split(fmt.Sprintf("-config %s -ns %s -n %s start %d end %d", c.configfile, namespace, distributorName, distributor.Spec.Range.Start, distributor.Spec.Range.End), " ")
+	if err != nil {
+		klog.Fatalf("Failed to rebalance the pod hashkey range in namespace %vs", namespace)
+	}
+	args := strings.Split(fmt.Sprintf("-config %s -ns %s -n %s", c.configfile, namespace, distributorName), " ")
 
 	//	Format the command
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
@@ -202,22 +208,20 @@ func (c *DistributorController) syncHandlerAndUpdate(key string) error {
 		klog.Fatalf("Failed to get the path to the process with the err %v", err)
 	}
 
-	cmd := exec.Command(path.Join(dir, "gs-distributor-process"), args...)
+	cmd := exec.Command(path.Join(dir, "distributor_process"), args...)
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 
 	//	Run the command
-	cmd.Run()
+	go cmd.Run()
 
 	//	Output our results
 	klog.V(2).Infof("Running process with the result: %v / %v\n", out.String(), stderr.String())
 	if err != nil {
 		klog.Warningf("Failed to rebalance %v with the err %v", namespace, err)
 	}
-
-	c.queue.Forget(key)
 
 	c.recorder.Event(distributor, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 

@@ -21,7 +21,8 @@ import (
 
 // dispatcherSpec defines the desired state of dispatcher
 type DispatcherSpec struct {
-	POD []string `json:"POD name"`
+	// Cluster is an array that stores the name of clusters
+	Cluster []string `json:"cluster"`
 }
 
 // +genclient
@@ -31,8 +32,8 @@ type Dispatcher struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec  DispatcherSpec `json:"spec,omitempty"`
-	State string         `json:"state"`
+	Spec   DispatcherSpec `json:"spec,omitempty"`
+	Status string         `json:"status"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

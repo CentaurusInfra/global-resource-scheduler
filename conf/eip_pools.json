@@ -1,0 +1,14 @@
+{
+  "eip_pools": [{
+      "region": "region1",
+      "common_pools": [{
+        "name": "eip_type_name",
+        "status": "active",
+        "type": "type1",
+        "size": 20,
+        "used": 2,
+        "cached": 1
+      }]
+    }
+  ]
+}

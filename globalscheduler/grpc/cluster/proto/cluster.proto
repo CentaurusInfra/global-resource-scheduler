@@ -45,9 +45,11 @@ message ClusterProfile {
         int64 CPUCapacity = 8;  
         int64 MemCapacity = 9;   
         int64 ServerPrice = 10;    
-        string HomeScheduler = 11; 
+        string HomeScheduler = 11;
+        string HomeDispatcher = 12;
    }
    ClusterSpecInfo ClusterSpec = 3;
+   string ClusterStatus = 4;
 }
 
 //Message from ResourceCollector, Cluster Controller should get response from ResourceCollector.

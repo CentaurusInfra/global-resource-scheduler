@@ -46,6 +46,7 @@ type DispatchersGetter interface {
 type DispatcherInterface interface {
 	Create(*v1.Dispatcher) (*v1.Dispatcher, error)
 	Update(*v1.Dispatcher) (*v1.Dispatcher, error)
+	UpdateStatus(*v1.Dispatcher) (*v1.Dispatcher, error)
 	Delete(name string, options *metav1.DeleteOptions) error
 	DeleteCollection(options *metav1.DeleteOptions, listOptions metav1.ListOptions) error
 	Get(name string, options metav1.GetOptions) (*v1.Dispatcher, error)
@@ -283,6 +284,30 @@ func (c *dispatchers) Update(dispatcher *v1.Dispatcher) (result *v1.Dispatcher, 
 		Namespace(c.ns).
 		Resource("dispatchers").
 		Name(dispatcher.Name).
+		Body(dispatcher).
+		Do().
+		Into(result)
+
+	return
+}
+
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+
+func (c *dispatchers) UpdateStatus(dispatcher *v1.Dispatcher) (result *v1.Dispatcher, err error) {
+	result = &v1.Dispatcher{}
+
+	objectTenant := dispatcher.ObjectMeta.Tenant
+	if objectTenant == "" {
+		objectTenant = c.te
+	}
+
+	err = c.client.Put().
+		Tenant(objectTenant).
+		Namespace(c.ns).
+		Resource("dispatchers").
+		Name(dispatcher.Name).
+		SubResource("status").
 		Body(dispatcher).
 		Do().
 		Into(result)

@@ -1,0 +1,23 @@
+{
+  "volume_pools": [{
+      "region": "region1",
+      "pools": [{
+          "availability_zone": "az1",
+          "name": "pool1",
+          "capabilities": {
+            "pool_name": "pool1",
+            "provisioned_capacity_gb": 0,
+            "allocated_capacity_gb": 10,
+            "free_capacity_gb": 2000,
+            "total_capacity_gb": 2000,
+            "volume_type": "SAS",
+            "max_over_subscription_ratio": 1.0,
+            "thin_provisioning_support": true,
+            "reserved_percentage": 0.3,
+            "pool_model": 0
+          }
+        }
+      ]
+    }
+  ]
+}

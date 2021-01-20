@@ -2229,6 +2229,8 @@ type VirtualMachine struct {
 	// resource flavor information
 	// +optional
 	Flavors []ResourceFlavor
+	// +optional
+	SecurityGroupId string
 }
 
 // Handler defines a specific action that should be taken
@@ -2411,6 +2413,13 @@ const (
 	// PodUnknown means that for some reason the state of the pod could not be obtained, typically due
 	// to an error in communicating with the host of the pod.
 	PodUnknown PodPhase = "Unknown"
+
+	// PodAssigned means that the pod has a scheduler assigned to.
+	PodAssigned PodPhase = "Assigned"
+	// PodBound means that the pod has a cluster bound to.
+	PodBound PodPhase = "Bound"
+	// ClusterScheduled means that openstack vms has been created for the pod
+	ClusterScheduled PodPhase = "Scheduled"
 )
 
 type PodConditionType string
@@ -2939,6 +2948,11 @@ type PodSpec struct {
 	// Resource Type indicates whether the resource objects are VM or containers
 	// +optional
 	ResourceType string
+	// ClusterName is a request to schedule this pod onto a specific cluster.  If it is non-empty,
+	// the scheduler simply binds this pod onto that cluster, assuming that it fits resource
+	// requirements.
+	// +optional
+	ClusterName string
 }
 
 func (ps *PodSpec) Workloads() []CommonInfo {

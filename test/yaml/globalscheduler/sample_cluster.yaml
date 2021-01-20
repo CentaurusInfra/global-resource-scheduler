@@ -1,8 +1,0 @@
-apiVersion: globalscheduler.com/v1
-kind: Cluster
-metadata:
-  name: sample-cluster-3
-spec:
-  ipaddress: "127.4.0.1"
-  geolocation:
-    city: "BBB"

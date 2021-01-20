@@ -1,0 +1,6 @@
+#api server info
+master: 127.0.0.1:8080
+kubeconfig: {filepath}/admin.kubeconfig
+
+scheduler_policy: edgecloud
+scheduler_policy_file: {filepath}/edgecloud_policy.yaml

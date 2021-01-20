@@ -6355,6 +6355,7 @@ func autoConvert_v1_PodSpec_To_core_PodSpec(in *v1.PodSpec, out *core.PodSpec, s
 	out.EnableServiceLinks = (*bool)(unsafe.Pointer(in.EnableServiceLinks))
 	out.PreemptionPolicy = (*core.PreemptionPolicy)(unsafe.Pointer(in.PreemptionPolicy))
 	out.ResourceType = in.ResourceType
+	out.ClusterName = in.ClusterName
 	return nil
 }
 
@@ -6408,6 +6409,7 @@ func autoConvert_core_PodSpec_To_v1_PodSpec(in *core.PodSpec, out *v1.PodSpec, s
 	out.RuntimeClassName = (*string)(unsafe.Pointer(in.RuntimeClassName))
 	out.EnableServiceLinks = (*bool)(unsafe.Pointer(in.EnableServiceLinks))
 	out.ResourceType = in.ResourceType
+	out.ClusterName = in.ClusterName
 	return nil
 }
 
@@ -8663,6 +8665,7 @@ func autoConvert_v1_VirtualMachine_To_core_VirtualMachine(in *v1.VirtualMachine,
 	}
 	out.NeedEIP = in.NeedEIP
 	out.Flavors = *(*[]core.ResourceFlavor)(unsafe.Pointer(&in.Flavors))
+	out.SecurityGroupId = in.SecurityGroupId
 	return nil
 }
 
@@ -8695,6 +8698,7 @@ func autoConvert_core_VirtualMachine_To_v1_VirtualMachine(in *core.VirtualMachin
 	}
 	out.NeedEIP = in.NeedEIP
 	out.Flavors = *(*[]v1.ResourceFlavor)(unsafe.Pointer(&in.Flavors))
+	out.SecurityGroupId = in.SecurityGroupId
 	return nil
 }
 
