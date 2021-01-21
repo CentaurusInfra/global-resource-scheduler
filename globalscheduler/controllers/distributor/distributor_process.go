@@ -81,7 +81,6 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		klog.Fatal(err)
 	}
 
-
 	if err != nil {
 		klog.Warningf("Failed to run distributor process %v - %v with the err %v", namespace, distributorName, err)
 	}
@@ -125,7 +124,7 @@ func (p *Process) Run(quit chan struct{}) {
 				klog.Warningf("Failed to convert a new object  %+v to a distributor", new)
 				return
 			}
-			if newDistributor.Spec.Range.Start != p.rangeStart || newDistributor.Spec.Range.End != p.rangeEnd  {
+			if newDistributor.Spec.Range.Start != p.rangeStart || newDistributor.Spec.Range.End != p.rangeEnd {
 				p.rangeStart = newDistributor.Spec.Range.Start
 				p.rangeEnd = newDistributor.Spec.Range.End
 				if err := syscall.Exec(os.Args[0], os.Args, os.Environ()); err != nil {
@@ -153,7 +152,7 @@ func (p *Process) Run(quit chan struct{}) {
 			}
 			for _, item := range p.schedulers {
 				if reflect.DeepEqual(item, scheduler) {
-					_, p.schedulers = p.schedulers[len(p.schedulers) - 1], p.schedulers[:len(p.schedulers) - 1]
+					_, p.schedulers = p.schedulers[len(p.schedulers)-1], p.schedulers[:len(p.schedulers)-1]
 					return
 				}
 			}
@@ -169,7 +168,7 @@ func (p *Process) Run(quit chan struct{}) {
 
 func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
 	podSelector := fields.ParseSelectorOrDie(fmt.Sprintf("status.phase=%s,metadata.hashkey=gte:%s,metadata.hashkey=lte:%s",
-		string(v1.PodPending), strconv.FormatInt(start, 10),  strconv.FormatInt(end, 10)))
+		string(v1.PodPending), strconv.FormatInt(start, 10), strconv.FormatInt(end, 10)))
 
 	lw := cache.NewListWatchFromClient(p.clientset.CoreV1(), string(v1.ResourcePods), metav1.NamespaceAll, podSelector)
 
