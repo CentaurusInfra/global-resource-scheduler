@@ -17,11 +17,9 @@ limitations under the License.
 package siteresources
 
 import (
-	"fmt"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache"
 	"strings"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
@@ -51,7 +49,7 @@ var defaultRequestedRatioResources = resourceToWeightMap{types.ResourceMemory: 1
 func (r *resourceAllocationScorer) score(
 	stack *types.Stack,
 	siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) (int64, *interfaces.Status) {
-	site := siteCacheInfo.Site()
+	site := siteCacheInfo.GetSite()
 	if site == nil {
 		return 0, interfaces.NewStatus(interfaces.Error, "site not found")
 	}
@@ -90,22 +88,13 @@ func calculateStackStorageRequest(stack *types.Stack) map[string]int64 {
 }
 
 func getResourceType(flavorID string, siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) string {
-	flavors := informers.InformerFac.GetInformer(informers.FLAVOR).GetStore().List()
-	for _, fla := range flavors {
-		regionFlv, ok := fla.(typed.RegionFlavor)
-		if !ok {
-			continue
-		}
-
-		if flavorID != regionFlv.ID {
-			continue
-		}
-
-		for _, host := range siteCacheInfo.Site().Hosts {
-			if siteCacheInfo.Site().Region != regionFlv.Region {
+	flavor, ok := cache.FlavorCache.GetFlavor(flavorID, siteCacheInfo.GetSite().Region)
+	if !ok {
+		for _, host := range siteCacheInfo.GetSite().Hosts {
+			if siteCacheInfo.GetSite().Region != flavor.Region {
 				continue
 			}
-			flavorExtraSpecs := regionFlv.OsExtraSpecs
+			flavorExtraSpecs := flavor.OsExtraSpecs
 			resTypes := strings.Split(host.ResourceType, "||")
 			if utils.IsContain(resTypes, flavorExtraSpecs.ResourceType) {
 				return flavorExtraSpecs.ResourceType
@@ -185,51 +174,6 @@ func calculateStorageAllocatableRequest(siteCacheInfo *schedulersitecacheinfo.Si
 	return allocatableStorage, requestedStroage
 }
 
-func calculateEipAllocatableRequest(siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo, stack *types.Stack) (int64, int64) {
-
-	var eipCount = 0
-	for _, server := range stack.Resources {
-		if server.NeedEip {
-			eipCount++
-		}
-	}
-
-	eipPoolsInterface, ok := informers.InformerFac.GetInformer(informers.EIPPOOLS).GetStore().Get(siteCacheInfo.Site().Region)
-	if !ok {
-		logger.Warnf("Site (%s/%s) has no eip pools.", siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region)
-		return 0, 0
-	}
-
-	eipPool, ok := eipPoolsInterface.(typed.EipPool)
-	if !ok {
-		msg := fmt.Sprintf("Site (%s/%s) eipPoolConvert failed.", siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region)
-		logger.Errorf(msg)
-		return 0, 0
-	}
-
-	var find = false
-	var findEipPool = typed.IPCommonPool{}
-	for _, pool := range eipPool.CommonPools {
-		if siteCacheInfo.Site().EipTypeName == pool.Name {
-			find = true
-			findEipPool = pool
-			break
-		}
-	}
-
-	if !find {
-		msg := fmt.Sprintf("Site (%s/%s) has no eip pools.", siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region)
-		logger.Infof(msg)
-		return 0, 0
-	}
-
-	if eipCount <= 0 {
-		return 0, 0
-	}
-
-	return int64(findEipPool.Size), int64(findEipPool.Used + eipCount)
-}
-
 // calculateResourceAllocatableRequest returns resources Allocatable and Requested values
 func calculateResourceAllocatableRequest(siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo, stack *types.Stack,
 	resource string) (int64, int64) {
@@ -241,8 +185,6 @@ func calculateResourceAllocatableRequest(siteCacheInfo *schedulersitecacheinfo.S
 		return calculateMemoryAllocatableRequest(siteCacheInfo, stack)
 	case types.ResourceStorage:
 		return calculateStorageAllocatableRequest(siteCacheInfo, stack)
-	case types.ResourceEip:
-		return calculateEipAllocatableRequest(siteCacheInfo, stack)
 	}
 
 	logger.Infof("requested resource %v not considered for site score calculation", resource)

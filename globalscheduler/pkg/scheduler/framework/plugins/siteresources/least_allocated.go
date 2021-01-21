@@ -18,7 +18,7 @@ package siteresources
 
 import (
 	"context"
-	"fmt"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
@@ -43,13 +43,7 @@ func (la *LeastAllocated) Name() string {
 
 // Score invoked at the score extension point.
 func (la *LeastAllocated) Score(ctx context.Context, state *interfaces.CycleState, stack *types.Stack,
-	siteID string) (int64, *interfaces.Status) {
-	siteCacheInfo, err := la.handle.SnapshotSharedLister().SiteCacheInfos().Get(siteID)
-	if err != nil {
-		return 0, interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %q from Snapshot: %v",
-			siteID, err))
-	}
-
+	siteCacheInfo *sitecacheinfo.SiteCacheInfo) (int64, *interfaces.Status) {
 	// la.score favors site with fewer requested resources.
 	// It calculates the percentage of memory and CPU requested by pods scheduled on the site, and
 	// prioritizes based on the minimum of the average of the fraction of requested to capacity.

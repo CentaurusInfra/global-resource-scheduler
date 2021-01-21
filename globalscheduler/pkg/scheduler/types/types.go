@@ -396,4 +396,7 @@ type ListSiteOpts struct {
 type GSSchedulerConfiguration struct {
 	// Scheduler Name Differentiating Schedulers
 	SchedulerName string
+
+	// Api url of the resource collector
+	ResourceCollectorApiUrl string
 }

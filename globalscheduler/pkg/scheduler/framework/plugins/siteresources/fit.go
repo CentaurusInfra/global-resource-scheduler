@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache"
 	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/sets"
@@ -91,7 +91,7 @@ func calculateStackResourceRequest(stack *types.Stack) []FlavorInfos {
 			if flv.Spot != nil && flv.Spot.SpotDurationHours != 0 {
 				continue
 			}
-			flvObj, exist := informers.InformerFac.GetFlavor(flv.FlavorID, "")
+			flvObj, exist := cache.FlavorCache.GetFlavor(flv.FlavorID, "")
 			if !exist {
 				logger.Warnf("Flavor %v not found!", flv)
 				continue
@@ -189,7 +189,7 @@ func (f *Fit) Filter(ctx context.Context, cycleState *interfaces.CycleState, sta
 		}
 		if !isMatch {
 			msg := fmt.Sprintf("Site (%s-%s) do not support required flavor (%+v).",
-				siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Region, flvs.Flavors)
+				siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().Region, flvs.Flavors)
 			logger.Info(ctx, msg)
 			return interfaces.NewStatus(interfaces.Unschedulable, msg)
 		}

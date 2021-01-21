@@ -19,6 +19,7 @@ package cache
 
 import (
 	"fmt"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 
 	schedulerlisters "k8s.io/kubernetes/globalscheduler/pkg/scheduler/listers"
 	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
@@ -28,12 +29,16 @@ import (
 // Snapshot is a snapshot of cache SiteCacheInfo and SiteTree order. The scheduler takes a
 // snapshot at the beginning of each scheduling cycle and uses it for its operations in that cycle.
 type Snapshot struct {
-	// siteCacheInfoMap a map of site name to a snapshot of its SiteCacheInfo.
-	siteCacheInfoMap map[string]*schedulersitecacheinfo.SiteCacheInfo
-	// siteCacheInfoList is the list of siteIDs as ordered in the cache's siteTree.
-	siteCacheInfoList []*schedulersitecacheinfo.SiteCacheInfo
-	// havePodsWithAffinitySiteCacheInfoList is the list of siteIDs with at least one pod declaring affinity terms.
-	havePodsWithAffinitySiteCacheInfoList []*schedulersitecacheinfo.SiteCacheInfo
+	// SiteCacheInfoMap a map of site name to a snapshot of its SiteCacheInfo.
+	SiteCacheInfoMap map[string]*schedulersitecacheinfo.SiteCacheInfo				`json:"siteCacheInfoMap"`
+	// SiteCacheInfoList is the list of siteIDs as ordered in the cache's siteTree.
+	SiteCacheInfoList []*schedulersitecacheinfo.SiteCacheInfo						`json:"siteCacheInfoList"`
+	// HavePodsWithAffinitySiteCacheInfoList is the list of siteIDs with at least one pod declaring affinity terms.
+	HavePodsWithAffinitySiteCacheInfoList []*schedulersitecacheinfo.SiteCacheInfo	`json:"havePodsWithAffinitySiteCacheInfoList"`
+	// RegionFlavorMap is a map of the region flavor id to a flavor, contains all flavors
+	RegionFlavorMap map[string]*typed.RegionFlavor									`json:"regionFlavorMap"`
+	// FlavorMap is a map of the flavor id to a flavor, contains all flavors
+	FlavorMap map[string]*typed.RegionFlavor										`json:"flavorMap"`
 	generation                            int64
 }
 
@@ -42,7 +47,7 @@ var _ schedulerlisters.SharedLister = &Snapshot{}
 // NewEmptySnapshot initializes a Snapshot struct and returns it.
 func NewEmptySnapshot() *Snapshot {
 	return &Snapshot{
-		siteCacheInfoMap: make(map[string]*schedulersitecacheinfo.SiteCacheInfo),
+		SiteCacheInfoMap: make(map[string]*schedulersitecacheinfo.SiteCacheInfo),
 	}
 }
 
@@ -59,9 +64,9 @@ func NewSnapshot(stacks []*types.Stack, sites []*types.Site) *Snapshot {
 	}
 
 	s := NewEmptySnapshot()
-	s.siteCacheInfoMap = siteCacheInfoMap
-	s.siteCacheInfoList = siteCacheInfoList
-	s.havePodsWithAffinitySiteCacheInfoList = havePodsWithAffinitySiteCacheInfoList
+	s.SiteCacheInfoMap = siteCacheInfoMap
+	s.SiteCacheInfoList = siteCacheInfoList
+	s.HavePodsWithAffinitySiteCacheInfoList = havePodsWithAffinitySiteCacheInfoList
 
 	return s
 }
@@ -91,7 +96,7 @@ func createSiteInfoCacheMap(stacks []*types.Stack, sites []*types.Site) map[stri
 
 // Stacks returns a StackLister
 func (s *Snapshot) Stacks() schedulerlisters.StackLister {
-	return stackLister(s.siteCacheInfoList)
+	return stackLister(s.SiteCacheInfoList)
 }
 
 // SiteCacheInfos returns a SiteCacheInfoLister.
@@ -101,7 +106,7 @@ func (s *Snapshot) SiteCacheInfos() schedulerlisters.SiteCacheInfoLister {
 
 // NumSites returns the number of siteIDs in the snapshot.
 func (s *Snapshot) NumSites() int {
-	return len(s.siteCacheInfoList)
+	return len(s.SiteCacheInfoList)
 }
 
 type stackLister []*schedulersitecacheinfo.SiteCacheInfo
@@ -134,17 +139,17 @@ func (p stackLister) FilteredList(filter schedulerlisters.StackFilter) ([]*types
 
 // List returns the list of siteIDs in the snapshot.
 func (s *Snapshot) List() ([]*schedulersitecacheinfo.SiteCacheInfo, error) {
-	return s.siteCacheInfoList, nil
+	return s.SiteCacheInfoList, nil
 }
 
 // HavePodsWithAffinityList returns the list of siteIDs with at least one pods with inter-pod affinity
 func (s *Snapshot) HavePodsWithAffinityList() ([]*schedulersitecacheinfo.SiteCacheInfo, error) {
-	return s.havePodsWithAffinitySiteCacheInfoList, nil
+	return s.HavePodsWithAffinitySiteCacheInfoList, nil
 }
 
 // Get returns the SiteCacheInfo of the given site ID.
 func (s *Snapshot) Get(siteID string) (*schedulersitecacheinfo.SiteCacheInfo, error) {
-	if v, ok := s.siteCacheInfoMap[siteID]; ok {
+	if v, ok := s.SiteCacheInfoMap[siteID]; ok {
 		return v, nil
 	}
 	return nil, fmt.Errorf("sitecacheinfo not found for site ID %q", siteID)

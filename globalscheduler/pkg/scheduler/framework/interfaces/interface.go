@@ -37,6 +37,7 @@ type SiteScoreList []SiteScore
 // SiteScore is a struct with sites name and score.
 type SiteScore struct {
 	SiteID     string
+	Region     string
 	AZ         string
 	Score      int64
 	StackCount int
@@ -303,7 +304,7 @@ type ScorePlugin interface {
 	// Score is called on each filtered site. It must return success and an integer
 	// indicating the rank of the site. All scoring plugins must return success or
 	// the pod will be rejected.
-	Score(ctx context.Context, state *CycleState, p *types.Stack, siteID string) (int64, *Status)
+	Score(ctx context.Context, state *CycleState, p *types.Stack, siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) (int64, *Status)
 }
 
 // PostScorePlugin is an interface that must be implemented by "PostScore" plugins to rank
@@ -384,7 +385,7 @@ type BindPlugin interface {
 	// remaining bind plugins are skipped. When a bind plugin does not handle a pod,
 	// it must return Skip in its Status code. If a bind plugin returns an Error, the
 	// pod is rejected and will not be bound.
-	Bind(ctx context.Context, state *CycleState, p *types.Stack, siteID string) *Status
+	Bind(ctx context.Context, state *CycleState, p *types.Stack, siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) *Status
 }
 
 // StrategyPlugin is an interface that must be implemented by "strategy" plugins. strategy
@@ -429,7 +430,7 @@ type Framework interface {
 	// It also returns *Status, which is set to non-success if any of the plugins returns
 	// a non-success status.
 	RunScorePlugins(ctx context.Context, state *CycleState, stack *types.Stack,
-		sites []*types.Site) (PluginToSiteScores, *Status)
+		sites []*types.Site, siteCacheInfoMap map[string]*schedulersitecacheinfo.SiteCacheInfo) (PluginToSiteScores, *Status)
 
 	// RunPreBindPlugins runs the set of configured prebind plugins. It returns
 	// *Status and its code is set to non-success if any of the plugins returns
@@ -458,7 +459,8 @@ type Framework interface {
 	// whether or not to handle the given Pod. If a bind plugin chooses to skip the
 	// binding, it should return code=5("skip") status. Otherwise, it should return "Error"
 	// or "Success". If none of the plugins handled binding, RunBindPlugins returns code=5("skip") status.
-	RunBindPlugins(ctx context.Context, state *CycleState, stack *types.Stack, siteID string) *Status
+	RunBindPlugins(ctx context.Context, state *CycleState, stack *types.Stack,
+		siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) *Status
 
 	//RunStrategyPlugins runs the set of configured strategy plugins.
 	RunStrategyPlugins(ctx context.Context, state *CycleState,

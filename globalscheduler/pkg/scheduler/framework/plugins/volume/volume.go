@@ -73,7 +73,7 @@ func (pl *Volume) Filter(ctx context.Context, cycleState *interfaces.CycleState,
 		var ok bool
 		if allocatableSize, ok = siteCacheInfo.TotalStorage[volType]; !ok {
 			msg := fmt.Sprintf("Site (%s) do not support required volume(%s).Support volume(%v)",
-				siteCacheInfo.Site().SiteID, volType, siteCacheInfo.TotalStorage)
+				siteCacheInfo.GetSite().SiteID, volType, siteCacheInfo.TotalStorage)
 			logger.Debug(ctx, msg)
 			return interfaces.NewStatus(interfaces.Unschedulable, msg)
 		}
@@ -84,7 +84,7 @@ func (pl *Volume) Filter(ctx context.Context, cycleState *interfaces.CycleState,
 
 		if allocatableSize < requestedSize+size {
 			msg := fmt.Sprintf("Site (%s) do not support required volume(%s-%f).Support volume(%v)",
-				siteCacheInfo.Site().SiteID, volType, size, siteCacheInfo.TotalStorage)
+				siteCacheInfo.GetSite().SiteID, volType, size, siteCacheInfo.TotalStorage)
 			logger.Debug(ctx, msg)
 			return interfaces.NewStatus(interfaces.Unschedulable, msg)
 		}
@@ -95,20 +95,14 @@ func (pl *Volume) Filter(ctx context.Context, cycleState *interfaces.CycleState,
 
 		maxCount = math.Min(maxCount, float64((allocatableSize-requestedSize)/size))
 	}
-	interfaces.UpdateSiteSelectorState(cycleState, siteCacheInfo.Site().SiteID,
+	interfaces.UpdateSiteSelectorState(cycleState, siteCacheInfo.GetSite().SiteID,
 		map[string]interface{}{"StackMaxCount": maxCount})
 	return nil
 }
 
 // Score invoked at the score extension point.
 func (pl *Volume) Score(ctx context.Context, state *interfaces.CycleState, stack *types.Stack,
-	siteID string) (int64, *interfaces.Status) {
-	siteCacheInfo, err := pl.handle.SnapshotSharedLister().SiteCacheInfos().Get(siteID)
-	if err != nil {
-		return 0, interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %q from Snapshot: %v",
-			siteID, err))
-	}
-
+	siteCacheInfo *sitecacheinfo.SiteCacheInfo) (int64, *interfaces.Status) {
 	var requestedTotalSize float64 = 0
 	var allocatableTotalSize float64 = 0
 
