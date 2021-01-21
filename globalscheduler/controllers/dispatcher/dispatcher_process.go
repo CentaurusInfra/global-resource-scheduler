@@ -195,8 +195,8 @@ func (p *Process) SendPodToCluster() {
 			}
 
 			// Calculate average delete latency
-			averageDeleteLatency := int(TotalDeleteLatency) / TotalPodDeleteNum / 60
-			klog.V(3).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Pod Number: %d, Average Delete Latency: %d min %%%%%%%%%%%%%%%%%%%%%%%%%%", TotalPodNum, averageDeleteLatency)
+			averageDeleteLatency := int(TotalDeleteLatency) / TotalPodDeleteNum
+			klog.V(3).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Pod Number: %d, Average Delete Latency: %d second %%%%%%%%%%%%%%%%%%%%%%%%%%", TotalPodNum, averageDeleteLatency)
 		} else {
 			instanceId, err := openstack.ServerCreate(host, token, &pod.Spec)
 			if err == nil {
@@ -221,8 +221,8 @@ func (p *Process) SendPodToCluster() {
 				}
 
 				// Calculate average create latency
-				averageCreateLatency := int(TotalCreateLatency) / TotalPodCreateNum / 60
-				klog.V(3).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Pod Number: %d, Average Create Latency: %d min %%%%%%%%%%%%%%%%%%%%%%%%%%", TotalPodNum, averageCreateLatency)
+				averageCreateLatency := int(TotalCreateLatency) / TotalPodCreateNum
+				klog.V(3).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Pod Number: %d, Average Create Latency: %d second %%%%%%%%%%%%%%%%%%%%%%%%%%", TotalPodNum, averageCreateLatency)
 			} else {
 				pod.Status.Phase = v1.PodFailed
 				if _, err := p.clientset.CoreV1().Pods(pod.ObjectMeta.Namespace).UpdateStatus(pod); err != nil {
