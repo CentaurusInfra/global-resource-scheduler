@@ -74,7 +74,7 @@ func (dc *DispatcherController) CreateDispatcherCRD() error {
 						"spec": {
 							Type: "object",
 							Properties: map[string]apiextensions.JSONSchemaProps{
-								"range": {
+								"clusterRange": {
 									Type: "object",
 									Properties: map[string]apiextensions.JSONSchemaProps{
 										"start": {Type: "string"},
@@ -88,9 +88,9 @@ func (dc *DispatcherController) CreateDispatcherCRD() error {
 			},
 			AdditionalPrinterColumns: []apiextensions.CustomResourceColumnDefinition{
 				{
-					Name:     "range",
+					Name:     "ClusterRange",
 					Type:     "string",
-					JSONPath: ".spec.range",
+					JSONPath: ".spec.clusterRange",
 				},
 			},
 		},
