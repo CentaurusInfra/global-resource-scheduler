@@ -7,10 +7,13 @@ spec:
   union:
     geolocation:
       - city: "Seattle"
-        province: "WA1"
-        area: "Downtown1"
+        province: "Washington"
+        area: "NW"
         country: "USA"
       - city: "Renton"
+        province: "Washington"
+        area: "NW"
+        country: "USA"
     region:
       - region: "NW"
         availabilityzone: "az"
