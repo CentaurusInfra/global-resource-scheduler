@@ -40,7 +40,7 @@ spec:
 EOF
 }
 
-for ((i = 1 ; i < $(($1)) ; i++)); do
+for ((i = 0 ; i < $(($1)) ; i++)); do
     name="pod-$(($i))"
     create_pod $name
 done
