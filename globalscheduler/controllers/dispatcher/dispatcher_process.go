@@ -209,7 +209,7 @@ func (p *Process) SendPodToCluster() {
 				TotalCreateLatency += duration
 				createLatency := int(duration)
 				klog.V(3).Infof("************************************ Pod Name: %s, Create Latency: %d Millisecond ************************************", pod.Name, createLatency)
-				
+
 				pod.Status.ClusterInstanceId = instanceId
 				pod.Status.Phase = v1.ClusterScheduled
 				updatedPod, err := p.clientset.CoreV1().Pods(pod.ObjectMeta.Namespace).UpdateStatus(pod)
