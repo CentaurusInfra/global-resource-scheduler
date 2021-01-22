@@ -1,0 +1,1989 @@
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster661
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: East
+    city: NewYork
+    country: US
+    province: NewYork
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.61
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-east-1
+    region: us-east
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster662
+  namespace: default
+spec:
+  flavors:
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: East
+    city: Boston
+    country: US
+    province: Massachusettes
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.62
+  memcapacity: 512
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-east-2
+    region: us-east
+  serverprice: 15
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster663
+  namespace: default
+spec:
+  flavors:
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: West
+    city: Bellevue
+    country: US
+    province: Washington
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.63
+  memcapacity: 512
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-west-1
+    region: us-west
+  serverprice: 15
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster664
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: West
+    city: SanFrancisco
+    country: US
+    province: California
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.64
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-west-2
+    region: us-west
+  storage:
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster665
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "2"
+    totalcapacity: 20
+  - flavorid: "3"
+    totalcapacity: 30
+  geolocation:
+    area: South
+    city: Orlando
+    country: US
+    province: Florida
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.65
+  memcapacity: 512
+  region:
+    availabilityzone: us-south-1
+    region: us-south
+  serverprice: 20
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster666
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: South
+    city: Atlanta
+    country: US
+    province: Georgia
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.66
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-west-2
+    region: us-west
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster667
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: North
+    city: TwinCity
+    country: US
+    province: Minnesota
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.67
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-north-1
+    region: us-north
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster668
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: North
+    city: Ankorage
+    country: US
+    province: Alaska
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.68
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-north-2
+    region: us-north
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster669
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: Central
+    city: Chicago
+    country: US
+    province: Illinois
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.69
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-central-1
+    region: us-central
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster670
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: Central
+    city: Omaha
+    country: US
+    province: Nebraska
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.70
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-central-2
+    region: us-central
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster671
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: Central
+    city: Omaha
+    country: US
+    province: Nebraska
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.71
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-central-2
+    region: us-central
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster672
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: Central
+    city: Chicago
+    country: US
+    province: Illinois
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.72
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-central-1
+    region: us-central
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster673
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: North
+    city: Ankorage
+    country: US
+    province: Alaska
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.73
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-north-2
+    region: us-north
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster674
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: North
+    city: TwinCity
+    country: US
+    province: Minnesota
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.74
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-north-1
+    region: us-north
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster675
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: South
+    city: Atlanta
+    country: US
+    province: Georgia
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.75
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-south-2
+    region: us-south
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster676
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "2"
+    totalcapacity: 20
+  - flavorid: "3"
+    totalcapacity: 30
+  geolocation:
+    area: South
+    city: Orlando
+    country: US
+    province: Florida
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.76
+  memcapacity: 512
+  region:
+    availabilityzone: us-south-1
+    region: us-south
+  serverprice: 20
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster677
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "2"
+    totalcapacity: 20
+  - flavorid: "3"
+    totalcapacity: 30
+  geolocation:
+    area: West
+    city: SanFrancisco
+    country: US
+    province: California
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.77
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-west-2
+    region: us-west
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster678
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: West
+    city: Bellevue
+    country: US
+    province: Washington
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.78
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-west-1
+    region: us-west
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster679
+  namespace: default
+spec:
+  flavors:
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: East
+    city: Boston
+    country: US
+    province: Massachusettes
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.79
+  memcapacity: 512
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-east-2
+    region: us-east
+  serverprice: 15
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster680
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: East
+    city: NewYork
+    country: US
+    province: NewYork
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.80
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-east-1
+    region: us-east
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster681
+  namespace: default
+spec:
+  flavors:
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: East
+    city: Boston
+    country: US
+    province: Massachusettes
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.81
+  memcapacity: 512
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-east-2
+    region: us-east
+  serverprice: 15
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster682
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: West
+    city: SanFrancisco
+    country: US
+    province: California
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.22
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-west-2
+    region: us-west
+  storage:
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster683
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: South
+    city: Atlanta
+    country: US
+    province: Georgia
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.83
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-south-2
+    region: us-south
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster684
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: North
+    city: Ankorage
+    country: US
+    province: Alaska
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.84
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-north-2
+    region: us-north
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster685
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: Central
+    city: Omaha
+    country: US
+    province: Nebraska
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.85
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-central-2
+    region: us-central
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster686
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: East
+    city: NewYork
+    country: US
+    province: NewYork
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.86
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-east-1
+    region: us-east
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster687
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: West
+    city: Bellevue
+    country: US
+    province: Washington
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.87
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-west-1
+    region: us-west
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster688
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "2"
+    totalcapacity: 20
+  - flavorid: "3"
+    totalcapacity: 30
+  geolocation:
+    area: South
+    city: Orlando
+    country: US
+    province: Florida
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.88
+  memcapacity: 512
+  region:
+    availabilityzone: us-south-1
+    region: us-south
+  serverprice: 20
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster689
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: North
+    city: TwinCity
+    country: US
+    province: Minnesota
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.89
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-north-1
+    region: us-north
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster690
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: Central
+    city: Chicago
+    country: US
+    province: Illinois
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.90
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-central-1
+    region: us-central
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster691
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: East
+    city: NewYork
+    country: US
+    province: NewYork
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.91
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-east-1
+    region: us-east
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster692
+  namespace: default
+spec:
+  flavors:
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: East
+    city: Boston
+    country: US
+    province: Massachusettes
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.92
+  memcapacity: 512
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-east-2
+    region: us-east
+  serverprice: 15
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster693
+  namespace: default
+spec:
+  flavors:
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: West
+    city: Bellevue
+    country: US
+    province: Washington
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.93
+  memcapacity: 512
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-west-1
+    region: us-west
+  serverprice: 15
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster694
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: West
+    city: SanFrancisco
+    country: US
+    province: California
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.94
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-west-2
+    region: us-west
+  storage:
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster695
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "2"
+    totalcapacity: 20
+  - flavorid: "3"
+    totalcapacity: 30
+  geolocation:
+    area: South
+    city: Orlando
+    country: US
+    province: Florida
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.95
+  memcapacity: 512
+  region:
+    availabilityzone: us-south-1
+    region: us-south
+  serverprice: 20
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster696
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: South
+    city: Atlanta
+    country: US
+    province: Georgia
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.96
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-west-2
+    region: us-west
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster697
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: North
+    city: TwinCity
+    country: US
+    province: Minnesota
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.97
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-north-1
+    region: us-north
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster698
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: North
+    city: Ankorage
+    country: US
+    province: Alaska
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.98
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-north-2
+    region: us-north
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster699
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: Central
+    city: Chicago
+    country: US
+    province: Illinois
+  homescheduler: scheduler0
+  ipaddress: 10.6.0.99
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-central-1
+    region: us-central
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster700
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: Central
+    city: Omaha
+    country: US
+    province: Nebraska
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.0
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-central-2
+    region: us-central
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster701
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: Central
+    city: Omaha
+    country: US
+    province: Nebraska
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.1
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-central-2
+    region: us-central
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster702
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: Central
+    city: Chicago
+    country: US
+    province: Illinois
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.2
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-central-1
+    region: us-central
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster703
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: North
+    city: Ankorage
+    country: US
+    province: Alaska
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.3
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-north-2
+    region: us-north
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster704
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: North
+    city: TwinCity
+    country: US
+    province: Minnesota
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.4
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-north-1
+    region: us-north
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster705
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: South
+    city: Atlanta
+    country: US
+    province: Georgia
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.5
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-south-2
+    region: us-south
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster706
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "2"
+    totalcapacity: 20
+  - flavorid: "3"
+    totalcapacity: 30
+  geolocation:
+    area: South
+    city: Orlando
+    country: US
+    province: Florida
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.6
+  memcapacity: 512
+  region:
+    availabilityzone: us-south-1
+    region: us-south
+  serverprice: 20
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster707
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "2"
+    totalcapacity: 20
+  - flavorid: "3"
+    totalcapacity: 30
+  geolocation:
+    area: West
+    city: SanFrancisco
+    country: US
+    province: California
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.7
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-west-2
+    region: us-west
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster708
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: West
+    city: Bellevue
+    country: US
+    province: Washington
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.8
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-west-1
+    region: us-west
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster709
+  namespace: default
+spec:
+  flavors:
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: East
+    city: Boston
+    country: US
+    province: Massachusettes
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.9
+  memcapacity: 512
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-east-2
+    region: us-east
+  serverprice: 15
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster710
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: East
+    city: NewYork
+    country: US
+    province: NewYork
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.10
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-east-1
+    region: us-east
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster711
+  namespace: default
+spec:
+  flavors:
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: East
+    city: Boston
+    country: US
+    province: Massachusettes
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.11
+  memcapacity: 512
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-east-2
+    region: us-east
+  serverprice: 15
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster712
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: West
+    city: SanFrancisco
+    country: US
+    province: California
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.12
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-west-2
+    region: us-west
+  storage:
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster713
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: South
+    city: Atlanta
+    country: US
+    province: Georgia
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.13
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-south-2
+    region: us-south
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster714
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: North
+    city: Ankorage
+    country: US
+    province: Alaska
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.14
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-north-2
+    region: us-north
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster715
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: Central
+    city: Omaha
+    country: US
+    province: Nebraska
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.15
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-central-2
+    region: us-central
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster716
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: East
+    city: NewYork
+    country: US
+    province: NewYork
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.16
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-east-1
+    region: us-east
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster717
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: West
+    city: Bellevue
+    country: US
+    province: Washington
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.17
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-west-1
+    region: us-west
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster718
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "2"
+    totalcapacity: 20
+  - flavorid: "3"
+    totalcapacity: 30
+  geolocation:
+    area: South
+    city: Orlando
+    country: US
+    province: Florida
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.18
+  memcapacity: 512
+  region:
+    availabilityzone: us-south-1
+    region: us-south
+  serverprice: 20
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster719
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: North
+    city: TwinCity
+    country: US
+    province: Minnesota
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.19
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-north-1
+    region: us-north
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster720
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 10
+  - flavorid: "2"
+    totalcapacity: 20
+  geolocation:
+    area: Central
+    city: Chicago
+    country: US
+    province: Illinois
+  homescheduler: scheduler0
+  ipaddress: 10.7.0.20
+  memcapacity: 256
+  operator:
+    operator: globalscheduler
+  region:
+    availabilityzone: us-central-1
+    region: us-central
+  serverprice: 10
+  storage:
+  - storagecapacity: 2000
+    typeid: sata
+  - storagecapacity: 1000
+    typeid: sas
+  - storagecapacity: 3000
+    typeid: ssd

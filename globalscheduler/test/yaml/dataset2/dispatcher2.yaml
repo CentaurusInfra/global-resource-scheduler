@@ -1,0 +1,13 @@
+apiVersion: globalscheduler.com/v1
+kind: Dispatcher
+metadata:
+  name: dispatcher1
+spec:
+  cluster: ["cluster1"]
+---
+apiVersion: globalscheduler.com/v1
+kind: Dispatcher
+metadata:
+  name: dispatcher1
+spec:
+  cluster: ["cluster2"]
