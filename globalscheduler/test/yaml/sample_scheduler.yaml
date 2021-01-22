@@ -17,4 +17,4 @@ kind: Scheduler
 metadata:
   name: banana-3
 spec:
-  tag: "3
+  tag: "3"
