@@ -208,7 +208,7 @@ func (p *Process) SendPodToCluster() {
 				duration := (currentTime.UnixNano() - podCreateTime.UnixNano()) / 1000000
 				TotalCreateLatency += duration
 				createLatency := int(duration)
-				klog.V(2).Infof("************************************ Pod Name: %s, Create Latency: %d Millisecond ************************************", pod.Name, createLatency)
+				klog.V(3).Infof("************************************ Pod Name: %s, Create Latency: %d second ************************************", pod.Name, createLatency)
 
 				pod.Status.ClusterInstanceId = instanceId
 				pod.Status.Phase = v1.ClusterScheduled
