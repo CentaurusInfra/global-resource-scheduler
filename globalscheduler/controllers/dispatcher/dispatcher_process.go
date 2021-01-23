@@ -185,10 +185,10 @@ func (p *Process) SendPodToCluster() {
 				// Calculate delete latency
 				podDeleteTime := pod.DeletionTimestamp
 				currentTime := time.Now().UTC()
-				duration := currentTime.Unix() - podDeleteTime.Unix()
+				duration := (currentTime.UnixNano() - podDeleteTime.UnixNano()) / 1000000
 				TotalDeleteLatency += duration
 				deleteLatency := int(duration)
-				klog.V(3).Infof("************************************ Pod Name: %s, Delete Latency: %d second ************************************", pod.Name, deleteLatency)
+				klog.V(2).Infof("************************************ Pod Name: %s, Delete Latency: %d Millisecond ************************************", pod.Name, deleteLatency)
 
 			} else {
 				klog.Warningf("Failed to delete the pod %v with error %v", pod.ObjectMeta.Name, err)
@@ -196,7 +196,7 @@ func (p *Process) SendPodToCluster() {
 
 			// Calculate average delete latency
 			averageDeleteLatency := int(TotalDeleteLatency) / TotalPodDeleteNum
-			klog.V(3).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Total Number of Pods Deleted: %d, Average Delete Latency: %d second %%%%%%%%%%%%%%%%%%%%%%%%%%", TotalPodDeleteNum, averageDeleteLatency)
+			klog.V(2).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Total Number of Pods Deleted: %d, Average Delete Latency: %d Millisecond %%%%%%%%%%%%%%%%%%%%%%%%%%", TotalPodDeleteNum, averageDeleteLatency)
 		} else {
 			instanceId, err := openstack.ServerCreate(host, token, &pod.Spec)
 			if err == nil {
@@ -205,11 +205,11 @@ func (p *Process) SendPodToCluster() {
 				// Calculate create latency
 				podCreateTime := pod.CreationTimestamp
 				currentTime := time.Now().UTC()
-				duration := currentTime.Unix() - podCreateTime.Unix()
+				duration := (currentTime.UnixNano() - podCreateTime.UnixNano()) / 1000000
 				TotalCreateLatency += duration
 				createLatency := int(duration)
-				klog.V(3).Infof("************************************ Pod Name: %s, Create Latency: %d second ************************************", pod.Name, createLatency)
-				
+				klog.V(2).Infof("************************************ Pod Name: %s, Create Latency: %d Millisecond ************************************", pod.Name, createLatency)
+
 				pod.Status.ClusterInstanceId = instanceId
 				pod.Status.Phase = v1.ClusterScheduled
 				updatedPod, err := p.clientset.CoreV1().Pods(pod.ObjectMeta.Namespace).UpdateStatus(pod)
@@ -222,7 +222,7 @@ func (p *Process) SendPodToCluster() {
 
 				// Calculate average create latency
 				averageCreateLatency := int(TotalCreateLatency) / TotalPodCreateNum
-				klog.V(3).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Total Number of Pods Created: %d, Average Create Latency: %d second %%%%%%%%%%%%%%%%%%%%%%%%%%", TotalPodCreateNum, averageCreateLatency)
+				klog.V(2).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Total Number of Pods Created: %d, Average Create Latency: %d Millisecond %%%%%%%%%%%%%%%%%%%%%%%%%%", TotalPodCreateNum, averageCreateLatency)
 			} else {
 				pod.Status.Phase = v1.PodFailed
 				if _, err := p.clientset.CoreV1().Pods(pod.ObjectMeta.Namespace).UpdateStatus(pod); err != nil {
