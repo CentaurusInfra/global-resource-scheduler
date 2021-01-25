@@ -1,0 +1,149 @@
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster0
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 1000
+  geolocation:
+    area: NE-1
+    city: NewYork
+    country: US
+    province: NewYork
+  ipaddress: 34.218.224.247
+  memcapacity: 256
+  operator:
+      operator: globalscheduler
+  region:
+      availabilityzone: NE-1
+      region: NE-1
+  serverprice: 10
+  storage:
+  - storagecapacity: 256
+    typeid: sas
+  homescheduler: scheduler0
+  homedispatcher: dispatcher0
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster1
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 1000
+  geolocation:
+    area: NW-1
+    city: Bellevue
+    country: US
+    province: Washington
+  ipaddress: 34.218.224.247
+  memcapacity: 256
+  operator:
+      operator: globalscheduler
+  region:
+      availabilityzone: NW-1
+      region: NW-1
+  serverprice: 10
+  storage:
+  - storagecapacity: 256
+    typeid: sas
+  homescheduler: scheduler0
+  homedispatcher: dispatcher0
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster2
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 1000
+  geolocation:
+    area: SE-1
+    city: Orlando
+    country: US
+    province: Florida
+  ipaddress: 34.218.224.247
+  memcapacity: 256
+  operator:
+      operator: globalscheduler
+  region:
+      availabilityzone: SE-1
+      region: SE-1
+  serverprice: 10
+  storage:
+  - storagecapacity: 256
+    typeid: sas
+  homescheduler: scheduler0
+  homedispatcher: dispatcher0
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster3
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 1000
+  geolocation:
+    area: SW-1
+    city: Austin
+    country: US
+    province: Texas
+  ipaddress: 34.218.224.247
+  memcapacity: 256
+  operator:
+      operator: globalscheduler
+  region:
+      availabilityzone: SW-1
+      region: SW-1
+  serverprice: 10
+  storage:
+  - storagecapacity: 256
+    typeid: sas
+  homescheduler: scheduler0
+  homedispatcher: dispatcher0
+---
+apiVersion: globalscheduler.com/v1
+kind: Cluster
+metadata:
+  name: cluster4
+  namespace: default
+spec:
+  cpucapacity: 8
+  eipcapacity: 3
+  flavors:
+  - flavorid: "1"
+    totalcapacity: 1000
+  geolocation:
+    area: Central-1
+    city: Chicago
+    country: US
+    province: Illinois
+  ipaddress: 34.218.224.247
+  memcapacity: 256
+  operator:
+      operator: globalscheduler
+  region:
+      availabilityzone: Central-1
+      region: Central-1
+  serverprice: 10
+  storage:
+  - storagecapacity: 256
+    typeid: sas
+  homescheduler: scheduler0
+  homedispatcher: dispatcher0

@@ -24,6 +24,9 @@ import (
 	"os"
 )
 
+const (
+	OpenstackIP = "34.218.224.247"
+)
 // ApiServer : Empty API server struct
 type Location struct {
 	availabilityzone string
@@ -44,20 +47,6 @@ type Storage struct {
 	typeid          string
 }
 
-func num2ip(n int, m int) string {
-	n1 := n / 1000
-	n = n - (n1 * 1000)
-	n2 := n / 100
-	n = n - (n2 * 100)
-	n3 := n / 10
-	n = n - (n3 * 10)
-	if n1 == 0 {
-		n1 = 10
-	}
-	s := fmt.Sprintf("%d.%d.%d.%d", n1, n2, n3, n)
-	return s
-}
-
 func check(e error) {
 	if e != nil {
 		panic(e)
@@ -75,37 +64,37 @@ func main() {
 	var flavors [3]Flavor
 	var storages [3]Storage
 
-	regions[0].availabilityzone = "NE"
-	regions[0].region = "NE"
-	regions[0].area = "NE"
+	regions[0].availabilityzone = "NE-1"
+	regions[0].region = "NE-1"
+	regions[0].area = "NE-1"
 	regions[0].city = "NewYork"
 	regions[0].country = "US"
 	regions[0].province = "NewYork"
 
-	regions[1].availabilityzone = "NW"
-	regions[1].region = "NW"
-	regions[1].area = "NW"
+	regions[1].availabilityzone = "NW-1"
+	regions[1].region = "NW-1"
+	regions[1].area = "NW-1"
 	regions[1].city = "Bellevue"
 	regions[1].country = "US"
 	regions[1].province = "Washington"
 
-	regions[2].availabilityzone = "SE"
-	regions[2].region = "SE"
-	regions[2].area = "SE"
+	regions[2].availabilityzone = "SE-1"
+	regions[2].region = "SE-1"
+	regions[2].area = "SE-1"
 	regions[2].city = "Orlando"
 	regions[2].country = "US"
 	regions[2].province = "Florida"
 
-	regions[3].availabilityzone = "SW"
-	regions[3].region = "SW"
-	regions[3].area = "SW"
+	regions[3].availabilityzone = "SW-1"
+	regions[3].region = "SW-1"
+	regions[3].area = "SW-1"
 	regions[3].city = "Austin"
 	regions[3].country = "US"
 	regions[3].province = "Texas"
 
-	regions[4].availabilityzone = "Central"
-	regions[4].region = "Central"
-	regions[4].area = "Central"
+	regions[4].availabilityzone = "Central-1"
+	regions[4].region = "Central-1"
+	regions[4].area = "Central-1"
 	regions[4].city = "Chicago"
 	regions[4].country = "US"
 	regions[4].province = "Illinois"
@@ -119,7 +108,7 @@ func main() {
 
 	regions[6].availabilityzone = "NW-2"
 	regions[6].region = "NW-2"
-	regions[6].area = "NW2"
+	regions[6].area = "NW-2"
 	regions[6].city = "SanFrancisco"
 	regions[6].country = "US"
 	regions[6].province = "California"
@@ -219,17 +208,17 @@ func main() {
 					_, err = f.WriteString("    totalcapacity: " + flavors[0].totalcapacity + "\n")
 				}
 				_, err = f.WriteString("  geolocation:\n")
-				_, err = f.WriteString("  	area: " + regions[k].area + "\n")
-				_, err = f.WriteString("  	city: " + regions[k].city + "\n")
-				_, err = f.WriteString("  	country: " + regions[k].country + "\n")
-				_, err = f.WriteString("  	province: " + regions[k].province + "\n")
-				_, err = f.WriteString("  ipaddress: " + num2ip(clusterNumber, *max) + "\n")
+				_, err = f.WriteString("    area: " + regions[k].area + "\n")
+				_, err = f.WriteString("    city: " + regions[k].city + "\n")
+				_, err = f.WriteString("    country: " + regions[k].country + "\n")
+				_, err = f.WriteString("    province: " + regions[k].province + "\n")
+				_, err = f.WriteString("  ipaddress: " + OpenstackIP + "\n")
 				_, err = f.WriteString("  memcapacity: 256\n")
 				_, err = f.WriteString("  operator:\n")
 				_, err = f.WriteString("      operator: globalscheduler\n")
-				_, err = f.WriteString("  regions:\n")
+				_, err = f.WriteString("  region:\n")
 				_, err = f.WriteString("      availabilityzone: " + regions[k].availabilityzone + "\n")
-				_, err = f.WriteString("      regions: " + regions[k].region + "\n")
+				_, err = f.WriteString("      region: " + regions[k].region + "\n")
 				_, err = f.WriteString("  serverprice: 10\n")
 				_, err = f.WriteString("  storage:\n")
 				switch ii := i % 6; ii {
