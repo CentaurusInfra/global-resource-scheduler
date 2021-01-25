@@ -27,6 +27,7 @@ import (
 const (
 	OpenstackIP = "34.218.224.247"
 )
+
 // ApiServer : Empty API server struct
 type Location struct {
 	availabilityzone string
