@@ -1,44 +1,20 @@
 apiVersion: globalscheduler.com/v1
 kind: Scheduler
 metadata:
-  name: sample-scheduler
+  name: apple-1
 spec:
-  location:
-    city: "Bellevue"
-    province: "WA"
-    area: "Downtown"
-    country: "USA"
   tag: "1"
-  cluster: ["sample1","sample2"]
-  union:
-    geolocation:
-      - city: "Bellevue1"
-        province: "WA1"
-        area: "Downtown1"
-        country: "USA"
-      - city: "Bellevue2"
-        province: "WA2"
-        area: "Downtown2"
-        country: "US"
-    region:
-      - region: "NW"
-        availabilityzone: "az"
-      - region: "NE"
-        availabilityzone: "az2"
-    operator:
-      - operator: "None"
-      - operator: "x"
-    flavors:
-      - flavorid: "1"
-        totalcapacity: 100
-      - flavorid: "2"
-        totalcapacity: 200
-    storage:
-      - typeid: "ssd"
-        storagecapacity: 12
-      - typeid: "sas"
-        storagecapacity: 2200
-    eipcapacity: [100,101]
-    cpucapacity: [200,201]
-    memcapacity: [300,301]
-    serverprice: [400,401]
+---
+apiVersion: globalscheduler.com/v1
+kind: Scheduler
+metadata:
+  name: orange-2
+spec:
+  tag: "2"
+---
+apiVersion: globalscheduler.com/v1
+kind: Scheduler
+metadata:
+  name: banana-3
+spec:
+  tag: "3"

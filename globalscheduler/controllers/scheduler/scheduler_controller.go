@@ -277,11 +277,11 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		}
 
 		// Start Scheduler Process
-		command := "./hack/globalscheduler/start_scheduler.sh " + schedulerCopy.Spec.Tag + " " + schedulerCopy.Name
-		err = runCommand(command)
-		if err != nil {
-			return fmt.Errorf("start scheduler process failed")
-		}
+		// command := "./hack/globalscheduler/start_scheduler.sh " + schedulerCopy.Spec.Tag + " " + schedulerCopy.Name
+		// err = runCommand(command)
+		// if err != nil {
+		// 	return fmt.Errorf("start scheduler process failed")
+		// }
 		sc.recorder.Event(schedulerCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	case EventTypeUpdateScheduler:
 		klog.Infof("Event Type '%s'", EventTypeUpdateScheduler)
@@ -335,11 +335,11 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 
 			// Delete scheduler process
 			// TBD: Will add logic which will wait for the scheduler process to complete processing all PODs in its internal queue and then close the scheduler process
-			command := "./hack/globalscheduler/close_scheduler.sh " + schedulerCopy.Spec.Tag
-			err = runCommand(command)
-			if err != nil {
-				return fmt.Errorf("delete scheduler process failed")
-			}
+			// command := "./hack/globalscheduler/close_scheduler.sh " + schedulerCopy.Spec.Tag
+			// err = runCommand(command)
+			// if err != nil {
+			// 	return fmt.Errorf("delete scheduler process failed")
+			// }
 		}
 		sc.recorder.Event(schedulerCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	case EventTypeAddCluster:

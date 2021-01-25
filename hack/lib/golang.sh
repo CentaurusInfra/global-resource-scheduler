@@ -75,7 +75,11 @@ kube::golang::server_targets() {
     cmd/kubelet
     cmd/kubeadm
     cmd/hyperkube
-    cmd/kube-scheduler
+    cmd/gs-scheduler
+    globalscheduler/cmd/gs-controllers
+    globalscheduler/cmd/dispatcher_process
+    globalscheduler/cmd/distributor_process
+    globalscheduler/cmd/grpc-server
     vendor/k8s.io/apiextensions-apiserver
     cluster/gce/gci/mounter
   )
@@ -92,8 +96,12 @@ kube::golang::server_image_targets() {
   local targets=(
     cmd/kube-apiserver
     cmd/kube-controller-manager
-    cmd/kube-scheduler
     cmd/kube-proxy
+    cmd/gs-scheduler
+    globalscheduler/cmd/gs-controllers
+    globalscheduler/cmd/dispatcher_process
+    globalscheduler/cmd/distributor_process
+    globalscheduler/cmd/grpc-server
   )
   echo "${targets[@]}"
 }
@@ -319,7 +327,6 @@ readonly KUBE_ALL_BINARIES=("${KUBE_ALL_TARGETS[@]##*/}")
 readonly KUBE_STATIC_LIBRARIES=(
   kube-apiserver
   kube-controller-manager
-  kube-scheduler
   kube-proxy
   kubeadm
   kubectl
@@ -329,7 +336,6 @@ readonly KUBE_STATIC_LIBRARIES=(
 readonly KUBE_COVERAGE_INSTRUMENTED_PACKAGES=(
   k8s.io/kubernetes/cmd/kube-apiserver
   k8s.io/kubernetes/cmd/kube-controller-manager
-  k8s.io/kubernetes/cmd/kube-scheduler
   k8s.io/kubernetes/cmd/kube-proxy
   k8s.io/kubernetes/cmd/kubelet
 )
