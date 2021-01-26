@@ -1,0 +1,2199 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-1"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-2"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-3"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-4"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-2
+          city: Boston
+          country: US
+          province: Massachusettes
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-5"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: Boston
+          country: US
+          province: Massachusettes
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-6"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: Boston
+          country: US
+          province: Massachusettes
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-7"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-8"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-9"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-10"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-2
+          city: SanFrancisco
+          country: US
+          province: California
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-11"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-2
+          city: SanFrancisco
+          country: US
+          province: California
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-12"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-2
+          city: SanFrancisco
+          country: US
+          province: California
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-13"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: SE-1
+          city: Orlando
+          country: US
+          province: Florida
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-14"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: SE-1
+          city: Orlando
+          country: US
+          province: Florida
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-15"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: SE-1
+          city: Orlando
+          country: US
+          province: Florida
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-16"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: SE-2
+          city: Atlanta
+          country: US
+          province: Georgia
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-17"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: SE-2
+          city: Atlanta
+          country: US
+          province: Georgia
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-18"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: SE-2
+          city: Atlanta
+          country: US
+          province: Georgia
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-19"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-20"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-21"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-22"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-23"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-24"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-25"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: Central
+          city: Chicago
+          country: US
+          province: Illinois
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-26"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: Central
+          city: Chicago
+          country: US
+          province: Illinois
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-27"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: Central
+          city: Chicago
+          country: US
+          province: Illinois
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-28"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: Central
+          city: Omaha
+          country: US
+          province: Nebraska
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-29"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: Central
+          city: Omaha
+          country: US
+          province: Nebraska
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-30"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: Central
+          city: Omaha
+          country: US
+          province: Nebraska
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-31"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-32"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-33"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-34"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: Boston
+          country: US
+          province: Massachusettes
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-35"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: Boston
+          country: US
+          province: Massachusettes
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-36"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: Boston
+          country: US
+          province: Massachusettes
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-37"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-38"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-39"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-40"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-2
+          city: SanFrancisco
+          country: US
+          province: California
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-41"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-2
+          city: SanFrancisco
+          country: US
+          province: California
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-42"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-2
+          city: SanFrancisco
+          country: US
+          province: California
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-43"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: SE-1
+          city: Orlando
+          country: US
+          province: Florida
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-44"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: SE-1
+          city: Orlando
+          country: US
+          province: Florida
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-45"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: SE-1
+          city: Orlando
+          country: US
+          province: Florida
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-46"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: SE-2
+          city: Atlanta
+          country: US
+          province: Georgia
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-47"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: SE-2
+          city: Atlanta
+          country: US
+          province: Georgia
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-48"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: SE-2
+          city: Atlanta
+          country: US
+          province: Georgia
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-49"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-50"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-51"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-52"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-53"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-54"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-55"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: Central
+          city: Chicago
+          country: US
+          province: Illinois
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-56"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: Central
+          city: Chicago
+          country: US
+          province: Illinois
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-57"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: Central
+          city: Chicago
+          country: US
+          province: Illinois
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-58"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: Central
+          city: Omaha
+          country: US
+          province: Nebraska
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-59"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: Central
+          city: Omaha
+          country: US
+          province: Nebraska
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-60"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "2"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: Central
+          city: Omaha
+          country: US
+          province: Nebraska
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-61"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "84"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-62"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "84"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-63"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "84"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-64"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "84"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-2
+          city: Boston
+          country: US
+          province: Massachusettes
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-65"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "84"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-2
+          city: Boston
+          country: US
+          province: Massachusettes
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-66"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "84"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-2
+          city: Boston
+          country: US
+          province: Massachusettes
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-67"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "84"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-68"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "84"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-69"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "84"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-70"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "84"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-2
+          city: SanFrancisco
+          country: US
+          province: California
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-71"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "c1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-2
+          city: SanFrancisco
+          country: US
+          province: California
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-72"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "c1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-2
+          city: SanFrancisco
+          country: US
+          province: California
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-73"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "c1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: SE-1
+          city: Orlando
+          country: US
+          province: Florida
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-74"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "c1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: SE-1
+          city: Orlando
+          country: US
+          province: Florida
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-75"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "c1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: SE-1
+          city: Orlando
+          country: US
+          province: Florida
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-76"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "c1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: SE-2
+          city: Atlanta
+          country: US
+          province: Georgia
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-77"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "c1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: SE-2
+          city: Atlanta
+          country: US
+          province: Georgia
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-78"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "c1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: SE-2
+          city: Atlanta
+          country: US
+          province: Georgia
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-79"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "c1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-80"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "c1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-81"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "d1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-82"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "d1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-83"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "d1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-84"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "d1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-85"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "d1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: Central
+          city: Chicago
+          country: US
+          province: Illinois
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-86"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "d1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: Central
+          city: Chicago
+          country: US
+          province: Illinois
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-87"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "d1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: Central
+          city: Chicago
+          country: US
+          province: Illinois
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-88"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "d1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: Central
+          city: Omaha
+          country: US
+          province: Nebraska
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-89"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "d1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: Central
+          city: Omaha
+          country: US
+          province: Nebraska
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-90"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "d1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: Central
+          city: Omaha
+          country: US
+          province: Nebraska
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-91"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-92"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-93"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-94"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-2
+          city: Boston
+          country: US
+          province: Massachusettes
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-95"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-2
+          city: Boston
+          country: US
+          province: Massachusettes
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-96"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NE-1
+          city: Boston
+          country: US
+          province: Massachusettes
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-97"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-98"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-99"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-100"
+spec:
+  virtualMachine:
+    name: "demo-vm"
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "1"
+    resourceCommonInfo:
+      selector:
+        geoLocation:
+          area: NW-2
+          city: SanFrancisco
+          country: US
+          province: California
+  nics:
+  - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"

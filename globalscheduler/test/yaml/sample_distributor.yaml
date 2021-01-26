@@ -1,8 +1,0 @@
-apiVersion: globalscheduler.com/v1
-kind: Distributor
-metadata:
-  name: sample
-spec:
-  range:
-    start: 1
-    end: 1000
