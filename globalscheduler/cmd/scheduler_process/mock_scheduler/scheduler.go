@@ -180,13 +180,29 @@ func (s *Scheduler) Run(quit chan struct{}) {
 func (s *Scheduler) ScheduleOne() {
 
 	p := <-s.podQueue
-	fmt.Println("found a pod to schedule:", p.Namespace, "/", p.Name)
+	fmt.Printf("Found a pod to schedule: %s / %s \n", p.Namespace, p.Name)
+	idx := 0
+	if p.Status.AssignedScheduler.Name != "" {
+		if val, ok := s.clusters[p.Status.AssignedScheduler.Name]; ok {
+			if clusterLen := len(val); clusterLen > 0 {
+				idx = rand.Intn(clusterLen)
+			} else {
+				log.Println("there is no clusters")
+				return
+			}
+		} else {
+			log.Println("Failed to get clusters")
+			return
+		}
+	} else {
+		log.Println("The assigned name is empty")
+		return
+	}
 
-	idx := rand.Intn(len(s.clusters[p.Status.AssignedScheduler.Name]))
-	fmt.Println("The current cluster to bind is: ", s.clusters[p.Status.AssignedScheduler.Name][idx])
+	fmt.Printf("The current cluster to bind is: %s \n", s.clusters[p.Status.AssignedScheduler.Name][idx])
 	err := s.bindPod(p, s.clusters[p.Status.AssignedScheduler.Name][idx])
 	if err != nil {
-		log.Println("failed to bind cluster", err.Error())
+		log.Printf("Failed to bind cluster with the error %v \n", err.Error())
 		return
 	}
 

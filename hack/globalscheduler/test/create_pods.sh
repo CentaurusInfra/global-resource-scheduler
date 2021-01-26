@@ -29,7 +29,7 @@ spec:
     keyPairName: "demo-keypair"
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     flavors:
-      - flavorID: "3"
+      - flavorID: "42"
     resourceCommonInfo:
      count: 1
      selector:
