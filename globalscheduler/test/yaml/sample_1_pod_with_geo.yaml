@@ -16,7 +16,7 @@ spec:
      selector:
        geoLocation:
          city: "Bellevue"
-         province: "King"
+         province: "Washington"
          country: "US"
        regions:
          - region: "NW-1"

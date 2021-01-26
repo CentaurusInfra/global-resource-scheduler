@@ -37,7 +37,7 @@ spec:
   cpucapacity: 8
   eipcapacity: 3
   flavors:
-  - flavorid: "1"
+  - flavorid: "3"
     totalcapacity: 1000
   geolocation:
     area: NW-1
