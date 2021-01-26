@@ -9,11 +9,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-1
           city: NewYork
           country: US
           province: NewYork
@@ -31,11 +31,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-1
           city: NewYork
           country: US
           province: NewYork
@@ -53,11 +53,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-1
           city: NewYork
           country: US
           province: NewYork
@@ -75,11 +75,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-2
           city: Boston
           country: US
           province: Massachusettes
@@ -97,11 +97,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-1
           city: Boston
           country: US
           province: Massachusettes
@@ -119,11 +119,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-1
           city: Boston
           country: US
           province: Massachusettes
@@ -141,11 +141,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-1
           city: Bellevue
           country: US
           province: Washington
@@ -163,11 +163,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-1
           city: Bellevue
           country: US
           province: Washington
@@ -185,11 +185,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-1
           city: Bellevue
           country: US
           province: Washington
@@ -207,11 +207,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-2
           city: SanFrancisco
           country: US
           province: California
@@ -229,11 +229,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-2
           city: SanFrancisco
           country: US
           province: California
@@ -251,11 +251,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-2
           city: SanFrancisco
           country: US
           province: California
@@ -273,11 +273,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: South
+          area: SE-1
           city: Orlando
           country: US
           province: Florida
@@ -295,11 +295,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: South
+          area: SE-1
           city: Orlando
           country: US
           province: Florida
@@ -317,11 +317,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: South
+          area: SE-1
           city: Orlando
           country: US
           province: Florida
@@ -339,11 +339,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: South
+          area: SE-2
           city: Atlanta
           country: US
           province: Georgia
@@ -361,11 +361,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: South
+          area: SE-2
           city: Atlanta
           country: US
           province: Georgia
@@ -383,11 +383,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: South
+          area: SE-2
           city: Atlanta
           country: US
           province: Georgia
@@ -405,14 +405,14 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: North
-          city: TwinCity
+          area: NW-1
+          city: Bellevue
           country: US
-          province: Minnesota
+          province: Washington
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -427,14 +427,14 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: North
-          city: TwinCity
+          area: NW-1
+          city: Bellevue
           country: US
-          province: Minnesota
+          province: Washington
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -449,14 +449,14 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: North
-          city: TwinCity
+          area: NW-1
+          city: Bellevue
           country: US
-          province: Minnesota
+          province: Washington
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -471,14 +471,14 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: North
-          city: Ankorage
+          area: NE-1
+          city: NewYork
           country: US
-          province: Alaska
+          province: NewYork
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -493,14 +493,14 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: North
-          city: Ankorage
+          area: NE-1
+          city: NewYork
           country: US
-          province: Alaska
+          province: NewYork
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -515,14 +515,14 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: North
-          city: Ankorage
+          area: NE-1
+          city: NewYork
           country: US
-          province: Alaska
+          province: NewYork
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -537,7 +537,7 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
@@ -559,7 +559,7 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
@@ -581,7 +581,7 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
@@ -603,7 +603,7 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
@@ -625,7 +625,7 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
@@ -647,7 +647,7 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
@@ -669,11 +669,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-1
           city: NewYork
           country: US
           province: NewYork
@@ -691,11 +691,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-1
           city: NewYork
           country: US
           province: NewYork
@@ -713,11 +713,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-1
           city: NewYork
           country: US
           province: NewYork
@@ -735,11 +735,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-1
           city: Boston
           country: US
           province: Massachusettes
@@ -757,11 +757,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-1
           city: Boston
           country: US
           province: Massachusettes
@@ -779,11 +779,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-1
           city: Boston
           country: US
           province: Massachusettes
@@ -801,11 +801,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-1
           city: Bellevue
           country: US
           province: Washington
@@ -823,11 +823,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-1
           city: Bellevue
           country: US
           province: Washington
@@ -845,11 +845,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-1
           city: Bellevue
           country: US
           province: Washington
@@ -867,11 +867,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-2
           city: SanFrancisco
           country: US
           province: California
@@ -889,11 +889,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-2
           city: SanFrancisco
           country: US
           province: California
@@ -911,11 +911,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-2
           city: SanFrancisco
           country: US
           province: California
@@ -933,11 +933,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: South
+          area: SE-1
           city: Orlando
           country: US
           province: Florida
@@ -955,11 +955,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: South
+          area: SE-1
           city: Orlando
           country: US
           province: Florida
@@ -977,11 +977,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: South
+          area: SE-1
           city: Orlando
           country: US
           province: Florida
@@ -999,11 +999,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: South
+          area: SE-2
           city: Atlanta
           country: US
           province: Georgia
@@ -1021,11 +1021,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: South
+          area: SE-2
           city: Atlanta
           country: US
           province: Georgia
@@ -1043,11 +1043,11 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: South
+          area: SE-2
           city: Atlanta
           country: US
           province: Georgia
@@ -1065,14 +1065,14 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: North
-          city: TwinCity
+          area: NW-1
+          city: Bellevue
           country: US
-          province: Minnesota
+          province: Washington
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -1087,14 +1087,14 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: North
-          city: TwinCity
+          area: NW-1
+          city: Bellevue
           country: US
-          province: Minnesota
+          province: Washington
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -1109,14 +1109,14 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: North
-          city: TwinCity
+          area: NW-1
+          city: Bellevue
           country: US
-          province: Minnesota
+          province: Washington
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -1131,14 +1131,14 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: North
-          city: Ankorage
+          area: NE-1
+          city: NewYork
           country: US
-          province: Alaska
+          province: NewYork
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -1153,14 +1153,14 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: North
-          city: Ankorage
+          area: NE-1
+          city: NewYork
           country: US
-          province: Alaska
+          province: NewYork
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -1175,14 +1175,14 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: North
-          city: Ankorage
+          area: NE-1
+          city: NewYork
           country: US
-          province: Alaska
+          province: NewYork
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -1197,7 +1197,7 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
@@ -1219,7 +1219,7 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
@@ -1241,7 +1241,7 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
@@ -1263,7 +1263,7 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
@@ -1285,7 +1285,7 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
@@ -1307,7 +1307,7 @@ spec:
     securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "42"
+    - flavorID: "2"
     resourceCommonInfo:
       selector:
         geoLocation:
@@ -1333,7 +1333,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-1
           city: NewYork
           country: US
           province: NewYork
@@ -1355,7 +1355,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-1
           city: NewYork
           country: US
           province: NewYork
@@ -1377,7 +1377,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-1
           city: NewYork
           country: US
           province: NewYork
@@ -1399,7 +1399,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-2
           city: Boston
           country: US
           province: Massachusettes
@@ -1421,7 +1421,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-2
           city: Boston
           country: US
           province: Massachusettes
@@ -1443,7 +1443,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-2
           city: Boston
           country: US
           province: Massachusettes
@@ -1465,7 +1465,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-1
           city: Bellevue
           country: US
           province: Washington
@@ -1487,7 +1487,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-1
           city: Bellevue
           country: US
           province: Washington
@@ -1509,7 +1509,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-1
           city: Bellevue
           country: US
           province: Washington
@@ -1531,7 +1531,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-2
           city: SanFrancisco
           country: US
           province: California
@@ -1553,7 +1553,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-2
           city: SanFrancisco
           country: US
           province: California
@@ -1575,7 +1575,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-2
           city: SanFrancisco
           country: US
           province: California
@@ -1597,7 +1597,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: South
+          area: SE-1
           city: Orlando
           country: US
           province: Florida
@@ -1619,7 +1619,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: South
+          area: SE-1
           city: Orlando
           country: US
           province: Florida
@@ -1641,7 +1641,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: South
+          area: SE-1
           city: Orlando
           country: US
           province: Florida
@@ -1663,7 +1663,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: South
+          area: SE-2
           city: Atlanta
           country: US
           province: Georgia
@@ -1685,7 +1685,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: South
+          area: SE-2
           city: Atlanta
           country: US
           province: Georgia
@@ -1707,7 +1707,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: South
+          area: SE-2
           city: Atlanta
           country: US
           province: Georgia
@@ -1729,10 +1729,10 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: North
-          city: TwinCity
+          area: NW-1
+          city: Bellevue
           country: US
-          province: Minnesota
+          province: Washington
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -1751,10 +1751,10 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: North
-          city: TwinCity
+          area: NW-1
+          city: Bellevue
           country: US
-          province: Minnesota
+          province: Washington
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -1773,10 +1773,10 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: North
-          city: TwinCity
+          area: NW-1
+          city: Bellevue
           country: US
-          province: Minnesota
+          province: Washington
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -1795,10 +1795,10 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: North
-          city: Ankorage
+          area: NE-1
+          city: NewYork
           country: US
-          province: Alaska
+          province: NewYork
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -1817,10 +1817,10 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: North
-          city: Ankorage
+          area: NE-1
+          city: NewYork
           country: US
-          province: Alaska
+          province: NewYork
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -1839,10 +1839,10 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: North
-          city: Ankorage
+          area: NE-1
+          city: NewYork
           country: US
-          province: Alaska
+          province: NewYork
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -1993,7 +1993,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-1
           city: NewYork
           country: US
           province: NewYork
@@ -2015,7 +2015,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-1
           city: NewYork
           country: US
           province: NewYork
@@ -2037,7 +2037,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-1
           city: NewYork
           country: US
           province: NewYork
@@ -2059,7 +2059,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-2
           city: Boston
           country: US
           province: Massachusettes
@@ -2081,7 +2081,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-2
           city: Boston
           country: US
           province: Massachusettes
@@ -2103,7 +2103,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: East
+          area: NE-1
           city: Boston
           country: US
           province: Massachusettes
@@ -2125,7 +2125,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-1
           city: Bellevue
           country: US
           province: Washington
@@ -2147,7 +2147,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-1
           city: Bellevue
           country: US
           province: Washington
@@ -2169,7 +2169,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-1
           city: Bellevue
           country: US
           province: Washington
@@ -2191,7 +2191,7 @@ spec:
     resourceCommonInfo:
       selector:
         geoLocation:
-          area: West
+          area: NW-2
           city: SanFrancisco
           country: US
           province: California
