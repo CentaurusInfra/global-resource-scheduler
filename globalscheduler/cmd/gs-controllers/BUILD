@@ -10,6 +10,7 @@ go_library(
         "//globalscheduler/controllers/dispatcher:go_default_library",
         "//globalscheduler/controllers/distributor:go_default_library",
         "//globalscheduler/controllers/scheduler:go_default_library",
+        "//globalscheduler/controllers/util:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/clientset/versioned:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/informers/externalversions:go_default_library",
         "//globalscheduler/pkg/apis/dispatcher/client/clientset/versioned:go_default_library",
