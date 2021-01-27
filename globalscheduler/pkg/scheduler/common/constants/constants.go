@@ -88,4 +88,10 @@ const (
 
 	//ConfCommonHypervisorInterval common_hypervisor_interval, default 24h，86400s
 	ConfCommonHypervisorInterval = "common_hypervisor_interval"
+
+	//Default resource collector api url
+	DefaultResourceCollectorAPIURL = "127.0.0.1:8663"
+
+	//ResourceCollector snapshot url
+	ResourceCollecotrSnapshotURL = "/v1/snapshot"
 )

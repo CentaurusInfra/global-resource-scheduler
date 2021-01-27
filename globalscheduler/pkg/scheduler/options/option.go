@@ -18,6 +18,7 @@ package options
 
 import (
 	cliflag "k8s.io/component-base/cli/flag"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 )
 
@@ -27,6 +28,9 @@ type ServerRunOptions struct {
 
 	// Scheduler Name Differentiating Schedulers
 	SchedulerName string
+
+	// Resource Collector API URL
+	ResourceCollectorApiUrl string
 }
 
 // NewServerRunOptions constructs a new ServerRunOptions if existed.
@@ -39,12 +43,18 @@ func (s *ServerRunOptions) Flags() (fss cliflag.NamedFlagSets) {
 	fs := fss.FlagSet("gs-scheduler")
 	fs.StringVar(&s.KubeConfig, "kubeconfig", s.KubeConfig, "Path to kubeconfig files, specifying how to connect to  API servers. Providing --kubeconfig enables API server mode, omitting --kubeconfig enables standalone mode.")
 	fs.StringVar(&s.SchedulerName, "schedulername", s.SchedulerName, "Scheduler name of the gs-scheduler, specifying the name of the scheduler.")
+	fs.StringVar(&s.ResourceCollectorApiUrl, "resourcecollectorapiurl", s.ResourceCollectorApiUrl, "Api url of the resource collector, specifying the api of the resource collector.")
 	return fss
 }
 
 func (s *ServerRunOptions) Config() *types.GSSchedulerConfiguration {
 	config := NewGSSchedulerConfiguration()
 	config.SchedulerName = s.SchedulerName
+	config.ResourceCollectorApiUrl = s.ResourceCollectorApiUrl
+	if config.ResourceCollectorApiUrl == "" {
+		config.ResourceCollectorApiUrl = constants.DefaultResourceCollectorAPIURL
+	}
+
 	return config
 }
 

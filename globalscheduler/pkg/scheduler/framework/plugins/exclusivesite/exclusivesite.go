@@ -47,7 +47,7 @@ func (pl *ExclusiveSite) Filter(ctx context.Context, cycleState *interfaces.Cycl
 	siteCacheInfo *sitecacheinfo.SiteCacheInfo) *interfaces.Status {
 	domainID := utils.GetStrFromCtx(ctx, constants.ContextDomainID)
 
-	siteAttrs := siteCacheInfo.Site().SiteAttribute
+	siteAttrs := siteCacheInfo.GetSite().SiteAttribute
 
 	for _, siteAttr := range siteAttrs {
 		if siteAttr.Key == constants.SiteExclusiveDomains {
@@ -55,8 +55,8 @@ func (pl *ExclusiveSite) Filter(ctx context.Context, cycleState *interfaces.Cycl
 			allowDomains := strings.Split(whiteList, ",")
 			allowDomainsSet := sets.NewString(allowDomains...)
 			if allowDomainsSet.Has(domainID) {
-				logger.Debug(ctx, "Site(%s-%s) belong to domianID(%s)", siteCacheInfo.Site().SiteID,
-					siteCacheInfo.Site().Region, domainID)
+				logger.Debug(ctx, "Site(%s-%s) belong to domianID(%s)", siteCacheInfo.GetSite().SiteID,
+					siteCacheInfo.GetSite().Region, domainID)
 				return interfaces.NewStatus(interfaces.Unschedulable, "site is exclusive site.")
 			}
 
