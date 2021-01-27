@@ -152,6 +152,7 @@ func (p *Process) Run(quit chan struct{}) {
 		},
 	})
 	go scheduledPodnformer.Run(quit)
+	go p.refreshToken()
 	wait.Until(p.SendPodToCluster, 0, quit)
 }
 
@@ -236,9 +237,7 @@ func (p *Process) SendPodToCluster() {
 
 func (p *Process) getToken(ip string) (string, error) {
 	if token, ok := p.tokenMap[ip]; ok {
-		if !openstack.TokenExpired(ip, token) {
-			return token, nil
-		}
+		return token, nil
 	}
 	token, err := openstack.RequestToken(ip)
 	if err != nil {
@@ -246,7 +245,6 @@ func (p *Process) getToken(ip string) (string, error) {
 	}
 	p.tokenMap[ip] = token
 	return token, nil
-
 }
 
 func (p *Process) getHostIP(clusterName string) (string, error) {
@@ -259,4 +257,17 @@ func (p *Process) getHostIP(clusterName string) (string, error) {
 	}
 	p.clusterIpMap[clusterName] = cluster.Spec.IpAddress
 	return p.clusterIpMap[clusterName], nil
+}
+
+func (p *Process) refreshToken() {
+	for range time.Tick(time.Hour * 2) {
+		for ip, token := range p.tokenMap {
+			if openstack.TokenExpired(ip, token) {
+				newToken, err := openstack.RequestToken(ip)
+				if err == nil {
+					p.tokenMap[ip] = newToken
+				}
+			}
+		}
+	}
 }
