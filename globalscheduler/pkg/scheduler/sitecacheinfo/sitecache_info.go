@@ -40,17 +40,17 @@ var (
 
 // nextGeneration: Let's make sure history never forgets the name...
 // Increments the generation number monotonically ensuring that generation numbers never collide.
-// Collision of the generation numbers would be particularly problematic if a site was deleted and
+// Collision of the generation numbers would be particularly problematic if a Site was deleted and
 // added back with the same name. See issue#63262.
 func nextGeneration() int64 {
 	return atomic.AddInt64(&generation, 1)
 }
 
-// SiteCacheInfo is site level aggregated information.
+// SiteCacheInfo is Site level aggregated information.
 type SiteCacheInfo struct {
-	site *types.Site
+	Site *types.Site `json:"site"`
 
-	// Total requested  of all resources on this site. This includes assumed
+	// Total requested  of all resources on this Site. This includes assumed
 	// resources, which scheduler has sent for binding, but may not be scheduled yet.
 	RequestedResources map[string]*types.CPUAndMemory `json:"requestedCPUAndMemory"`
 
@@ -58,7 +58,7 @@ type SiteCacheInfo struct {
 	// as int64, to avoid conversions and accessing map.
 	TotalResources map[string]*types.CPUAndMemory `json:"allocatableCPUAndMemory"`
 
-	// Total requested resources of all resources on this site. This includes assumed
+	// Total requested resources of all resources on this Site. This includes assumed
 	RequestedStorage map[string]float64 `json:"requestedStorage"`
 
 	// We store TotalStorage  explicitly
@@ -88,7 +88,7 @@ type SiteCacheInfo struct {
 	generation int64
 }
 
-// GetGeneration returns the generation on this site.
+// GetGeneration returns the generation on this Site.
 func (n *SiteCacheInfo) GetGeneration() int64 {
 	if n == nil {
 		return 0
@@ -96,11 +96,11 @@ func (n *SiteCacheInfo) GetGeneration() int64 {
 	return n.generation
 }
 
-// Clone returns a copy of this site.
+// Clone returns a copy of this Site.
 func (n *SiteCacheInfo) ToString() string {
 	ret := fmt.Sprintf("siteInfo: %#v, totalResources: %#v, RequestedResources: %#v, allocatableFlavor: %#v, "+
 		"allocatableSpotFlavor: %#v, allocatablStorage: %#v, requestedStorage: %#v ",
-		n.site.ToString(), n.TotalResources, n.RequestedResources, n.AllocatableFlavor, n.AllocatableSpotFlavor, n.TotalStorage, n.RequestedStorage)
+		n.Site.ToString(), n.TotalResources, n.RequestedResources, n.AllocatableFlavor, n.AllocatableSpotFlavor, n.TotalStorage, n.RequestedStorage)
 	if n.eipPool != nil {
 		ret += fmt.Sprintf("eipPool: %#v", n.eipPool.ToString())
 	}
@@ -108,10 +108,10 @@ func (n *SiteCacheInfo) ToString() string {
 	return ret
 }
 
-// Clone returns a copy of this site.
+// Clone returns a copy of this Site.
 func (n *SiteCacheInfo) Clone() *SiteCacheInfo {
 	clone := &SiteCacheInfo{
-		site:                  n.site.Clone(),
+		Site:                  n.Site.Clone(),
 		RequestedResources:    make(map[string]*types.CPUAndMemory),
 		TotalResources:        make(map[string]*types.CPUAndMemory),
 		RequestedStorage:      make(map[string]float64),
@@ -224,8 +224,8 @@ func (n *SiteCacheInfo) getSupportFlavorsBySite() []typed.Flavor {
 			continue
 		}
 
-		for _, host := range n.Site().Hosts {
-			if n.Site().Region != regionFlv.Region {
+		for _, host := range n.GetSite().Hosts {
+			if n.GetSite().Region != regionFlv.Region {
 				continue
 			}
 			flavorExtraSpecs := regionFlv.OsExtraSpecs
@@ -234,13 +234,13 @@ func (n *SiteCacheInfo) getSupportFlavorsBySite() []typed.Flavor {
 				flavorStatus := flavorExtraSpecs.CondOperationStatus
 				azMaps := n.getCondOperationAz(flavorExtraSpecs.CondOperationAz)
 				if flavorStatus == "abandon" {
-					if flag, ok := azMaps[n.Site().AvailabilityZone]; ok {
+					if flag, ok := azMaps[n.GetSite().AvailabilityZone]; ok {
 						if flag != "sellout" && flag != "abandon" {
 							addFlavrFunc(regionFlv.Flavor)
 						}
 					}
 				} else {
-					if flag, ok := azMaps[n.Site().AvailabilityZone]; ok {
+					if flag, ok := azMaps[n.GetSite().AvailabilityZone]; ok {
 						if flag != "sellout" && flag != "abandon" {
 							addFlavrFunc(regionFlv.Flavor)
 						}
@@ -328,9 +328,9 @@ func (n *SiteCacheInfo) updateFlavor() {
 
 }
 
-// SetSite sets the overall site information.
+// SetSite sets the overall Site information.
 func (n *SiteCacheInfo) SetSite(site *types.Site) error {
-	n.site = site
+	n.Site = site
 	n.RequestedResources = make(map[string]*types.CPUAndMemory)
 	n.TotalResources = make(map[string]*types.CPUAndMemory)
 	n.AllocatableFlavor = make(map[string]int64)
@@ -380,7 +380,7 @@ func (n *SiteCacheInfo) UpdateSiteWithVolumePool(volumePool *typed.RegionVolumeP
 	var allocatableStorage = map[string]float64{}
 	var requestedStorage = map[string]float64{}
 	for _, storage := range volumePool.StoragePools {
-		if n.Site().AvailabilityZone == storage.AvailabilityZone {
+		if n.GetSite().AvailabilityZone == storage.AvailabilityZone {
 			var voType = storage.Capabilities.VolumeType
 			if _, ok := allocatableStorage[voType]; !ok {
 				allocatableStorage[voType] = 0
@@ -450,7 +450,7 @@ func (n *SiteCacheInfo) UpdateQos(netMetricData *types.NetMetricDatas) error {
 func (n *SiteCacheInfo) UpdateSiteWithRatio(ratios []types.AllocationRatio) error {
 	var resTypeMapRatio = map[string]types.AllocationRatio{}
 	for _, resAllo := range ratios {
-		flavorInfo, find := informers.InformerFac.GetFlavor(resAllo.Flavor, n.Site().Region)
+		flavorInfo, find := informers.InformerFac.GetFlavor(resAllo.Flavor, n.GetSite().Region)
 		if !find {
 			continue
 		}
@@ -462,20 +462,20 @@ func (n *SiteCacheInfo) UpdateSiteWithRatio(ratios []types.AllocationRatio) erro
 
 		if totalRes.VCPU <= 0 || totalRes.Memory <= 0 {
 			logger.Warnf("region: %s, az: %s, resType:%s has invalid totalCpu(%d) or totalMem(%d)",
-				n.Site().Region, n.Site().AvailabilityZone, resType, totalRes.VCPU, totalRes.Memory)
+				n.GetSite().Region, n.GetSite().AvailabilityZone, resType, totalRes.VCPU, totalRes.Memory)
 			continue
 		}
 
 		cpuRatio, err := strconv.ParseFloat(value.AllocationRatioByType.CoreAllocationRatio, 64)
 		if err != nil {
 			logger.Warnf("region: %s, az: %s, resType:%s has invalid cpuRatio(%s)",
-				n.Site().Region, n.Site().AvailabilityZone, resType, value.AllocationRatioByType.CoreAllocationRatio)
+				n.GetSite().Region, n.GetSite().AvailabilityZone, resType, value.AllocationRatioByType.CoreAllocationRatio)
 			continue
 		}
 		memRatio, err := strconv.ParseFloat(value.AllocationRatioByType.MemAllocationRatio, 64)
 		if err != nil {
 			logger.Warnf("region: %s, az: %s, resType:%s has invalid memRatio(%s)",
-				n.Site().Region, n.Site().AvailabilityZone, resType, value.AllocationRatioByType.MemAllocationRatio)
+				n.GetSite().Region, n.GetSite().AvailabilityZone, resType, value.AllocationRatioByType.MemAllocationRatio)
 			continue
 		}
 		var usedCpu = int64(float64(totalRes.VCPU) * cpuRatio)
@@ -497,7 +497,7 @@ func (n *SiteCacheInfo) UpdateSpotResources(spotRes map[string]types.SpotResourc
 	return nil
 }
 
-// StackWithAffinity return all pods with (anti)affinity constraints on this site.
+// StackWithAffinity return all pods with (anti)affinity constraints on this Site.
 func (n *SiteCacheInfo) StackWithAffinity() []*types.Stack {
 	if n == nil {
 		return nil
@@ -505,7 +505,7 @@ func (n *SiteCacheInfo) StackWithAffinity() []*types.Stack {
 	return n.stacksWithAffinity
 }
 
-// Stacks return all stacks scheduled (including assumed to be) on this site.
+// Stacks return all stacks scheduled (including assumed to be) on this Site.
 func (n *SiteCacheInfo) Stacks() []*types.Stack {
 	if n == nil {
 		return nil
@@ -513,12 +513,12 @@ func (n *SiteCacheInfo) Stacks() []*types.Stack {
 	return n.stacks
 }
 
-// Site returns overall information about this site.
-func (n *SiteCacheInfo) Site() *types.Site {
+// Site returns overall information about this Site.
+func (n *SiteCacheInfo) GetSite() *types.Site {
 	if n == nil {
 		return nil
 	}
-	return n.site
+	return n.Site
 }
 
 // NewSiteCacheInfo returns a ready to use empty SiteCacheInfo object.

@@ -18,8 +18,10 @@ package scheduler
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	uuid "github.com/satori/go.uuid"
+	"io/ioutil"
 	"math/rand"
 	"sort"
 	"sync"
@@ -89,6 +91,9 @@ type Scheduler struct {
 	// Name of the current scheduler
 	SchedulerName string
 
+	// Resource Collector API URL
+	ResourceCollectorApiUrl string
+
 	// It is expected that changes made via SchedulerCache will be observed
 	// by NodeLister and Algorithm.
 	SchedulerCache internalcache.Cache
@@ -113,6 +118,8 @@ type Scheduler struct {
 	// a stack may take some amount of time and we don't want pods to get
 	// stale while they sit in a channel.
 	NextStack func() *types.Stack
+
+	mu sync.RWMutex
 }
 
 // Cache returns the cache in scheduler for test to check the data in scheduler.
@@ -159,6 +166,47 @@ func (sched *Scheduler) generateAllocationFromStack(stack *types.Stack) (*types.
 // and blocked until the context is done.
 func (sched *Scheduler) Run() {
 	go wait.Until(sched.scheduleOne, 0, sched.StopEverything)
+}
+
+func (sched *Scheduler) GetResourceSnapshot(resourceCollectorApiUrl string) (internalcache.Snapshot, error) {
+	snapshotEndpoint := "http://" + resourceCollectorApiUrl + constants.ResourceCollecotrSnapshotURL
+	resp, err := utils.SendHTTPRequest("GET", snapshotEndpoint, nil, nil, false)
+	if err != nil {
+		// snapshot api error
+		return internalcache.Snapshot{}, err
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		// read snapshot resp error
+		return internalcache.Snapshot{}, err
+	}
+
+	bodyStr := string(body)
+	var snapshot internalcache.Snapshot
+	if err = json.Unmarshal([]byte(bodyStr), &snapshot); err != nil {
+		return internalcache.Snapshot{}, err
+	}
+
+	// update flavor map
+	internalcache.FlavorCache.UpdateFlavorMap(snapshot.RegionFlavorMap, snapshot.FlavorMap)
+
+	logger.Infof("snapshot : %v", snapshot)
+	return snapshot, nil
+}
+
+func (sched *Scheduler) updateSnapshot() error {
+	snapshot, err := sched.GetResourceSnapshot(sched.ResourceCollectorApiUrl)
+	if err != nil {
+		return err
+	}
+
+	// set snapshot
+	sched.mu.Lock()
+	sched.mu.Unlock()
+	sched.siteCacheInfoSnapshot = &snapshot
+	return nil
 }
 
 // snapshot snapshots scheduler cache and site cache infos for all fit and priority
@@ -209,7 +257,7 @@ func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *int
 
 	if !sched.SchedFrame.HasFilterPlugins() {
 		for i := range filtered {
-			filtered[i] = allSiteCacheInfos[i].Site()
+			filtered[i] = allSiteCacheInfos[i].GetSite()
 		}
 		return filtered, nil
 	}
@@ -227,11 +275,11 @@ func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *int
 		}
 		if fits {
 			length := atomic.AddInt32(&filteredLen, 1)
-			filtered[length-1] = siteCacheInfo.Site()
+			filtered[length-1] = siteCacheInfo.GetSite()
 		} else {
 			statusesLock.Lock()
 			if !status.IsSuccess() {
-				statuses[siteCacheInfo.Site().SiteID] = status
+				statuses[siteCacheInfo.GetSite().SiteID] = status
 			}
 			statusesLock.Unlock()
 		}
@@ -273,7 +321,8 @@ func (sched *Scheduler) prioritizeSites(
 	}
 
 	// Run the Score plugins.
-	scoresMap, scoreStatus := sched.SchedFrame.RunScorePlugins(ctx, state, pod, sites)
+	scoresMap, scoreStatus := sched.SchedFrame.RunScorePlugins(ctx, state, pod, sites,
+		sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
 	if !scoreStatus.IsSuccess() {
 		return interfaces.SiteScoreList{}, scoreStatus.AsError()
 	}
@@ -282,7 +331,7 @@ func (sched *Scheduler) prioritizeSites(
 	result := make(interfaces.SiteScoreList, 0, len(sites))
 
 	for i := range sites {
-		result = append(result, interfaces.SiteScore{SiteID: sites[i].SiteID, AZ: sites[i].AvailabilityZone, Score: 0})
+		result = append(result, interfaces.SiteScore{SiteID: sites[i].SiteID, AZ: sites[i].AvailabilityZone, Score: 0, Region: sites[i].Region})
 		for j := range scoresMap {
 			result[i].Score += scoresMap[j][i].Score
 		}
@@ -326,7 +375,8 @@ func (sched *Scheduler) selectHost(siteScoreList interfaces.SiteScoreList) (stri
 // We expect this to run asynchronously, so we handle binding metrics internally.
 func (sched *Scheduler) bind(ctx context.Context, stack *types.Stack, targetSiteID string,
 	state *interfaces.CycleState) (err error) {
-	bindStatus := sched.SchedFrame.RunBindPlugins(ctx, state, stack, targetSiteID)
+	bindStatus := sched.SchedFrame.RunBindPlugins(ctx, state, stack,
+		sched.siteCacheInfoSnapshot.SiteCacheInfoMap[targetSiteID])
 	if bindStatus.IsSuccess() {
 		return nil
 	}
@@ -347,7 +397,7 @@ func (sched *Scheduler) Schedule2(ctx context.Context, allocation *types.Allocat
 
 	start := time.Now()
 	logger.Debug(ctx, "[START] snapshot site...")
-	err = sched.snapshot()
+	err = sched.updateSnapshot()
 	if err != nil {
 		logger.Error(ctx, "sched snapshot failed! err : %s", err)
 		return result, err
@@ -550,9 +600,10 @@ func NewScheduler(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}
 	}
 
 	sched := &Scheduler{
-		SchedulerCache:        internalcache.New(30*time.Second, stopEverything),
-		siteCacheInfoSnapshot: internalcache.NewEmptySnapshot(),
-		SchedulerName:         config.SchedulerName,
+		SchedulerCache:          internalcache.New(30*time.Second, stopEverything),
+		siteCacheInfoSnapshot:   internalcache.NewEmptySnapshot(),
+		SchedulerName:           config.SchedulerName,
+		ResourceCollectorApiUrl: config.ResourceCollectorApiUrl,
 	}
 
 	err := sched.buildFramework()
@@ -590,10 +641,28 @@ func (sched *Scheduler) initPodInformers(stopCh <-chan struct{}) error {
 
 	sched.StackQueue = internalqueue.NewSchedulingQueue(stopCh, sched.SchedFrame)
 	sched.InformerFactory = internalinformers.NewSharedInformerFactory(client, 0)
-	sched.PodInformer = factory.NewPodInformer(client, 0)
+	sched.PodInformer = factory.NewPodInformer(sched.SchedulerName, client, 0)
 	sched.NextStack = internalqueue.MakeNextStackFunc(sched.StackQueue)
 	sched.Client = client
 	return nil
+}
+
+// start Scheduler
+func (sched *Scheduler) StartPodInformerAndRun(stopCh <-chan struct{}) {
+	go func(stopCh2 <-chan struct{}) {
+		// start pod informers
+		if sched.PodInformer != nil && sched.InformerFactory != nil {
+			go sched.PodInformer.Informer().Run(stopCh2)
+			sched.InformerFactory.Start(stopCh2)
+
+			// Wait for all caches to sync before scheduling.
+			sched.InformerFactory.WaitForCacheSync(stopCh2)
+
+			// Do scheduling
+			sched.Run()
+		}
+
+	}(stopCh)
 }
 
 // start resource cache informer and run

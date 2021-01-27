@@ -42,12 +42,14 @@ func (i *podInformer) Lister() corelisters.PodLister {
 }
 
 // NewPodInformer creates a shared index informer that returns only non-terminal pods.
-func NewPodInformer(client clientset.Interface, resyncPeriod time.Duration) coreinformers.PodInformer {
+func NewPodInformer(schedulerName string, client clientset.Interface,
+	resyncPeriod time.Duration) coreinformers.PodInformer {
 	selector := fields.ParseSelectorOrDie(
-		"status.phase!=" + string(v1.PodSucceeded) +
-			",status.phase!=" + string(v1.PodFailed))
+		"status.phase=" + string(v1.PodAssigned) +
+			",status.assignedScheduler.name=" + schedulerName)
 	lw := cache.NewListWatchFromClient(client.CoreV1(), string(v1.ResourcePods), metav1.NamespaceAll, selector)
 	return &podInformer{
-		informer: cache.NewSharedIndexInformer(lw, &v1.Pod{}, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}),
+		informer: cache.NewSharedIndexInformer(lw, &v1.Pod{}, resyncPeriod,
+		cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}),
 	}
 }

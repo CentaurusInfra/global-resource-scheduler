@@ -243,11 +243,7 @@ func (f *framework) RunPreFilterPlugins(ctx context.Context, state *CycleState, 
 
 func (f *framework) runPreFilterPlugin(ctx context.Context, pl PreFilterPlugin, state *CycleState,
 	stack *types.Stack) *Status {
-	if !state.ShouldRecordPluginMetrics() {
-		return pl.PreFilter(ctx, state, stack)
-	}
-	status := pl.PreFilter(ctx, state, stack)
-	return status
+	return pl.PreFilter(ctx, state, stack)
 }
 
 // RunFilterPlugins runs the set of configured Filter plugins for pod on
@@ -288,12 +284,7 @@ func (f *framework) RunFilterPlugins(
 
 func (f *framework) runFilterPlugin(ctx context.Context, pl FilterPlugin, state *CycleState, stack *types.Stack,
 	siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) *Status {
-	if !state.ShouldRecordPluginMetrics() {
-		return pl.Filter(ctx, state, stack, siteCacheInfo)
-	}
-
-	status := pl.Filter(ctx, state, stack, siteCacheInfo)
-	return status
+	return pl.Filter(ctx, state, stack, siteCacheInfo)
 }
 
 // RunPreScorePlugins runs the set of configured pre-score plugins. If any
@@ -304,7 +295,6 @@ func (f *framework) RunPreScorePlugins(
 	stack *types.Stack,
 	sites []*types.Site,
 ) (status *Status) {
-
 	for _, pl := range f.preScorePlugins {
 		status = f.runPreScorePlugin(ctx, pl, state, stack, sites)
 		if !status.IsSuccess() {
@@ -320,11 +310,7 @@ func (f *framework) RunPreScorePlugins(
 
 func (f *framework) runPreScorePlugin(ctx context.Context, pl PreScorePlugin, state *CycleState, stack *types.Stack,
 	sites []*types.Site) *Status {
-	if !state.ShouldRecordPluginMetrics() {
-		return pl.PreScore(ctx, state, stack, sites)
-	}
-	status := pl.PreScore(ctx, state, stack, sites)
-	return status
+	return pl.PreScore(ctx, state, stack, sites)
 }
 
 // RunScorePlugins runs the set of configured scoring plugins. It returns a list that
@@ -332,8 +318,8 @@ func (f *framework) runPreScorePlugin(ctx context.Context, pl PreScorePlugin, st
 // It also returns *Status, which is set to non-success if any of the plugins returns
 // a non-success status.
 func (f *framework) RunScorePlugins(ctx context.Context, state *CycleState, stack *types.Stack,
-	sites []*types.Site) (ps PluginToSiteScores, status *Status) {
-
+	sites []*types.Site, siteCacheInfoMap map[string]*schedulersitecacheinfo.SiteCacheInfo) (ps PluginToSiteScores,
+	status *Status) {
 	pluginToSiteScores := make(PluginToSiteScores, len(f.scorePlugins))
 	for _, pl := range f.scorePlugins {
 		pluginToSiteScores[pl.Name()] = make(SiteScoreList, len(sites))
@@ -345,7 +331,7 @@ func (f *framework) RunScorePlugins(ctx context.Context, state *CycleState, stac
 	workqueue.ParallelizeUntil(ctx, 16, len(sites), func(index int) {
 		for _, pl := range f.scorePlugins {
 			siteID := sites[index].SiteID
-			s, status := f.runScorePlugin(ctx, pl, state, stack, siteID)
+			s, status := f.runScorePlugin(ctx, pl, state, stack, siteCacheInfoMap[siteID])
 			if !status.IsSuccess() {
 				errCh.SendErrorWithCancel(fmt.Errorf(status.Message()), cancel)
 				return
@@ -391,13 +377,8 @@ func (f *framework) RunScorePlugins(ctx context.Context, state *CycleState, stac
 }
 
 func (f *framework) runScorePlugin(ctx context.Context, pl ScorePlugin, state *CycleState, stack *types.Stack,
-	siteID string) (int64, *Status) {
-	if !state.ShouldRecordPluginMetrics() {
-		return pl.Score(ctx, state, stack, siteID)
-	}
-
-	s, status := pl.Score(ctx, state, stack, siteID)
-	return s, status
+	siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) (int64, *Status) {
+	return pl.Score(ctx, state, stack, siteCacheInfo)
 }
 
 // RunPreBindPlugins runs the set of configured prebind plugins. It returns a
@@ -420,23 +401,17 @@ func (f *framework) RunPreBindPlugins(ctx context.Context, state *CycleState, st
 
 func (f *framework) runPreBindPlugin(ctx context.Context, pl PreBindPlugin, state *CycleState, stack *types.Stack,
 	siteID string) *Status {
-	if !state.ShouldRecordPluginMetrics() {
-		return pl.PreBind(ctx, state, stack, siteID)
-	}
-
-	status := pl.PreBind(ctx, state, stack, siteID)
-
-	return status
+	return pl.PreBind(ctx, state, stack, siteID)
 }
 
 // RunBindPlugins runs the set of configured bind plugins until one returns a non `Skip` status.
 func (f *framework) RunBindPlugins(ctx context.Context, state *CycleState, stack *types.Stack,
-	siteID string) (status *Status) {
+	siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) (status *Status) {
 	if len(f.bindPlugins) == 0 {
 		return NewStatus(Skip, "")
 	}
 	for _, bp := range f.bindPlugins {
-		status = f.runBindPlugin(ctx, bp, state, stack, siteID)
+		status = f.runBindPlugin(ctx, bp, state, stack, siteCacheInfo)
 		if status != nil && status.Code() == Skip {
 			continue
 		}
@@ -451,13 +426,8 @@ func (f *framework) RunBindPlugins(ctx context.Context, state *CycleState, stack
 }
 
 func (f *framework) runBindPlugin(ctx context.Context, bp BindPlugin, state *CycleState, stack *types.Stack,
-	siteID string) *Status {
-	if !state.ShouldRecordPluginMetrics() {
-		return bp.Bind(ctx, state, stack, siteID)
-	}
-
-	status := bp.Bind(ctx, state, stack, siteID)
-	return status
+	siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) *Status {
+	return bp.Bind(ctx, state, stack, siteCacheInfo)
 }
 
 // RunPostBindPlugins runs the set of configured postbind plugins.
@@ -469,12 +439,7 @@ func (f *framework) RunPostBindPlugins(ctx context.Context, state *CycleState, s
 
 func (f *framework) runPostBindPlugin(ctx context.Context, pl PostBindPlugin, state *CycleState,
 	stack *types.Stack, siteID string) {
-	if !state.ShouldRecordPluginMetrics() {
-		pl.PostBind(ctx, state, stack, siteID)
-		return
-	}
 	pl.PostBind(ctx, state, stack, siteID)
-
 }
 
 // RunReservePlugins runs the set of configured reserve plugins. If any of these
@@ -496,11 +461,7 @@ func (f *framework) RunReservePlugins(ctx context.Context, state *CycleState, st
 
 func (f *framework) runReservePlugin(ctx context.Context, pl ReservePlugin, state *CycleState, stack *types.Stack,
 	siteID string) *Status {
-	if !state.ShouldRecordPluginMetrics() {
-		return pl.Reserve(ctx, state, stack, siteID)
-	}
-	status := pl.Reserve(ctx, state, stack, siteID)
-	return status
+	return pl.Reserve(ctx, state, stack, siteID)
 }
 
 // RunUnreservePlugins runs the set of configured unreserve plugins.
@@ -512,11 +473,6 @@ func (f *framework) RunUnreservePlugins(ctx context.Context, state *CycleState, 
 
 func (f *framework) runUnreservePlugin(ctx context.Context, pl UnreservePlugin, state *CycleState,
 	stack *types.Stack, siteID string) {
-	if !state.ShouldRecordPluginMetrics() {
-		pl.Unreserve(ctx, state, stack, siteID)
-		return
-	}
-
 	pl.Unreserve(ctx, state, stack, siteID)
 }
 

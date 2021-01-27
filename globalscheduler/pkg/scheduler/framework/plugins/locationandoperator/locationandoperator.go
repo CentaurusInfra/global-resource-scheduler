@@ -46,21 +46,21 @@ func (pl *LocationAndOperator) locationEqual(stack *types.Stack, siteCacheInfo *
 	}
 
 	country := stack.Selector.GeoLocation.Country
-	if country != "" && country != siteCacheInfo.Site().Country {
+	if country != "" && country != siteCacheInfo.GetSite().Country {
 		return false, interfaces.NewStatus(interfaces.Unschedulable, "stack country not equal site county.")
 	}
 
 	area := stack.Selector.GeoLocation.Area
-	if area != "" && area != siteCacheInfo.Site().Area {
+	if area != "" && area != siteCacheInfo.GetSite().Area {
 		return false, interfaces.NewStatus(interfaces.Unschedulable, "stack area not equal site area.")
 	}
 	province := stack.Selector.GeoLocation.Province
-	if province != "" && province != siteCacheInfo.Site().Province {
+	if province != "" && province != siteCacheInfo.GetSite().Province {
 		return false, interfaces.NewStatus(interfaces.Unschedulable, "stack province not equal site province.")
 	}
 
 	city := stack.Selector.GeoLocation.City
-	if city != "" && city != siteCacheInfo.Site().City {
+	if city != "" && city != siteCacheInfo.GetSite().City {
 		return false, interfaces.NewStatus(interfaces.Unschedulable, "stack city not equal site city.")
 	}
 
@@ -75,7 +75,7 @@ func (pl *LocationAndOperator) Filter(ctx context.Context, cycleState *interface
 		return status
 	}
 
-	if stack.Selector.Operator != "" && stack.Selector.Operator != siteCacheInfo.Site().Operator {
+	if stack.Selector.Operator != "" && stack.Selector.Operator != siteCacheInfo.GetSite().Operator {
 		return interfaces.NewStatus(interfaces.Unschedulable, "stack operator not equal site operator.")
 	}
 

@@ -77,8 +77,9 @@ func Run(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}) error {
 		return fmt.Errorf("get new scheduler failed")
 	}
 
-	// start scheduler resource cache informer and run
-	sched.StartInformersAndRun(stopCh)
+	// start scheduler pod informer and run
+	//sched.StartInformersAndRun(stopCh)
+	sched.StartPodInformerAndRun(stopCh)
 
 	// start allocation API here
 	// StartAPI(stopCh)
