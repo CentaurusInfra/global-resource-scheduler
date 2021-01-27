@@ -487,6 +487,11 @@ function kube::common::start_gs_scheduler {
     GS_SCHEDULER_PID=$!
 }
 
+function kube::common::start_resource_collector {
+    RESOURCE_COLLECTOR_LOG=${LOG_DIR}/resource_collector.log
+    ${CONTROLPLANE_SUDO} "${GO_OUT}/resource-collector"  > "${RESOURCE_COLLECTOR_LOG}" 2>&1 &
+    RESOURCE_COLLECTOR_PID=$!
+}
 
 function kube::common::start_kubelet {
     KUBELET_LOG=${LOG_DIR}/kubelet.log
