@@ -86,6 +86,8 @@ type DispatcherController struct {
 	recorder record.EventRecorder
 	// mutex for updating dispatchers
 	mu sync.Mutex
+	// stop channel
+	stopCh <-chan struct{}
 }
 
 // NewDispatcherController returns a new dispatcher controller
@@ -145,7 +147,7 @@ func NewDispatcherController(
 func (dc *DispatcherController) Run(workers int, stopCh <-chan struct{}) error {
 	defer runtime.HandleCrash()
 	defer dc.workqueue.ShutDown()
-
+	dc.stopCh = stopCh
 	// Start the informer factories to begin populating the informer caches
 	klog.Info("Starting Dispatcher control loop")
 
@@ -442,6 +444,9 @@ func (dc *DispatcherController) RunController(workers int, stopCh <-chan struct{
 func (dc *DispatcherController) balance() error {
 	dc.mu.Lock()
 	defer dc.mu.Unlock()
+	if ok := cache.WaitForCacheSync(dc.stopCh, dc.dispatcherSynced); !ok {
+		return fmt.Errorf("failed to wait for caches to sync")
+	}
 	dispatchers, err := dc.dispatcherInformer.Dispatchers(corev1.NamespaceDefault).List(labels.Everything())
 	if err != nil {
 		return fmt.Errorf("listing dispathers got error %v", err)
@@ -471,6 +476,7 @@ func (dc *DispatcherController) balance() error {
 			if _, err = dc.dispatcherclient.GlobalschedulerV1().Dispatchers(corev1.NamespaceDefault).Update(dispatcher); err != nil {
 				return fmt.Errorf("updating clusters got error %v", err)
 			}
+			klog.V(3).Infof("The dispatcher %s has updated the new range %v", dispatcher.GetName(), dispatcher.Spec.ClusterRange)
 			// We don't need homedispatcher now. Will remove it in the future
 			//for clusterIdx := ranges[idx][0]; clusterIdx <= ranges[idx][1]; clusterIdx++ {
 			//	clusters[clusterIdx].Spec.HomeDispatcher = dispatcher.GetName()
