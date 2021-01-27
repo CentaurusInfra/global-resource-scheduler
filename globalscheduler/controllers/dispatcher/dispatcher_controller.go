@@ -84,6 +84,8 @@ type DispatcherController struct {
 	// recorder is an event recorder for recording Event resources to the
 	// Kubernetes API.
 	recorder record.EventRecorder
+	// mutex for updating dispatchers
+	mu sync.Mutex
 }
 
 // NewDispatcherController returns a new dispatcher controller
@@ -438,13 +440,21 @@ func (dc *DispatcherController) RunController(workers int, stopCh <-chan struct{
 }
 
 func (dc *DispatcherController) balance() error {
-	dispatchers, err := dc.dispatcherInformer.Dispatchers("default").List(labels.Everything())
+	dc.mu.Lock()
+	defer dc.mu.Unlock()
+	dispatchers, err := dc.dispatcherInformer.Dispatchers(corev1.NamespaceDefault).List(labels.Everything())
 	if err != nil {
 		return fmt.Errorf("listing dispathers got error %v", err)
 	}
-	clusters, err := dc.clusterInformer.Clusters("default").List(labels.Everything())
+	if len(dispatchers) == 0 {
+		return nil
+	}
+	clusters, err := dc.clusterInformer.Clusters(corev1.NamespaceDefault).List(labels.Everything())
 	if err != nil {
 		return fmt.Errorf("listing clusters got error %v", err)
+	}
+	if len(clusters) == 0 {
+		return nil
 	}
 	sort.Slice(clusters[:], func(i, j int) bool {
 		return clusters[i].GetName() < clusters[j].GetName()
@@ -452,16 +462,22 @@ func (dc *DispatcherController) balance() error {
 	if len(dispatchers) > 0 && len(clusters) > 0 {
 		ranges := util.EvenlyDivide(len(dispatchers), int64(len(clusters)-1))
 		for idx, dispatcher := range dispatchers {
-			dispatcher.Spec.ClusterRange = dispatchercrdv1.DispatcherRange{Start: clusters[ranges[idx][0]].GetName(), End: clusters[ranges[idx][1]].GetName()}
+			if idx < len(ranges) {
+				dispatcher.Spec.ClusterRange = dispatchercrdv1.DispatcherRange{Start: clusters[ranges[idx][0]].GetName(), End: clusters[ranges[idx][1]].GetName()}
+			} else {
+				dispatcher.Spec.ClusterRange = dispatchercrdv1.DispatcherRange{}
+			}
+
 			if _, err = dc.dispatcherclient.GlobalschedulerV1().Dispatchers(corev1.NamespaceDefault).Update(dispatcher); err != nil {
 				return fmt.Errorf("updating clusters got error %v", err)
 			}
-			for clusterIdx := ranges[idx][0]; clusterIdx <= ranges[idx][1]; clusterIdx++ {
-				clusters[clusterIdx].Spec.HomeDispatcher = dispatcher.GetName()
-				if _, err = dc.clusterclient.GlobalschedulerV1().Clusters(corev1.NamespaceDefault).Update(clusters[clusterIdx]); err != nil {
-					return fmt.Errorf("updating clusters got error %v", err)
-				}
-			}
+			// We don't need homedispatcher now. Will remove it in the future
+			//for clusterIdx := ranges[idx][0]; clusterIdx <= ranges[idx][1]; clusterIdx++ {
+			//	clusters[clusterIdx].Spec.HomeDispatcher = dispatcher.GetName()
+			//	if _, err = dc.clusterclient.GlobalschedulerV1().Clusters(corev1.NamespaceDefault).Update(clusters[clusterIdx]); err != nil {
+			//		return fmt.Errorf("updating clusters got error %v", err)
+			//	}
+			//}
 		}
 	}
 
