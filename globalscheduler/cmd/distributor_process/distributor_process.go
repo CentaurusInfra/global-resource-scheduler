@@ -18,9 +18,9 @@ package main
 
 import (
 	"flag"
+	"k8s.io/kubernetes/globalscheduler/controllers/util"
 
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/component-base/logs"
 	"k8s.io/klog"
 	process "k8s.io/kubernetes/globalscheduler/controllers/distributor"
 )
@@ -29,9 +29,12 @@ func main() {
 	configFile := flag.String("config", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	namespace := flag.String("ns", "", "The namespace of the distributor process")
 	name := flag.String("n", "", "The name of the distributor process")
+	logFile := flag.String("logfile", "/tmp/gs_distributor_process.log", "The log file of the distributor process")
+	logLevel := flag.String("loglevel", "2", "The log level of the distributor process")
+
 	flag.Parse()
-	logs.InitLogs()
-	defer logs.FlushLogs()
+	util.InitKlog(*namespace, *name, *logFile, *logLevel)
+	defer util.FlushKlog()
 
 	config, err := clientcmd.BuildConfigFromFlags("", *configFile)
 	if err != nil {
@@ -41,6 +44,7 @@ func main() {
 	quit := make(chan struct{})
 	defer close(quit)
 
+	klog.V(2).Infof("Starting distributor process namespace %s name %s", *namespace, *name)
 	process := process.NewProcess(config, *namespace, *name, quit)
 	process.Run(quit)
 }

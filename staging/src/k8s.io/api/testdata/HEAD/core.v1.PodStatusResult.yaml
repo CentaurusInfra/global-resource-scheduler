@@ -38,6 +38,7 @@ status:
   assignedScheduler:
     name: "67"
     tag: "68"
+  clusterInstanceId: "69"
   conditions:
   - lastProbeTime: "2942-12-08T14:55:02Z"
     lastTransitionTime: "2763-08-05T14:40:52Z"

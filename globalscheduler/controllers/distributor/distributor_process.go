@@ -26,11 +26,13 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog"
+	clustercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 	distributortype "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor"
 	distributorclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/client/clientset/versioned"
 	distributorv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/v1"
 	schedulerclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
 	schedulerv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
+	"math/rand"
 	"os"
 	"reflect"
 	"strconv"
@@ -40,7 +42,6 @@ import (
 const distributorName = "distributor"
 
 type predicateFunc func(scheduler schedulerv1.Scheduler, pod *v1.Pod) bool
-type priorityFunc func(scheduler schedulerv1.Scheduler, pod *v1.Pod) int
 
 type Process struct {
 	namespace            string
@@ -50,9 +51,7 @@ type Process struct {
 	schedulers           []schedulerv1.Scheduler
 	clientset            *kubernetes.Clientset
 	podQueue             chan *v1.Pod
-	resetCh              chan string
 	predicates           []predicateFunc
-	priorities           []priorityFunc
 	rangeStart           int64
 	rangeEnd             int64
 	pid                  int
@@ -82,8 +81,6 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		klog.Fatal(err)
 	}
 
-	resetCh := make(chan string, 1)
-
 	if err != nil {
 		klog.Warningf("Failed to run distributor process %v - %v with the err %v", namespace, distributorName, err)
 	}
@@ -95,12 +92,8 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		distributorClientset: distributorClientset,
 		schedulerClientset:   schedulerClientset,
 		podQueue:             podQueue,
-		resetCh:              resetCh,
 		predicates: []predicateFunc{
 			GeoLocationPredicate,
-		},
-		priorities: []priorityFunc{
-			GeoLocationPriority,
 		},
 		rangeStart: distributor.Spec.Range.Start,
 		rangeEnd:   distributor.Spec.Range.End,
@@ -122,20 +115,18 @@ func (p *Process) Run(quit chan struct{}) {
 			}
 		},
 		UpdateFunc: func(old, new interface{}) {
-			oldDistributor, ok := old.(*distributorv1.Distributor)
-			if !ok {
-				klog.Warningf("Failed to convert a old object  %+v to a distributor", old)
-				return
-			}
+
 			newDistributor, ok := new.(*distributorv1.Distributor)
 			if !ok {
 				klog.Warningf("Failed to convert a new object  %+v to a distributor", new)
 				return
 			}
-			if oldDistributor.Spec.Range.Start != newDistributor.Spec.Range.Start || oldDistributor.Spec.Range.End != newDistributor.Spec.Range.End {
-				// Update reflector selector for load balancing
-				p.resetCh <- fmt.Sprintf("status.phase=%s, metadata.hashkey=gte:%s,metadata.hashkey=lte:%s",
-					string(v1.PodPending), strconv.FormatInt(newDistributor.Spec.Range.Start, 10), strconv.FormatInt(newDistributor.Spec.Range.End, 10))
+			if newDistributor.Spec.Range.Start != p.rangeStart || newDistributor.Spec.Range.End != p.rangeEnd {
+				p.rangeStart = newDistributor.Spec.Range.Start
+				p.rangeEnd = newDistributor.Spec.Range.End
+				if err := syscall.Exec(os.Args[0], os.Args, os.Environ()); err != nil {
+					klog.Fatal(err)
+				}
 			}
 		},
 	})
@@ -149,6 +140,7 @@ func (p *Process) Run(quit chan struct{}) {
 				return
 			}
 			p.schedulers = append(p.schedulers, *scheduler)
+			klog.V(4).Infof("A new scheduler %s has been added", scheduler.Name)
 		},
 		DeleteFunc: func(obj interface{}) {
 			scheduler, ok := obj.(*schedulerv1.Scheduler)
@@ -156,9 +148,11 @@ func (p *Process) Run(quit chan struct{}) {
 				klog.Warningf("Failed to convert the object  %+v to a scheduler", obj)
 				return
 			}
-			for _, item := range p.schedulers {
+			for idx, item := range p.schedulers {
 				if reflect.DeepEqual(item, scheduler) {
-					_, p.schedulers = p.schedulers[len(p.schedulers)-1], p.schedulers[:len(p.schedulers)-1]
+					p.schedulers[idx] = p.schedulers[len(p.schedulers)-1]
+					p.schedulers = p.schedulers[:len(p.schedulers)-1]
+					klog.V(4).Infof("The current scheduler map is %v", p.schedulers)
 					return
 				}
 			}
@@ -173,7 +167,8 @@ func (p *Process) Run(quit chan struct{}) {
 }
 
 func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
-	podSelector := fields.ParseSelectorOrDie("status.phase=" + string(v1.PodPending))
+	podSelector := fields.ParseSelectorOrDie(fmt.Sprintf("status.phase=%s,metadata.hashkey=gte:%s,metadata.hashkey=lte:%s",
+		string(v1.PodPending), strconv.FormatInt(start, 10), strconv.FormatInt(end, 10)))
 
 	lw := cache.NewListWatchFromClient(p.clientset.CoreV1(), string(v1.ResourcePods), metav1.NamespaceAll, podSelector)
 
@@ -185,6 +180,7 @@ func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
 				klog.Warningf("Failed to convert  object  %+v to a pod", obj)
 				return
 			}
+			klog.V(4).Infof("A pod %s has been added", pod.GetName())
 			if pod.Spec.ResourceType != "vm" {
 				return
 			}
@@ -193,10 +189,6 @@ func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
 			}()
 		},
 	})
-	podInformer.AddSelectorCh(p.resetCh)
-	// ParseSelectorOrDie has issues for handling gte and lte selectors. Update directly through channels
-	p.resetCh <- fmt.Sprintf("status.phase=%s, metadata.hashkey=gte:%s,metadata.hashkey=lte:%s",
-		string(v1.PodPending), strconv.FormatInt(start, 10), strconv.FormatInt(end, 10))
 	return podInformer
 }
 
@@ -204,17 +196,22 @@ func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
 func (p *Process) ScheduleOne() {
 	pod := <-p.podQueue
 	if pod != nil {
-		klog.V(2).Infof("Found a pod %v-%v to schedule:", pod.Namespace, pod.Name)
+		klog.V(4).Infof("Found a pod %v-%v to schedule:", pod.Namespace, pod.Name)
 
 		scheduler, err := p.findFit(pod)
+
 		if err != nil {
 			klog.Warningf("Failed to find scheduler that fits scheduler with the error %v", err)
 			return
 		}
-
+		klog.V(4).Infof("Find a scheduler %s to fit the pod %s", scheduler, pod.Name)
 		err = p.bindPod(pod, scheduler)
 		if err != nil {
 			klog.Warningf("Failed to assign scheduler %v to pod %v with the error %vs", scheduler, pod, err)
+			pod.Status.Phase = v1.PodFailed
+			if _, err = p.clientset.CoreV1().Pods(p.namespace).UpdateStatus(pod); err != nil {
+				klog.Warningf("Failed to update pod %v - %v status to failed", pod.Namespace, pod.Name)
+			}
 			return
 		}
 
@@ -224,11 +221,11 @@ func (p *Process) ScheduleOne() {
 
 func (p *Process) findFit(pod *v1.Pod) (string, error) {
 	filteredSchedulers := p.runPredicates(p.schedulers, pod)
-	if len(filteredSchedulers) == 0 {
+	seed := len(filteredSchedulers)
+	if seed == 0 {
 		return "", errors.New("failed to find a scheduler that fits pod")
 	}
-	priorities := p.prioritize(filteredSchedulers, pod)
-	return p.findBestScheduler(priorities), nil
+	return filteredSchedulers[rand.Intn(seed)].Name, nil
 }
 
 func (p *Process) bindPod(pod *v1.Pod, scheduler string) error {
@@ -249,11 +246,13 @@ func (p *Process) bindPod(pod *v1.Pod, scheduler string) error {
 func (p *Process) runPredicates(schedulers []schedulerv1.Scheduler, pod *v1.Pod) []schedulerv1.Scheduler {
 	filteredSchedulers := make([]schedulerv1.Scheduler, 0)
 	for _, scheduler := range schedulers {
+		klog.V(4).Infof("The current scheduler is %s", scheduler.Name)
 		if p.predicatesApply(scheduler, pod) {
 			filteredSchedulers = append(filteredSchedulers, scheduler)
+			klog.V(4).Infof("The matched scheduler is %s", scheduler.Name)
 		}
 	}
-	klog.V(3).Infof("schedulers %v that fit the pod %v", filteredSchedulers, pod)
+	klog.V(3).Infof("schedulers %v that fit the pod %s", filteredSchedulers, pod.Name)
 	return filteredSchedulers
 }
 
@@ -268,82 +267,30 @@ func (p *Process) predicatesApply(scheduler schedulerv1.Scheduler, pod *v1.Pod) 
 
 // GeoLocationPredicate is to find if schedulers match a pod based on their geoLocations
 func GeoLocationPredicate(scheduler schedulerv1.Scheduler, pod *v1.Pod) bool {
-	schedulerLoc := scheduler.Spec.Location
-	podLoc := pod.Spec.VirtualMachine.ResourceCommonInfo.Selector.GeoLocation
-	if schedulerLoc.Country == "" && schedulerLoc.Province == "" && schedulerLoc.City == "" && schedulerLoc.Area == "" {
-		return true
+	for _, geoLocation := range scheduler.Spec.Union.GeoLocation {
+		if matchGeoLocation(geoLocation, pod.Spec.VirtualMachine.ResourceCommonInfo.Selector.GeoLocation) {
+			return true
+		}
 	}
+	return false
+}
+
+func matchGeoLocation(geoLocation *clustercrdv1.GeolocationInfo, podLoc v1.ResourceGeoLocation) bool {
+	klog.V(4).Infof("The scheduler loc is %v and the pod loc is %v", geoLocation, podLoc)
 	if podLoc.Area == "" && podLoc.City == "" && podLoc.Province == "" && podLoc.Country == "" {
 		return true
 	}
-	if schedulerLoc.Country == "" && schedulerLoc.Province == "" && schedulerLoc.City == "" {
-		return schedulerLoc.Area == podLoc.Area
+	if podLoc.Country != "" && geoLocation.Country != podLoc.Country {
+		return false
 	}
-	if schedulerLoc.Country == "" && schedulerLoc.Province == "" {
-		return schedulerLoc.Area == podLoc.Area && schedulerLoc.City == podLoc.City
+	if podLoc.Area != "" && geoLocation.Area != podLoc.Area {
+		return false
 	}
-	if schedulerLoc.Country == "" {
-		return schedulerLoc.Area == podLoc.Area && schedulerLoc.City == podLoc.City && schedulerLoc.Province == podLoc.Province
+	if podLoc.Province != "" && geoLocation.Province != podLoc.Province {
+		return false
 	}
-	return schedulerLoc.Area == podLoc.Area && schedulerLoc.City == podLoc.City &&
-		schedulerLoc.Province == podLoc.Province && schedulerLoc.Country == podLoc.Country
-}
-
-func (p *Process) prioritize(schedulers []schedulerv1.Scheduler, pod *v1.Pod) map[string]int {
-	priorities := make(map[string]int)
-	for _, scheduler := range schedulers {
-		for _, priority := range p.priorities {
-			priorities[scheduler.Name] += priority(scheduler, pod)
-		}
+	if podLoc.City != "" && geoLocation.City != podLoc.City {
+		return false
 	}
-	klog.V(5).Infof("calculated priorities: %v", priorities)
-	return priorities
-}
-
-func (p *Process) findBestScheduler(priorities map[string]int) string {
-	var maxP int
-	var bestschheduler string
-	for scheduler, p := range priorities {
-		if p > maxP {
-			maxP = p
-			bestschheduler = scheduler
-		}
-	}
-	return bestschheduler
-}
-
-// GeoLocationPriority is to prioritize schedulers on their geoLocations
-func GeoLocationPriority(scheduler schedulerv1.Scheduler, pod *v1.Pod) int {
-	schedulerLoc := scheduler.Spec.Location
-	podLoc := pod.Spec.VirtualMachine.ResourceCommonInfo.Selector.GeoLocation
-	if schedulerLoc.Country == "" && schedulerLoc.Province == "" && schedulerLoc.City == "" && schedulerLoc.Area == "" {
-		return 1
-	}
-	if podLoc.Area == "" && podLoc.City == "" && podLoc.Province == "" && podLoc.Country == "" {
-		return 1
-	}
-	if schedulerLoc.Country == "" && schedulerLoc.Province == "" && schedulerLoc.City == "" {
-		if schedulerLoc.Area == podLoc.Area {
-			return 10
-		}
-		return 0
-	}
-	if schedulerLoc.Country == "" && schedulerLoc.Province == "" {
-		if schedulerLoc.Area == podLoc.Area && schedulerLoc.City == podLoc.City {
-			return 100
-		}
-		return 0
-	}
-	if schedulerLoc.Country == "" {
-		if schedulerLoc.Area == podLoc.Area && schedulerLoc.City == podLoc.City &&
-			schedulerLoc.Province == podLoc.Province {
-			return 1000
-		}
-		return 0
-	}
-	if schedulerLoc.Area == podLoc.Area && schedulerLoc.City == podLoc.City &&
-		schedulerLoc.Province == podLoc.Province && schedulerLoc.Country == podLoc.Country {
-		return 10000
-	}
-	return 0
+	return true
 }

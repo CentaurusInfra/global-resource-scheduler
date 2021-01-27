@@ -19,10 +19,16 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// dispatcherSpec defines the desired state of dispatcher
+// DispatcherRange defines the upper and the lower bound of pod clustername for dispatchers to process
+type DispatcherRange struct {
+	Start string `json:"start,omitempty"`
+	End   string `json:"end,omitempty"`
+}
+
+// DispatcherSpec defines the desired state of dispatcher
 type DispatcherSpec struct {
 	// Cluster is an array that stores the name of clusters
-	Cluster []string `json:"cluster"`
+	ClusterRange DispatcherRange `json:"clusterRange,omitempty"`
 }
 
 // +genclient

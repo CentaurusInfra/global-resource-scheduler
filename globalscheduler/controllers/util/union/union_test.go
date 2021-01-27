@@ -41,12 +41,14 @@ func TestUpdateUnionWithDifferentUnion(t *testing.T) {
 					{
 						Region:           "LA",
 						AvailabilityZone: "C",
-						//AvailabilityZone: []string{"C", "D"},
 					},
 				},
 				Operator: []*clustercrdv1.OperatorInfo{
 					{
 						Operator: "operator-1",
+					},
+					{
+						Operator: "operator-2",
 					},
 				},
 				Flavors: []*clustercrdv1.FlavorInfo{
@@ -54,11 +56,31 @@ func TestUpdateUnionWithDifferentUnion(t *testing.T) {
 						FlavorID:      "flavor-id-1",
 						TotalCapacity: 100,
 					},
+					{
+						FlavorID:      "flavor-id-2",
+						TotalCapacity: 200,
+					},
 				},
 				Storage: []*clustercrdv1.StorageSpec{
 					{
-						TypeID:          "storage -id-1",
+						TypeID:          "storage-id-1",
 						StorageCapacity: 100,
+					},
+					{
+						TypeID:          "storage-id-2",
+						StorageCapacity: 200,
+					},
+					{
+						TypeID:          "storage-id-3",
+						StorageCapacity: 300,
+					},
+					{
+						TypeID:          "storage-id-4",
+						StorageCapacity: 400,
+					},
+					{
+						TypeID:          "storage-id-5",
+						StorageCapacity: 500,
 					},
 				},
 				EipCapacity: []int64{100},
@@ -80,23 +102,50 @@ func TestUpdateUnionWithDifferentUnion(t *testing.T) {
 			Region: clustercrdv1.RegionInfo{
 				Region:           "Oregon",
 				AvailabilityZone: "A",
-				//AvailabilityZone: []string{"A", "B"},
 			},
 			Operator: clustercrdv1.OperatorInfo{
 				Operator: "operator-2",
 			},
-			//Flavors: []clustercrdv1.FlavorInfo{
-			//	{
-			//		FlavorID:      "flavor-id-1",
-			//		TotalCapacity: 100,
-			//	},
-			//},
-			//Storage: []clustercrdv1.StorageSpec{
-			//	{
-			//		TypeID:          "storage -id-1",
-			//		StorageCapacity: 100,
-			//	},
-			//},
+			Flavors: []clustercrdv1.FlavorInfo{
+				{
+					FlavorID:      "flavor-id-1",
+					TotalCapacity: 100,
+				},
+				{
+					FlavorID:      "flavor-id-2",
+					TotalCapacity: 200,
+				},
+				{
+					FlavorID:      "flavor-id-3",
+					TotalCapacity: 300,
+				},
+				{
+					FlavorID:      "flavor-id-4",
+					TotalCapacity: 300,
+				},
+				{
+					FlavorID:      "flavor-id-5",
+					TotalCapacity: 300,
+				},
+			},
+			Storage: []clustercrdv1.StorageSpec{
+				{
+					TypeID:          "storage-id-2",
+					StorageCapacity: 200,
+				},
+				{
+					TypeID:          "storage-id-3",
+					StorageCapacity: 300,
+				},
+				{
+					TypeID:          "storage-id-4",
+					StorageCapacity: 400,
+				},
+				{
+					TypeID:          "storage-id-6",
+					StorageCapacity: 600,
+				},
+			},
 			EipCapacity: 50,
 			CPUCapacity: 50,
 			MemCapacity: 50,
@@ -116,12 +165,10 @@ func TestUpdateUnionWithDifferentUnion(t *testing.T) {
 			{
 				Region:           "LA",
 				AvailabilityZone: "C",
-				//AvailabilityZone: []string{"C", "D"},
 			},
 			{
 				Region:           "Oregon",
 				AvailabilityZone: "A",
-				//AvailabilityZone: []string{"A", "B"},
 			},
 		},
 		Operator: []*clustercrdv1.OperatorInfo{
@@ -137,11 +184,47 @@ func TestUpdateUnionWithDifferentUnion(t *testing.T) {
 				FlavorID:      "flavor-id-1",
 				TotalCapacity: 100,
 			},
+			{
+				FlavorID:      "flavor-id-2",
+				TotalCapacity: 200,
+			},
+			{
+				FlavorID:      "flavor-id-3",
+				TotalCapacity: 300,
+			},
+			{
+				FlavorID:      "flavor-id-4",
+				TotalCapacity: 300,
+			},
+			{
+				FlavorID:      "flavor-id-5",
+				TotalCapacity: 300,
+			},
 		},
 		Storage: []*clustercrdv1.StorageSpec{
 			{
-				TypeID:          "storage -id-1",
+				TypeID:          "storage-id-1",
 				StorageCapacity: 100,
+			},
+			{
+				TypeID:          "storage-id-2",
+				StorageCapacity: 200,
+			},
+			{
+				TypeID:          "storage-id-3",
+				StorageCapacity: 300,
+			},
+			{
+				TypeID:          "storage-id-4",
+				StorageCapacity: 400,
+			},
+			{
+				TypeID:          "storage-id-5",
+				StorageCapacity: 500,
+			},
+			{
+				TypeID:          "storage-id-6",
+				StorageCapacity: 600,
 			},
 		},
 		EipCapacity: []int64{100, 50},
@@ -175,7 +258,6 @@ func TestUpdateUnionWithDefaultUnion(t *testing.T) {
 					{
 						Region:           "Oregon",
 						AvailabilityZone: "A",
-						//AvailabilityZone: []string{"A", "B"},
 					},
 				},
 				Operator: []*clustercrdv1.OperatorInfo{
@@ -191,7 +273,7 @@ func TestUpdateUnionWithDefaultUnion(t *testing.T) {
 				},
 				Storage: []*clustercrdv1.StorageSpec{
 					{
-						TypeID:          "storage -id-1",
+						TypeID:          "storage-id-1",
 						StorageCapacity: 100,
 					},
 				},
@@ -214,7 +296,6 @@ func TestUpdateUnionWithDefaultUnion(t *testing.T) {
 			Region: clustercrdv1.RegionInfo{
 				Region:           "Oregon",
 				AvailabilityZone: "A",
-				//AvailabilityZone: []string{"A", "B"},
 			},
 			Operator: clustercrdv1.OperatorInfo{
 				Operator: "operator",
@@ -227,7 +308,7 @@ func TestUpdateUnionWithDefaultUnion(t *testing.T) {
 			},
 			Storage: []clustercrdv1.StorageSpec{
 				{
-					TypeID:          "storage -id-1",
+					TypeID:          "storage-id-1",
 					StorageCapacity: 100,
 				},
 			},
@@ -247,7 +328,6 @@ func TestUpdateUnionWithDefaultUnion(t *testing.T) {
 			{
 				Region:           "Oregon",
 				AvailabilityZone: "A",
-				//AvailabilityZone: []string{"A", "B"},
 			},
 		},
 		Operator: []*clustercrdv1.OperatorInfo{
@@ -263,7 +343,7 @@ func TestUpdateUnionWithDefaultUnion(t *testing.T) {
 		},
 		Storage: []*clustercrdv1.StorageSpec{
 			{
-				TypeID:          "storage -id-1",
+				TypeID:          "storage-id-1",
 				StorageCapacity: 100,
 			},
 		},
@@ -301,7 +381,6 @@ func TestUpdateUnionWithoutDefaultUnion(t *testing.T) {
 			Region: clustercrdv1.RegionInfo{
 				Region:           "Oregon",
 				AvailabilityZone: "A",
-				//AvailabilityZone: []string{"A", "B"},
 			},
 			Operator: clustercrdv1.OperatorInfo{
 				Operator: "operator",
@@ -314,7 +393,7 @@ func TestUpdateUnionWithoutDefaultUnion(t *testing.T) {
 			},
 			Storage: []clustercrdv1.StorageSpec{
 				{
-					TypeID:          "storage -id-1",
+					TypeID:          "storage-id-1",
 					StorageCapacity: 100,
 				},
 			},
@@ -334,7 +413,6 @@ func TestUpdateUnionWithoutDefaultUnion(t *testing.T) {
 			{
 				Region:           "Oregon",
 				AvailabilityZone: "A",
-				//AvailabilityZone: []string{"A", "B"},
 			},
 		},
 		Operator: []*clustercrdv1.OperatorInfo{
@@ -350,7 +428,7 @@ func TestUpdateUnionWithoutDefaultUnion(t *testing.T) {
 		},
 		Storage: []*clustercrdv1.StorageSpec{
 			{
-				TypeID:          "storage -id-1",
+				TypeID:          "storage-id-1",
 				StorageCapacity: 100,
 			},
 		},

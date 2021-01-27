@@ -1,11 +1,11 @@
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sample
+  name: c1
   labels:
     app: test
 spec:
-  ipaddress: "127.4.0.1"
+  ipaddress: "34.218.224.247"
   geolocation:
     city: "BBB"
     province: "King"

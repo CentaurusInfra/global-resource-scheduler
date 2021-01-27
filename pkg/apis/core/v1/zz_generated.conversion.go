@@ -6430,6 +6430,7 @@ func autoConvert_v1_PodStatus_To_core_PodStatus(in *v1.PodStatus, out *core.PodS
 	if err := Convert_v1_ResourceScheduler_To_core_ResourceScheduler(&in.AssignedScheduler, &out.AssignedScheduler, s); err != nil {
 		return err
 	}
+	out.ClusterInstanceId = in.ClusterInstanceId
 	return nil
 }
 
@@ -6455,6 +6456,7 @@ func autoConvert_core_PodStatus_To_v1_PodStatus(in *core.PodStatus, out *v1.PodS
 	if err := Convert_core_ResourceScheduler_To_v1_ResourceScheduler(&in.AssignedScheduler, &out.AssignedScheduler, s); err != nil {
 		return err
 	}
+	out.ClusterInstanceId = in.ClusterInstanceId
 	return nil
 }
 
