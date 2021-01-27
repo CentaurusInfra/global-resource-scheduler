@@ -360,7 +360,6 @@ func TestCreatesCluster(t *testing.T) {
 	f.clusterLister = append(f.clusterLister, cluster)
 	f.clusterobjects = append(f.clusterobjects, cluster)
 	f.expectCreateClusterAction(cluster)
-	f.expectUpdateClusterAction(cluster)
 	f.run(getClusterKey(cluster, t), EventTypeAddCluster)
 }
 
