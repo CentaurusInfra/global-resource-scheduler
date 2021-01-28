@@ -6,6 +6,7 @@ go_library(
     importpath = "k8s.io/kubernetes/globalscheduler/cmd/scheduler_process/mock_scheduler",
     visibility = ["//visibility:public"],
     deps = [
+        "//globalscheduler/controllers/util:go_default_library",
         "//globalscheduler/pkg/apis/scheduler/client/clientset/versioned:go_default_library",
         "//globalscheduler/pkg/apis/scheduler/v1:go_default_library",
         "//staging/src/k8s.io/api/core/v1:go_default_library",

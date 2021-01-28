@@ -35,6 +35,7 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog"
+	"k8s.io/kubernetes/globalscheduler/controllers/util"
 	distributortype "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor"
 	distributorclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/client/clientset/versioned"
 	distributorscheme "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/client/clientset/versioned/scheme"
@@ -331,30 +332,23 @@ func (c *DistributorController) rebalance(namespace string) error {
 	distributors, err := c.lister.Distributors(namespace).List(labels.Everything())
 	if err == nil {
 		size := len(distributors)
+		klog.V(3).Infof("Get the %d distributors to balance", size)
 		if size < 1 {
 			return nil
 		}
 		// hash function can only get uint32, uint64
 		// k8s code base does not deal with uint32 properly
 		// uint64 > MaxInt64 will have issue in converter. Need to map to 0 - maxInt64
-		var start int64 = 0
-		var end int64 = 0
-		chunk := math.MaxInt64 / int64(size)
-		mod := math.MaxInt64 % size
+		ranges := util.EvenlyDivide(len(distributors), math.MaxInt64)
 		for i, d := range distributors {
-			end = start + chunk - 1
-			if i <= mod {
-				end += 1
-			}
-			d.Spec.Range = distributorv1.DistributorRange{Start: start, End: end}
+			d.Spec.Range = distributorv1.DistributorRange{Start: ranges[i][0], End: ranges[i][1]}
 			updated, err := c.clientset.GlobalschedulerV1().Distributors(namespace).Update(d)
 			if err != nil {
 				klog.Warningf("Failed to updated the distributor %v with the err %v", d, err)
 				return err
 			} else {
-				klog.V(3).Infof("Updated the distributor %v", updated)
+				klog.V(3).Infof("Updated the distributor %s with %v", updated.GetName(), updated.Spec.Range)
 			}
-			start = end + 1
 		}
 	}
 	return err

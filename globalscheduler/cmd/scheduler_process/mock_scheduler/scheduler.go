@@ -19,6 +19,7 @@ import (
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
+	"k8s.io/kubernetes/globalscheduler/controllers/util"
 	"log"
 	"math/rand"
 	"reflect"
@@ -42,6 +43,8 @@ type Scheduler struct {
 	clientset          *kubernetes.Clientset
 	podQueue           chan *v1.Pod
 	clusters           map[string][]string
+	total              int64
+	count              int
 }
 
 func NewScheduler(config *rest.Config, podQueue chan *v1.Pod, name string, quit chan struct{}) Scheduler {
@@ -152,8 +155,11 @@ func (s *Scheduler) initInformers(quit chan struct{}) {
 func main() {
 	configFile := flag.String("config", "/var/run/kubernetes/admin.kubeconfig", "Path to a kubeconfig. Only required if out-of-cluster.")
 	name := flag.String("n", "mockscheduler", "The name of the scheduler name")
+	logFile := flag.String("logfile", "/tmp/gs_scheduler.log", "The log file of the distributor process")
+	logLevel := flag.String("loglevel", "4", "The log level of the distributor process")
 	flag.Parse()
-
+	util.InitKlog("default", *name, *logFile, *logLevel)
+	defer util.FlushKlog()
 	config, err := clientcmd.BuildConfigFromFlags("", *configFile)
 
 	if err != nil {
@@ -178,8 +184,8 @@ func (s *Scheduler) Run(quit chan struct{}) {
 }
 
 func (s *Scheduler) ScheduleOne() {
-
 	p := <-s.podQueue
+	podCreateTime := p.CreationTimestamp
 	fmt.Printf("Found a pod to schedule: %s / %s \n", p.Namespace, p.Name)
 	idx := 0
 	if p.Status.AssignedScheduler.Name != "" {
@@ -205,10 +211,13 @@ func (s *Scheduler) ScheduleOne() {
 		log.Printf("Failed to bind cluster with the error %v \n", err.Error())
 		return
 	}
-
-	message := fmt.Sprintf("Placed pod [%s/%s] on %s\n", p.Namespace, p.Name, s.clusters[p.Status.AssignedScheduler.Name][idx])
-
-	fmt.Println(message)
+	currentTime := time.Now().UTC()
+	duration := (currentTime.UnixNano() - podCreateTime.UnixNano()) / 1000000
+	s.total += duration
+	s.count += 1
+	createLatency := int(duration)
+	klog.V(2).Infof("************Pod %s has taken %d milliseconds assigned to %s *********", p.Name, createLatency, s.clusters[p.Status.AssignedScheduler.Name][idx])
+	klog.V(2).Infof("************Average binding takes %d milliseconds for %d pods ************", int(s.total)/s.count, s.count)
 }
 
 func (s *Scheduler) bindPod(p *v1.Pod, cluster string) error {

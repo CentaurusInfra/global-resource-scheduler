@@ -109,12 +109,6 @@ type Reflector struct {
 
 	// There are some watch that can only happen to certain api servers
 	allowPartialWatch bool
-
-	// selectorCh is a channel having selector input
-	selectorCh <-chan string
-
-	//s selector is a string for field selectors
-	selector string
 }
 
 var (
@@ -154,19 +148,6 @@ func NewReflectorWithReset(lw ListerWatcher, expectedType interface{}, store Sto
 	return r
 }
 
-// NewReflectorWithResetCh creates a new Reflector object which will keep the given store up to
-// date with the server's contents for the given resource. Reflector promises to
-// only put things in the store that have the type of expectedType, unless expectedType
-// is nil. If resyncPeriod is non-zero, then lists will be executed after every
-// resyncPeriod, so that you can use reflectors to periodically process everything as
-// well as incrementally processing the things that change. selectorCh is used to input
-// new selector to restart the reflector
-func NewReflectorWithSelectorCh(lw ListerWatcher, expectedType interface{}, store Store, resyncPeriod time.Duration, selectorCh <-chan string) *Reflector {
-	r := NewNamedReflector(naming.GetNameFromCallsite(internalPackages...), lw, expectedType, store, resyncPeriod, false)
-	r.selectorCh = selectorCh
-	return r
-}
-
 // NewNamedReflector same as NewReflector, but with a specified name for logging
 func NewNamedReflector(name string, lw ListerWatcher, expectedType interface{}, store Store, resyncPeriod time.Duration, allowPartialWatch bool) *Reflector {
 	r := &Reflector{
@@ -182,7 +163,6 @@ func NewNamedReflector(name string, lw ListerWatcher, expectedType interface{}, 
 		clientSetUpdateChan:     apiserverupdate.WatchClientSetUpdate(),
 		listFromResourceVersion: "0",
 		allowPartialWatch:       allowPartialWatch,
-		selectorCh:              nil,
 	}
 	return r
 }
@@ -196,20 +176,9 @@ var internalPackages = []string{"client-go/tools/cache/"}
 func (r *Reflector) Run(stopCh <-chan struct{}) {
 	klog.V(3).Infof("Starting reflector %v (%s) from %s", r.expectedType, r.resyncPeriod, r.name)
 	wait.Until(func() {
-		if len(r.filterBounds) == 0 && r.selectorCh == nil {
+		if len(r.filterBounds) == 0 {
 			if err := r.ListAndWatch(stopCh); err != nil {
 				utilruntime.HandleError(err)
-			}
-		} else if r.selectorCh != nil {
-			for {
-				if err := r.ListAndWatch(stopCh); err != nil {
-					if err == errorResetFilterSelectorRequested {
-						klog.V(4).Infof("Filter selector reset message received, redo ListAndWatch with selectorCh")
-						continue
-					}
-					utilruntime.HandleError(err)
-					break
-				}
 			}
 		} else {
 			for i, fb := range r.filterBounds {
@@ -262,9 +231,6 @@ var (
 
 	// Used to indicate that watching stopped because api server clients are updated
 	errorClientSetResetRequested = errors.New("Clientset reset requested")
-
-	// Used to indicate that watching stopped because filter selectors are updated
-	errorResetFilterSelectorRequested = errors.New("Filter Selector Reset requested")
 )
 
 // resyncChan returns a channel which will receive something when a resync is
@@ -310,21 +276,6 @@ func (r *Reflector) ListAndWatch(stopCh <-chan struct{}) error {
 
 		// Pick up any bound changes
 		options = appendFieldSelector(options, r.createHashkeyListOptions())
-	}
-
-	if r.selectorCh != nil {
-		if !r.waitForSelector(stopCh) {
-			return nil
-		} else {
-			select {
-			case <-stopCh:
-				return nil
-			default:
-				klog.V(4).Infof("ListAndWatchWithReset default fall through. selector %+v", r.selector)
-			}
-		}
-		// Pick up any selector changes
-		options = appendFieldSelector(options, metav1.ListOptions{FieldSelector: r.selector})
 	}
 
 	// LIST
@@ -444,10 +395,6 @@ func (r *Reflector) ListAndWatch(stopCh <-chan struct{}) error {
 		if len(r.filterBounds) > 0 {
 			options = appendFieldSelector(options, r.createHashkeyListOptions())
 		}
-		if r.selectorCh != nil {
-			options = appendFieldSelector(options, metav1.ListOptions{FieldSelector: r.selector})
-		}
-
 		aggregatedWatcher := r.listerWatcher.Watch(options)
 		err := aggregatedWatcher.GetErrors()
 		if err != nil {
@@ -475,7 +422,7 @@ func (r *Reflector) ListAndWatch(stopCh <-chan struct{}) error {
 		}
 
 		if err := r.watchHandler(aggregatedWatcher, &resourceVersion, resyncerrc, stopCh); err != nil {
-			if err == errorResetFilterBoundRequested || err == errorResetFilterSelectorRequested || err == errorClientSetResetRequested {
+			if err == errorResetFilterBoundRequested || err == errorClientSetResetRequested {
 				select {
 				case cancelCh <- struct{}{}:
 					klog.V(4).Infof("Sent message to Resync cancelCh.")
@@ -541,34 +488,6 @@ loop:
 				r.setBounds(signal)
 
 				return errorResetFilterBoundRequested
-			case err := <-errc:
-				return err
-			case event, ok := <-w.ResultChan():
-				if !ok {
-					break loop
-				}
-
-				var err error
-				err, eventCount = r.watchHandlerHelper(event, resourceVersion, eventCount)
-				if err != nil {
-					return err
-				}
-			}
-		} else if r.selectorCh != nil {
-			select {
-			case <-r.clientSetUpdateChan.Read:
-				klog.Infof("Got client set update message. Restarting ListAndWatch %v", r.expectedType)
-				return errorClientSetResetRequested
-			case <-stopCh:
-				return errorStopRequested
-			case signal, ok := <-r.selectorCh:
-				if !ok {
-					klog.Error("selector channel closed")
-					return errors.New("selector channel closed")
-				}
-				r.selector = signal
-
-				return errorResetFilterSelectorRequested
 			case err := <-errc:
 				return err
 			case event, ok := <-w.ResultChan():
@@ -731,29 +650,6 @@ func (r *Reflector) waitForBoundInit(stopCh <-chan struct{}) bool {
 			return true
 		} else {
 			klog.V(4).Infof("Waiting for more init bound. expectedType %v, Bounds: %+v", r.expectedType, r.filterBounds)
-		}
-	}
-}
-
-// return false if selectorCh sends new selector
-func (r *Reflector) waitForSelector(stopCh <-chan struct{}) bool {
-	for {
-		select {
-		case msg, ok := <-r.selectorCh:
-			if !ok {
-				klog.Errorf("Cannot read from closed channel. expectedType %v", r.expectedType)
-				return false
-			}
-			r.selector = msg
-		case <-stopCh:
-			return false
-		}
-
-		if len(r.selector) > 0 {
-			klog.V(4).Infof("Update selector succeeded. expectedType %v, selector: %+v", r.expectedType, r.selector)
-			return true
-		} else {
-			klog.V(4).Infof("Waiting for selector. expectedType %v, selector: %+v", r.expectedType, r.selector)
 		}
 	}
 }
