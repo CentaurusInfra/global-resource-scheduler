@@ -111,62 +111,51 @@ func unionEipCapacity(unionEipCapacity []int64, eipCapacity int64) []int64 {
 }
 
 func unionOperator(unionOperator []*clustercrdv1.OperatorInfo, operator clustercrdv1.OperatorInfo) []*clustercrdv1.OperatorInfo {
-	m := make([]*clustercrdv1.OperatorInfo, len(unionOperator)+1)
-	for i, v := range unionOperator {
-		m[i] = v
+	if len(unionOperator) == 0 {
+		unionOperator = append(unionOperator, &operator)
+		return unionOperator
 	}
 
-	for i, v := range m {
-		if v == nil {
-			m[i] = &operator
-			return m
-		}
+	for _, v := range unionOperator {
 		if reflect.DeepEqual(v, &operator) {
 			return unionOperator
 		}
 	}
-	m = append(m, &operator)
 
-	return m
+	unionOperator = append(unionOperator, &operator)
+	return unionOperator
 }
 
 func unionRegion(unionRegion []*clustercrdv1.RegionInfo, region clustercrdv1.RegionInfo) []*clustercrdv1.RegionInfo {
-	m := make([]*clustercrdv1.RegionInfo, len(unionRegion)+1)
-	for i, v := range unionRegion {
-		m[i] = v
+	if len(unionRegion) == 0 {
+		unionRegion = append(unionRegion, &region)
+		return unionRegion
 	}
 
-	for i, v := range m {
-		if v == nil {
-			m[i] = &region
-			return m
-		}
+	for _, v := range unionRegion {
 		if reflect.DeepEqual(v, &region) {
 			return unionRegion
 		}
 	}
-	m = append(m, &region)
 
-	return m
+	unionRegion = append(unionRegion, &region)
+	return unionRegion
 }
 
 func unionGeoLocation(unionGeoLocation []*clustercrdv1.GeolocationInfo, geoLocation clustercrdv1.GeolocationInfo) []*clustercrdv1.GeolocationInfo {
-	m := make([]*clustercrdv1.GeolocationInfo, len(unionGeoLocation)+1)
-	for i, v := range unionGeoLocation {
-		m[i] = v
+	if len(unionGeoLocation) == 0 {
+		unionGeoLocation = append(unionGeoLocation, &geoLocation)
+		return unionGeoLocation
 	}
 
-	for i, v := range m {
-		if v == nil {
-			m[i] = &geoLocation
-			return m
-		}
+	for _, v := range unionGeoLocation {
 		if reflect.DeepEqual(v, &geoLocation) {
 			return unionGeoLocation
 		}
 	}
-	m = append(m, &geoLocation)
-	return m
+
+	unionGeoLocation = append(unionGeoLocation, &geoLocation)
+	return unionGeoLocation
 }
 
 func unionStorage(unionStorage []*clustercrdv1.StorageSpec, storage []clustercrdv1.StorageSpec) []*clustercrdv1.StorageSpec {
@@ -177,12 +166,21 @@ func unionStorage(unionStorage []*clustercrdv1.StorageSpec, storage []clustercrd
 		return unionStorage
 	}
 
-	for _, x := range unionStorage {
-		for _, y := range storage {
-			if !reflect.DeepEqual(x, &y) {
-				unionStorage = append(unionStorage, &y)
+	var result []*clustercrdv1.StorageSpec
+
+	for _, x := range storage {
+		for idx, y := range unionStorage {
+			if reflect.DeepEqual(&x, y) {
+				break
+			} else if idx == len(unionStorage)-1 {
+				res := x
+				result = append(result, &res)
 			}
 		}
+	}
+
+	for _, z := range result {
+		unionStorage = append(unionStorage, z)
 	}
 	return unionStorage
 }
@@ -195,12 +193,21 @@ func unionFlavors(unionFlavors []*clustercrdv1.FlavorInfo, flavors []clustercrdv
 		return unionFlavors
 	}
 
-	for _, x := range unionFlavors {
-		for _, y := range flavors {
-			if !reflect.DeepEqual(x, &y) {
-				unionFlavors = append(unionFlavors, &y)
+	var result []*clustercrdv1.FlavorInfo
+
+	for _, x := range flavors {
+		for idx, y := range unionFlavors {
+			if reflect.DeepEqual(&x, y) {
+				break
+			} else if idx == len(unionFlavors)-1 {
+				res := x
+				result = append(result, &res)
 			}
 		}
+	}
+
+	for _, z := range result {
+		unionFlavors = append(unionFlavors, z)
 	}
 	return unionFlavors
 }

@@ -1,0 +1,8 @@
+apiVersion: globalscheduler.com/v1
+kind: Dispatcher
+metadata:
+  name: d1
+spec:
+  clusterRange:
+    start: "a"
+    end: "d"

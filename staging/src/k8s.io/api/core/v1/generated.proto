@@ -483,9 +483,6 @@ message CommonInfo {
   // Image pull policy.
   // +optional
   optional string imagePullPolicy = 5;
-
-  // +optional
-  optional string securityGroupId = 8;
 }
 
 // Information about the condition of a component.
@@ -3575,6 +3572,9 @@ message PodStatus {
   // Assigned Scheduler
   // +optional
   optional ResourceScheduler assignedScheduler = 14;
+
+  // +optional
+  optional string clusterInstanceId = 15;
 }
 
 // PodStatusResult is a wrapper for PodStatus returned by kubelet that can be encode/decoded
@@ -5127,18 +5127,18 @@ message VirtualMachine {
 
   // Node compute resources allocated to the container.
   // +optional
-  map<string, k8s.io.apimachinery.pkg.api.resource.Quantity> resourcesAllocated = 15;
+  map<string, k8s.io.apimachinery.pkg.api.resource.Quantity> resourcesAllocated = 4;
 
   // Resources resize policy for the container.
   // +optional
-  repeated ResizePolicy resizePolicy = 16;
+  repeated ResizePolicy resizePolicy = 5;
 
   // Pod volumes to mount into the workload's filesystem.
   // Cannot be updated.
   // +optional
   // +patchMergeKey=mountPath
   // +patchStrategy=merge
-  repeated VolumeMount volumeMounts = 4;
+  repeated VolumeMount volumeMounts = 6;
 
   // Image pull policy.
   // One of Always, Never, IfNotPresent.
@@ -5146,57 +5146,60 @@ message VirtualMachine {
   // Cannot be updated.
   // More info: https://kubernetes.io/docs/concepts/containers/images#updating-images
   // +optional
-  optional string imagePullPolicy = 5;
+  optional string imagePullPolicy = 7;
 
   // either keyPair or the publicKeystring must be provided, used to logon to the VM
   // +optional
-  optional string keyPairName = 6;
+  optional string keyPairName = 8;
 
   // +optional
-  optional string publicKey = 7;
+  optional string publicKey = 9;
 
   // Configuration information or scripts to use upon launch. Must be Base64 encoded. Restricted to 65535 bytes.
   // +optional
-  optional bytes userData = 8;
+  optional bytes userData = 10;
 
   // default none, array cert ID that used to verify the image
   // +optional
-  repeated string trustedImageCertificate = 9;
+  repeated string trustedImageCertificate = 11;
 
   // stop | terminate VM. default to stop
   // +optional
-  optional string shutdownBehavior = 10;
+  optional string shutdownBehavior = 12;
 
   // if not specified, the first volume in the volume slice will be used
   // +optional
-  optional string bootVolume = 11;
+  optional string bootVolume = 13;
 
   // default running
   // +optional
-  optional string powerSpec = 12;
+  optional string powerSpec = 14;
 
   // volumeDevices is the list of block devices to be used by the container.
   // This is a beta feature.
   // +patchMergeKey=devicePath
   // +patchStrategy=merge
   // +optional
-  repeated VolumeDevice volumeDevices = 13;
+  repeated VolumeDevice volumeDevices = 15;
 
   // cloud-init user data script
   // +optional
-  optional string cloudInitUserDataScript = 14;
+  optional string cloudInitUserDataScript = 16;
 
   // resource common information for vms or containers
   // +optional
-  optional ResourceCommonInfo resourceCommonInfo = 18;
+  optional ResourceCommonInfo resourceCommonInfo = 17;
 
   // flag that if the vm needs any external ip address
   // +optional
-  optional bool needEIP = 19;
+  optional bool needEIP = 18;
 
   // resource flavor information
   // +optional
-  repeated ResourceFlavor flavors = 20;
+  repeated ResourceFlavor flavors = 19;
+
+  // +optional
+  optional string securityGroupId = 20;
 }
 
 // VirtualMachineStatus holds the details of the current status of a given virtual machine instance

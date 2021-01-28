@@ -10,7 +10,6 @@ filegroup(
     srcs = [
         ":package-srcs",
         "//globalscheduler/cmd/dispatcher_process:all-srcs",
-        "//globalscheduler/cmd/distributor:all-srcs",
         "//globalscheduler/cmd/distributor_process:all-srcs",
         "//globalscheduler/cmd/grpc-server:all-srcs",
         "//globalscheduler/cmd/gs-controllers:all-srcs",

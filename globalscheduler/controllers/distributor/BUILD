@@ -9,6 +9,8 @@ go_library(
     importpath = "k8s.io/kubernetes/globalscheduler/controllers/distributor",
     visibility = ["//visibility:public"],
     deps = [
+        "//globalscheduler/controllers/util:go_default_library",
+        "//globalscheduler/pkg/apis/cluster/v1:go_default_library",
         "//globalscheduler/pkg/apis/distributor:go_default_library",
         "//globalscheduler/pkg/apis/distributor/client/clientset/versioned:go_default_library",
         "//globalscheduler/pkg/apis/distributor/client/clientset/versioned/scheme:go_default_library",
@@ -16,7 +18,6 @@ go_library(
         "//globalscheduler/pkg/apis/distributor/client/listers/distributor/v1:go_default_library",
         "//globalscheduler/pkg/apis/distributor/v1:go_default_library",
         "//globalscheduler/pkg/apis/scheduler/client/clientset/versioned:go_default_library",
-        "//globalscheduler/pkg/apis/scheduler/client/informers/externalversions:go_default_library",
         "//globalscheduler/pkg/apis/scheduler/v1:go_default_library",
         "//pkg/controller:go_default_library",
         "//staging/src/k8s.io/api/core/v1:go_default_library",

@@ -41,8 +41,8 @@ type StackBackoffMap struct {
 // NewStackBackoffMap creates a StackBackoffMap with initial duration and max duration.
 func NewStackBackoffMap(initialDuration, maxDuration time.Duration) *StackBackoffMap {
 	return &StackBackoffMap{
-		initialDuration:   initialDuration,
-		maxDuration:       maxDuration,
+		initialDuration:     initialDuration,
+		maxDuration:         maxDuration,
 		stackAttempts:       make(map[ktypes.NamespacedName]int),
 		stackLastUpdateTime: make(map[ktypes.NamespacedName]time.Time),
 	}

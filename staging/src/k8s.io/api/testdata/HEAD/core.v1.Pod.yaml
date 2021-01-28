@@ -562,6 +562,7 @@ spec:
         Ė漘: "109"
     resourcesAllocated:
       ',铻OŤǢʭ嵔棂p儼Ƿ裚瓶': "806"
+    securityGroupId: "297"
     shutdownBehavior: "282"
     trustedImageCertificate:
     - "281"
@@ -774,9 +775,9 @@ spec:
       volumePath: "90"
   vpc: "25"
   workloadInfo:
-  - image: "298"
+  - image: "299"
     imagePullPolicy: R§耶FfBls3!Zɾģ毋Ó
-    name: "297"
+    name: "298"
     resizePolicy:
     - policy: '|懥ƖN粕擓ƖHVe熼'
       resourceName: ȿ0矀Kʝ
@@ -787,18 +788,18 @@ spec:
         荶ǉʁ揆ɘȌ脾嚏吐ĠLƐȤ藠3: "86"
     resourcesAllocated:
       t莭琽§ć\ ïì: "80"
-    securityGroupId: "303"
     volumeMounts:
-    - mountPath: "300"
+    - mountPath: "301"
       mountPropagation: D剂讼ɓȌʟni酛3ƁÀ*
-      name: "299"
+      name: "300"
       readOnly: true
-      subPath: "301"
-      subPathExpr: "302"
+      subPath: "302"
+      subPathExpr: "303"
 status:
   assignedScheduler:
     name: "415"
     tag: "416"
+  clusterInstanceId: "417"
   conditions:
   - lastProbeTime: "2476-07-28T03:34:42Z"
     lastTransitionTime: "2592-05-14T17:29:31Z"

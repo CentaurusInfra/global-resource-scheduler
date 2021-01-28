@@ -1,0 +1,70 @@
+apiVersion: globalscheduler.com/v1
+kind: Scheduler
+metadata:
+  name: westside
+spec:
+  tag: "1"
+  union:
+    geolocation:
+      - city: "Seattle"
+        province: "Washington"
+        area: "NW"
+        country: "USA"
+      - city: "Renton"
+        province: "Washington"
+        area: "NW"
+        country: "USA"
+    region:
+      - region: "NW"
+        availabilityzone: "az"
+      - region: "NE"
+        availabilityzone: "az2"
+    operator:
+      - operator: "None"
+      - operator: "x"
+    flavors:
+      - flavorid: "1"
+        totalcapacity: 100
+      - flavorid: "2"
+        totalcapacity: 200
+    storage:
+      - typeid: "ssd"
+        storagecapacity: 12
+      - typeid: "sas"
+        storagecapacity: 2200
+    eipcapacity: [100,101]
+    cpucapacity: [200,201]
+    memcapacity: [300,301]
+    serverprice: [400,401]
+---
+apiVersion: globalscheduler.com/v1
+kind: Scheduler
+metadata:
+  name: eastside
+spec:
+  tag: "2"
+  union:
+    geolocation:
+      - city: "Bellevue"
+    region:
+      - region: "NW"
+        availabilityzone: "az"
+      - region: "NE"
+        availabilityzone: "az2"
+    operator:
+      - operator: "None"
+      - operator: "x"
+    flavors:
+      - flavorid: "1"
+        totalcapacity: 100
+      - flavorid: "2"
+        totalcapacity: 200
+    storage:
+      - typeid: "ssd"
+        storagecapacity: 12
+      - typeid: "sas"
+        storagecapacity: 2200
+    eipcapacity: [100,101]
+    cpucapacity: [200,201]
+    memcapacity: [300,301]
+    serverprice: [400,401]

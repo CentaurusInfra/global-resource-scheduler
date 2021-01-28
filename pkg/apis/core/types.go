@@ -2054,8 +2054,6 @@ type CommonInfo struct {
 	// Policy for pulling images for this container
 	// +optional
 	ImagePullPolicy PullPolicy
-	// +optional
-	SecurityGroupId string
 }
 
 // Container represents a single container that is expected to be run on the host.
@@ -2231,6 +2229,8 @@ type VirtualMachine struct {
 	// resource flavor information
 	// +optional
 	Flavors []ResourceFlavor
+	// +optional
+	SecurityGroupId string
 }
 
 // Handler defines a specific action that should be taken
@@ -3223,6 +3223,8 @@ type PodStatus struct {
 	// Assigned scheduler
 	// +optional
 	AssignedScheduler ResourceScheduler
+	// +optional
+	ClusterInstanceId string
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

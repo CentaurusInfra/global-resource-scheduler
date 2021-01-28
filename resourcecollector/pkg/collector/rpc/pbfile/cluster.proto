@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+//option go_package = "k8s.io/kubernetes/resourcecollector/grpc/cluster/proto";
+
+package pbfile;
+
+// service
+service ClusterProtocol {
+  rpc SendClusterProfile(ClusterProfile) returns (ReturnMessageClusterProfile) {}
+}
+
+//message from ClusterController to ResourceCollector
+message ClusterProfile {
+  string ClusterNameSpace = 1;
+  string ClusterName = 2;
+  message ClusterSpecInfo {
+    string ClusterIpAddress = 1;
+    message GeoLocationInfo{
+      string City = 1;
+      string Province = 2;
+      string Area = 3;
+      string Country = 4;
+    }
+    message RegionInfo {
+      string Region = 1;
+      string AvailabilityZone = 2;
+    }
+    message OperatorInfo {
+      string Operator = 1;
+    }
+    message FlavorInfo {
+      string FlavorID = 1;  //Small, Medium, Large, Xlarge, 2xLarge
+      int64 TotalCapacity = 2;
+    }
+    message StorageInfo {
+      string  TypeID = 1;     //"SATA", "SAS", "SSD"
+      int64   StorageCapacity = 2;
+    }
+    GeoLocationInfo GeoLocation = 2;
+    RegionInfo Region = 3;
+    OperatorInfo Operator = 4;
+    repeated FlavorInfo Flavor = 5;
+    repeated StorageInfo Storage = 6;
+    int64 EipCapacity = 7;
+    int64 CPUCapacity = 8;
+    int64 MemCapacity = 9;
+    int64 ServerPrice = 10;
+    string HomeScheduler = 11;
+  }
+  ClusterSpecInfo ClusterSpec = 3;
+  string Status = 4;
+}
+
+//Message from ResourceCollector, Cluster Controller should get response from ResourceCollector.
+message ReturnMessageClusterProfile {
+  enum CodeType{
+    Error = 0;
+    OK = 1;
+  }
+  string ClusterNameSpace = 1;
+  string ClusterName = 2;
+  CodeType  ReturnCode = 3;
+  string Message = 4;
+}

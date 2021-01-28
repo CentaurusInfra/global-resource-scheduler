@@ -1,0 +1,17 @@
+apiVersion: globalscheduler.com/v1
+kind: Distributor
+metadata:
+  name: d1
+spec:
+  range:
+    start: 1
+    end: 4223372036854775807
+---
+apiVersion: globalscheduler.com/v1
+kind: Distributor
+metadata:
+  name: d2
+spec:
+  range:
+    start: 4223372036854775808
+    end: 9223372036854775807

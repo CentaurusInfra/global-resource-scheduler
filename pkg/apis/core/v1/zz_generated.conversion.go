@@ -3036,7 +3036,6 @@ func autoConvert_v1_CommonInfo_To_core_CommonInfo(in *v1.CommonInfo, out *core.C
 	out.ResizePolicy = *(*[]core.ResizePolicy)(unsafe.Pointer(&in.ResizePolicy))
 	out.VolumeMounts = *(*[]core.VolumeMount)(unsafe.Pointer(&in.VolumeMounts))
 	out.ImagePullPolicy = core.PullPolicy(in.ImagePullPolicy)
-	out.SecurityGroupId = in.SecurityGroupId
 	return nil
 }
 
@@ -3055,7 +3054,6 @@ func autoConvert_core_CommonInfo_To_v1_CommonInfo(in *core.CommonInfo, out *v1.C
 	out.ResizePolicy = *(*[]v1.ResizePolicy)(unsafe.Pointer(&in.ResizePolicy))
 	out.VolumeMounts = *(*[]v1.VolumeMount)(unsafe.Pointer(&in.VolumeMounts))
 	out.ImagePullPolicy = v1.PullPolicy(in.ImagePullPolicy)
-	out.SecurityGroupId = in.SecurityGroupId
 	return nil
 }
 
@@ -6432,6 +6430,7 @@ func autoConvert_v1_PodStatus_To_core_PodStatus(in *v1.PodStatus, out *core.PodS
 	if err := Convert_v1_ResourceScheduler_To_core_ResourceScheduler(&in.AssignedScheduler, &out.AssignedScheduler, s); err != nil {
 		return err
 	}
+	out.ClusterInstanceId = in.ClusterInstanceId
 	return nil
 }
 
@@ -6457,6 +6456,7 @@ func autoConvert_core_PodStatus_To_v1_PodStatus(in *core.PodStatus, out *v1.PodS
 	if err := Convert_core_ResourceScheduler_To_v1_ResourceScheduler(&in.AssignedScheduler, &out.AssignedScheduler, s); err != nil {
 		return err
 	}
+	out.ClusterInstanceId = in.ClusterInstanceId
 	return nil
 }
 
@@ -8667,6 +8667,7 @@ func autoConvert_v1_VirtualMachine_To_core_VirtualMachine(in *v1.VirtualMachine,
 	}
 	out.NeedEIP = in.NeedEIP
 	out.Flavors = *(*[]core.ResourceFlavor)(unsafe.Pointer(&in.Flavors))
+	out.SecurityGroupId = in.SecurityGroupId
 	return nil
 }
 
@@ -8699,6 +8700,7 @@ func autoConvert_core_VirtualMachine_To_v1_VirtualMachine(in *core.VirtualMachin
 	}
 	out.NeedEIP = in.NeedEIP
 	out.Flavors = *(*[]v1.ResourceFlavor)(unsafe.Pointer(&in.Flavors))
+	out.SecurityGroupId = in.SecurityGroupId
 	return nil
 }
 
