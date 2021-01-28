@@ -21,15 +21,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 	"path/filepath"
 	"time"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/internalinterfaces"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 )
 
 // InformerFlavor provides access to a shared informer and lister for SiteInfos.
@@ -75,6 +75,7 @@ func NewSiteInfoInformer(client client.Interface, resyncPeriod time.Duration, na
 			}
 
 			return interfaceSlice, nil
+
 		}}, resyncPeriod, name, key, types.ListSiteOpts{})
 }
 

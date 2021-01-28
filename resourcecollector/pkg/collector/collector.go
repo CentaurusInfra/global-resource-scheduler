@@ -17,12 +17,13 @@ limitations under the License.
 package collector
 
 import (
+	"errors"
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/siteinfo"
 	"time"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	internalcache "k8s.io/kubernetes/resourcecollector/pkg/collector/internal/cache"
@@ -39,26 +40,27 @@ func InitCollector(stopCh <-chan struct{}) error {
 
 // GetScheduler gets single scheduler instance. New Scheduler will only run once,
 // if it runs failed, nil will be return.
-func GetCollector() *Collector {
+func GetCollector() (*Collector, error) {
 	if collector == nil {
-		logger.Errorf("Collector need to be init correctly")
-		return collector
+		logger.Errorf("collector need to be init correctly")
+		err := errors.New("collector need to be init correctly")
+		return nil, err
 	}
 
-	return collector
+	return collector, nil
 }
 
 type Collector struct {
-	CollectorCache        internalcache.Cache
+	ResourceCache         internalcache.Cache
 	siteCacheInfoSnapshot *internalcache.Snapshot
-	SiteIPCache           *internalcache.SiteIPCache
+	SiteInfoCache         *siteinfo.SiteInfoCache
 }
 
 func NewCollector(stopCh <-chan struct{}) (*Collector, error) {
 	c := &Collector{
-		CollectorCache:        internalcache.New(30*time.Second, stopCh),
+		ResourceCache:         internalcache.New(30*time.Second, stopCh),
 		siteCacheInfoSnapshot: internalcache.NewEmptySnapshot(),
-		SiteIPCache:           internalcache.NewSiteIPCache(),
+		SiteInfoCache:         siteinfo.NewSiteInfoCache(),
 	}
 	return c, nil
 }
@@ -68,6 +70,15 @@ func NewCollector(stopCh <-chan struct{}) (*Collector, error) {
 func (c *Collector) snapshot() error {
 	// Used for all fit and priority funcs.
 	return c.Cache().UpdateSnapshot(c.siteCacheInfoSnapshot)
+}
+
+// Cache returns the cache in scheduler for test to check the data in scheduler.
+func (c *Collector) Cache() internalcache.Cache {
+	return c.ResourceCache
+}
+
+func (c *Collector) GetSiteInfos() *siteinfo.SiteInfoCache {
+	return c.SiteInfoCache
 }
 
 func (c *Collector) GetSnapshot() (*internalcache.Snapshot, error) {
@@ -87,20 +98,15 @@ func (c *Collector) StartInformersAndRun(stopCh <-chan struct{}) {
 		// init volume type informer
 		volumetypeInterval := 600
 		informers.InformerFac.VolumeType(informers.VOLUMETYPE, "ID",
-			time.Duration(volumetypeInterval)*time.Second).Informer()
-
-		// init site informer
-		siteInfoInterval := 600
-		informers.InformerFac.SiteInfo(informers.SITEINFOS, "SITEID",
-			time.Duration(siteInfoInterval)*time.Second).Informer()
+			time.Duration(volumetypeInterval)*time.Second, c).Informer()
 
 		// init flavor informer
 		flavorInterval := 600
 		informers.InformerFac.Flavor(informers.FLAVOR, "RegionFlavorID",
-			time.Duration(flavorInterval)*time.Second).Informer()
+			time.Duration(flavorInterval)*time.Second, c).Informer()
 
 		// init eip pool informer
-		eipPoolInterval := 60
+		eipPoolInterval := 600
 		eipPoolInformer := informers.InformerFac.EipPools(informers.EIPPOOLS, "Region",
 			time.Duration(eipPoolInterval)*time.Second).Informer()
 		eipPoolInformer.AddEventHandler(
@@ -109,18 +115,18 @@ func (c *Collector) StartInformersAndRun(stopCh <-chan struct{}) {
 			})
 
 		// init volume pool informer
-		volumePoolInterval := 60
+		volumePoolInterval := 600
 		volumePoolInformer := informers.InformerFac.VolumePools(informers.VOLUMEPOOLS, "Region",
-			time.Duration(volumePoolInterval)*time.Second).Informer()
+			time.Duration(volumePoolInterval)*time.Second, c).Informer()
 		volumePoolInformer.AddEventHandler(
 			cache.ResourceEventHandlerFuncs{
 				ListFunc: updateVolumePools,
 			})
 
 		// init site resource informer
-		siteResourceInterval := 86400
+		siteResourceInterval := 600
 		siteResourceInformer := informers.InformerFac.SiteResource(informers.SITERESOURCES, "SiteID",
-			time.Duration(siteResourceInterval)*time.Second).Informer()
+			time.Duration(siteResourceInterval)*time.Second, c).Informer()
 		siteResourceInformer.AddEventHandler(
 			cache.ResourceEventHandlerFuncs{
 				ListFunc: addSitesToCache,
@@ -129,11 +135,6 @@ func (c *Collector) StartInformersAndRun(stopCh <-chan struct{}) {
 		informers.InformerFac.Start(stopCh2)
 
 	}(stopCh)
-}
-
-// Cache returns the cache in scheduler for test to check the data in scheduler.
-func (c *Collector) Cache() internalcache.Cache {
-	return c.CollectorCache
 }
 
 // update EipPools with sched cache
@@ -177,28 +178,32 @@ func updateVolumePools(obj []interface{}) {
 }
 
 // add site to cache
-func addSitesToCache(obj []interface{}) {
-	if obj == nil {
+func addSitesToCache(objs []interface{}) {
+	if objs == nil {
 		return
 	}
 
-	siteInfos := informers.InformerFac.GetInformer(informers.SITEINFOS).GetStore().List()
+	col, err := GetCollector()
+	if err != nil {
+		logger.Errorf("GetCollector err: %s", err.Error())
+		return
+	}
+	//siteInfos := informers.InformerFac.GetInformer(informers.SITEINFOS).GetStore().List()
+	siteInfos := col.SiteInfoCache.SiteInfoMap
 
-	for _, sn := range obj {
-		siteResource, ok := sn.(typed.SiteResource)
+	// Iterate the site information collected by the SiteResources Informer
+	for _, obj := range objs {
+		siteResource, ok := obj.(typed.SiteResource)
 		if !ok {
 			logger.Warnf("convert interface to (typed.SiteResource) failed.")
 			continue
 		}
 
+		// Check to see if this site exists in SiteInfo
 		var isFind = false
-		for _, site := range siteInfos {
-			siteInfo, ok := site.(typed.SiteInfo)
-			if !ok {
-				continue
-			}
-
-			if siteInfo.Region == siteResource.Region && siteInfo.AvailabilityZone == siteResource.AvailabilityZone {
+		for _, siteInfo := range siteInfos {
+			if siteInfo.SiteID == siteResource.SiteID {
+				// Integrate site static information and resource information
 				info := convertToSite(siteInfo, siteResource)
 				err := collector.Cache().AddSite(info)
 				if err != nil {
@@ -211,43 +216,31 @@ func addSitesToCache(obj []interface{}) {
 		}
 
 		if !isFind {
-			site := &types.Site{
-				SiteID: siteResource.Region + "--" + siteResource.AvailabilityZone,
-				RegionAzMap: types.RegionAzMap{
-					Region:           siteResource.Region,
-					AvailabilityZone: siteResource.AvailabilityZone,
-				},
-				Status: constants.SiteStatusNormal,
-			}
-
-			site.Hosts = append(site.Hosts, siteResource.Hosts...)
-			err := collector.Cache().AddSite(site)
-			if err != nil {
-				logger.Infof("add site to cache failed! err: %s", err)
-			}
+			logger.Warnf("siteResource.SiteID[%s] is not in siteInfo, Not add to the cache", siteResource.SiteID)
 		}
 	}
 
 	collector.Cache().PrintString()
 }
 
-func convertToSite(site typed.SiteInfo, siteResource typed.SiteResource) *types.Site {
+// Integrate site static information and resource information
+func convertToSite(siteInfo *typed.SiteInfo, siteResource typed.SiteResource) *types.Site {
 	result := &types.Site{
-		SiteID: site.SiteID,
+		SiteID: siteInfo.SiteID,
 		GeoLocation: types.GeoLocation{
-			Country:  site.Country,
-			Area:     site.Area,
-			Province: site.Province,
-			City:     site.City,
+			Country:  siteInfo.Country,
+			Area:     siteInfo.Area,
+			Province: siteInfo.Province,
+			City:     siteInfo.City,
 		},
 		RegionAzMap: types.RegionAzMap{
-			Region:           site.Region,
-			AvailabilityZone: site.AvailabilityZone,
+			Region:           siteInfo.Region,
+			AvailabilityZone: siteInfo.AvailabilityZone,
 		},
-		Operator:      site.Operator.Name,
-		EipTypeName:   site.EipTypeName,
-		Status:        site.Status,
-		SiteAttribute: site.SiteAttributes,
+		Operator:      siteInfo.Operator.Name,
+		EipTypeName:   siteInfo.EipTypeName,
+		Status:        siteInfo.Status,
+		SiteAttribute: siteInfo.SiteAttributes,
 	}
 
 	result.Hosts = append(result.Hosts, siteResource.Hosts...)

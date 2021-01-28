@@ -17,8 +17,6 @@ limitations under the License.
 package app
 
 import (
-	"fmt"
-
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/options"
@@ -66,9 +64,10 @@ func Run(stopCh <-chan struct{}) error {
 
 	// init collector
 	collector.InitCollector(stopCh)
-	col := collector.GetCollector()
-	if col == nil {
-		return fmt.Errorf("get new collector failed")
+	col, err := collector.GetCollector()
+	if err != nil {
+		logger.Errorf("get new collector failed, err: %s", err.Error())
+		return err
 	}
 
 	// start scheduler resource cache informer and run
@@ -79,7 +78,7 @@ func Run(stopCh <-chan struct{}) error {
 
 	// todo  wait until all informer synced
 	// start http server to provide resource information to the Scheduler
-	err := startHttpServer(stopCh)
+	err = startHttpServer(stopCh)
 	if err != nil {
 		return err
 	}

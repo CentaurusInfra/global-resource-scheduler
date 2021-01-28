@@ -674,17 +674,17 @@ func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
 		// init volume type informer
 		volumetypeInterval := config.DefaultInt(constants.ConfVolumeTypeInterval, 600)
 		informers.InformerFac.VolumeType(informers.VOLUMETYPE, "ID",
-			time.Duration(volumetypeInterval)*time.Second).Informer()
+			time.Duration(volumetypeInterval)*time.Second, nil).Informer()
 
 		// init site informer
-		siteInfoInterval := config.DefaultInt(constants.ConfSiteInfoInterval, 600)
-		informers.InformerFac.SiteInfo(informers.SITEINFOS, "SITEID",
-			time.Duration(siteInfoInterval)*time.Second).Informer()
+		//siteInfoInterval := config.DefaultInt(constants.ConfSiteInfoInterval, 600)
+		//informers.InformerFac.SiteInfo(informers.SITEINFOS, "SITEID",
+		//	time.Duration(siteInfoInterval)*time.Second).Informer()
 
 		// init flavor informer
 		flavorInterval := config.DefaultInt(constants.ConfFlavorInterval, 600)
 		informers.InformerFac.Flavor(informers.FLAVOR, "RegionFlavorID",
-			time.Duration(flavorInterval)*time.Second).Informer()
+			time.Duration(flavorInterval)*time.Second, nil).Informer()
 
 		// init eip pool informer
 		eipPoolInterval := config.DefaultInt(constants.ConfEipPoolInterval, 60)
@@ -698,7 +698,7 @@ func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
 		// init volume pool informer
 		volumePoolInterval := config.DefaultInt(constants.ConfVolumePoolInterval, 60)
 		volumePoolInformer := informers.InformerFac.VolumePools(informers.VOLUMEPOOLS, "Region",
-			time.Duration(volumePoolInterval)*time.Second).Informer()
+			time.Duration(volumePoolInterval)*time.Second, nil).Informer()
 		volumePoolInformer.AddEventHandler(
 			cache.ResourceEventHandlerFuncs{
 				ListFunc: updateVolumePools,
@@ -707,7 +707,7 @@ func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
 		// init site resource informer
 		siteResourceInterval := config.DefaultInt(constants.ConfCommonHypervisorInterval, 86400)
 		siteResourceInformer := informers.InformerFac.SiteResource(informers.SITERESOURCES, "SiteID",
-			time.Duration(siteResourceInterval)*time.Second).Informer()
+			time.Duration(siteResourceInterval)*time.Second, nil).Informer()
 		siteResourceInformer.AddEventHandler(
 			cache.ResourceEventHandlerFuncs{
 				ListFunc: addSitesToCache,

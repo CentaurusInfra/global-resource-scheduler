@@ -29,4 +29,11 @@ const (
 	// ClusterController Info
 	ClusterControllerIP   = "127.0.0.1"
 	ClusterControllerPort = "50053"
+
+	// OpenStack
+	OpenStackUsername        = "admin"
+	OpenStackPassword        = "secret"
+	OpenStackDomainID        = "default"
+	OpenStackScopProjectName = "admin"
+	OpenStackScopDomainID    = "default"
 )
