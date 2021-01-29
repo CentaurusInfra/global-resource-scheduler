@@ -268,14 +268,12 @@ func (c *DistributorController) createCustomResourceDefinition() *apiextensions.
 					Name:     "pod_hashkey_start",
 					Type:     "integer",
 					JSONPath: ".spec.range.start",
-					Format:   "int32",
 
 				},
 				{
 					Name:     "pod_hashkey_end",
 					Type:     "integer",
 					JSONPath: ".spec.range.end",
-					Format:   "int32",
 				},
 			},
 		},
