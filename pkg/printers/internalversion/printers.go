@@ -94,7 +94,7 @@ func AddHandlers(h printers.PrintHandler) {
 		{Name: "Status", Type: "string", Description: "The aggregate status of the containers in this pod."},
 		{Name: "Restarts", Type: "integer", Description: "The number of times the containers in this pod have been restarted."},
 		{Name: "Age", Type: "string", Description: metav1.ObjectMeta{}.SwaggerDoc()["creationTimestamp"]},
-		{Name: "Distributor", Type: "string", Description:"The name of global resource distributor"},
+		{Name: "Distributor", Type: "string", Description: "The name of global resource distributor"},
 		{Name: "Scheduler", Type: "string", Description: "The name of global resource Scheduler"},
 		{Name: "Dispatcher", Type: "string", Description: "The name of global resource dispatcher"},
 		{Name: "IP", Type: "string", Priority: 1, Description: apiv1.PodStatus{}.SwaggerDoc()["podIP"]},
