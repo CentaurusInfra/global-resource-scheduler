@@ -179,6 +179,7 @@ func (p *Process) SendPodToCluster() {
 			klog.Warningf("Failed to get token from host %v", host)
 			return
 		}
+		pod.Status.DispatcherName = p.name
 		if pod.ObjectMeta.DeletionTimestamp != nil {
 			p.totalPodDeleteNum += 1
 			// Calculate delete latency
@@ -207,6 +208,8 @@ func (p *Process) SendPodToCluster() {
 			duration := (currentTime.UnixNano() - podCreateTime.UnixNano()) / 1000000
 			p.totalCreateLatency += duration
 			createLatency := int(duration)
+			klog.V(2).Infof("******** %v  Pod %s has been scheduled", currentTime.Format("2006-01-02 15:04:05.000000"), pod.Name)
+			klog.V(2).Infof("******** Pod %s has been scheduled at %d", pod.Name, currentTime.UnixNano()/int64(time.Millisecond))
 			klog.V(2).Infof("************************************ Pod Name: %s, Create Latency: %d Millisecond ************************************", pod.Name, createLatency)
 
 			// Calculate average create latency

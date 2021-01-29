@@ -3555,6 +3555,10 @@ type PodStatus struct {
 	AssignedScheduler ResourceScheduler `json:"assignedScheduler,omitempty" protobuf:"bytes,14,opt,name=assignedScheduler"`
 	// +optional
 	ClusterInstanceId string `json:"clusterInstanceId,omitempty" protobuf:"bytes,15,opt,name=clusterInstanceId"`
+	// +optional
+	DistributorName string `json:"distributorName,omitempty" protobuf:"bytes,16,opt,name=distributorName"`
+	// +optional
+	DispatcherName string `json:"dispatcherName,omitempty" protobuf:"bytes,17,opt,name=dispatcherName"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

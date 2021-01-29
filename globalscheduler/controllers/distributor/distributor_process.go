@@ -239,6 +239,7 @@ func (p *Process) bindPod(pod *v1.Pod, scheduler string) error {
 			APIVersion: "v1",
 			Kind:       "Scheduler",
 			Name:       scheduler,
+			FieldPath:  p.name,
 		},
 	})
 }

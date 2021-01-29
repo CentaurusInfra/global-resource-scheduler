@@ -88,9 +88,14 @@ func (dc *DispatcherController) CreateDispatcherCRD() error {
 			},
 			AdditionalPrinterColumns: []apiextensions.CustomResourceColumnDefinition{
 				{
-					Name:     "ClusterRange",
+					Name:     "clusternamestart",
 					Type:     "string",
-					JSONPath: ".spec.clusterRange",
+					JSONPath: ".spec.clusterRange.start",
+				},
+				{
+					Name:     "clusternameend",
+					Type:     "string",
+					JSONPath: ".spec.clusterRange.end",
 				},
 			},
 		},
