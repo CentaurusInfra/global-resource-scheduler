@@ -29,4 +29,22 @@ const (
 	// ClusterController Info
 	ClusterControllerIP   = "127.0.0.1"
 	ClusterControllerPort = "50053"
+
+	// OpenStack
+	OpenStackUsername        = "admin"
+	OpenStackPassword        = "secret"
+	OpenStackDomainID        = "default"
+	OpenStackScopProjectName = "admin"
+	OpenStackScopDomainID    = "default"
+
+	// Informer interval period
+	FlavorInterval       = 600
+	SiteResourceInterval = 10
+	VolumePoolInterval   = 60
+	VolumeTypeInterval   = 600
+	EipPoolInterval      = 60
+
+	// When the maximum number of unreachable requests is reached,
+	// send the node unreachable status to the ClusterController
+	MaxUnreachableNum = 3
 )

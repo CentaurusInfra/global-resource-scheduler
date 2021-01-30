@@ -18,17 +18,17 @@ limitations under the License.
 package volumetype
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"path/filepath"
+	"errors"
 	"time"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/internalinterfaces"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient"
+
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumetypes"
 )
 
 // InformerVolumeType provides access to a shared informer and lister for VolumeType.
@@ -37,42 +37,79 @@ type InformerVolumeType interface {
 }
 
 type informerVolumeType struct {
-	factory internalinterfaces.SharedInformerFactory
-	name    string
-	key     string
-	period  time.Duration
+	factory   internalinterfaces.SharedInformerFactory
+	name      string
+	key       string
+	period    time.Duration
+	collector internalinterfaces.ResourceCollector
 }
 
 // New initial the informerVolumeType
-func New(f internalinterfaces.SharedInformerFactory, name string, key string, period time.Duration) InformerVolumeType {
-	return &informerVolumeType{factory: f, name: name, key: key, period: period}
+func New(f internalinterfaces.SharedInformerFactory, name string, key string, period time.Duration,
+	collector internalinterfaces.ResourceCollector) InformerVolumeType {
+	return &informerVolumeType{factory: f, name: name, key: key, period: period, collector: collector}
 }
 
 // NewVolumeTypeInformer constructs a new informer for volume type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewVolumeTypeInformer(client client.Interface, resyncPeriod time.Duration, name string, key string) cache.SharedInformer {
+func NewVolumeTypeInformer(client client.Interface, resyncPeriod time.Duration, name string, key string,
+	collector internalinterfaces.ResourceCollector) cache.SharedInformer {
 	return cache.NewSharedInformer(
 		&cache.Lister{ListFunc: func(options interface{}) ([]interface{}, error) {
-			// read volume type init data
-			confLocation := utils.GetConfigDirectory()
-			confFilePath := filepath.Join(confLocation, "volume_types.json")
-			file, err := ioutil.ReadFile(confFilePath)
-			if err != nil {
-				return nil, fmt.Errorf("read volumetype data error:%v", err)
+			//siteInfoMap := map[string]*typed.SiteInfo{
+			//	"ns|name": {
+			//		SiteID:           "ns|name",
+			//		Region:           "ns",
+			//		AvailabilityZone: "name",
+			//		EipNetworkID:     "34.218.224.247",
+			//	},
+			//}
+			if collector == nil {
+				return nil, errors.New("collector need to be init correctly")
 			}
-
-			var volumeTypes typed.RegionVolumeTypes
-			err = json.Unmarshal(file, &volumeTypes)
-			if err != nil {
-				return nil, fmt.Errorf("unmarshal volumetype data error:%v", err)
+			siteInfoCache := collector.GetSiteInfos()
+			if siteInfoCache == nil || siteInfoCache.SiteInfoMap == nil {
+				logger.Errorf("get site info failed")
+				return nil, errors.New("get site info failed")
 			}
 
 			var interfaceSlice []interface{}
-			for _, volumeType := range volumeTypes.VolumeTypes {
-				interfaceSlice = append(interfaceSlice, volumeType)
-			}
+			// todo MultiExec
+			for _, info := range siteInfoCache.SiteInfoMap {
+				cloudClient, err := cloudclient.NewClientSet(info.EipNetworkID)
+				if err != nil {
+					logger.Warnf("VolumeType.NewClientSet[%s] err: %s", info.EipNetworkID, err.Error())
+					continue
+				}
+				client := cloudClient.VolumeV3()
 
+				allPages, err := volumetypes.List(client, volumetypes.ListOpts{}).AllPages()
+				if err != nil {
+					logger.Errorf("volumetypes list failed! err: %s", err.Error())
+					return nil, err
+				}
+				volumeTypes, err := volumetypes.ExtractVolumeTypes(allPages)
+				if err != nil {
+					logger.Errorf("volumetypes ExtractVolumeTypes failed! err: %s", err.Error())
+					return nil, err
+				}
+				for _, volType := range volumeTypes {
+					regionVolType := typed.RegionVolumeType{
+						VolumeType: typed.VolumeType{
+							ID:   volType.ID,
+							Name: volType.Name,
+						},
+						Region: info.Region,
+					}
+					if volType.ExtraSpecs != nil {
+						if backendName, ok := volType.ExtraSpecs["volume_backend_name"]; ok {
+							regionVolType.VolumeType.VolumeBackendName = backendName
+						}
+					}
+					interfaceSlice = append(interfaceSlice, regionVolType)
+				}
+			}
 			return interfaceSlice, nil
 		}}, resyncPeriod, name, key, nil)
 }
@@ -81,7 +118,7 @@ func (f *informerVolumeType) defaultInformer(client client.Interface, resyncPeri
 	if f.period > 0 {
 		resyncPeriod = f.period
 	}
-	return NewVolumeTypeInformer(client, resyncPeriod, name, key)
+	return NewVolumeTypeInformer(client, resyncPeriod, name, key, f.collector)
 }
 
 func (f *informerVolumeType) Informer() cache.SharedInformer {

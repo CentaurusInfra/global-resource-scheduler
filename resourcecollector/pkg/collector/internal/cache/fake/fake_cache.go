@@ -49,7 +49,7 @@ func (c *Cache) UpdateSite(oldSite, newSite *types.Site) error {
 	return nil
 }
 
-func (c *Cache) RemoveSite(site *types.Site) error {
+func (c *Cache) RemoveSite(siteID string) error {
 	return nil
 }
 
