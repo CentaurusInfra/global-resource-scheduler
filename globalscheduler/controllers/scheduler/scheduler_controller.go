@@ -57,6 +57,7 @@ import (
 
 	"k8s.io/kubernetes/globalscheduler/controllers/util"
 	"k8s.io/kubernetes/globalscheduler/controllers/util/consistenthashing"
+	gld "k8s.io/kubernetes/globalscheduler/controllers/util/geoLocationDistribute"
 )
 
 const (
@@ -76,7 +77,8 @@ type SchedulerController struct {
 	clusterInformer   clusterlisters.ClusterLister
 	schedulerSynced   cache.InformerSynced
 
-	consistentHash *consistenthashing.ConsistentHash
+	consistentHash        *consistenthashing.ConsistentHash
+	geoLocationDistribute *gld.GeoLocationDistribute
 
 	// workqueue is a rate limited work queue. This is used to queue work to be
 	// processed instead of performing it as soon as a change happens. This
@@ -119,6 +121,7 @@ func NewSchedulerController(
 		clusterInformer:        clusterInformer.Lister(),
 		schedulerSynced:        schedulerInformer.Informer().HasSynced,
 		consistentHash:         consistenthashing.New(),
+		geoLocationDistribute:  gld.New(),
 		workqueue:              workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Scheduler"),
 		recorder:               recorder,
 	}
@@ -253,7 +256,9 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 			return fmt.Errorf("scheduler object get failed")
 		}
 
-		err = sc.balance()
+		sc.geoLocationDistribute.SchedulersName = append(sc.geoLocationDistribute.SchedulersName, schedulerCopy.Name)
+
+		err = sc.myBalance(namespace)
 		if err != nil {
 			return fmt.Errorf("scheduler object update failed")
 		}
@@ -319,10 +324,19 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		if err != nil {
 			return fmt.Errorf("cluster object get failed")
 		}
-		err = sc.balance()
+
+		// Store the data according to Cluster geoLocation different fields
+		sc.dataStoreClassified(clusterCopy)
+
+		err = sc.myBalance(namespace)
 		if err != nil {
 			return fmt.Errorf("scheduler object update failed")
 		}
+
+		//err = sc.balance()
+		//if err != nil {
+		//	return fmt.Errorf("scheduler object update failed")
+		//}
 
 		sc.recorder.Event(clusterCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	case EventTypeUpdateCluster:
@@ -529,6 +543,128 @@ func (sc *SchedulerController) balance() error {
 			//		return fmt.Errorf("updating clusters got error %v", err)
 			//	}
 			//}
+		}
+	}
+
+	return nil
+}
+
+func (sc *SchedulerController) dataStoreClassified(clusterCopy *clustercrdv1.Cluster) {
+	clusterLocation := clusterCopy.Spec.GeoLocation
+	clusterCountry := clusterLocation.Country
+	clusterArea := clusterLocation.Area
+	clusterProvince := clusterLocation.Province
+	clusterCity := clusterLocation.City
+
+	sc.geoLocationDistribute.CountryMap[clusterCountry] = append(sc.geoLocationDistribute.CountryMap[clusterCountry], clusterCopy.Name)
+	sc.geoLocationDistribute.AreaMap[clusterArea] = append(sc.geoLocationDistribute.AreaMap[clusterArea], clusterCopy.Name)
+	sc.geoLocationDistribute.ProvinceMap[clusterProvince] = append(sc.geoLocationDistribute.ProvinceMap[clusterProvince], clusterCopy.Name)
+	sc.geoLocationDistribute.CityMap[clusterCity] = append(sc.geoLocationDistribute.CityMap[clusterCity], clusterCopy.Name)
+
+	klog.Infof("!!!!!!! %v:", sc.geoLocationDistribute.CountryMap[clusterCountry])
+}
+
+func (sc *SchedulerController) myBalance(namespace string) error {
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
+	if len(sc.geoLocationDistribute.CountryMap) == 0 || len(sc.geoLocationDistribute.SchedulersName) == 0 {
+		return nil
+	}
+	schedulersLength := len(sc.geoLocationDistribute.SchedulersName)
+
+	if len(sc.geoLocationDistribute.CountryMap) >= len(sc.geoLocationDistribute.SchedulersName) {
+		if schedulersLength == 1 {
+			schedulerName := sc.geoLocationDistribute.SchedulersName[0]
+			schedulerObj, err := sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Get(schedulerName, metav1.GetOptions{})
+			if err != nil {
+				return fmt.Errorf("scheduler object Get Failed")
+			}
+
+			var temp []string
+			idx := 0
+			for _, clusters := range sc.geoLocationDistribute.CountryMap {
+				if idx == 0 {
+					temp = clusters
+					idx++
+				} else {
+					temp = append(temp, clusters...)
+				}
+			}
+			schedulerObj.Spec.Cluster = temp
+
+			unions := schedulercrdv1.ClusterUnion{}
+			for _, cluster := range schedulerObj.Spec.Cluster {
+				clusterObj, err := sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(cluster, metav1.GetOptions{})
+				if err != nil {
+					return fmt.Errorf("cluster object get failed")
+				}
+				unions = union.UpdateUnion(unions, clusterObj)
+			}
+			schedulerObj.Spec.Union = unions
+
+			_, err = sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Update(schedulerObj)
+			if err != nil {
+				return fmt.Errorf("scheduler object Update Failed")
+			}
+		} else {
+			err := sc.updateSchedulersWithClusters(sc.geoLocationDistribute.CountryMap, namespace, schedulersLength)
+			if err != nil {
+				return err
+			}
+		}
+	} else if len(sc.geoLocationDistribute.AreaMap) >= len(sc.geoLocationDistribute.SchedulersName) {
+		err := sc.updateSchedulersWithClusters(sc.geoLocationDistribute.AreaMap, namespace, schedulersLength)
+		if err != nil {
+			return err
+		}
+	} else if len(sc.geoLocationDistribute.ProvinceMap) >= len(sc.geoLocationDistribute.SchedulersName) {
+		err := sc.updateSchedulersWithClusters(sc.geoLocationDistribute.ProvinceMap, namespace, schedulersLength)
+		if err != nil {
+			return err
+		}
+	} else if len(sc.geoLocationDistribute.CityMap) >= len(sc.geoLocationDistribute.SchedulersName) {
+		err := sc.updateSchedulersWithClusters(sc.geoLocationDistribute.CityMap, namespace, schedulersLength)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (sc *SchedulerController) updateSchedulersWithClusters(dataMap map[string][]string, namespace string, schedulersLength int) error {
+	idx := 0
+	var schedulerObjs []*schedulercrdv1.Scheduler
+	for _, clusters := range dataMap {
+		schedulerName := sc.geoLocationDistribute.SchedulersName[idx]
+		schedulerObj, err := sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Get(schedulerName, metav1.GetOptions{})
+		if err != nil {
+			return fmt.Errorf("scheduler object Get Failed")
+		}
+
+		schedulerObj.Spec.Cluster = clusters
+		schedulerObjs = append(schedulerObjs, schedulerObj)
+
+		idx++
+		if idx == schedulersLength {
+			idx = 0
+		}
+	}
+
+	for _, scObj := range schedulerObjs {
+		unions := schedulercrdv1.ClusterUnion{}
+		for _, cluster := range scObj.Spec.Cluster {
+			clusterObj, err := sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(cluster, metav1.GetOptions{})
+			if err != nil {
+				return fmt.Errorf("cluster object get failed")
+			}
+			unions = union.UpdateUnion(unions, clusterObj)
+		}
+		scObj.Spec.Union = unions
+
+		_, err := sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Update(scObj)
+		if err != nil {
+			return fmt.Errorf("scheduler object Update Failed")
 		}
 	}
 
