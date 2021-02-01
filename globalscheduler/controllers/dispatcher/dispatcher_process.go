@@ -181,10 +181,6 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 		}
 		pod.Status.DispatcherName = p.name
 		if pod.ObjectMeta.DeletionTimestamp != nil {
-			currentTime1 := time.Now().UTC()
-			klog.V(2).Infof("******** %v  Pod %s has been deleted", currentTime1.Format("2006-01-02 15:04:05.000000"), pod.ObjectMeta.Name)
-			klog.V(2).Infof("******** Pod %s has been deleted at %d", pod.ObjectMeta.Name, currentTime1.UnixNano()/int64(time.Millisecond))
-
 			p.totalPodDeleteNum += 1
 			// Calculate delete latency
 			podDeleteTime := pod.DeletionTimestamp
@@ -201,17 +197,13 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 			go func() {
 				err = openstack.DeleteInstance(host, token, pod.Status.ClusterInstanceId)
 				if err == nil {
-					klog.V(3).Infof("Deleting request for pod %v has been sent to %v", pod.ObjectMeta.Name, host)
+					klog.V(3).Infof("The openstack vm for the pod %v has been deleted at the host %v", pod.ObjectMeta.Name, host)
 				} else {
-					klog.Warningf("Failed to delete the pod %v with error %v", pod.ObjectMeta.Name, err)
+					klog.Warningf("The openstack vm for the pod %v failed to delete with the error %v", pod.ObjectMeta.Name, err)
 				}
 			}()
 
 		} else {
-			currentTime1 := time.Now().UTC()
-			klog.V(2).Infof("******** %v  Pod %s has been created", currentTime1.Format("2006-01-02 15:04:05.000000"), pod.ObjectMeta.Name)
-			klog.V(2).Infof("******** Pod %s has been created at %d", pod.ObjectMeta.Name, currentTime1.UnixNano()/int64(time.Millisecond))
-
 			p.totalPodCreateNum += 1
 			// Calculate create latency
 			podCreateTime := pod.CreationTimestamp
@@ -219,8 +211,6 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 			duration := (currentTime.UnixNano() - podCreateTime.UnixNano()) / 1000000
 			p.totalCreateLatency += duration
 			createLatency := int(duration)
-			klog.V(2).Infof("******** %v  Pod %s has been scheduled", currentTime.Format("2006-01-02 15:04:05.000000"), pod.Name)
-			klog.V(2).Infof("******** Pod %s has been scheduled at %d", pod.Name, currentTime.UnixNano()/int64(time.Millisecond))
 			klog.V(2).Infof("************************************ Pod Name: %s, Create Latency: %d Millisecond ************************************", pod.Name, createLatency)
 
 			// Calculate average create latency
@@ -230,20 +220,21 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 			go func() {
 				instanceId, err := openstack.ServerCreate(host, token, &pod.Spec)
 				if err == nil {
-					klog.V(3).Infof("Creating request for pod %v has been sent to %v", pod.ObjectMeta.Name, host)
+					klog.V(3).Infof("The openstack vm for the pod %v has been created at the host %v", pod.ObjectMeta.Name, host)
 					pod.Status.ClusterInstanceId = instanceId
 					pod.Status.Phase = v1.ClusterScheduled
 					updatedPod, err := p.clientset.CoreV1().Pods(pod.ObjectMeta.Namespace).UpdateStatus(pod)
 					if err == nil {
-						klog.V(3).Infof("Creating request for pod %v returned successfully with %v", updatedPod, instanceId)
+						klog.V(3).Infof("The pod %v has been updated its apiserver database status to scheduled successfully with the instance id %v", updatedPod, instanceId)
 
 					} else {
-						klog.Warningf("Failed to update the pod %v with error %v", pod.ObjectMeta.Name, err)
+						klog.Warningf("The pod %v failed to update its apiserver database status to scheduled with the error %v", pod.ObjectMeta.Name, err)
 					}
 				} else {
+					klog.Warningf("The openstack vm for the  pod %v failed to create with the error %v", pod.ObjectMeta.Name, err)
 					pod.Status.Phase = v1.PodFailed
 					if _, err := p.clientset.CoreV1().Pods(pod.ObjectMeta.Namespace).UpdateStatus(pod); err != nil {
-						klog.Warningf("Failed to create the pod %v with error %v", pod.ObjectMeta.Name, err)
+						klog.Warningf("The pod %v failed to update its apiserver dtatbase status to failed with the error %v", pod.ObjectMeta.Name, err)
 					}
 				}
 			}()
