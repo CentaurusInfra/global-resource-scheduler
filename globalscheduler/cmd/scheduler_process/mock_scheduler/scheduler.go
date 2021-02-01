@@ -28,7 +28,6 @@ import (
 
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
@@ -92,7 +91,6 @@ func (s *Scheduler) initInformers(quit chan struct{}) {
 		},
 	})
 
-
 	podSelector := fields.ParseSelectorOrDie("status.phase=" + string(v1.PodAssigned) + ",status.assignedScheduler.name=" + s.name)
 	lw := cache.NewListWatchFromClient(s.clientset.CoreV1(), string(v1.ResourcePods), metav1.NamespaceAll, podSelector)
 	podInformer := cache.NewSharedIndexInformer(lw, &v1.Pod{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
@@ -106,7 +104,7 @@ func (s *Scheduler) initInformers(quit chan struct{}) {
 				return
 			}
 			go func() {
-				s.podQueue <- pod
+				s.ScheduleOne(pod)
 			}()
 		},
 		UpdateFunc: func(old, new interface{}) {
@@ -123,7 +121,9 @@ func (s *Scheduler) initInformers(quit chan struct{}) {
 			}
 			fmt.Printf("A  pod %s has been updated\n", newPod.Name)
 			if oldPod.Status.Phase != v1.PodAssigned && newPod.Status.Phase == v1.PodAssigned {
-				s.podQueue <- newPod
+				go func() {
+					s.ScheduleOne(newPod)
+				}()
 			}
 		},
 	})
@@ -155,21 +155,15 @@ func main() {
 
 	scheduler := NewScheduler(config, podQueue, *name, quit)
 	scheduler.initInformers(quit)
-	go scheduler.Run(quit)
 	<-quit
 }
 
-func (s *Scheduler) Run(quit chan struct{}) {
-	wait.Until(s.ScheduleOne, 0, quit)
-}
+func (s *Scheduler) ScheduleOne(p *v1.Pod) {
 
-func (s *Scheduler) ScheduleOne() {
-	p := <-s.podQueue
-	fmt.Printf("Found a pod to schedule: %s / %s \n", p.Namespace,p.Name)
 	idx := 0
 	if p.Status.AssignedScheduler.Name == s.name {
 		if clusterLen := len(s.clusters); clusterLen > 0 {
-			idx =  rand.Intn(clusterLen)
+			idx = rand.Intn(clusterLen)
 			err := s.bindPod(p, s.clusters[idx])
 			if err != nil {
 				klog.Warningf("Failed to bind cluster with the error %v \n", err.Error())
