@@ -107,6 +107,7 @@ filegroup(
         "//perf-tests/clusterloader2/pkg/util:all-srcs",
         "//pkg:all-srcs",
         "//plugin:all-srcs",
+        "//resourcecollector/pkg/collector:all-srcs",
         "//staging:all-srcs",
         "//test:all-srcs",
         "//third_party:all-srcs",
