@@ -1739,7 +1739,7 @@ func TestPrintPodwide(t *testing.T) {
 					NominatedNodeName: "node1",
 				},
 			},
-			[]metav1beta1.TableRow{{Cells: []interface{}{"test1", int64(0), "1/2", "podPhase", int64(6), "<unknown>", "1.1.1.1", "test1", "node1", "1/3"}}},
+			[]metav1beta1.TableRow{{Cells: []interface{}{"test1", int64(0), "1/2", "podPhase", int64(6), "<unknown>", "", "", "", "1.1.1.1", "test1", "node1", "1/3"}}},
 		},
 		{
 			// Test when the NodeName and PodIP are none
@@ -1758,7 +1758,7 @@ func TestPrintPodwide(t *testing.T) {
 					},
 				},
 			},
-			[]metav1beta1.TableRow{{Cells: []interface{}{"test2", int64(0), "1/2", "ContainerWaitingReason", int64(6), "<unknown>", "<none>", "<none>", "<none>", "<none>"}}},
+			[]metav1beta1.TableRow{{Cells: []interface{}{"test2", int64(0), "1/2", "ContainerWaitingReason", int64(6), "<unknown>", "", "", "", "<none>", "<none>", "<none>", "<none>"}}},
 		},
 	}
 
@@ -1808,7 +1808,7 @@ func TestPrintPodList(t *testing.T) {
 					},
 				},
 			},
-			[]metav1beta1.TableRow{{Cells: []interface{}{"test1", int64(0), "2/2", "podPhase", int64(6), "<unknown>"}}, {Cells: []interface{}{"test2", int64(0), "1/1", "podPhase", int64(1), "<unknown>", "", "", ""}}},
+			[]metav1beta1.TableRow{{Cells: []interface{}{"test1", int64(0), "2/2", "podPhase", int64(6), "<unknown>", "", "", ""}}, {Cells: []interface{}{"test2", int64(0), "1/1", "podPhase", int64(1), "<unknown>", "", "", ""}}},
 		},
 	}
 
