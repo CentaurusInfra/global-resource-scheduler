@@ -560,8 +560,6 @@ func (sc *SchedulerController) dataStoreClassified(clusterCopy *clustercrdv1.Clu
 	sc.geoLocationDistribute.AreaMap[clusterArea] = append(sc.geoLocationDistribute.AreaMap[clusterArea], clusterCopy.Name)
 	sc.geoLocationDistribute.ProvinceMap[clusterProvince] = append(sc.geoLocationDistribute.ProvinceMap[clusterProvince], clusterCopy.Name)
 	sc.geoLocationDistribute.CityMap[clusterCity] = append(sc.geoLocationDistribute.CityMap[clusterCity], clusterCopy.Name)
-
-	klog.Infof("!!!!!!! %v:", sc.geoLocationDistribute.CountryMap[clusterCountry])
 }
 
 func (sc *SchedulerController) myBalance(namespace string) error {
@@ -633,36 +631,42 @@ func (sc *SchedulerController) myBalance(namespace string) error {
 }
 
 func (sc *SchedulerController) updateSchedulersWithClusters(dataMap map[string][]string, namespace string, schedulersLength int) error {
-	idx := 0
-	var schedulerObjs []*schedulercrdv1.Scheduler
+	schedulerIdx := 0
+	mapClustersToScheduler := make(map[string][]string)
 	for _, clusters := range dataMap {
-		schedulerName := sc.geoLocationDistribute.SchedulersName[idx]
+		schedulerName := sc.geoLocationDistribute.SchedulersName[schedulerIdx]
+
+		_, exist := mapClustersToScheduler[schedulerName]
+		if exist {
+			mapClustersToScheduler[schedulerName] = append(mapClustersToScheduler[schedulerName], clusters...)
+		} else {
+			mapClustersToScheduler[schedulerName] = clusters
+		}
+
+		schedulerIdx++
+		if schedulerIdx == schedulersLength {
+			schedulerIdx = 0
+		}
+	}
+
+	for schedulerName, clusters := range mapClustersToScheduler {
 		schedulerObj, err := sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Get(schedulerName, metav1.GetOptions{})
 		if err != nil {
 			return fmt.Errorf("scheduler object Get Failed")
 		}
 
 		schedulerObj.Spec.Cluster = clusters
-		schedulerObjs = append(schedulerObjs, schedulerObj)
-
-		idx++
-		if idx == schedulersLength {
-			idx = 0
-		}
-	}
-
-	for _, scObj := range schedulerObjs {
 		unions := schedulercrdv1.ClusterUnion{}
-		for _, cluster := range scObj.Spec.Cluster {
-			clusterObj, err := sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(cluster, metav1.GetOptions{})
+		for _, clusterName := range clusters {
+			clusterObj, err := sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(clusterName, metav1.GetOptions{})
 			if err != nil {
 				return fmt.Errorf("cluster object get failed")
 			}
 			unions = union.UpdateUnion(unions, clusterObj)
 		}
-		scObj.Spec.Union = unions
+		schedulerObj.Spec.Union = unions
 
-		_, err := sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Update(scObj)
+		_, err = sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Update(schedulerObj)
 		if err != nil {
 			return fmt.Errorf("scheduler object Update Failed")
 		}
