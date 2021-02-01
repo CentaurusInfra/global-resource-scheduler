@@ -88,6 +88,7 @@ func CreateValidPod(name, namespace, tenant string) *v1.Pod {
 					TerminationMessagePolicy: v1.TerminationMessageReadFile,
 				},
 			},
+			ResourceType: "Container",
 		},
 	}
 }

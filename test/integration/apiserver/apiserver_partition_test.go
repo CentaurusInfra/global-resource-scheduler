@@ -127,6 +127,7 @@ func generateRSData(tenant, namespace, rsName string, replicas int) *apps.Replic
 							Image: "fakeimage",
 						},
 					},
+					ResourceType: "Container",
 				},
 			},
 		},
@@ -152,6 +153,7 @@ func generatePod(tenant, namespace, podName string) *v1.Pod {
 					Image: "fakeimage",
 				},
 			},
+			ResourceType: "Container",
 		},
 		Status: v1.PodStatus{
 			Phase: v1.PodRunning,

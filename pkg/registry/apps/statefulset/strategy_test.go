@@ -51,6 +51,7 @@ func TestStatefulSetStrategy(t *testing.T) {
 				RestartPolicy: api.RestartPolicyAlways,
 				DNSPolicy:     api.DNSClusterFirst,
 				Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent"}},
+				ResourceType:  "Container",
 			},
 		},
 	}
@@ -174,6 +175,7 @@ func TestStatefulSetStatusStrategy(t *testing.T) {
 				RestartPolicy: api.RestartPolicyAlways,
 				DNSPolicy:     api.DNSClusterFirst,
 				Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent"}},
+				ResourceType:  "Container",
 			},
 		},
 	}

@@ -47,6 +47,7 @@ func getValidPodTemplateSpecForManual(selector *metav1.LabelSelector) api.PodTem
 			RestartPolicy: api.RestartPolicyOnFailure,
 			DNSPolicy:     api.DNSClusterFirst,
 			Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+			ResourceType:  "Container",
 		},
 	}
 }
@@ -66,6 +67,7 @@ func getValidPodTemplateSpecForGenerated(selector *metav1.LabelSelector) api.Pod
 			RestartPolicy: api.RestartPolicyOnFailure,
 			DNSPolicy:     api.DNSClusterFirst,
 			Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+			ResourceType:  "Container",
 		},
 	}
 }
@@ -179,6 +181,7 @@ func TestValidateJob(t *testing.T) {
 						RestartPolicy: api.RestartPolicyOnFailure,
 						DNSPolicy:     api.DNSClusterFirst,
 						Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+						ResourceType:  "Container",
 					},
 				},
 			},
@@ -201,6 +204,7 @@ func TestValidateJob(t *testing.T) {
 						RestartPolicy: api.RestartPolicyOnFailure,
 						DNSPolicy:     api.DNSClusterFirst,
 						Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+						ResourceType:  "Container",
 					},
 				},
 			},
@@ -223,6 +227,7 @@ func TestValidateJob(t *testing.T) {
 						RestartPolicy: api.RestartPolicyAlways,
 						DNSPolicy:     api.DNSClusterFirst,
 						Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+						ResourceType:  "Container",
 					},
 				},
 			},
@@ -629,6 +634,7 @@ func TestValidateCronJob(t *testing.T) {
 								RestartPolicy: api.RestartPolicyAlways,
 								DNSPolicy:     api.DNSClusterFirst,
 								Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+								ResourceType:  "Container",
 							},
 						},
 					},

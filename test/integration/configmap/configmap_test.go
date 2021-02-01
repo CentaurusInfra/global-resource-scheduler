@@ -109,6 +109,7 @@ func DoTestConfigMap(t *testing.T, client clientset.Interface, ns *v1.Namespace)
 					},
 				},
 			},
+			ResourceType: "Container",
 		},
 	}
 

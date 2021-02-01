@@ -91,6 +91,7 @@ func validNewController() *api.ReplicationController {
 					},
 					RestartPolicy: api.RestartPolicyAlways,
 					DNSPolicy:     api.DNSClusterFirst,
+					ResourceType:  "Container",
 				},
 			},
 		},

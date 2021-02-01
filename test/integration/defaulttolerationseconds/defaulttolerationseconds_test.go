@@ -56,6 +56,7 @@ func TestAdmission(t *testing.T) {
 					Image: "an-image",
 				},
 			},
+			ResourceType: "Container",
 		},
 	}
 

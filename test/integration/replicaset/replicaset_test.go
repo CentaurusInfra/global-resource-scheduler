@@ -82,6 +82,7 @@ func newRS(name, namespace string, replicas int) *apps.ReplicaSet {
 							Image: "fakeimage",
 						},
 					},
+					ResourceType: "Container",
 				},
 			},
 		},
@@ -106,6 +107,7 @@ func newMatchingPod(podName, namespace string) *v1.Pod {
 					Image: "fakeimage",
 				},
 			},
+			ResourceType: "Container",
 		},
 		Status: v1.PodStatus{
 			Phase: v1.PodRunning,

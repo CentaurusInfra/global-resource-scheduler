@@ -624,6 +624,7 @@ func TestInterPodAffinity(t *testing.T) {
 							},
 						},
 					},
+					ResourceType: "Container",
 				},
 			},
 			pods: []*v1.Pod{
@@ -649,6 +650,7 @@ func TestInterPodAffinity(t *testing.T) {
 								},
 							},
 						},
+						ResourceType: "Container",
 					},
 					ObjectMeta: metav1.ObjectMeta{
 						Name:   "fakename2",
@@ -685,13 +687,16 @@ func TestInterPodAffinity(t *testing.T) {
 							},
 						},
 					},
+					ResourceType: "Container",
 				},
 			},
 			pods: []*v1.Pod{{Spec: v1.PodSpec{
-				Containers: []v1.Container{{Name: "container", Image: imageutils.GetPauseImageName()}},
-				NodeName:   "machine2"}, ObjectMeta: metav1.ObjectMeta{
+				ResourceType: "Container",
+				Containers:   []v1.Container{{Name: "container", Image: imageutils.GetPauseImageName()}},
+				NodeName:     "machine2"}, ObjectMeta: metav1.ObjectMeta{
 				Name:   "fakename2",
-				Labels: podLabel}}},
+				Labels: podLabel,
+			}}},
 			node: nodes[0],
 			fits: false,
 			test: "pod matches its own Label in PodAffinity and that matches the existing pod Labels",
@@ -702,7 +707,7 @@ func TestInterPodAffinity(t *testing.T) {
 					Name:   "fakename",
 					Labels: podLabel,
 				},
-				Spec: v1.PodSpec{Containers: []v1.Container{{Name: "container", Image: imageutils.GetPauseImageName()}}},
+				Spec: v1.PodSpec{ResourceType: "Container", Containers: []v1.Container{{Name: "container", Image: imageutils.GetPauseImageName()}}},
 			},
 			pods: []*v1.Pod{
 				{
@@ -726,6 +731,7 @@ func TestInterPodAffinity(t *testing.T) {
 								},
 							},
 						},
+						ResourceType: "Container",
 					},
 					ObjectMeta: metav1.ObjectMeta{
 						Name:   "fakename2",
@@ -742,7 +748,7 @@ func TestInterPodAffinity(t *testing.T) {
 					Name:   "fake-name",
 					Labels: podLabel,
 				},
-				Spec: v1.PodSpec{Containers: []v1.Container{{Name: "container", Image: imageutils.GetPauseImageName()}}},
+				Spec: v1.PodSpec{ResourceType: "Container", Containers: []v1.Container{{Name: "container", Image: imageutils.GetPauseImageName()}}},
 			},
 			pods: []*v1.Pod{
 				{
@@ -766,6 +772,7 @@ func TestInterPodAffinity(t *testing.T) {
 								},
 							},
 						},
+						ResourceType: "Container",
 					},
 					ObjectMeta: metav1.ObjectMeta{
 						Name:   "fake-name2",
@@ -800,12 +807,14 @@ func TestInterPodAffinity(t *testing.T) {
 							},
 						},
 					},
+					ResourceType: "Container",
 				},
 			},
 			pods: []*v1.Pod{
 				{Spec: v1.PodSpec{
-					Containers: []v1.Container{{Name: "container", Image: imageutils.GetPauseImageName()}},
-					NodeName:   nodes[0].Name}, ObjectMeta: metav1.ObjectMeta{Name: "fakename", Labels: map[string]string{"foo": "abc"}}},
+					ResourceType: "Container",
+					Containers:   []v1.Container{{Name: "container", Image: imageutils.GetPauseImageName()}},
+					NodeName:     nodes[0].Name}, ObjectMeta: metav1.ObjectMeta{Name: "fakename", Labels: map[string]string{"foo": "abc"}}},
 			},
 			fits: false,
 			test: "nodes[0] and nodes[1] have same topologyKey and label value. nodes[0] has an existing pod that matches the inter pod affinity rule. The new pod can not be scheduled onto either of the two nodes.",
@@ -906,6 +915,7 @@ func TestNodePIDPressure(t *testing.T) {
 			Containers: []v1.Container{
 				{Name: "container", Image: imageutils.GetPauseImageName()},
 			},
+			ResourceType: "Container",
 		},
 	}
 

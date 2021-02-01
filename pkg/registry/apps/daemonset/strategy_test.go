@@ -187,6 +187,7 @@ func newDaemonSetWithSelectorLabels(selectorLabels map[string]string, templateGe
 					RestartPolicy: api.RestartPolicyAlways,
 					DNSPolicy:     api.DNSClusterFirst,
 					Containers:    []api.Container{{Name: fakeImageName, Image: fakeImage, ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+					ResourceType:  "Container",
 				},
 			},
 		},
