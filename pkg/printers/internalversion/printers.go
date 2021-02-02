@@ -94,6 +94,9 @@ func AddHandlers(h printers.PrintHandler) {
 		{Name: "Status", Type: "string", Description: "The aggregate status of the containers in this pod."},
 		{Name: "Restarts", Type: "integer", Description: "The number of times the containers in this pod have been restarted."},
 		{Name: "Age", Type: "string", Description: metav1.ObjectMeta{}.SwaggerDoc()["creationTimestamp"]},
+		{Name: "Distributor", Type: "string", Description: "The name of global resource distributor"},
+		{Name: "Scheduler", Type: "string", Description: "The name of global resource Scheduler"},
+		{Name: "Dispatcher", Type: "string", Description: "The name of global resource dispatcher"},
 		{Name: "IP", Type: "string", Priority: 1, Description: apiv1.PodStatus{}.SwaggerDoc()["podIP"]},
 		{Name: "Node", Type: "string", Priority: 1, Description: apiv1.PodSpec{}.SwaggerDoc()["nodeName"]},
 		{Name: "Nominated Node", Type: "string", Priority: 1, Description: apiv1.PodStatus{}.SwaggerDoc()["nominatedNodeName"]},
@@ -754,7 +757,7 @@ func printPod(pod *api.Pod, options printers.PrintOptions) ([]metav1.TableRow, e
 		reason = "Terminating"
 	}
 
-	row.Cells = append(row.Cells, pod.Name, pod.HashKey, fmt.Sprintf("%d/%d", readyContainers, totalContainers), reason, int64(restarts), translateTimestampSince(pod.CreationTimestamp))
+	row.Cells = append(row.Cells, pod.Name, pod.HashKey, fmt.Sprintf("%d/%d", readyContainers, totalContainers), reason, int64(restarts), translateTimestampSince(pod.CreationTimestamp), pod.Status.DistributorName, pod.Status.AssignedScheduler.Name, pod.Status.DispatcherName)
 	if options.Wide {
 		nodeName := pod.Spec.NodeName
 		nominatedNodeName := pod.Status.NominatedNodeName

@@ -167,7 +167,7 @@ func (r *BindingREST) Create(ctx context.Context, obj runtime.Object, createVali
 		}
 	}
 
-	err = r.assignPod(ctx, binding.Name, binding.Target.Kind, binding.Target.Name, binding.Annotations, dryrun.IsDryRun(options.DryRun))
+	err = r.assignPod(ctx, binding.Name, binding.Target.Kind, binding.Target.Name, binding.Target.FieldPath, binding.Annotations, dryrun.IsDryRun(options.DryRun))
 	out = &metav1.Status{Status: metav1.StatusSuccess}
 	return
 }
@@ -175,7 +175,7 @@ func (r *BindingREST) Create(ctx context.Context, obj runtime.Object, createVali
 // setPodHostAndAnnotations sets the given pod's host to target(machine, cluster, or scheduler) if and only if it was
 // previously 'oldMachine' and merges the provided annotations with those of the pod.
 // Returns the current state of the pod, or an error.
-func (r *BindingREST) setPodHostAndAnnotations(ctx context.Context, podID, oldMachine, targetKind, targetName string, annotations map[string]string, dryRun bool) (finalPod *api.Pod, err error) {
+func (r *BindingREST) setPodHostAndAnnotations(ctx context.Context, podID, oldMachine, targetKind, targetName, targetFieldPath string, annotations map[string]string, dryRun bool) (finalPod *api.Pod, err error) {
 	podKey, err := r.store.KeyFunc(ctx, podID)
 	if err != nil {
 		return nil, err
@@ -193,6 +193,7 @@ func (r *BindingREST) setPodHostAndAnnotations(ctx context.Context, podID, oldMa
 		case "Scheduler":
 			pod.Status.AssignedScheduler.Name = targetName
 			pod.Status.Phase = api.PodAssigned
+			pod.Status.DistributorName = targetFieldPath
 		case "Cluster":
 			pod.Spec.ClusterName = targetName
 			pod.Status.Phase = api.PodBound
@@ -219,8 +220,8 @@ func (r *BindingREST) setPodHostAndAnnotations(ctx context.Context, podID, oldMa
 }
 
 // assignPod assigns the given pod to the given target(machine, cluster, or scheduler).
-func (r *BindingREST) assignPod(ctx context.Context, podID, targetKind, targetName string, annotations map[string]string, dryRun bool) (err error) {
-	if _, err = r.setPodHostAndAnnotations(ctx, podID, "", targetKind, targetName, annotations, dryRun); err != nil {
+func (r *BindingREST) assignPod(ctx context.Context, podID, targetKind, targetName, targetFieldPath string, annotations map[string]string, dryRun bool) (err error) {
+	if _, err = r.setPodHostAndAnnotations(ctx, podID, "", targetKind, targetName, targetFieldPath, annotations, dryRun); err != nil {
 		err = storeerr.InterpretGetError(err, api.Resource("pods"), podID)
 		err = storeerr.InterpretUpdateError(err, api.Resource("pods"), podID)
 		if _, ok := err.(*errors.StatusError); !ok {

@@ -86,6 +86,8 @@ status:
       waiting:
         message: "48"
         reason: "47"
+  dispatcherName: "71"
+  distributorName: "70"
   hostIP: "30"
   initContainerStatuses:
   - containerID: "45"
