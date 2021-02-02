@@ -258,7 +258,7 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 
 		sc.geoLocationDistribute.SchedulersName = append(sc.geoLocationDistribute.SchedulersName, schedulerCopy.Name)
 
-		err = sc.myBalance(namespace)
+		err = sc.balanceScheduler(namespace)
 		if err != nil {
 			return fmt.Errorf("scheduler object update failed")
 		}
@@ -304,9 +304,9 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		}
 
 		if schedulerCopy.Status == schedulercrdv1.SchedulerDelete {
-			err = sc.balance()
+			err = sc.balanceScheduler(namespace)
 			if err != nil {
-				return fmt.Errorf("scheduler object delete failed")
+				return fmt.Errorf("scheduler object update failed")
 			}
 
 			// Delete scheduler process
@@ -328,7 +328,7 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		// Store the data according to Cluster geoLocation different fields
 		sc.dataStoreClassified(clusterCopy)
 
-		err = sc.myBalance(namespace)
+		err = sc.balanceScheduler(namespace)
 		if err != nil {
 			return fmt.Errorf("scheduler object update failed")
 		}
@@ -345,9 +345,9 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		if err != nil {
 			return fmt.Errorf("cluster object get failed")
 		}
-		err = sc.balance()
+		err = sc.balanceScheduler(namespace)
 		if err != nil {
-			return fmt.Errorf("cluster object delete failed")
+			return fmt.Errorf("scheduler object update failed")
 		}
 
 		sc.recorder.Event(clusterCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
@@ -562,7 +562,7 @@ func (sc *SchedulerController) dataStoreClassified(clusterCopy *clustercrdv1.Clu
 	sc.geoLocationDistribute.CityMap[clusterCity] = append(sc.geoLocationDistribute.CityMap[clusterCity], clusterCopy.Name)
 }
 
-func (sc *SchedulerController) myBalance(namespace string) error {
+func (sc *SchedulerController) balanceScheduler(namespace string) error {
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
 	if len(sc.geoLocationDistribute.CountryMap) == 0 || len(sc.geoLocationDistribute.SchedulersName) == 0 {
