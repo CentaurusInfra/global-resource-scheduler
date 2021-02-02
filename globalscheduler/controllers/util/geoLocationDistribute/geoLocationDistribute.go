@@ -44,7 +44,7 @@ func RemoveClusterName(cluster *clustercrdv1.Cluster, gld *GeoLocationDistribute
 	gld.CountryMap = countryMapRemove(cluster, gld.CountryMap)
 	gld.AreaMap = areaMapRemove(cluster, gld.AreaMap)
 	gld.ProvinceMap = provinceMapRemove(cluster, gld.ProvinceMap)
-	gld.CityMap = cityMap(cluster, gld.CityMap)
+	gld.CityMap = cityMapRemove(cluster, gld.CityMap)
 
 	return gld
 }
@@ -61,7 +61,7 @@ func schedulersNameRemove(name string, schedulersName []string) []string {
 	return res
 }
 
-func cityMap(cluster *clustercrdv1.Cluster, cityMap map[string][]string) map[string][]string {
+func cityMapRemove(cluster *clustercrdv1.Cluster, cityMap map[string][]string) map[string][]string {
 	clusterCity := cluster.Spec.GeoLocation.City
 	clustersName := cityMap[clusterCity]
 	curMap := getMap(clustersName)
