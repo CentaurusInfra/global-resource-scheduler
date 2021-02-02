@@ -25,11 +25,11 @@ import (
 )
 
 func NewRpcServer() {
-	lis, err := net.Listen("tcp", "127.0.0.1:"+config.RpcPort)
+	lis, err := net.Listen("tcp", "127.0.0.1:"+config.GlobalConf.RpcPort)
 	if err != nil {
 		logger.Fatalf("failed to listen: %v", err)
 	}
-	logger.Infof("gRPC Server started, Port: " + config.RpcPort)
+	logger.Infof("gRPC Server started, Port: " + config.GlobalConf.RpcPort)
 
 	s := grpc.NewServer()
 	pb.RegisterClusterProtocolServer(s, &ClusterProtocolServer{})

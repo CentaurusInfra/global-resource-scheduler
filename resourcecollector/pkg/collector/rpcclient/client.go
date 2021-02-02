@@ -37,8 +37,8 @@ const (
 	StateUnreachable = 3
 )
 
-func GrpcUpdateClusterStatus(siteID string, status int64) error {
-	grpcHost := config.ClusterControllerIP
+func GrpcUpdateClusterStatus(siteID string, state int64) error {
+	grpcHost := config.GlobalConf.ClusterControllerIP
 	client, ctx, conn, cancel, err := getGrpcClient(grpcHost)
 	if err != nil {
 		logger.Errorf("Error to make a connection to ClusterController %s", grpcHost)
@@ -53,7 +53,7 @@ func GrpcUpdateClusterStatus(siteID string, status int64) error {
 	req := &pb.ClusterState{
 		NameSpace: region,
 		Name:      az,
-		State:     status,
+		State:     state,
 	}
 	returnMessage, err := client.UpdateClusterStatus(ctx, req)
 	if err != nil {
@@ -69,7 +69,7 @@ func GrpcUpdateClusterStatus(siteID string, status int64) error {
 
 func getGrpcClient(grpcHost string) (pb.ResourceCollectorProtocolClient, context.Context, *grpc.ClientConn, context.CancelFunc, error) {
 	logger.Infof("get gRPC client: %s", grpcHost)
-	address := fmt.Sprintf("%s:%s", grpcHost, config.ClusterControllerPort)
+	address := fmt.Sprintf("%s:%s", grpcHost, config.GlobalConf.ClusterControllerPort)
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
 		return nil, nil, conn, nil, err

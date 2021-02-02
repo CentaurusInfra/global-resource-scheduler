@@ -37,14 +37,14 @@ func NewClientSet(siteEndpoint string) (*ClientSet, error) {
 
 	// 1. ops
 	scop := gophercloud.AuthScope{
-		ProjectName: config.OpenStackScopProjectName,
-		DomainID:    config.OpenStackScopDomainID,
+		ProjectName: config.GlobalConf.OpenStackScopProjectName,
+		DomainID:    config.GlobalConf.OpenStackScopDomainID,
 	}
 	authOpts := gophercloud.AuthOptions{
 		IdentityEndpoint: fmt.Sprintf("http://%s/identity", siteEndpoint),
-		Username:         config.OpenStackUsername,
-		Password:         config.OpenStackPassword,
-		DomainID:         config.OpenStackDomainID,
+		Username:         config.GlobalConf.OpenStackUsername,
+		Password:         config.GlobalConf.OpenStackPassword,
+		DomainID:         config.GlobalConf.OpenStackDomainID,
 		Scope:            &scop,
 	}
 

@@ -18,9 +18,6 @@ package collector
 
 import (
 	"errors"
-	"k8s.io/kubernetes/resourcecollector/pkg/collector/common/config"
-	"k8s.io/kubernetes/resourcecollector/pkg/collector/rpcclient"
-	"k8s.io/kubernetes/resourcecollector/pkg/collector/siteinfo"
 	"sync"
 	"time"
 
@@ -29,7 +26,10 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/common/config"
 	internalcache "k8s.io/kubernetes/resourcecollector/pkg/collector/internal/cache"
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/rpcclient"
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/siteinfo"
 )
 
 var collector *Collector
@@ -80,7 +80,7 @@ func (c *Collector) RecordSiteUnreacheable(siteID string) {
 	defer c.mutex.Unlock()
 	c.unreachableNum[siteID]++
 	logger.Infof("RecordSiteUnreacheable site[%s] unreachableNum[%d]", siteID, c.unreachableNum[siteID])
-	if c.unreachableNum[siteID] == config.MaxUnreachableNum {
+	if c.unreachableNum[siteID] == config.GlobalConf.MaxUnreachableNum {
 		delete(c.unreachableNum, siteID)
 		go c.notifySiteUnreachable(siteID)
 	}
@@ -127,12 +127,12 @@ func (c *Collector) StartInformersAndRun(stopCh <-chan struct{}) {
 		informers.InformerFac = informers.NewSharedInformerFactory(nil, 60*time.Second)
 
 		// init flavor informer
-		flavorInterval := config.FlavorInterval
+		flavorInterval := config.GlobalConf.FlavorInterval
 		informers.InformerFac.Flavor(informers.FLAVOR, "RegionFlavorID",
 			time.Duration(flavorInterval)*time.Second, c).Informer()
 
 		// init site resource informer
-		siteResourceInterval := config.SiteResourceInterval
+		siteResourceInterval := config.GlobalConf.SiteResourceInterval
 		siteResourceInformer := informers.InformerFac.SiteResource(informers.SITERESOURCES, "SiteID",
 			time.Duration(siteResourceInterval)*time.Second, c).Informer()
 		siteResourceInformer.AddEventHandler(
@@ -141,7 +141,7 @@ func (c *Collector) StartInformersAndRun(stopCh <-chan struct{}) {
 			})
 
 		// init volume pool informer
-		volumePoolInterval := config.VolumePoolInterval
+		volumePoolInterval := config.GlobalConf.VolumePoolInterval
 		volumePoolInformer := informers.InformerFac.VolumePools(informers.VOLUMEPOOLS, "Region",
 			time.Duration(volumePoolInterval)*time.Second, c).Informer()
 		volumePoolInformer.AddEventHandler(
@@ -150,12 +150,12 @@ func (c *Collector) StartInformersAndRun(stopCh <-chan struct{}) {
 			})
 
 		// init volume type informer
-		volumeTypeInterval := config.VolumeTypeInterval
+		volumeTypeInterval := config.GlobalConf.VolumeTypeInterval
 		informers.InformerFac.VolumeType(informers.VOLUMETYPE, "ID",
 			time.Duration(volumeTypeInterval)*time.Second, c).Informer()
 
 		// init eip pool informer
-		eipPoolInterval := config.EipPoolInterval
+		eipPoolInterval := config.GlobalConf.EipPoolInterval
 		eipPoolInformer := informers.InformerFac.EipPools(informers.EIPPOOLS, "Region",
 			time.Duration(eipPoolInterval)*time.Second).Informer()
 		eipPoolInformer.AddEventHandler(
