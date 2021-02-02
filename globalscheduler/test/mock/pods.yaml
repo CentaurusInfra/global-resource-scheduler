@@ -1,0 +1,510 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-1
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod1
+
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-2
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod2
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-3
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod3
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-4
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod4
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-5
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod5
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-6
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod6
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-7
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod7
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-8
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod8
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-9
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod9
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-10
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod10
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-11
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod11
+
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-12
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod12
+
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-13
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod13
+
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-14
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod14
+
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-15
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod15
+
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-16
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod16
+
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-17
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod17
+
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-18
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod18
+
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-19
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod19
+
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-20
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstackpod20
+
+    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: ""
+         province: ""
+         country: ""
+       regions:
+         - region: "NE"
+  nics:
+    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"

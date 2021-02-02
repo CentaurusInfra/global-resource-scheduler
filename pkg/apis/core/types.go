@@ -2227,7 +2227,6 @@ type VirtualMachine struct {
 	// +optional
 	NeedEIP bool
 	// resource flavor information
-	// +optional
 	Flavors []ResourceFlavor
 	// +optional
 	SecurityGroupId string
@@ -2946,7 +2945,6 @@ type PodSpec struct {
 	// +optional
 	EnableServiceLinks *bool
 	// Resource Type indicates whether the resource objects are VM or containers
-	// +optional
 	ResourceType string
 	// ClusterName is a request to schedule this pod onto a specific cluster.  If it is non-empty,
 	// the scheduler simply binds this pod onto that cluster, assuming that it fits resource
@@ -3225,6 +3223,10 @@ type PodStatus struct {
 	AssignedScheduler ResourceScheduler
 	// +optional
 	ClusterInstanceId string
+	// +optional
+	DistributorName string
+	// +optional
+	DispatcherName string
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -5432,51 +5434,65 @@ type DataPartitionConfigList struct {
 
 // ResourceCommonInfo holds the resource common information
 type ResourceCommonInfo struct {
-	// +optional
 	Selector ResourceSelector
-	// +optional
-	Count int32
+	Count    int32
 }
 
 // ResourceSelector holds the resource selector information
 type ResourceSelector struct {
+	// +optional
 	GeoLocation ResourceGeoLocation
-	Regions     []ResourceRegion
-	Operator    string //chinatelecom, chinaunicom, chinamobile
-	Strategy    ResourceStrategy
+	// +optional
+	Regions []ResourceRegion
+	// +optional
+	Operator string //chinatelecom, chinaunicom, chinamobile
+	// +optional
+	Strategy ResourceStrategy
 }
 
 // ResourceStrategy holds the resource strategy information
 type ResourceStrategy struct {
+	// +optional
 	LocalStrategy string //centralize, centralize(default)
 }
 
 // ResourceFlavor holds the resource flavor information
 type ResourceFlavor struct {
+	// +optional
 	FlavorID string //c6.large.2(default)
-	Spot     ResourceSpot
+	// +optional
+	Spot ResourceSpot
 }
 
 // ResourceGeoLocation holds the resource geography information
 type ResourceGeoLocation struct {
-	City     string
+	// +optional
+	City string
+	// +optional
 	Province string
-	Area     string
-	Country  string
+	// +optional
+	Area string
+	// +optional
+	Country string
 }
 
 // ResourceRegion holds the resource region information
 type ResourceRegion struct {
-	Region          string
+	Region string
+	// +optional
 	AvailablityZone []string
 }
 
 // ResourceSpot holds the resource spot information
 type ResourceSpot struct {
-	MaxPrice           float32 //1.5(default)
-	SpotDurationHours  int32   //1(default,0-6)
-	SpotDurationCount  int32   //2(default)
-	InterruptionPolicy string  //immediate(default)
+	// +optional
+	MaxPrice float32 //1.5(default)
+	// +optional
+	SpotDurationHours int32 //1(default,0-6)
+	// +optional
+	SpotDurationCount int32 //2(default)
+	// +optional
+	InterruptionPolicy string //immediate(default)
 }
 
 // ResourceScheduler holds the scheduler information assigned to the pod

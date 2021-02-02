@@ -265,9 +265,14 @@ func (c *DistributorController) createCustomResourceDefinition() *apiextensions.
 			},
 			AdditionalPrinterColumns: []apiextensions.CustomResourceColumnDefinition{
 				{
-					Name:     "range",
-					Type:     "string",
-					JSONPath: ".spec.range",
+					Name:     "pod_hashkey_start",
+					Type:     "integer",
+					JSONPath: ".spec.range.start",
+				},
+				{
+					Name:     "pod_hashkey_end",
+					Type:     "integer",
+					JSONPath: ".spec.range.end",
 				},
 			},
 		},
