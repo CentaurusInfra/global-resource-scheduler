@@ -5,7 +5,10 @@ go_library(
     srcs = ["collector.go"],
     importpath = "k8s.io/kubernetes/cmd/resource-collector",
     visibility = ["//visibility:private"],
-    deps = ["//cmd/resource-collector/app:go_default_library"],
+    deps = [
+        "//cmd/resource-collector/app:go_default_library",
+        "//resourcecollector/pkg/collector/common/config:go_default_library",
+    ],
 )
 
 go_binary(
