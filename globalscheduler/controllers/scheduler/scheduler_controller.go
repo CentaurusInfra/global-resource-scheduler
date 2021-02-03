@@ -72,7 +72,7 @@ type SchedulerController struct {
 	schedulerInformer schedulerlisters.SchedulerLister
 	clusterInformer   clusterlisters.ClusterLister
 	schedulerSynced   cache.InformerSynced
-	
+
 	geoLocationDistribute *gld.GeoLocationDistribute
 
 	// workqueue is a rate limited work queue. This is used to queue work to be
