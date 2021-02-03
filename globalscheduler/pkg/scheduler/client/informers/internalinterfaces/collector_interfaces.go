@@ -1,5 +1,6 @@
 /*
-Copyright 2020 Authors of Arktos.
+Copyright 2019 The Kubernetes Authors.
+Copyright 2020 Authors of Arktos - file modified.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,29 +15,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package internalcache
+package internalinterfaces
 
-import "sync"
+import "k8s.io/kubernetes/resourcecollector/pkg/collector/siteinfo"
 
-type SiteIPCache struct {
-	mutex     sync.Mutex
-	SiteIPMap map[string]string
-}
-
-func NewSiteIPCache() *SiteIPCache {
-	c := &SiteIPCache{}
-	c.SiteIPMap = make(map[string]string)
-	return c
-}
-
-func (c *SiteIPCache) AddSiteIP(site, ip string) {
-	c.mutex.Lock()
-	c.SiteIPMap[site] = ip
-	c.mutex.Unlock()
-}
-
-func (c *SiteIPCache) RemoveSiteIP(site string) {
-	c.mutex.Lock()
-	delete(c.SiteIPMap, site)
-	c.mutex.Unlock()
+// ResourceCollector a small interface to allow for adding an informer without an import cycle
+type ResourceCollector interface {
+	StartInformersAndRun(stopCh <-chan struct{})
+	GetSiteInfos() *siteinfo.SiteInfoCache
+	RecordSiteUnreacheable(siteID string)
 }

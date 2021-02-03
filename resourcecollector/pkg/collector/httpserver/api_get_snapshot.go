@@ -28,9 +28,9 @@ import (
 
 // Schedule get snapshot
 func GetSnapshot(req *restful.Request, resp *restful.Response) {
-	col := collector.GetCollector()
-	if col == nil {
-		logger.Errorf("Collector is not init, please wait...")
+	col, err := collector.GetCollector()
+	if err != nil {
+		logger.Errorf("get new collector failed, err: %s", err.Error())
 		utils.WriteFailedJSONResponse(resp, http.StatusInternalServerError, utils.InternalServerError())
 		return
 	}
