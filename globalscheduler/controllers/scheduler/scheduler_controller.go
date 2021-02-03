@@ -53,7 +53,6 @@ import (
 	schedulerlisters "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/listers/scheduler/v1"
 	schedulercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
 
-	"k8s.io/kubernetes/globalscheduler/controllers/util/consistenthashing"
 	gld "k8s.io/kubernetes/globalscheduler/controllers/util/geoLocationDistribute"
 )
 
@@ -73,8 +72,7 @@ type SchedulerController struct {
 	schedulerInformer schedulerlisters.SchedulerLister
 	clusterInformer   clusterlisters.ClusterLister
 	schedulerSynced   cache.InformerSynced
-
-	consistentHash        *consistenthashing.ConsistentHash
+	
 	geoLocationDistribute *gld.GeoLocationDistribute
 
 	// workqueue is a rate limited work queue. This is used to queue work to be
@@ -117,7 +115,6 @@ func NewSchedulerController(
 		schedulerInformer:      schedulerInformer.Lister(),
 		clusterInformer:        clusterInformer.Lister(),
 		schedulerSynced:        schedulerInformer.Informer().HasSynced,
-		consistentHash:         consistenthashing.New(),
 		geoLocationDistribute:  gld.New(),
 		workqueue:              workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Scheduler"),
 		recorder:               recorder,
@@ -483,22 +480,22 @@ func (sc *SchedulerController) updateUnion(obj *schedulercrdv1.Scheduler, namesp
 	return nil
 }
 
-func (sc *SchedulerController) updateClusterBinding(schedulerCopy *schedulercrdv1.Scheduler, namespace string) error {
-	clusterIdList := sc.consistentHash.GetIdList(schedulerCopy.Name)
-	for _, v := range clusterIdList {
-		clusterObj, err := sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(v, metav1.GetOptions{})
-		if err != nil {
-			return err
-		}
-		clusterObj.Spec.HomeScheduler = schedulerCopy.Name
-		_, err = sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Update(clusterObj)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
+//func (sc *SchedulerController) updateClusterBinding(schedulerCopy *schedulercrdv1.Scheduler, namespace string) error {
+//	clusterIdList := sc.consistentHash.GetIdList(schedulerCopy.Name)
+//	for _, v := range clusterIdList {
+//		clusterObj, err := sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(v, metav1.GetOptions{})
+//		if err != nil {
+//			return err
+//		}
+//		clusterObj.Spec.HomeScheduler = schedulerCopy.Name
+//		_, err = sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Update(clusterObj)
+//		if err != nil {
+//			return err
+//		}
+//	}
+//
+//	return nil
+//}
 
 func runCommand(command string) error {
 	cmd := exec.Command("/bin/bash", "-c", command)
