@@ -47,4 +47,5 @@ EOF
 for ((i = 0 ; i < $(($1)) ; i++)); do
     name="pod-$(($i))"
     create_pod $name
+    sleep 0.01
 done
