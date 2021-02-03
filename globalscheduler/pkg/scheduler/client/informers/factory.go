@@ -18,6 +18,7 @@ limitations under the License.
 package informers
 
 import (
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/siteinfos"
 	"sync"
 	"time"
 
@@ -26,7 +27,6 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/eipavailability"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/flavor"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/internalinterfaces"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/siteinfos"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/siteresources"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/volumepool"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/volumetype"
@@ -64,12 +64,13 @@ type SharedInformerFactory interface {
 	GetInformer(name string) cache.SharedInformer
 
 	GetFlavor(flavorID string, region string) (typed.Flavor, bool)
-	Flavor(name, key string, period time.Duration) flavor.InformerFlavor
-	SiteInfo(name, key string, period time.Duration) siteinfos.InformerSiteInfo
-	SiteResource(name, key string, period time.Duration) siteresources.InformerSiteResource
-	VolumeType(name, key string, period time.Duration) volumetype.InformerVolumeType
+
+	//SiteInfo(name, key string, period time.Duration) siteinfos.InformerSiteInfo
+	SiteResource(name, key string, period time.Duration, col internalinterfaces.ResourceCollector) siteresources.InformerSiteResource
+	Flavor(name, key string, period time.Duration, col internalinterfaces.ResourceCollector) flavor.InformerFlavor
+	VolumeType(name, key string, period time.Duration, col internalinterfaces.ResourceCollector) volumetype.InformerVolumeType
+	VolumePools(name, key string, period time.Duration, col internalinterfaces.ResourceCollector) volumepool.InformerVolumePool
 	EipPools(name, key string, period time.Duration) eipavailability.InformerEipAvailability
-	VolumePools(name, key string, period time.Duration) volumepool.InformerVolumePool
 }
 
 type sharedInformerFactory struct {
@@ -111,6 +112,19 @@ func (f *sharedInformerFactory) Start(stopCh <-chan struct{}) {
 			f.startedInformers[informerType] = true
 		}
 	}
+}
+
+// SyncOnSiteChange is called when a site is added or removed
+func (f *sharedInformerFactory) SyncOnSiteChange() {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
+	go func() {
+		f.GetInformer(FLAVOR).SyncOnce()
+		f.GetInformer(SITERESOURCES).SyncOnce()
+		f.GetInformer(VOLUMEPOOLS).SyncOnce()
+		f.GetInformer(VOLUMETYPE).SyncOnce()
+	}()
 }
 
 // InternalInformerFor returns the SharedIndexInformer for obj using an internal
@@ -170,17 +184,20 @@ func (f *sharedInformerFactory) GetFlavor(flavorID string, region string) (typed
 }
 
 //Flavor new Flavor informer
-func (f *sharedInformerFactory) Flavor(name, key string, period time.Duration) flavor.InformerFlavor {
-	return flavor.New(f, name, key, period)
+func (f *sharedInformerFactory) Flavor(name, key string, period time.Duration,
+	collector internalinterfaces.ResourceCollector) flavor.InformerFlavor {
+	return flavor.New(f, name, key, period, collector)
 }
 
-func (f *sharedInformerFactory) SiteResource(name, key string, period time.Duration) siteresources.InformerSiteResource {
-	return siteresources.New(f, name, key, period)
+func (f *sharedInformerFactory) SiteResource(name, key string, period time.Duration,
+	collector internalinterfaces.ResourceCollector) siteresources.InformerSiteResource {
+	return siteresources.New(f, name, key, period, collector)
 }
 
 //VolumeType new volume type informer
-func (f *sharedInformerFactory) VolumeType(name, key string, period time.Duration) volumetype.InformerVolumeType {
-	return volumetype.New(f, name, key, period)
+func (f *sharedInformerFactory) VolumeType(name, key string, period time.Duration,
+	collector internalinterfaces.ResourceCollector) volumetype.InformerVolumeType {
+	return volumetype.New(f, name, key, period, collector)
 }
 
 //Sites new site informer
@@ -194,6 +211,7 @@ func (f *sharedInformerFactory) EipPools(name, key string, period time.Duration)
 }
 
 //VolumePools new volume pool informer
-func (f *sharedInformerFactory) VolumePools(name, key string, period time.Duration) volumepool.InformerVolumePool {
-	return volumepool.New(f, name, key, period)
+func (f *sharedInformerFactory) VolumePools(name, key string, period time.Duration,
+	collector internalinterfaces.ResourceCollector) volumepool.InformerVolumePool {
+	return volumepool.New(f, name, key, period, collector)
 }

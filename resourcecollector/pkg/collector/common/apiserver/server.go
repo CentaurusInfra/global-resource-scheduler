@@ -42,13 +42,13 @@ type HTTPServer struct {
 }
 
 func getServerAddress() string {
-	hostIP := config.HttpAddr
+	hostIP := config.GlobalConf.HttpAddr
 	if hostIP == "" {
 		logger.Errorf("server IP address not configured.")
 		os.Exit(1)
 	}
 
-	port := config.HttpPort
+	port := config.GlobalConf.HttpPort
 
 	return fmt.Sprintf("%s:%d", hostIP, port)
 }
