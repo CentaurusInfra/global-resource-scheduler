@@ -20,6 +20,7 @@ package internalcache
 import (
 	"encoding/json"
 	"fmt"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
 	"sync"
 	"time"
 
@@ -204,7 +205,7 @@ func (cache *collectorCache) UpdateSnapshot(siteCacheInfoSnapshot *Snapshot) err
 			break
 		}
 
-		if np := siteCacheInfo.info.Site(); np != nil {
+		if np := siteCacheInfo.info.GetSite(); np != nil {
 			existing, ok := siteCacheInfoSnapshot.SiteCacheInfoMap[np.SiteID]
 			if !ok {
 				updateAllLists = true
@@ -244,6 +245,20 @@ func (cache *collectorCache) UpdateSnapshot(siteCacheInfoSnapshot *Snapshot) err
 		cache.updateSiteCacheInfoSnapshotList(siteCacheInfoSnapshot, true)
 		return fmt.Errorf(errMsg)
 	}
+
+	// save flavor info from informer to the map of snapshot
+	flvInters := informers.InformerFac.GetInformer(informers.FLAVOR).GetStore().List()
+	regionFlavorMap := make(map[string]*typed.RegionFlavor, len(siteCacheInfoSnapshot.RegionFlavorMap))
+	flavorMap := make(map[string]*typed.RegionFlavor, len(siteCacheInfoSnapshot.FlavorMap))
+	for _, flvInter := range flvInters {
+		rf := flvInter.(typed.RegionFlavor)
+		regionFlavorMap[rf.RegionFlavorID] = &rf
+		if _, ok := flavorMap[rf.ID]; !ok {
+			flavorMap[rf.ID] = &rf
+		}
+	}
+	siteCacheInfoSnapshot.RegionFlavorMap = regionFlavorMap
+	siteCacheInfoSnapshot.FlavorMap = flavorMap
 
 	return nil
 }
@@ -537,15 +552,17 @@ func (cache *collectorCache) UpdateSite(oldSite, newSite *types.Site) error {
 // having it's source of truth in the cached siteIDs.
 // However, some information on pods (assumedPods, podStates) persist. These
 // caches will be eventually consistent as pod deletion events arrive.
-func (cache *collectorCache) RemoveSite(site *types.Site) error {
+func (cache *collectorCache) RemoveSite(siteID string) error {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 
-	_, ok := cache.siteCacheInfos[site.SiteID]
+	item, ok := cache.siteCacheInfos[siteID]
 	if !ok {
-		return fmt.Errorf("site %v is not found", site.SiteID)
+		return fmt.Errorf("site %v is not found", siteID)
 	}
-	cache.removeSiteCacheInfoFromList(site.SiteID)
+	cache.removeSiteCacheInfoFromList(siteID)
+
+	site := item.info.GetSite()
 	if err := cache.siteTree.removeSite(site); err != nil {
 		return err
 	}
@@ -695,14 +712,14 @@ func (cache *collectorCache) UpdateSiteWithRatio(region string, az string, ratio
 	defer cache.mu.Unlock()
 
 	for _, siteCacheInfo := range cache.siteCacheInfos {
-		if siteCacheInfo.info.Site().Region == region && siteCacheInfo.info.Site().AvailabilityZone == az {
+		if siteCacheInfo.info.GetSite().Region == region && siteCacheInfo.info.GetSite().AvailabilityZone == az {
 			err := siteCacheInfo.info.UpdateSiteWithRatio(ratios)
 			if err != nil {
 				logger.Errorf("UpdateSiteWithRatio failed! err: %s", err)
 				return err
 			}
 
-			cache.moveSiteCacheInfoToHead(siteCacheInfo.info.Site().SiteID)
+			cache.moveSiteCacheInfoToHead(siteCacheInfo.info.GetSite().SiteID)
 			break
 		}
 	}
@@ -716,13 +733,13 @@ func (cache *collectorCache) UpdateSpotResources(region string, az string, spotR
 	defer cache.mu.Unlock()
 
 	for _, siteCacheInfo := range cache.siteCacheInfos {
-		if siteCacheInfo.info.Site().Region == region && siteCacheInfo.info.Site().AvailabilityZone == az {
+		if siteCacheInfo.info.GetSite().Region == region && siteCacheInfo.info.GetSite().AvailabilityZone == az {
 			err := siteCacheInfo.info.UpdateSpotResources(spotRes)
 			if err != nil {
 				logger.Errorf("UpdateSiteWithRatio failed! err: %s", err)
 				return err
 			}
-			cache.moveSiteCacheInfoToHead(siteCacheInfo.info.Site().SiteID)
+			cache.moveSiteCacheInfoToHead(siteCacheInfo.info.GetSite().SiteID)
 
 			break
 		}
@@ -738,12 +755,12 @@ func (cache *collectorCache) GetRegions() map[string]types.CloudRegion {
 
 	ret := map[string]types.CloudRegion{}
 	for _, siteInfoCache := range cache.siteCacheInfos {
-		region := siteInfoCache.info.Site().Region
+		region := siteInfoCache.info.GetSite().Region
 		cr, ok := ret[region]
 		if !ok {
 			cr = types.CloudRegion{Region: region, AvailabilityZone: []string{}}
 		}
-		cr.AvailabilityZone = append(cr.AvailabilityZone, siteInfoCache.info.Site().AvailabilityZone)
+		cr.AvailabilityZone = append(cr.AvailabilityZone, siteInfoCache.info.GetSite().AvailabilityZone)
 		ret[region] = cr
 	}
 
@@ -757,10 +774,10 @@ func (cache *collectorCache) PrintString() {
 	for _, siteCache := range cache.siteCacheInfos {
 		bytes, err := json.Marshal(siteCache.info)
 		if err != nil {
-			logger.Warnf("Marshal siteInfo[%s] err: %s\n", siteCache.info.Site().SiteID, err.Error())
+			logger.Warnf("Marshal siteInfo[%s] err: %s\n", siteCache.info.GetSite().SiteID, err.Error())
 			continue
 		}
-		str := fmt.Sprintf("collectorCache(%d/%d) siteID[%s], info: %s\n", i, total, siteCache.info.Site().SiteID,
+		str := fmt.Sprintf("collectorCache(%d/%d) siteID[%s], info: %s\n", i, total, siteCache.info.GetSite().SiteID,
 			string(bytes))
 		logger.Infof(str)
 		i++

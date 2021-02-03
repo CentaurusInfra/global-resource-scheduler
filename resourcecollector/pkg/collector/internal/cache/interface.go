@@ -60,7 +60,7 @@ type Cache interface {
 	UpdateSite(oldSite, newSite *types.Site) error
 
 	// RemoveSite removes overall information about site.
-	RemoveSite(site *types.Site) error
+	RemoveSite(siteID string) error
 
 	//UpdateEipPool updates eip pool info about site
 	UpdateEipPool(eipPool *typed.EipPool) error
