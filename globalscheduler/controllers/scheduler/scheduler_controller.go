@@ -322,7 +322,7 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		sc.geoLocationDistribute.ClustersName = append(sc.geoLocationDistribute.ClustersName, clusterCopy.Name)
 
 		// Store the data according to Cluster geoLocation different fields
-		sc.dataStoreClassified(clusterCopy)
+		sc.addClusterToGeoMap(clusterCopy)
 
 		err = sc.balanceScheduler(namespace)
 		if err != nil {
@@ -452,7 +452,7 @@ func (sc *SchedulerController) deleteCluster(obj interface{}) {
 		return
 	}
 
-	sc.geoLocationDistribute = gld.RemoveClusterName(cluster, sc.geoLocationDistribute)
+	sc.geoLocationDistribute = gld.RemoveClusterFromGeoMap(cluster, sc.geoLocationDistribute)
 	sc.recorder.Event(cluster, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 
 	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
@@ -511,7 +511,7 @@ func runCommand(command string) error {
 	return nil
 }
 
-func (sc *SchedulerController) dataStoreClassified(clusterCopy *clustercrdv1.Cluster) {
+func (sc *SchedulerController) addClusterToGeoMap(clusterCopy *clustercrdv1.Cluster) {
 	clusterLocation := clusterCopy.Spec.GeoLocation
 	clusterCountry := clusterLocation.Country
 	clusterArea := clusterLocation.Area

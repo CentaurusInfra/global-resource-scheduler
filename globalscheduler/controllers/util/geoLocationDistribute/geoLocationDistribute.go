@@ -39,7 +39,7 @@ func New() *GeoLocationDistribute {
 	return gld
 }
 
-func RemoveClusterName(cluster *clustercrdv1.Cluster, gld *GeoLocationDistribute) *GeoLocationDistribute {
+func RemoveClusterFromGeoMap(cluster *clustercrdv1.Cluster, gld *GeoLocationDistribute) *GeoLocationDistribute {
 	gld.ClustersName = clustersNameRemove(cluster.Name, gld.ClustersName)
 	gld.CountryMap = countryMapRemove(cluster, gld.CountryMap)
 	gld.AreaMap = areaMapRemove(cluster, gld.AreaMap)
