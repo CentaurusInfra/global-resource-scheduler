@@ -21,7 +21,6 @@ import (
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
@@ -163,7 +162,7 @@ func (p *Process) Run(quit chan struct{}) {
 	go podInformer.Run(quit)
 	go distributorInformer.Run(quit)
 
-	wait.Until(p.ScheduleOne, 0, quit)
+	<-quit
 }
 
 func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
@@ -185,7 +184,7 @@ func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
 				return
 			}
 			go func() {
-				p.podQueue <- pod
+				p.ScheduleOne(pod)
 			}()
 		},
 	})
@@ -193,8 +192,7 @@ func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
 }
 
 // ScheduleOne is to process pods by assign a scheduler to it
-func (p *Process) ScheduleOne() {
-	pod := <-p.podQueue
+func (p *Process) ScheduleOne(pod *v1.Pod) {
 	if pod != nil {
 		klog.V(4).Infof("Found a pod %v-%v to schedule:", pod.Namespace, pod.Name)
 
@@ -239,6 +237,7 @@ func (p *Process) bindPod(pod *v1.Pod, scheduler string) error {
 			APIVersion: "v1",
 			Kind:       "Scheduler",
 			Name:       scheduler,
+			FieldPath:  p.name,
 		},
 	})
 }

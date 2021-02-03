@@ -847,6 +847,8 @@ status:
       waiting:
         message: "396"
         reason: "395"
+  dispatcherName: "419"
+  distributorName: "418"
   hostIP: "378"
   initContainerStatuses:
   - containerID: "393"
