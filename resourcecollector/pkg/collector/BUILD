@@ -35,6 +35,7 @@ filegroup(
         "//resourcecollector/pkg/collector/httpserver:all-srcs",
         "//resourcecollector/pkg/collector/internal/cache:all-srcs",
         "//resourcecollector/pkg/collector/router:all-srcs",
+        "//resourcecollector/pkg/collector/rpc:all-srcs",
         "//resourcecollector/pkg/collector/rpcclient:all-srcs",
         "//resourcecollector/pkg/collector/rpcserver:all-srcs",
         "//resourcecollector/pkg/collector/siteinfo:all-srcs",
