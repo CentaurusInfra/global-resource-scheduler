@@ -63,12 +63,12 @@ func main() {
 		}
 		//process a line
 		ndx := strings.Index(line, Latency)
-		if(ndx >= 0) {
+		if ndx >= 0 {
 			_, err = wf.WriteString(line)
 			if err != nil {
 				check(err)
-			}			
-		}		
+			}
+		}
 	}
 	if err != io.EOF {
 		fmt.Printf("Failed with error: %v\n", err)

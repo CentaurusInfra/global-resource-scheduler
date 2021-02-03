@@ -5,13 +5,13 @@ go_library(
     srcs = [
         "cache.go",
         "interface.go",
-        "site_ip_cache.go",
         "site_tree.go",
         "snapshot.go",
     ],
     importpath = "k8s.io/kubernetes/resourcecollector/pkg/collector/internal/cache",
     visibility = ["//resourcecollector/pkg/collector:__subpackages__"],
     deps = [
+        "//globalscheduler/pkg/scheduler/client/informers:go_default_library",
         "//globalscheduler/pkg/scheduler/client/typed:go_default_library",
         "//globalscheduler/pkg/scheduler/common/logger:go_default_library",
         "//globalscheduler/pkg/scheduler/listers:go_default_library",

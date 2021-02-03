@@ -21,12 +21,13 @@ import (
 	"os"
 
 	"k8s.io/kubernetes/cmd/resource-collector/app"
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/common/config"
 )
 
 func main() {
 	command := app.NewResourceCollectorCommand()
 	// Init config with go-chassis
-	//config.Init()
+	config.Init()
 
 	if err := command.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)

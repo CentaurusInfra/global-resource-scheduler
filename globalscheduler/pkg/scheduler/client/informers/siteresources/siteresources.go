@@ -18,17 +18,16 @@ limitations under the License.
 package siteresources
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"path/filepath"
+	"errors"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/hypervisors"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient"
 	"time"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/internalinterfaces"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 )
 
 // InformerSiteResource provides access to a shared informer and lister for Hosts.
@@ -37,51 +36,85 @@ type InformerSiteResource interface {
 }
 
 type informerSiteResources struct {
-	factory internalinterfaces.SharedInformerFactory
-	name    string
-	key     string
-	period  time.Duration
+	factory   internalinterfaces.SharedInformerFactory
+	name      string
+	key       string
+	period    time.Duration
+	collector internalinterfaces.ResourceCollector
 }
 
 // New initial the informerSiteResources
-func New(f internalinterfaces.SharedInformerFactory, name string, key string, period time.Duration) InformerSiteResource {
-	return &informerSiteResources{factory: f, name: name, key: key, period: period}
+func New(f internalinterfaces.SharedInformerFactory, name string, key string, period time.Duration,
+	collector internalinterfaces.ResourceCollector) InformerSiteResource {
+	return &informerSiteResources{factory: f, name: name, key: key, period: period, collector: collector}
 }
 
 // NewSiteResourcesInformer constructs a new informer for sites.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewSiteResourcesInformer(client client.Interface, reSyncPeriod time.Duration, name string, key string) cache.SharedInformer {
+func NewSiteResourcesInformer(client client.Interface, reSyncPeriod time.Duration, name string, key string,
+	collector internalinterfaces.ResourceCollector) cache.SharedInformer {
 	return cache.NewSharedInformer(
 		&cache.Lister{ListFunc: func(options interface{}) ([]interface{}, error) {
-			// read site infos init data
-			confLocation := utils.GetConfigDirectory()
-			confFilePath := filepath.Join(confLocation, "site_resources.json")
-			file, err := ioutil.ReadFile(confFilePath)
-			if err != nil {
-				return nil, fmt.Errorf("read site infos data error:%v", err)
+			if collector == nil {
+				return nil, errors.New("collector need to be init correctly")
 			}
-
-			var siteResources typed.SiteResources
-			err = json.Unmarshal(file, &siteResources)
-			if err != nil {
-				return nil, fmt.Errorf("unmarshal site infos data error:%v", err)
+			siteInfoCache := collector.GetSiteInfos()
+			if siteInfoCache == nil || siteInfoCache.SiteInfoMap == nil {
+				logger.Errorf("get site info failed")
+				return nil, errors.New("get site info failed")
 			}
 
 			var interfaceSlice []interface{}
-			for _, siteResource := range siteResources.SiteResources {
-				interfaceSlice = append(interfaceSlice, siteResource)
-			}
+			// todo MultiExec
+			for siteID, info := range siteInfoCache.SiteInfoMap {
+				cloudClient, err := cloudclient.NewClientSet(info.EipNetworkID)
+				if err != nil {
+					logger.Warnf("SiteResourcesInformer.NewClientSet[%s] err: %s", info.EipNetworkID, err.Error())
+					collector.RecordSiteUnreacheable(siteID)
+					continue
+				}
+				client := cloudClient.ComputeV2()
 
+				hypervisorsPages, err := hypervisors.List(client).AllPages()
+				if err != nil {
+					logger.Errorf("hypervisors list failed! err: %s", err.Error())
+					return nil, err
+				}
+				hypervisors, err := hypervisors.ExtractHypervisors(hypervisorsPages)
+				if err != nil {
+					logger.Errorf("hypervisors ExtractHypervisors failed! err: %s", err.Error())
+					return nil, err
+				}
+				for _, h := range hypervisors {
+					hosts := make([]typed.Host, 0)
+					host := typed.Host{
+						UsedVCPUs:    h.VCPUsUsed,
+						UsedMem:      h.MemoryMBUsed,
+						TotalVCPUs:   h.VCPUs,
+						TotalMem:     h.MemoryMB,
+						ResourceType: "default",
+					}
+					hosts = append(hosts, host)
+					sr := typed.SiteResource{
+						SiteID:           info.SiteID,
+						Region:           info.Region,
+						AvailabilityZone: info.AvailabilityZone,
+						Hosts:            hosts,
+					}
+					interfaceSlice = append(interfaceSlice, sr)
+				}
+			}
 			return interfaceSlice, nil
 		}}, reSyncPeriod, name, key, nil)
+
 }
 
 func (f *informerSiteResources) defaultInformer(client client.Interface, resyncPeriod time.Duration, name string, key string) cache.SharedInformer {
 	if f.period > 0 {
 		resyncPeriod = f.period
 	}
-	return NewSiteResourcesInformer(client, resyncPeriod, name, key)
+	return NewSiteResourcesInformer(client, resyncPeriod, name, key, f.collector)
 }
 
 func (f *informerSiteResources) Informer() cache.SharedInformer {

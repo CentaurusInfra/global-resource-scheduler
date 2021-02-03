@@ -14,47 +14,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package rpc
+package rpcclient
 
 import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
-	"net"
 	"strings"
 	"time"
 
+	"google.golang.org/grpc"
+	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/common/config"
-	"k8s.io/kubernetes/resourcecollector/pkg/collector/rpc/impl"
-	"k8s.io/kubernetes/resourcecollector/pkg/collector/rpc/pbfile"
-
-	"google.golang.org/grpc"
 )
 
 const (
-	ReturnError = 0
-	ReturnOK    = 1
+	ReturnError      = 0
+	ReturnOK         = 1
+	StateReady       = 1
+	StateDown        = 2
+	StateUnreachable = 3
 )
 
-func NewRpcServer() {
-	lis, err := net.Listen("tcp", "127.0.0.1:"+config.RpcPort)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-	logger.Infof("gRPC Server started, Port: " + config.RpcPort)
-
-	s := grpc.NewServer()
-	pbfile.RegisterClusterProtocolServer(s, &impl.ClusterProtocolServer{})
-
-	if err := s.Serve(lis); err != nil {
-		logger.Fatalf("failed to serve: %v", err)
-	}
-}
-
-func GrpcUpdateClusterStatus(node string, status int64) error {
-	grpcHost := config.ClusterControllerIP
+func GrpcUpdateClusterStatus(siteID string, state int64) error {
+	grpcHost := config.GlobalConf.ClusterControllerIP
 	client, ctx, conn, cancel, err := getGrpcClient(grpcHost)
 	if err != nil {
 		logger.Errorf("Error to make a connection to ClusterController %s", grpcHost)
@@ -62,14 +46,14 @@ func GrpcUpdateClusterStatus(node string, status int64) error {
 	}
 	defer conn.Close()
 	defer cancel()
-	region, az, err := ParseRegionAZ(node)
+	region, az, err := ParseRegionAZ(siteID)
 	if err != nil {
 		return err
 	}
-	req := &pbfile.ClusterState{
+	req := &pb.ClusterState{
 		NameSpace: region,
 		Name:      az,
-		State:     status,
+		State:     state,
 	}
 	returnMessage, err := client.UpdateClusterStatus(ctx, req)
 	if err != nil {
@@ -83,15 +67,15 @@ func GrpcUpdateClusterStatus(node string, status int64) error {
 	return nil
 }
 
-func getGrpcClient(grpcHost string) (pbfile.ResourceCollectorProtocolClient, context.Context, *grpc.ClientConn, context.CancelFunc, error) {
+func getGrpcClient(grpcHost string) (pb.ResourceCollectorProtocolClient, context.Context, *grpc.ClientConn, context.CancelFunc, error) {
 	logger.Infof("get gRPC client: %s", grpcHost)
-	address := fmt.Sprintf("%s:%s", grpcHost, config.ClusterControllerPort)
-	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	address := fmt.Sprintf("%s:%s", grpcHost, config.GlobalConf.ClusterControllerPort)
+	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
 		return nil, nil, conn, nil, err
 	}
 
-	client := pbfile.NewResourceCollectorProtocolClient(conn)
+	client := pb.NewResourceCollectorProtocolClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	return client, ctx, conn, cancel, nil
 }

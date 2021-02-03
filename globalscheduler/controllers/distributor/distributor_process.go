@@ -184,11 +184,11 @@ func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
 			if pod.Spec.ResourceType != "vm" {
 				return
 			}
-			util.CheckTime(pod.Name, "distributor", "Run-go func()", 1)
+			util.CheckTime(pod.Name, "distributor", "Run-gofunc()", 1)
 			go func() {
 				util.CheckTime(pod.Name, "distributor", "Run-AddFunc", 1)
 				p.ScheduleOne(pod)
-				util.CheckTime(pod.Name, "distributor", "Run-go func()", 2)
+				util.CheckTime(pod.Name, "distributor", "Run-gofunc()", 2)
 			}()
 			util.CheckTime(pod.Name, "distributor", "Run-AddFunc", 2)
 		},

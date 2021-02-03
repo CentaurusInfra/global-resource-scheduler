@@ -15,7 +15,7 @@ go_library(
         "//resourcecollector/pkg/collector:go_default_library",
         "//resourcecollector/pkg/collector/common/apiserver:go_default_library",
         "//resourcecollector/pkg/collector/router:go_default_library",
-        "//resourcecollector/pkg/collector/rpc:go_default_library",
+        "//resourcecollector/pkg/collector/rpcserver:go_default_library",
         "//staging/src/k8s.io/apiserver/pkg/server:go_default_library",
         "//vendor/github.com/spf13/cobra:go_default_library",
     ],

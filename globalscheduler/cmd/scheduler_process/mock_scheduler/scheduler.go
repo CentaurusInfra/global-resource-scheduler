@@ -187,7 +187,6 @@ func (s *Scheduler) ScheduleOne(p *v1.Pod) {
 }
 
 func (s *Scheduler) bindPod(p *v1.Pod, cluster string) error {
-
 	return s.clientset.CoreV1().Pods(p.Namespace).Bind(&v1.Binding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      p.Name,

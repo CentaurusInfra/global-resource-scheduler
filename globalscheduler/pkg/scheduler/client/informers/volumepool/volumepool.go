@@ -18,18 +18,17 @@ limitations under the License.
 package volumepool
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"path/filepath"
+	"errors"
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerstats"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient"
 	"time"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/internalinterfaces"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 )
 
 // InformerVolumePool provides access to a shared informer and lister for eip available.
@@ -38,41 +37,79 @@ type InformerVolumePool interface {
 }
 
 type informerVolumePool struct {
-	factory internalinterfaces.SharedInformerFactory
-	name    string
-	key     string
-	period  time.Duration
+	factory   internalinterfaces.SharedInformerFactory
+	name      string
+	key       string
+	period    time.Duration
+	collector internalinterfaces.ResourceCollector
 }
 
 // New initial the informerSite
-func New(f internalinterfaces.SharedInformerFactory, name string, key string, period time.Duration) InformerVolumePool {
-	return &informerVolumePool{factory: f, name: name, key: key, period: period}
+func New(f internalinterfaces.SharedInformerFactory, name string, key string, period time.Duration,
+	collector internalinterfaces.ResourceCollector) InformerVolumePool {
+	return &informerVolumePool{factory: f, name: name, key: key, period: period, collector: collector}
 }
 
 // NewVolumePoolInformer constructs a new informer for volumepool.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewVolumePoolInformer(client client.Interface, resyncPeriod time.Duration, name string, key string) cache.SharedInformer {
+func NewVolumePoolInformer(client client.Interface, resyncPeriod time.Duration, name string, key string,
+	collector internalinterfaces.ResourceCollector) cache.SharedInformer {
 	return cache.NewSharedInformer(
 		&cache.Lister{ListFunc: func(options interface{}) ([]interface{}, error) {
-			// read volume type init data
-			confLocation := utils.GetConfigDirectory()
-			confFilePath := filepath.Join(confLocation, "volume_pools.json")
-			file, err := ioutil.ReadFile(confFilePath)
-			if err != nil {
-				return nil, fmt.Errorf("read volume pool data error:%v", err)
+			if collector == nil {
+				return nil, errors.New("collector need to be init correctly")
+			}
+			siteInfoCache := collector.GetSiteInfos()
+			if siteInfoCache == nil || siteInfoCache.SiteInfoMap == nil {
+				logger.Errorf("get site info failed")
+				return nil, errors.New("get site info failed")
 			}
 
-			var volumePools typed.RegionVolumePools
-			err = json.Unmarshal(file, &volumePools)
-			if err != nil {
-				return nil, fmt.Errorf("unmarshal volume pool data error:%v", err)
-			}
 			var interfaceSlice []interface{}
-			for _, volumePools := range volumePools.VolumePools {
-				interfaceSlice = append(interfaceSlice, volumePools)
-			}
+			// todo MultiExec
+			for _, info := range siteInfoCache.SiteInfoMap {
+				cloudClient, err := cloudclient.NewClientSet(info.EipNetworkID)
+				if err != nil {
+					logger.Warnf("VolumePool.NewClientSet[%s] err: %s", info.EipNetworkID, err.Error())
+					continue
+				}
+				client := cloudClient.VolumeV3()
 
+				listOpts := schedulerstats.ListOpts{
+					Detail: true,
+				}
+				allPages, err := schedulerstats.List(client, listOpts).AllPages()
+				if err != nil {
+					logger.Errorf("schedulerstats list failed! err: %s", err.Error())
+					return nil, err
+				}
+				allStats, err := schedulerstats.ExtractStoragePools(allPages)
+				if err != nil {
+					logger.Errorf("schedulerstats ExtractStoragePools failed! err: %s", err.Error())
+					return nil, err
+				}
+				volPools := typed.VolumePools{}
+				for _, stat := range allStats {
+					cap := typed.VolumeCapabilities{
+						VolumeType:               stat.Capabilities.VolumeBackendName,
+						FreeCapacityGb:           stat.Capabilities.FreeCapacityGB,
+						TotalCapacityGb:          stat.Capabilities.TotalCapacityGB,
+						ProvisionedCapacityGb:    stat.Capabilities.ProvisionedCapacityGB,
+						MaxOverSubscriptionRatio: 1,
+					}
+					volPoolInfo := typed.VolumePoolInfo{
+						AvailabilityZone: info.AvailabilityZone,
+						Name:             stat.Name,
+						Capabilities:     cap,
+					}
+					volPools.StoragePools = append(volPools.StoragePools, volPoolInfo)
+				}
+				interfaceSlice = append(interfaceSlice, typed.RegionVolumePool{
+					VolumePools: volPools,
+					Region:      info.Region,
+				})
+			}
 			return interfaceSlice, nil
 		}}, resyncPeriod, name, key, types.ListSiteOpts{})
 }
@@ -81,7 +118,7 @@ func (f *informerVolumePool) defaultInformer(client client.Interface, resyncPeri
 	if f.period > 0 {
 		resyncPeriod = f.period
 	}
-	return NewVolumePoolInformer(client, resyncPeriod, name, key)
+	return NewVolumePoolInformer(client, resyncPeriod, name, key, f.collector)
 }
 
 func (f *informerVolumePool) Informer() cache.SharedInformer {

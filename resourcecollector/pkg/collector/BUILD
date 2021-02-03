@@ -9,10 +9,12 @@ go_library(
         "//globalscheduler/pkg/scheduler/client/cache:go_default_library",
         "//globalscheduler/pkg/scheduler/client/informers:go_default_library",
         "//globalscheduler/pkg/scheduler/client/typed:go_default_library",
-        "//globalscheduler/pkg/scheduler/common/constants:go_default_library",
         "//globalscheduler/pkg/scheduler/common/logger:go_default_library",
         "//globalscheduler/pkg/scheduler/types:go_default_library",
+        "//resourcecollector/pkg/collector/common/config:go_default_library",
         "//resourcecollector/pkg/collector/internal/cache:go_default_library",
+        "//resourcecollector/pkg/collector/rpcclient:go_default_library",
+        "//resourcecollector/pkg/collector/siteinfo:go_default_library",
     ],
 )
 
@@ -27,12 +29,22 @@ filegroup(
     name = "all-srcs",
     srcs = [
         ":package-srcs",
+<<<<<<< HEAD
+=======
+        "//resourcecollector/pkg/collector/cloudclient:all-srcs",
+>>>>>>> 82f00b947e8c84d29d5afa4e0c42f907c4f65142
         "//resourcecollector/pkg/collector/common/apiserver:all-srcs",
         "//resourcecollector/pkg/collector/common/config:all-srcs",
         "//resourcecollector/pkg/collector/httpserver:all-srcs",
         "//resourcecollector/pkg/collector/internal/cache:all-srcs",
         "//resourcecollector/pkg/collector/router:all-srcs",
+<<<<<<< HEAD
         "//resourcecollector/pkg/collector/rpc:all-srcs",
+=======
+        "//resourcecollector/pkg/collector/rpcclient:all-srcs",
+        "//resourcecollector/pkg/collector/rpcserver:all-srcs",
+        "//resourcecollector/pkg/collector/siteinfo:all-srcs",
+>>>>>>> 82f00b947e8c84d29d5afa4e0c42f907c4f65142
     ],
     tags = ["automanaged"],
     visibility = ["//visibility:public"],

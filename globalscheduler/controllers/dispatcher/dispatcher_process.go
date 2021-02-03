@@ -134,13 +134,13 @@ func (p *Process) Run(quit chan struct{}) {
 				return
 			}
 			klog.V(4).Infof("Pod %s with cluster %s has been added", pod.Name, pod.Spec.ClusterName)
-			util.CheckTime(pod.Name, "dispatcher", "Run-go func()", 1)
+			util.CheckTime(pod.Name, "dispatcher", "Run-gofunc()", 1)
 			go func() {
 				util.CheckTime(pod.Name, "dispatcher", "Run-SendPodToCluster", 1)
 				p.SendPodToCluster(pod)
 				util.CheckTime(pod.Name, "dispatcher", "Run-SendPodToCluster", 2)
 			}()
-			util.CheckTime(pod.Name, "dispatcher", "Run-go func()", 2)
+			util.CheckTime(pod.Name, "dispatcher", "Run-gofunc()", 2)
 		},
 	})
 	go boundPodnformer.Run(quit)
@@ -183,7 +183,9 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 			return
 		}
 		util.CheckTime(pod.Name, "dispatcher", "SendPodToCluster-getToken", 1)
-		token, err := p.getToken(host)
+		//temporarily delete for latency test
+		//token, err := p.getToken(host)
+		_, err = p.getToken(host)
 		util.CheckTime(pod.Name, "dispatcher", "SendPodToCluster-getToken", 2)
 		if err != nil {
 			klog.Warningf("Failed to get token from host %v", host)
@@ -205,7 +207,9 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 			klog.V(2).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Total Number of Pods Deleted: %d, Average Delete Latency: %d Millisecond %%%%%%%%%%%%%%%%%%%%%%%%%%", p.totalPodDeleteNum, averageDeleteLatency)
 			util.CheckTime(pod.Name, "dispatcher", "SendPodToCluster-deletePod", 1)
 			go func() {
-				err = openstack.DeleteInstance(host, token, pod.Status.ClusterInstanceId)
+				//temporarily delete for latency test
+				//err = openstack.DeleteInstance(host, token, pod.Status.ClusterInstanceId)
+				err = nil
 				if err == nil {
 					klog.V(3).Infof("The openstack vm for the pod %v has been deleted at the host %v", pod.ObjectMeta.Name, host)
 				} else {
@@ -229,7 +233,10 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 			klog.V(2).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Total Number of Pods Created: %d, Average Create Latency: %d Millisecond %%%%%%%%%%%%%%%%%%%%%%%%%%", p.totalPodCreateNum, averageCreateLatency)
 			util.CheckTime(pod.Name, "dispatcher", "SendPodToCluster-createPod", 1)
 			go func() {
-				instanceId, err := openstack.ServerCreate(host, token, &pod.Spec)
+				//temporarily delete for latency test
+				//instanceId, err := openstack.ServerCreate(host, token, &pod.Spec)
+				instanceId := "cluster1"
+				err = nil
 				if err == nil {
 					klog.V(3).Infof("The openstack vm for the pod %v has been created at the host %v", pod.ObjectMeta.Name, host)
 					pod.Status.ClusterInstanceId = instanceId

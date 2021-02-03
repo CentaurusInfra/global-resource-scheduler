@@ -93,12 +93,12 @@ spec:
       count: 1
       selector:
         geoLocation:
-          area: NE-2
-          city: Boston
+          area: NE-1
+          city: NewYork
           country: US
-          province: Massachusettes
+          province: NewYork
         regions:
-         - region: "NE-2"
+         - region: "NE-1"
   nics:
   - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
 ---
@@ -120,9 +120,9 @@ spec:
       selector:
         geoLocation:
           area: NE-1
-          city: Boston
+          city: NewYork
           country: US
-          province: Massachusettes
+          province: NewYork
         regions:
          - region: "NE-1"
   nics:
@@ -146,9 +146,9 @@ spec:
       selector:
         geoLocation:
           area: NE-1
-          city: Boston
+          city: NewYork
           country: US
-          province: Massachusettes
+          province: NewYork
         regions:
          - region: "NE-1"
   nics:
