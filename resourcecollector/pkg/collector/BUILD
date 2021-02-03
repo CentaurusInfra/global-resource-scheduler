@@ -29,22 +29,15 @@ filegroup(
     name = "all-srcs",
     srcs = [
         ":package-srcs",
-<<<<<<< HEAD
-=======
         "//resourcecollector/pkg/collector/cloudclient:all-srcs",
->>>>>>> 82f00b947e8c84d29d5afa4e0c42f907c4f65142
         "//resourcecollector/pkg/collector/common/apiserver:all-srcs",
         "//resourcecollector/pkg/collector/common/config:all-srcs",
         "//resourcecollector/pkg/collector/httpserver:all-srcs",
         "//resourcecollector/pkg/collector/internal/cache:all-srcs",
         "//resourcecollector/pkg/collector/router:all-srcs",
-<<<<<<< HEAD
-        "//resourcecollector/pkg/collector/rpc:all-srcs",
-=======
         "//resourcecollector/pkg/collector/rpcclient:all-srcs",
         "//resourcecollector/pkg/collector/rpcserver:all-srcs",
         "//resourcecollector/pkg/collector/siteinfo:all-srcs",
->>>>>>> 82f00b947e8c84d29d5afa4e0c42f907c4f65142
     ],
     tags = ["automanaged"],
     visibility = ["//visibility:public"],
