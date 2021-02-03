@@ -25,8 +25,6 @@ spec:
   storage:
   - storagecapacity: 256
     typeid: sas
-  homescheduler: scheduler0
-  homedispatcher: dispatcher0
 ---
 apiVersion: globalscheduler.com/v1
 kind: Cluster
@@ -55,8 +53,6 @@ spec:
   storage:
   - storagecapacity: 256
     typeid: sas
-  homescheduler: scheduler0
-  homedispatcher: dispatcher0
 ---
 apiVersion: globalscheduler.com/v1
 kind: Cluster
@@ -85,8 +81,6 @@ spec:
   storage:
   - storagecapacity: 256
     typeid: sas
-  homescheduler: scheduler0
-  homedispatcher: dispatcher0
 ---
 apiVersion: globalscheduler.com/v1
 kind: Cluster
@@ -115,8 +109,6 @@ spec:
   storage:
   - storagecapacity: 256
     typeid: sas
-  homescheduler: scheduler0
-  homedispatcher: dispatcher0
 ---
 apiVersion: globalscheduler.com/v1
 kind: Cluster
@@ -145,8 +137,6 @@ spec:
   storage:
   - storagecapacity: 256
     typeid: sas
-  homescheduler: scheduler0
-  homedispatcher: dispatcher0
 ---
 apiVersion: globalscheduler.com/v1
 kind: Cluster
@@ -175,8 +165,6 @@ spec:
   storage:
   - storagecapacity: 256
     typeid: sas
-  homescheduler: scheduler0
-  homedispatcher: dispatcher0
 ---
 apiVersion: globalscheduler.com/v1
 kind: Cluster
@@ -205,8 +193,6 @@ spec:
   storage:
   - storagecapacity: 256
     typeid: sas
-  homescheduler: scheduler0
-  homedispatcher: dispatcher0
 ---
 apiVersion: globalscheduler.com/v1
 kind: Cluster
@@ -235,8 +221,6 @@ spec:
   storage:
   - storagecapacity: 256
     typeid: sas
-  homescheduler: scheduler0
-  homedispatcher: dispatcher0
 ---
 apiVersion: globalscheduler.com/v1
 kind: Cluster
@@ -265,8 +249,6 @@ spec:
   storage:
   - storagecapacity: 256
     typeid: sas
-  homescheduler: scheduler0
-  homedispatcher: dispatcher0
 ---
 apiVersion: globalscheduler.com/v1
 kind: Cluster
@@ -295,5 +277,3 @@ spec:
   storage:
   - storagecapacity: 256
     typeid: sas
-  homescheduler: scheduler0
-  homedispatcher: dispatcher0

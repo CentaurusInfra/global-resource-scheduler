@@ -1,0 +1,17 @@
+apiVersion: globalscheduler.com/v1
+kind: Dispatcher
+metadata:
+  name: dispatcher1
+spec:
+  clusterRange:
+    start: "1"
+    end: "60"
+---
+apiVersion: globalscheduler.com/v1
+kind: Dispatcher
+metadata:
+  name: dispatcher2
+spec:
+  clusterRange:
+    start: "1"
+    end: "60"
