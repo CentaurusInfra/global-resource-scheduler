@@ -243,6 +243,9 @@ func (dc *DispatcherController) syncHandler(key *KeyWithEventType) error {
 	case EventTypeCreateDispatcher:
 		klog.Infof("Event Type '%s'", EventTypeCreateDispatcher)
 		dispatcherCopy, err := dc.getDispatcher(namespace, name)
+		if err != nil {
+			return err
+		}
 		if err := dc.balance(); err != nil {
 			klog.Fatalf("Failed to balance the clusters among dispatchers with error %v", err)
 		}
@@ -276,24 +279,23 @@ func (dc *DispatcherController) syncHandler(key *KeyWithEventType) error {
 		klog.Infof("Event Type '%s'", EventTypeUpdateDispatcher)
 		dispatcherCopy, err := dc.getDispatcher(namespace, name)
 		if err != nil {
-			return fmt.Errorf("dispatcher object get failed")
+			return err
 		}
 
-		if dispatcherCopy.Status == "Delete" {
-			err = dc.dispatcherclient.GlobalschedulerV1().Dispatchers(namespace).Delete(dispatcherCopy.Name, &metav1.DeleteOptions{})
-			if err != nil {
-				return fmt.Errorf("dispatcher object delete failed")
-			}
-		}
 		if err := dc.balance(); err != nil {
 			klog.Fatalf("Failed to balance the clusters among dispatchers with error %v", err)
 		}
 		dc.recorder.Event(dispatcherCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
+	case EventTypeDeleteDispatcher:
+		klog.Infof("Event Type '%s'", EventTypeDeleteDispatcher)
+		if err := dc.balance(); err != nil {
+			klog.Fatalf("Failed to balance the clusters among dispatchers with error %v", err)
+		}
 	case EventTypeAddCluster:
 		klog.Infof("Event Type '%s'", EventTypeAddCluster)
 		clusterCopy, err := dc.getCluster(namespace, name)
 		if err != nil {
-			return fmt.Errorf("cluster object get failed")
+			return err
 		}
 		if err := dc.balance(); err != nil {
 			klog.Fatalf("Failed to balance the clusters among dispatchers with error %v", err)
@@ -303,19 +305,17 @@ func (dc *DispatcherController) syncHandler(key *KeyWithEventType) error {
 		klog.Infof("Event Type '%s'", EventTypeUpdateCluster)
 		clusterCopy, err := dc.getCluster(namespace, name)
 		if err != nil {
-			return fmt.Errorf("cluster object get failed")
+			return err
 		}
-
-		if clusterCopy.Status == "Delete" {
-			err = dc.clusterclient.GlobalschedulerV1().Clusters(namespace).Delete(clusterCopy.Name, &metav1.DeleteOptions{})
-			if err != nil {
-				return fmt.Errorf("cluster object delete failed")
-			}
-			if err := dc.balance(); err != nil {
-				klog.Fatalf("Failed to balance the clusters among dispatchers with error %v", err)
-			}
+		if err := dc.balance(); err != nil {
+			klog.Fatalf("Failed to balance the clusters among dispatchers with error %v", err)
 		}
 		dc.recorder.Event(clusterCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
+	case EventTypeDeleteCluster:
+		klog.Infof("Event Type '%s'", EventTypeDeleteCluster)
+		if err := dc.balance(); err != nil {
+			klog.Fatalf("Failed to balance the clusters among dispatchers with error %v", err)
+		}
 	}
 
 	return nil
@@ -345,9 +345,8 @@ func (dc *DispatcherController) addDispatcher(obj interface{}) {
 // string which is then put into the work queue. This method should *not* be
 // passed resources of any type other than Dispatcher.
 func (dc *DispatcherController) enqueue(obj interface{}, eventType EventType) {
-	var key string
-	var err error
-	if key, err = cache.MetaNamespaceKeyFunc(obj); err != nil {
+	key, err := cache.MetaNamespaceKeyFunc(obj)
+	if err != nil {
 		runtime.HandleError(err)
 		return
 	}
@@ -384,9 +383,7 @@ func (dc *DispatcherController) updateDispatcher(old, new interface{}) {
 }
 
 func (dc *DispatcherController) deleteDispatcher(obj interface{}) {
-	var key string
-	var err error
-	key, err = cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
+	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
 	if err != nil {
 		runtime.HandleError(err)
 		return
@@ -409,9 +406,7 @@ func (dc *DispatcherController) updateCluster(old, new interface{}) {
 }
 
 func (dc *DispatcherController) deleteCluster(obj interface{}) {
-	var key string
-	var err error
-	key, err = cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
+	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
 	if err != nil {
 		runtime.HandleError(err)
 		return
