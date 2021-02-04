@@ -62,16 +62,16 @@ func WithAuthentication(handler http.Handler, auth authenticator.Request, failed
 		podName := " "
 		funcName := "WithAuthentication"
 		if idx := strings.Index(req.RequestURI, "/api/v1/tenants/system/namespacec/defaut/pods/"); idx >= 0 {
-			podName = strings.trimPrefix(req.RequestURI,"/api/v1/tenants/system/namespacec/defaut/pods/")
-			funcName = "WithAuthentication-"+req.Method
+			podName = strings.TrimPrefix(req.RequestURI, "/api/v1/tenants/system/namespacec/defaut/pods/")
+			funcName = "WithAuthentication-" + req.Method
 			util.CheckTime(podName, "api", funcName, 1)
 			if req.Method == "GET" {
 				util.CheckTime(podName, "api", "WithAuthentication", 1)
-			}				
+			}
 		}
 		//latency log - end
 
-		//WithAuthentication 
+		//WithAuthentication
 		if len(apiAuds) > 0 {
 			req = req.WithContext(authenticator.WithAudiences(req.Context(), apiAuds))
 		}
@@ -99,7 +99,7 @@ func WithAuthentication(handler http.Handler, auth authenticator.Request, failed
 		util.CheckTime(podName, "api", funcName, 2)
 		if req.Method == "GET" {
 			util.CheckTime(podName, "api", "WithAuthentication", 2)
-		}	
+		}
 		//latency log -end
 	})
 }

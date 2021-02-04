@@ -31,6 +31,7 @@ import (
 	"k8s.io/apiserver/pkg/admission"
 	"k8s.io/apiserver/pkg/features"
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
+	"k8s.io/kubernetes/globalscheduler/controllers/util"
 )
 
 // RESTUpdateStrategy defines the minimum validation, accepted input, and
@@ -92,6 +93,7 @@ func BeforeUpdate(strategy RESTUpdateStrategy, ctx context.Context, obj, old run
 	if kerr != nil {
 		return kerr
 	}
+	util.CheckTime(objectMeta.GetName(), "api", "BeforeUpdate", 1)
 	if strategy.NamespaceScoped() {
 		if !ValidNamespace(ctx, objectMeta) {
 			return errors.NewBadRequest("the namespace of the provided object does not match the namespace sent on the request")
@@ -165,7 +167,7 @@ func BeforeUpdate(strategy RESTUpdateStrategy, ctx context.Context, obj, old run
 	}
 
 	strategy.Canonicalize(obj)
-
+	util.CheckTime(objectMeta.GetName(), "api", "BeforeUpdate", 2)
 	return nil
 }
 
