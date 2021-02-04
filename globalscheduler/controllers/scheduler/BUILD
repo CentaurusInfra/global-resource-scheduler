@@ -57,7 +57,6 @@ go_test(
     srcs = ["scheduler_controller_test.go"],
     embed = [":go_default_library"],
     deps = [
-        "//globalscheduler/controllers/util/consistenthashing:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/clientset/versioned/fake:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/informers/externalversions:go_default_library",
         "//globalscheduler/pkg/apis/cluster/v1:go_default_library",
