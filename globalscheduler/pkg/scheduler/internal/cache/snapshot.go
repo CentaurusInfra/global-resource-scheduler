@@ -30,16 +30,16 @@ import (
 // snapshot at the beginning of each scheduling cycle and uses it for its operations in that cycle.
 type Snapshot struct {
 	// SiteCacheInfoMap a map of site name to a snapshot of its SiteCacheInfo.
-	SiteCacheInfoMap map[string]*schedulersitecacheinfo.SiteCacheInfo				`json:"siteCacheInfoMap"`
+	SiteCacheInfoMap map[string]*schedulersitecacheinfo.SiteCacheInfo `json:"siteCacheInfoMap"`
 	// SiteCacheInfoList is the list of siteIDs as ordered in the cache's siteTree.
-	SiteCacheInfoList []*schedulersitecacheinfo.SiteCacheInfo						`json:"siteCacheInfoList"`
+	SiteCacheInfoList []*schedulersitecacheinfo.SiteCacheInfo `json:"siteCacheInfoList"`
 	// HavePodsWithAffinitySiteCacheInfoList is the list of siteIDs with at least one pod declaring affinity terms.
-	HavePodsWithAffinitySiteCacheInfoList []*schedulersitecacheinfo.SiteCacheInfo	`json:"havePodsWithAffinitySiteCacheInfoList"`
+	HavePodsWithAffinitySiteCacheInfoList []*schedulersitecacheinfo.SiteCacheInfo `json:"havePodsWithAffinitySiteCacheInfoList"`
 	// RegionFlavorMap is a map of the region flavor id to a flavor, contains all flavors
-	RegionFlavorMap map[string]*typed.RegionFlavor									`json:"regionFlavorMap"`
+	RegionFlavorMap map[string]*typed.RegionFlavor `json:"regionFlavorMap"`
 	// FlavorMap is a map of the flavor id to a flavor, contains all flavors
-	FlavorMap map[string]*typed.RegionFlavor										`json:"flavorMap"`
-	generation                            int64
+	FlavorMap  map[string]*typed.RegionFlavor `json:"flavorMap"`
+	generation int64
 }
 
 var _ schedulerlisters.SharedLister = &Snapshot{}

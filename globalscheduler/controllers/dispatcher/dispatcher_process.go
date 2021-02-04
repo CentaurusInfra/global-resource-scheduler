@@ -25,6 +25,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog"
+	"k8s.io/kubernetes/globalscheduler/controllers/util"
 	"k8s.io/kubernetes/globalscheduler/controllers/util/openstack"
 	clusterclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
 	dispatcherclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/client/clientset/versioned"
@@ -133,9 +134,13 @@ func (p *Process) Run(quit chan struct{}) {
 				return
 			}
 			klog.V(4).Infof("Pod %s with cluster %s has been added", pod.Name, pod.Spec.ClusterName)
+			util.CheckTime(pod.Name, "dispatcher", "Run-AddFunc-gofunc", 1)
 			go func() {
+				util.CheckTime(pod.Name, "dispatcher", "Run-AddFunc-gofunc-SendPodToCluster", 1)
 				p.SendPodToCluster(pod)
+				util.CheckTime(pod.Name, "dispatcher", "Run-AddFunc-gofunc-SendPodToCluster", 2)
 			}()
+			util.CheckTime(pod.Name, "dispatcher", "Run-AddFunc-gofunc", 2)
 		},
 	})
 	go boundPodnformer.Run(quit)
@@ -147,13 +152,19 @@ func (p *Process) Run(quit chan struct{}) {
 				return
 			}
 			klog.V(4).Infof("Pod %s with cluster %s has been deleted", pod.Name, pod.Spec.ClusterName)
+			util.CheckTime(pod.Name, "dispatcher", "Run-DeleteFunc-gofunc", 1)
 			go func() {
+				util.CheckTime(pod.Name, "dispatcher", "Run-DeleteFunc-gofunc-SendPodToCluster", 1)
 				p.SendPodToCluster(pod)
+				util.CheckTime(pod.Name, "dispatcher", "Run-DeleteFunc-gofunc-SendPodToCluster", 2)
 			}()
+			util.CheckTime(pod.Name, "dispatcher", "Run-DeleteFunc-gofunc", 2)
 		},
 	})
 	go scheduledPodnformer.Run(quit)
+	util.CheckTime("local", "dispatcher", "Run-refreshToken", 1)
 	go p.refreshToken()
+	util.CheckTime("local", "dispatcher", "Run-refreshToken", 2)
 	<-quit
 }
 
@@ -168,13 +179,18 @@ func (p *Process) initPodInformer(phase v1.PodPhase, funcs cache.ResourceEventHa
 
 func (p *Process) SendPodToCluster(pod *v1.Pod) {
 	if pod != nil {
+		util.CheckTime(pod.Name, "dispatcher", "SendPodToCluster", 1)
 		klog.V(3).Infof("Processing the item %v", pod)
+		util.CheckTime(pod.Name, "dispatcher", "SendPodToCluster-getHostIP", 1)
 		host, err := p.getHostIP(pod.Spec.ClusterName)
+		util.CheckTime(pod.Name, "dispatcher", "SendPodToCluster-getHostIP", 2)
 		if err != nil {
 			klog.Warningf("Failed to get host from the cluster %v", pod.Spec.ClusterName)
 			return
 		}
+		util.CheckTime(pod.Name, "dispatcher", "SendPodToCluster-getToken", 1)
 		token, err := p.getToken(host)
+		util.CheckTime(pod.Name, "dispatcher", "SendPodToCluster-getToken", 2)
 		if err != nil {
 			klog.Warningf("Failed to get token from host %v", host)
 			return
@@ -193,7 +209,7 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 			// Calculate average delete latency
 			averageDeleteLatency := int(p.totalDeleteLatency) / p.totalPodDeleteNum
 			klog.V(2).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Total Number of Pods Deleted: %d, Average Delete Latency: %d Millisecond %%%%%%%%%%%%%%%%%%%%%%%%%%", p.totalPodDeleteNum, averageDeleteLatency)
-
+			util.CheckTime(pod.Name, "dispatcher", "SendPodToCluster-deletePod", 1)
 			go func() {
 				err = openstack.DeleteInstance(host, token, pod.Status.ClusterInstanceId)
 				if err == nil {
@@ -202,7 +218,7 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 					klog.Warningf("The openstack vm for the pod %v failed to delete with the error %v", pod.ObjectMeta.Name, err)
 				}
 			}()
-
+			util.CheckTime(pod.Name, "dispatcher", "SendPodToCluster-deletePod", 2)
 		} else {
 			p.totalPodCreateNum += 1
 			// Calculate create latency
@@ -216,14 +232,16 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 			// Calculate average create latency
 			averageCreateLatency := int(p.totalCreateLatency) / p.totalPodCreateNum
 			klog.V(2).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Total Number of Pods Created: %d, Average Create Latency: %d Millisecond %%%%%%%%%%%%%%%%%%%%%%%%%%", p.totalPodCreateNum, averageCreateLatency)
-
+			util.CheckTime(pod.Name, "dispatcher", "SendPodToCluster-createPod", 1)
 			go func() {
 				instanceId, err := openstack.ServerCreate(host, token, &pod.Spec)
 				if err == nil {
 					klog.V(3).Infof("The openstack vm for the pod %v has been created at the host %v", pod.ObjectMeta.Name, host)
 					pod.Status.ClusterInstanceId = instanceId
 					pod.Status.Phase = v1.ClusterScheduled
+					util.CheckTime(pod.Name, "dispatcher", "SendPodToCluster-createPod-UpdateStatus", 1)
 					updatedPod, err := p.clientset.CoreV1().Pods(pod.ObjectMeta.Namespace).UpdateStatus(pod)
+					util.CheckTime(pod.Name, "dispatcher", "SendPodToCluster-createPod-UpdateStatus", 2)
 					if err == nil {
 						klog.V(3).Infof("The pod %v has been updated its apiserver database status to scheduled successfully with the instance id %v", updatedPod, instanceId)
 
@@ -238,6 +256,7 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 					}
 				}
 			}()
+			util.CheckTime(pod.Name, "dispatcher", "SendPodToCluster-createPod", 2)
 		}
 	}
 }
@@ -267,6 +286,7 @@ func (p *Process) getHostIP(clusterName string) (string, error) {
 }
 
 func (p *Process) refreshToken() {
+	util.CheckTime("local", "dispatcher", "refreshToken", 1)
 	for range time.Tick(time.Hour * 2) {
 		for ip, token := range p.tokenMap {
 			if openstack.TokenExpired(ip, token) {
@@ -277,6 +297,7 @@ func (p *Process) refreshToken() {
 			}
 		}
 	}
+	util.CheckTime("local", "dispatcher", "refreshToken", 2)
 }
 
 func (p *Process) init() {

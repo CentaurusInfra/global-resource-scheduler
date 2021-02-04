@@ -32,6 +32,7 @@ import (
 	"k8s.io/apiserver/pkg/features"
 	"k8s.io/apiserver/pkg/storage/names"
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
+	"k8s.io/kubernetes/globalscheduler/controllers/util"
 )
 
 // RESTCreateStrategy defines the minimum validation, accepted input, and
@@ -79,7 +80,7 @@ func BeforeCreate(strategy RESTCreateStrategy, ctx context.Context, obj runtime.
 	if kerr != nil {
 		return kerr
 	}
-
+	util.CheckTime(objectMeta.GetName(), "api", "BeforeCreate", 1)
 	if strategy.NamespaceScoped() {
 		if !ValidNamespace(ctx, objectMeta) {
 			return errors.NewBadRequest("the namespace of the provided object does not match the namespace sent on the request")
@@ -129,7 +130,7 @@ func BeforeCreate(strategy RESTCreateStrategy, ctx context.Context, obj runtime.
 	}
 
 	strategy.Canonicalize(obj)
-
+	util.CheckTime(objectMeta.GetName(), "api", "BeforeCreate", 2)
 	return nil
 }
 

@@ -103,9 +103,13 @@ func (s *Scheduler) initInformers(quit chan struct{}) {
 				klog.Warningf("Failed to convert  object  %+v to a pod", obj)
 				return
 			}
+			util.CheckTime(pod.Name, "mockscheduler", "Run-AddFunc-gofunc", 1)
 			go func() {
+				util.CheckTime(pod.Name, "mockscheduler", "Run-AddFunc-gofunc-ScheduleOne", 1)
 				s.ScheduleOne(pod)
+				util.CheckTime(pod.Name, "mockscheduler", "Run-AddFunc-gofunc-ScheduleOne", 2)
 			}()
+			util.CheckTime(pod.Name, "mockscheduler", "Run-AddFunc-gofunc", 2)
 		},
 		UpdateFunc: func(old, new interface{}) {
 
@@ -122,7 +126,9 @@ func (s *Scheduler) initInformers(quit chan struct{}) {
 			fmt.Printf("A  pod %s has been updated\n", newPod.Name)
 			if oldPod.Status.Phase != v1.PodAssigned && newPod.Status.Phase == v1.PodAssigned {
 				go func() {
+					util.CheckTime(newPod.Name, "mockscheduler", "UpdateFunc", 1)
 					s.ScheduleOne(newPod)
+					util.CheckTime(newPod.Name, "mockscheduler", "UpdateFunc", 2)
 				}()
 			}
 		},
@@ -159,12 +165,14 @@ func main() {
 }
 
 func (s *Scheduler) ScheduleOne(p *v1.Pod) {
-
+	util.CheckTime(p.Name, "mockscheduler", "ScheduleOne", 1)
 	idx := 0
 	if p.Status.AssignedScheduler.Name == s.name {
 		if clusterLen := len(s.clusters); clusterLen > 0 {
 			idx = rand.Intn(clusterLen)
+			util.CheckTime(p.Name, "mockscheduler", "ScheduleOne-bindPod", 1)
 			err := s.bindPod(p, s.clusters[idx])
+			util.CheckTime(p.Name, "mockscheduler", "ScheduleOne-bindPod", 1)
 			if err != nil {
 				klog.Warningf("Failed to bind cluster with the error %v \n", err.Error())
 			}
@@ -175,6 +183,7 @@ func (s *Scheduler) ScheduleOne(p *v1.Pod) {
 	} else {
 		klog.Errorf("The assigned name %s is not valid", s.name)
 	}
+	util.CheckTime(p.Name, "mockscheduler", "ScheduleOne", 2)
 }
 
 func (s *Scheduler) bindPod(p *v1.Pod, cluster string) error {

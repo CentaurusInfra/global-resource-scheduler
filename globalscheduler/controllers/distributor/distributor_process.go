@@ -25,6 +25,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog"
+	"k8s.io/kubernetes/globalscheduler/controllers/util"
 	clustercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 	distributortype "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor"
 	distributorclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/client/clientset/versioned"
@@ -183,9 +184,13 @@ func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
 			if pod.Spec.ResourceType != "vm" {
 				return
 			}
+			util.CheckTime(pod.Name, "distributor", "Run-AddFunc-gofunc", 1)
 			go func() {
+				util.CheckTime(pod.Name, "distributor", "Run-AddFunc-gofunc-ScheduleOne", 1)
 				p.ScheduleOne(pod)
+				util.CheckTime(pod.Name, "distributor", "Run-AddFunc-gofunc-ScheduleOne", 2)
 			}()
+			util.CheckTime(pod.Name, "distributor", "Run-AddFunc-gofunc", 2)
 		},
 	})
 	return podInformer
@@ -195,15 +200,18 @@ func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
 func (p *Process) ScheduleOne(pod *v1.Pod) {
 	if pod != nil {
 		klog.V(4).Infof("Found a pod %v-%v to schedule:", pod.Namespace, pod.Name)
-
+		util.CheckTime(pod.Name, "distributor", "ScheduleOne", 1)
+		util.CheckTime(pod.Name, "distributor", "ScheduleOne-findFit", 1)
 		scheduler, err := p.findFit(pod)
-
+		util.CheckTime(pod.Name, "distributor", "ScheduleOne-findFit", 2)
 		if err != nil {
 			klog.Warningf("Failed to find scheduler that fits scheduler with the error %v", err)
 			return
 		}
 		klog.V(4).Infof("Find a scheduler %s to fit the pod %s", scheduler, pod.Name)
+		util.CheckTime(pod.Name, "distributor", "ScheduleOne-bindPod", 1)
 		err = p.bindPod(pod, scheduler)
+		util.CheckTime(pod.Name, "distributor", "ScheduleOne-bindPod", 2)
 		if err != nil {
 			klog.Warningf("Failed to assign scheduler %v to pod %v with the error %vs", scheduler, pod, err)
 			pod.Status.Phase = v1.PodFailed
@@ -212,7 +220,7 @@ func (p *Process) ScheduleOne(pod *v1.Pod) {
 			}
 			return
 		}
-
+		util.CheckTime(pod.Name, "distributor", "ScheduleOne", 2)
 		klog.V(3).Infof("Assigned pod [%s/%s] on %s\n", pod.Namespace, pod.Name, scheduler)
 	}
 }
@@ -227,7 +235,6 @@ func (p *Process) findFit(pod *v1.Pod) (string, error) {
 }
 
 func (p *Process) bindPod(pod *v1.Pod, scheduler string) error {
-
 	return p.clientset.CoreV1().Pods(pod.Namespace).Bind(&v1.Binding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      pod.Name,
