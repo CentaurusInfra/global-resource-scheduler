@@ -26,7 +26,6 @@ import (
 	core "k8s.io/client-go/testing"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
-	"k8s.io/kubernetes/globalscheduler/controllers/util/consistenthashing"
 	clusterfake "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned/fake"
 	clusterinformers "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/informers/externalversions"
 	clustercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
@@ -158,9 +157,6 @@ func (f *fixture) runExpectError(fooName string, eventType EventType) {
 
 func (f *fixture) runController(fooName string, startInformer bool, expectError bool, eventType EventType) {
 	p, si, ci := f.newController()
-	p.consistentHash = consistenthashing.New()
-	input := []string{"scheduler1"}
-	p.consistentHash.Add(input)
 	if startInformer {
 		stopCh := make(chan struct{})
 		defer close(stopCh)
