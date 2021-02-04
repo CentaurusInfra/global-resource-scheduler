@@ -28,6 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apiserver/pkg/admission"
+	"k8s.io/kubernetes/globalscheduler/controllers/util"
 )
 
 // RESTDeleteStrategy defines deletion behavior on an object that follows Kubernetes
@@ -75,6 +76,7 @@ func BeforeDelete(strategy RESTDeleteStrategy, ctx context.Context, obj runtime.
 	if kerr != nil {
 		return false, false, kerr
 	}
+	util.CheckTime(objectMeta.GetName(), "api", "BeforeDelete", 1)
 	if errs := validation.ValidateDeleteOptions(options); len(errs) > 0 {
 		return false, false, errors.NewInvalid(schema.GroupKind{Group: metav1.GroupName, Kind: "DeleteOptions"}, "", errs)
 	}
@@ -140,6 +142,7 @@ func BeforeDelete(strategy RESTDeleteStrategy, ctx context.Context, obj runtime.
 	if objectMeta.GetGeneration() > 0 {
 		objectMeta.SetGeneration(objectMeta.GetGeneration() + 1)
 	}
+	util.CheckTime(objectMeta.GetName(), "api", "BeforeDelete", 2)
 	return true, false, nil
 }
 
