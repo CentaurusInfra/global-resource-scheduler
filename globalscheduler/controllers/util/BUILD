@@ -27,6 +27,7 @@ filegroup(
     srcs = [
         ":package-srcs",
         "//globalscheduler/controllers/util/consistenthashing:all-srcs",
+        "//globalscheduler/controllers/util/geoLocationDistribute:all-srcs",
         "//globalscheduler/controllers/util/openstack:all-srcs",
         "//globalscheduler/controllers/util/union:all-srcs",
     ],

@@ -161,7 +161,8 @@ func unionGeoLocation(unionGeoLocation []*clustercrdv1.GeolocationInfo, geoLocat
 func unionStorage(unionStorage []*clustercrdv1.StorageSpec, storage []clustercrdv1.StorageSpec) []*clustercrdv1.StorageSpec {
 	if len(unionStorage) == 0 {
 		for _, y := range storage {
-			unionStorage = append(unionStorage, &y)
+			res := y
+			unionStorage = append(unionStorage, &res)
 		}
 		return unionStorage
 	}
@@ -188,7 +189,8 @@ func unionStorage(unionStorage []*clustercrdv1.StorageSpec, storage []clustercrd
 func unionFlavors(unionFlavors []*clustercrdv1.FlavorInfo, flavors []clustercrdv1.FlavorInfo) []*clustercrdv1.FlavorInfo {
 	if len(unionFlavors) == 0 {
 		for _, y := range flavors {
-			unionFlavors = append(unionFlavors, &y)
+			res := y
+			unionFlavors = append(unionFlavors, &res)
 		}
 		return unionFlavors
 	}
