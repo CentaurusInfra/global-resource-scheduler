@@ -33,7 +33,7 @@ import (
 
 var (
 	cleanAssumedPeriod = 1 * time.Second
-	FlavorCache = &flavorCache{}
+	FlavorCache        = &flavorCache{}
 )
 
 // New returns a Cache implementation.
@@ -59,7 +59,7 @@ func (fc *flavorCache) GetFlavor(flavorID string, region string) (*typed.RegionF
 	}
 
 	// region != ""
-	value := fc.RegionFlavorMap[region + "|" + flavorID]
+	value := fc.RegionFlavorMap[region+"|"+flavorID]
 	if value == nil {
 		return value, false
 	}
@@ -74,7 +74,6 @@ func (fc *flavorCache) UpdateFlavorMap(regionFlavorMap map[string]*typed.RegionF
 	fc.FlavorMap = flavorMap
 	fc.RegionFlavorMap = regionFlavorMap
 }
-
 
 type flavorCache struct {
 	// This mutex guards all fields within this cache struct.
