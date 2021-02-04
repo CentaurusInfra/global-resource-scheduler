@@ -1,6 +1,5 @@
 /*
 Copyright 2014 The Kubernetes Authors.
-Copyright 2020 Authors of Arktos - file modified.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -79,7 +78,6 @@ func BeforeCreate(strategy RESTCreateStrategy, ctx context.Context, obj runtime.
 	if kerr != nil {
 		return kerr
 	}
-
 	if strategy.NamespaceScoped() {
 		if !ValidNamespace(ctx, objectMeta) {
 			return errors.NewBadRequest("the namespace of the provided object does not match the namespace sent on the request")
@@ -129,7 +127,6 @@ func BeforeCreate(strategy RESTCreateStrategy, ctx context.Context, obj runtime.
 	}
 
 	strategy.Canonicalize(obj)
-
 	return nil
 }
 

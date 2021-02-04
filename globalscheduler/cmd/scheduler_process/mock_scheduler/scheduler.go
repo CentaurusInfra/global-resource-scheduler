@@ -96,19 +96,18 @@ func (s *Scheduler) initInformers(quit chan struct{}) {
 	podInformer := cache.NewSharedIndexInformer(lw, &v1.Pod{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
 	podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
-
 			pod, ok := obj.(*v1.Pod)
-
 			if !ok {
 				klog.Warningf("Failed to convert  object  %+v to a pod", obj)
 				return
 			}
+			util.CheckTime(pod.Name, "mockscheduler", "CreatePod-Start", 1)
 			go func() {
 				s.ScheduleOne(pod)
+				util.CheckTime(pod.Name, "mockscheduler", "CreatePod-End", 2)
 			}()
 		},
 		UpdateFunc: func(old, new interface{}) {
-
 			oldPod, ok := old.(*v1.Pod)
 			if !ok {
 				klog.Warningf("Failed to convert  object  %+v to a pod", old)
@@ -120,9 +119,11 @@ func (s *Scheduler) initInformers(quit chan struct{}) {
 				return
 			}
 			fmt.Printf("A  pod %s has been updated\n", newPod.Name)
+			util.CheckTime(newPod.Name, "mockscheduler", "DeletePod-Start", 1)
 			if oldPod.Status.Phase != v1.PodAssigned && newPod.Status.Phase == v1.PodAssigned {
 				go func() {
 					s.ScheduleOne(newPod)
+					util.CheckTime(newPod.Name, "mockscheduler", "DeletePod-End", 2)
 				}()
 			}
 		},
@@ -159,7 +160,6 @@ func main() {
 }
 
 func (s *Scheduler) ScheduleOne(p *v1.Pod) {
-
 	idx := 0
 	if p.Status.AssignedScheduler.Name == s.name {
 		if clusterLen := len(s.clusters); clusterLen > 0 {
@@ -178,7 +178,6 @@ func (s *Scheduler) ScheduleOne(p *v1.Pod) {
 }
 
 func (s *Scheduler) bindPod(p *v1.Pod, cluster string) error {
-
 	return s.clientset.CoreV1().Pods(p.Namespace).Bind(&v1.Binding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      p.Name,

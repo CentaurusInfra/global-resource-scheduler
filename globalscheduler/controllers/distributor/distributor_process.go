@@ -25,6 +25,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog"
+	"k8s.io/kubernetes/globalscheduler/controllers/util"
 	clustercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 	distributortype "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor"
 	distributorclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/client/clientset/versioned"
@@ -183,6 +184,7 @@ func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
 			if pod.Spec.ResourceType != "vm" {
 				return
 			}
+			util.CheckTime(pod.Name, "distributor", "CreatePod-Start", 1)
 			go func() {
 				p.ScheduleOne(pod)
 			}()
@@ -195,9 +197,7 @@ func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
 func (p *Process) ScheduleOne(pod *v1.Pod) {
 	if pod != nil {
 		klog.V(4).Infof("Found a pod %v-%v to schedule:", pod.Namespace, pod.Name)
-
 		scheduler, err := p.findFit(pod)
-
 		if err != nil {
 			klog.Warningf("Failed to find scheduler that fits scheduler with the error %v", err)
 			return
@@ -212,8 +212,8 @@ func (p *Process) ScheduleOne(pod *v1.Pod) {
 			}
 			return
 		}
-
 		klog.V(3).Infof("Assigned pod [%s/%s] on %s\n", pod.Namespace, pod.Name, scheduler)
+		util.CheckTime(pod.Name, "distributor", "CreatePod-End", 2)
 	}
 }
 
@@ -227,7 +227,6 @@ func (p *Process) findFit(pod *v1.Pod) (string, error) {
 }
 
 func (p *Process) bindPod(pod *v1.Pod, scheduler string) error {
-
 	return p.clientset.CoreV1().Pods(pod.Namespace).Bind(&v1.Binding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      pod.Name,
