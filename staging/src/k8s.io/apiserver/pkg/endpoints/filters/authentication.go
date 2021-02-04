@@ -58,7 +58,7 @@ func WithAuthentication(handler http.Handler, auth authenticator.Request, failed
 		return handler
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		///latency log -start
+		//latency log -start
 		podName := " "
 		funcName := "WithAuthentication"
 		if idx := strings.Index(req.RequestURI, "/api/v1/tenants/system/namespacec/defaut/pods/"); idx >= 0 {
@@ -69,7 +69,7 @@ func WithAuthentication(handler http.Handler, auth authenticator.Request, failed
 				util.CheckTime(podName, "api", "WithAuthentication", 1)
 			}
 		}
-		///latency log - end
+		//latency log - end
 
 		//WithAuthentication
 		if len(apiAuds) > 0 {

@@ -80,7 +80,7 @@ func BeforeCreate(strategy RESTCreateStrategy, ctx context.Context, obj runtime.
 	if kerr != nil {
 		return kerr
 	}
-	util.CheckTime(objectMeta.GetName(), "api", "BeforeCreate", 1)
+	util.CheckTime(objectMeta.GetName(), "api", "BeforeCreate", 1)	
 	if strategy.NamespaceScoped() {
 		if !ValidNamespace(ctx, objectMeta) {
 			return errors.NewBadRequest("the namespace of the provided object does not match the namespace sent on the request")
@@ -121,16 +121,14 @@ func BeforeCreate(strategy RESTCreateStrategy, ctx context.Context, obj runtime.
 	if errs := strategy.Validate(ctx, obj); len(errs) > 0 {
 		return errors.NewInvalid(kind.GroupKind(), objectMeta.GetName(), errs)
 	}
-
 	// Custom validation (including name validation) passed
 	// Now run common validation on object meta
 	// Do this *after* custom validation so that specific error messages are shown whenever possible
 	if errs := genericvalidation.ValidateObjectMetaAccessor(objectMeta, strategy.TenantScoped(), strategy.NamespaceScoped(), path.ValidatePathSegmentName, field.NewPath("metadata")); len(errs) > 0 {
 		return errors.NewInvalid(kind.GroupKind(), objectMeta.GetName(), errs)
 	}
-
 	strategy.Canonicalize(obj)
-	util.CheckTime(objectMeta.GetName(), "api", "BeforeCreate", 2)
+	util.CheckTime(objectMeta.GetName(), "api", "BeforeCreate", 2)	
 	return nil
 }
 
