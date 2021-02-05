@@ -184,6 +184,7 @@ func getTestCases(hostname types.NodeName, tenant string) []*testCase {
 					Containers:      []v1.Container{{Name: "image", Image: "test/image", SecurityContext: securitycontext.ValidSecurityContextWithContainerDefaults()}},
 					SecurityContext: &v1.PodSecurityContext{},
 					SchedulerName:   api.DefaultSchedulerName,
+					ResourceType:    "Container",
 				},
 				Status: v1.PodStatus{
 					Phase: v1.PodPending,
@@ -218,6 +219,7 @@ func getTestCases(hostname types.NodeName, tenant string) []*testCase {
 					SecurityContext:    &v1.PodSecurityContext{},
 					SchedulerName:      api.DefaultSchedulerName,
 					EnableServiceLinks: &enableServiceLinks,
+					ResourceType:       "Container",
 				},
 				Status: v1.PodStatus{
 					Phase: v1.PodPending,

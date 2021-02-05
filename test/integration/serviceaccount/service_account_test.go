@@ -265,6 +265,7 @@ func testServiceAccountTokenAutoMount(t *testing.T, tenant string) {
 					VolumeSource: v1.VolumeSource{EmptyDir: &v1.EmptyDirVolumeSource{}},
 				},
 			},
+			ResourceType: "Container",
 		},
 	}
 

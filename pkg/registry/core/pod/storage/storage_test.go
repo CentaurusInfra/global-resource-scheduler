@@ -73,7 +73,7 @@ func validNewPod() *api.Pod {
 			DNSPolicy:     api.DNSClusterFirst,
 
 			TerminationGracePeriodSeconds: &grace,
-			ResourceType:                  "container",
+			ResourceType:                  "Container",
 			Containers: []api.Container{
 				{
 					Name:            "foo",
@@ -811,6 +811,7 @@ func TestEtcdUpdateScheduled(t *testing.T) {
 			},
 			SecurityContext: &api.PodSecurityContext{},
 			SchedulerName:   api.DefaultSchedulerName,
+			ResourceType:    "Container",
 		},
 	}, nil, 1, false)
 	if err != nil {
@@ -843,6 +844,7 @@ func TestEtcdUpdateScheduled(t *testing.T) {
 			SecurityContext:               &api.PodSecurityContext{},
 			SchedulerName:                 api.DefaultSchedulerName,
 			EnableServiceLinks:            &enableServiceLinks,
+			ResourceType:                  "Container",
 		},
 	}
 	_, _, err = storage.Update(ctx, podIn.Name, rest.DefaultUpdatedObjectInfo(&podIn), rest.ValidateAllObjectFunc, rest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
@@ -886,6 +888,7 @@ func TestEtcdUpdateStatus(t *testing.T) {
 			},
 			SecurityContext: &api.PodSecurityContext{},
 			SchedulerName:   api.DefaultSchedulerName,
+			ResourceType:    "Container",
 		},
 	}
 	err := storage.Storage.Create(ctx, key, &podStart, nil, 0, false)
@@ -911,6 +914,7 @@ func TestEtcdUpdateStatus(t *testing.T) {
 			},
 			SecurityContext: &api.PodSecurityContext{},
 			SchedulerName:   api.DefaultSchedulerName,
+			ResourceType:    "Container",
 		},
 		Status: api.PodStatus{
 			Phase:   api.PodRunning,

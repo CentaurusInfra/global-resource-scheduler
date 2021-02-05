@@ -59,6 +59,7 @@ func TestReplicaSetStrategy(t *testing.T) {
 				RestartPolicy: api.RestartPolicyAlways,
 				DNSPolicy:     api.DNSClusterFirst,
 				Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+				ResourceType:  "Container",
 			},
 		},
 	}
@@ -120,6 +121,7 @@ func TestReplicaSetStatusStrategy(t *testing.T) {
 				RestartPolicy: api.RestartPolicyAlways,
 				DNSPolicy:     api.DNSClusterFirst,
 				Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent"}},
+				ResourceType:  "Container",
 			},
 		},
 	}
@@ -232,6 +234,7 @@ func newReplicaSetWithSelectorLabels(selectorLabels map[string]string) *apps.Rep
 					RestartPolicy: api.RestartPolicyAlways,
 					DNSPolicy:     api.DNSClusterFirst,
 					Containers:    []api.Container{{Name: fakeImageName, Image: fakeImage, ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+					ResourceType:  "Container",
 				},
 			},
 		},
