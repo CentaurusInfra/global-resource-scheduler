@@ -330,8 +330,8 @@ func (c *ClusterController) gRPCRequest(event EventType, clusterNameSpace string
 			klog.Infof("Cluster update   %v", clusterName)
 		}
 	case EventType_Delete:
-		//When deleting a cluster, API Server deletes the cluster before cluster controller watches the event. 
-		//So, ClusterController cannot get cluster info from etcd. 
+		//When deleting a cluster, API Server deletes the cluster before cluster controller watches the event.
+		//So, ClusterController cannot get cluster info from etcd.
 		//To send grpc delete request to ResourceCollector, ClusterController makes a dummy new cluster
 		cluster := c.newCluster(clusterNameSpace, clusterName)
 		if err != nil || cluster == nil {
