@@ -36,6 +36,7 @@ import (
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/apiserver/pkg/util/dryrun"
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
+	"k8s.io/kubernetes/globalscheduler/controllers/util"
 	utiltrace "k8s.io/utils/trace"
 )
 
@@ -110,6 +111,10 @@ func DeleteResource(r rest.GracefulDeleter, allowsOptions bool, scope *RequestSc
 				ae := request.AuditEventFrom(ctx)
 				audit.LogRequestObject(ae, obj, scope.Resource, scope.Subresource, scope.Serializer)
 				trace.Step("Recorded the audit event")
+				//LatencyLog - start
+				if defaultGVK.Kind == "Pod" {
+					util.CheckTime(name, "api", "DeletePod-End", 2)
+				} //LatencyLog - end
 			} else {
 				if err := metainternalversion.ParameterCodec.DecodeParameters(req.URL.Query(), scope.MetaGroupVersion, options); err != nil {
 					err = errors.NewBadRequest(err.Error())
@@ -138,6 +143,7 @@ func DeleteResource(r rest.GracefulDeleter, allowsOptions bool, scope *RequestSc
 			scope.err(err, w, req)
 			return
 		}
+
 		trace.Step("Object deleted from database")
 
 		status := http.StatusOK
