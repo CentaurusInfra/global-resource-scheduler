@@ -3185,8 +3185,8 @@ func ValidatePodSpec(spec *core.PodSpec, fldPath *field.Path) field.ErrorList {
 		allErrs = append(allErrs, validateInitContainers(true, spec.InitContainers, spec.Containers, vols, fldPath.Child("initContainers"))...)
 		allErrs = append(allErrs, validateWorkloadInfo(true, spec.WorkloadInfo, fldPath.Child("workloadInfo"))...)
 		allErrs = append(allErrs, validateVirtualMachine(spec.VirtualMachine, fldPath.Child("virtualMachine"))...)
-		if spec.ResourceType == "" {
-			if spec.VirtualMachine.Flavors != nil && len(spec.VirtualMachine.Flavors) == 0 {
+		if spec.ResourceType == "vm" {
+			if spec.VirtualMachine.Flavors == nil || len(spec.VirtualMachine.Flavors) == 0 {
 				allErrs = append(allErrs, field.Required(fldPath.Child("VirtualMachine.Flavors"), "VirtualMachine Flavors can't be empty when resource type is not empty"))
 
 			}
