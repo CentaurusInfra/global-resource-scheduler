@@ -409,6 +409,7 @@ func DoTestPodScheduling(ns *v1.Namespace, t *testing.T, cs clientset.Interface)
 					},
 				},
 			},
+			ResourceType: "Container",
 		},
 	}
 

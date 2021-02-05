@@ -87,6 +87,7 @@ func validNewDeployment() *apps.Deployment {
 					},
 					RestartPolicy: api.RestartPolicyAlways,
 					DNSPolicy:     api.DNSClusterFirst,
+					ResourceType:  "Container",
 				},
 			},
 			Replicas: 7,

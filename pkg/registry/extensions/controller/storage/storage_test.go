@@ -58,6 +58,7 @@ var validPodTemplate = api.PodTemplate{
 			},
 			RestartPolicy: api.RestartPolicyAlways,
 			DNSPolicy:     api.DNSClusterFirst,
+			ResourceType:  "Container",
 		},
 	},
 }

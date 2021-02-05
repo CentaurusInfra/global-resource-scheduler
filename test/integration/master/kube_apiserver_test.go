@@ -78,6 +78,7 @@ func TestRun(t *testing.T) {
 							Image: "foo",
 						},
 					},
+					ResourceType: "Container",
 				},
 			},
 		},

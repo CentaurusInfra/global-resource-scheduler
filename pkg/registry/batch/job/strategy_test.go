@@ -68,6 +68,7 @@ func TestJobStrategy(t *testing.T) {
 			RestartPolicy: api.RestartPolicyOnFailure,
 			DNSPolicy:     api.DNSClusterFirst,
 			Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+			ResourceType:  "Container",
 		},
 	}
 	job := &batch.Job{
@@ -176,6 +177,7 @@ func TestJobStrategyWithGeneration(t *testing.T) {
 			RestartPolicy: api.RestartPolicyOnFailure,
 			DNSPolicy:     api.DNSClusterFirst,
 			Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+			ResourceType:  "Container",
 		},
 	}
 	job := &batch.Job{

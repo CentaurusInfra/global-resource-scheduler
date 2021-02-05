@@ -62,6 +62,7 @@ func TestDynamicClient(t *testing.T) {
 					Image: "test-image",
 				},
 			},
+			ResourceType: "Container",
 		},
 	}
 
