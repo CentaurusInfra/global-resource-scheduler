@@ -1,7 +1,7 @@
 apiVersion: globalscheduler.com/v1
 kind: Scheduler
 metadata:
-  name: mockscheduler2
+  name: mockscheduler1
 spec:
   tag: "1"
 ---

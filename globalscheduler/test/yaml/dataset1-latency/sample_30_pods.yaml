@@ -3,7 +3,7 @@ kind: Pod
 metadata:
   name: "pod-21"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm21"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -29,7 +29,7 @@ kind: Pod
 metadata:
   name: "pod-22"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm22"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -55,7 +55,7 @@ kind: Pod
 metadata:
   name: "pod-23"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm23"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -81,7 +81,7 @@ kind: Pod
 metadata:
   name: "pod-24"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm24"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -107,7 +107,7 @@ kind: Pod
 metadata:
   name: "pod-25"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm25"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -133,7 +133,7 @@ kind: Pod
 metadata:
   name: "pod-26"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm26"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -159,7 +159,7 @@ kind: Pod
 metadata:
   name: "pod-27"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm27"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -185,7 +185,7 @@ kind: Pod
 metadata:
   name: "pod-28"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm28"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -211,7 +211,7 @@ kind: Pod
 metadata:
   name: "pod-29"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm29"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -237,7 +237,7 @@ kind: Pod
 metadata:
   name: "pod-30"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm30"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -263,7 +263,7 @@ kind: Pod
 metadata:
   name: "pod-31"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm31"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -289,7 +289,7 @@ kind: Pod
 metadata:
   name: "pod-32"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm32"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -315,7 +315,7 @@ kind: Pod
 metadata:
   name: "pod-33"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm33"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -341,7 +341,7 @@ kind: Pod
 metadata:
   name: "pod-34"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm34"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -367,7 +367,7 @@ kind: Pod
 metadata:
   name: "pod-35"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm35"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -393,7 +393,7 @@ kind: Pod
 metadata:
   name: "pod-36"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm36"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -419,7 +419,7 @@ kind: Pod
 metadata:
   name: "pod-37"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm37"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -445,7 +445,7 @@ kind: Pod
 metadata:
   name: "pod-38"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm38"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -471,7 +471,7 @@ kind: Pod
 metadata:
   name: "pod-39"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm39"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -497,7 +497,7 @@ kind: Pod
 metadata:
   name: "pod-40"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm40"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -523,7 +523,7 @@ kind: Pod
 metadata:
   name: "pod-41"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm41"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -549,7 +549,7 @@ kind: Pod
 metadata:
   name: "pod-42"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm42"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -575,7 +575,7 @@ kind: Pod
 metadata:
   name: "pod-43"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm43"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -601,7 +601,7 @@ kind: Pod
 metadata:
   name: "pod-44"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm44"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -627,7 +627,7 @@ kind: Pod
 metadata:
   name: "pod-45"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm45"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -653,7 +653,7 @@ kind: Pod
 metadata:
   name: "pod-46"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm46"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -679,7 +679,7 @@ kind: Pod
 metadata:
   name: "pod-47"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm47"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -705,7 +705,7 @@ kind: Pod
 metadata:
   name: "pod-48"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm48"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -731,7 +731,7 @@ kind: Pod
 metadata:
   name: "pod-49"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm49"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
@@ -757,7 +757,7 @@ kind: Pod
 metadata:
   name: "pod-50"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm50"
     image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
