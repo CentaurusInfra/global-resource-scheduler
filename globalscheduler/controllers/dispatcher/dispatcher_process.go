@@ -1,12 +1,9 @@
 /*
 Copyright 2020 Authors of Arktos.
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -197,13 +194,12 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 			averageDeleteLatency := int(p.totalDeleteLatency) / p.totalPodDeleteNum
 			klog.V(2).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Total Number of Pods Deleted: %d, Average Delete Latency: %d Millisecond %%%%%%%%%%%%%%%%%%%%%%%%%%", p.totalPodDeleteNum, averageDeleteLatency)
 			go func() {
-				//temporarily comment for latency test
-				/*err = openstack.DeleteInstance(host, token, pod.Status.ClusterInstanceId)
+				err = openstack.DeleteInstance(host, token, pod.Status.ClusterInstanceId)
 				if err == nil {
 					klog.V(3).Infof("The openstack vm for the pod %v has been deleted at the host %v", pod.ObjectMeta.Name, host)
 				} else {
 					klog.Warningf("The openstack vm for the pod %v failed to delete with the error %v", pod.ObjectMeta.Name, err)
-				}*/
+				}
 				util.CheckTime(pod.Name, "dispatcher", "DeletePod-End", 2)
 			}()
 		} else {
@@ -220,13 +216,7 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 			averageCreateLatency := int(p.totalCreateLatency) / p.totalPodCreateNum
 			klog.V(2).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Total Number of Pods Created: %d, Average Create Latency: %d Millisecond %%%%%%%%%%%%%%%%%%%%%%%%%%", p.totalPodCreateNum, averageCreateLatency)
 			go func() {
-				//temporarily comment for latency test
-				/*instanceId, err := openstack.ServerCreate(host, token, &pod.Spec)*/
-				//temporarily comment for latency test
-				klog.Infof("token=%v", token)
-				instanceId := "cluster1"
-				err = nil
-				//
+				instanceId, err := openstack.ServerCreate(host, token, &pod.Spec)
 				if err == nil {
 					klog.V(3).Infof("The openstack vm for the pod %v has been created at the host %v", pod.ObjectMeta.Name, host)
 					pod.Status.ClusterInstanceId = instanceId
