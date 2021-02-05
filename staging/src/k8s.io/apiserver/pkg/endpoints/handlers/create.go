@@ -43,6 +43,7 @@ import (
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	utiltrace "k8s.io/utils/trace"
 	"k8s.io/kubernetes/globalscheduler/controllers/util"
+	"k8s.io/kubernetes/pkg/apis/core"
 )
 
 func createHandler(r rest.NamedCreater, scope *RequestScope, admit admission.Interface, includeName bool) http.HandlerFunc {
