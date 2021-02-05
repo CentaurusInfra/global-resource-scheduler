@@ -24,6 +24,7 @@ filegroup(
         "//globalscheduler/pkg/apis/scheduler:all-srcs",
         "//globalscheduler/pkg/scheduler:all-srcs",
         "//globalscheduler/test/data_createdelete_tool:all-srcs",
+        "//globalscheduler/test/latency_test:all-srcs",
     ],
     tags = ["automanaged"],
 )
