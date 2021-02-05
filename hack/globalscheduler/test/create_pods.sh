@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+locs=("NewYork NewYork NE-1 US" "Bellevue Washington NW-1 US" "Orlando Florida SE-1 US" "Austin Texas SW-1 US" "Chicago Illinois Central-1 US" "Boston Massachusettes NE-2 US" "SanFrancisco California NW-2 US" "Atlanta Georgia SE-2 US" "LasVegas Nevada SW-2 US" "Omaha Nebraska Central-2 US")
 
 function create_pod {
 # Create multiple YAML objects from stdin
@@ -24,27 +25,32 @@ metadata:
 spec:
   resourceType: "vm"
   virtualMachine:
-    name: openstack$1
-    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    name: vm$1
+    image: "b45c9c7c-64ae-4b9f-9a32-47ef88ebb32e"
     keyPairName: "demo-keypair"
-    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    securityGroupId: "9feee91c-bee8-4e6a-b2c5-74e4bc2a153a"
     flavors:
       - flavorID: "42"
     resourceCommonInfo:
      count: 1
      selector:
        geoLocation:
-         city: ""
-         province: ""
-         country: ""
+         city: "$2"
+         province: "$3"
+         area: "$4"
+         country: "$5"
        regions:
          - region: "NE"
   nics:
-    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+    - name: "b82da5d4-9d0c-4ba3-8ba6-9054a80998cc"
 EOF
 }
 
+locsLen=${#locs[@]}
+
 for ((i = 0 ; i < $(($1)) ; i++)); do
+    locsIdx=$(($i%locsLen))
     name="pod-$(($i))"
-    create_pod $name
+    create_pod $name ${locs[$locsIdx]}
+    sleep $2
 done
