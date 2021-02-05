@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "common.go",
         "klog.go",
+        "latency_log.go",
     ],
     importpath = "k8s.io/kubernetes/globalscheduler/controllers/util",
     visibility = ["//visibility:public"],

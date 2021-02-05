@@ -136,4 +136,3 @@ func compressUsername(username string) string {
 		return "other"
 	}
 }
-
