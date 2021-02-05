@@ -1204,6 +1204,9 @@ func TestPendingPodsMetric(t *testing.T) {
 					Namespace: fmt.Sprintf("ns%d", i),
 					UID:       types.UID(fmt.Sprintf("tp-%d", i)),
 				},
+				Spec: v1.PodSpec{
+				    ResourceType: "Container",
+				},
 			},
 			Timestamp: timestamp,
 		}

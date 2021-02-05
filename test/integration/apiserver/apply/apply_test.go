@@ -82,6 +82,7 @@ func TestApplyAlsoCreates(t *testing.T) {
 					"name": "test-pod"
 				},
 				"spec": {
+                    "resourceType": "Container",
 					"containers": [{
 						"name":  "test-container",
 						"image": "test-image"
@@ -161,6 +162,7 @@ func TestCreateOnApplyFailsWithUID(t *testing.T) {
 				"uid":  "88e00824-7f0e-11e8-94a1-c8d3ffb15800"
 			},
 			"spec": {
+                "resourceType": "Container",
 				"containers": [{
 					"name":  "test-container",
 					"image": "test-image"
@@ -201,6 +203,7 @@ func TestApplyUpdateApplyConflictForced(t *testing.T) {
                                         }
                                 },
                                 "spec": {
+                        "resourceType": "Container",
 				        "containers": [{
 					        "name":  "nginx",
 					        "image": "nginx:latest"
@@ -488,6 +491,7 @@ func TestApplyRemoveContainerPort(t *testing.T) {
 					}
 				},
 				"spec": {
+                    "resourceType": "Container",
 					"containers": [{
 						"name":  "nginx",
 						"image": "nginx:latest",
@@ -533,6 +537,7 @@ func TestApplyRemoveContainerPort(t *testing.T) {
 					}
 				},
 				"spec": {
+                    "resourceType": "Container",
 					"containers": [{
 						"name":  "nginx",
 						"image": "nginx:latest"
@@ -592,6 +597,7 @@ func TestApplyFailsWithVersionMismatch(t *testing.T) {
 					}
 				},
 				"spec": {
+                    "resourceType": "Container",
 					"containers": [{
 						"name":  "nginx",
 						"image": "nginx:latest"
@@ -633,6 +639,7 @@ func TestApplyFailsWithVersionMismatch(t *testing.T) {
 					}
 				},
 				"spec": {
+                    "resourceType": "Container",
 					"containers": [{
 						"name":  "nginx",
 						"image": "nginx:latest"
@@ -688,6 +695,7 @@ func TestApplyConvertsManagedFieldsVersion(t *testing.T) {
 						"f:spec": {
 							"f:template": {
 								"f: spec": {
+                                    "f:resourceType": {},
 									"f:containers": {
 										"k:{\"name\":\"sidecar\"}": {
 											".": {},
@@ -714,6 +722,7 @@ func TestApplyConvertsManagedFieldsVersion(t *testing.T) {
 					}
 				},
 				"spec": {
+                    "resourceType": "Container",
 					"containers": [{
 						"name":  "nginx",
 						"image": "nginx:latest"
@@ -742,6 +751,7 @@ func TestApplyConvertsManagedFieldsVersion(t *testing.T) {
 		"spec": {
 			"template": {
 				"spec": {
+                    "resourceType": "Container",
 					"containers": [{
 						"name":  "sidecar",
 						"image": "sidecar:latest"
@@ -810,6 +820,7 @@ func TestApplyConvertsManagedFieldsVersion(t *testing.T) {
 							Map: map[string]metav1.Fields{
 								"f:spec": {
 									Map: map[string]metav1.Fields{
+										"f:resourceType": {Map: map[string]metav1.Fields{}},
 										"f:containers": {
 											Map: map[string]metav1.Fields{
 												"k:{\"name\":\"sidecar\"}": {

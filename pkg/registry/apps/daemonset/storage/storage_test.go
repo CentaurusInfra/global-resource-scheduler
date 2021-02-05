@@ -72,6 +72,7 @@ func newValidDaemonSet() *apps.DaemonSet {
 					},
 					RestartPolicy: api.RestartPolicyAlways,
 					DNSPolicy:     api.DNSClusterFirst,
+					ResourceType:  "Container",
 				},
 			},
 		},

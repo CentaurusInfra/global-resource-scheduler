@@ -68,6 +68,7 @@ func validNewPodTemplate(name string) *api.PodTemplate {
 						TerminationMessagePolicy: api.TerminationMessageReadFile,
 					},
 				},
+				ResourceType: "Container",
 			},
 		},
 	}

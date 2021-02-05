@@ -136,6 +136,7 @@ func newRS(namespace string) *apps.ReplicaSet {
 							Image: "fakeimage",
 						},
 					},
+					ResourceType: "Container",
 				},
 			},
 		},

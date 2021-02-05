@@ -92,7 +92,7 @@ func TestRunUntil(t *testing.T) {
 	go r.Run(stopCh)
 	// Synchronously add a dummy pod into the watch channel so we
 	// know the RunUntil go routine is in the watch handler.
-	fw.Add(&v1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "bar"}})
+	fw.Add(&v1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "bar"}, Spec: v1.PodSpec{ResourceType: "Container"}})
 	close(stopCh)
 	select {
 	case _, ok := <-fw.ResultChan():

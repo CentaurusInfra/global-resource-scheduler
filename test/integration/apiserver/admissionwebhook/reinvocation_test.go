@@ -275,6 +275,7 @@ func TestWebhookReinvocationPolicy(t *testing.T) {
 						Name:  "fake-name",
 						Image: "fakeimage",
 					}},
+					ResourceType: "Container",
 				},
 			}
 			if tt.initialPriorityClass != "" {
@@ -457,5 +458,6 @@ var reinvocationMarkerFixture = &corev1.Pod{
 			Name:  "fake-name",
 			Image: "fakeimage",
 		}},
+		ResourceType: "Container",
 	},
 }
