@@ -1,5 +1,6 @@
 /*
 Copyright 2017 The Kubernetes Authors.
+Copyright 2020 Authors of Arktos - file modified.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -1205,7 +1206,7 @@ func TestPendingPodsMetric(t *testing.T) {
 					UID:       types.UID(fmt.Sprintf("tp-%d", i)),
 				},
 				Spec: v1.PodSpec{
-				    ResourceType: "Container",
+					ResourceType: "Container",
 				},
 			},
 			Timestamp: timestamp,
