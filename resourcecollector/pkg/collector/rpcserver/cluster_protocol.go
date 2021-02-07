@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector"
@@ -77,7 +76,7 @@ func (s *ClusterProtocolServer) SendClusterProfile(ctx context.Context,
 			SiteAttributes:   nil,
 		}
 		col.SiteInfoCache.AddSite(siteInfo)
-		informers.InformerFac.SyncOnSiteChange()
+		//informers.InformerFac.SyncOnSiteChange()
 	case ClusterStatusDeleted:
 		logger.Infof("grpc.GrpcSendClusterProfile deleted- siteID[%s], IP[%s]", siteID, ip)
 		col.SiteInfoCache.RemoveSite(siteID)
@@ -85,7 +84,7 @@ func (s *ClusterProtocolServer) SendClusterProfile(ctx context.Context,
 		if err != nil {
 			logger.Errorf("col.ResourceCache.RemoveSite err: %s", err.Error())
 		}
-		informers.InformerFac.SyncOnSiteChange()
+		//informers.InformerFac.SyncOnSiteChange()
 	default:
 		logger.Infof("grpc.GrpcSendClusterProfile status error[%s]- siteID[%s], IP[%s]", in.ClusterStatus, siteID, ip)
 		err := errors.New("status error")

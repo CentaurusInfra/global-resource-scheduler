@@ -18,7 +18,6 @@ package types
 
 import (
 	"encoding/json"
-
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 )
 
@@ -113,14 +112,15 @@ type Selector struct {
 
 // Stack is resource group
 type Stack struct {
-	Name      string            `json:"name" required:"true"`
-	Labels    map[string]string `json:"labels,omitempty"`
-	Resources []*Resource       `json:"resources,omitempty"`
-	Selector  Selector          `json:"-"`
-	Selected  Selected          `json:"-"`
-	UID       string            `json:"uid,omitempty"`
-	Tenant    string
-	Namespace string
+	Name       string            `json:"name" required:"true"`
+	Labels     map[string]string `json:"labels,omitempty"`
+	Resources  []*Resource       `json:"resources,omitempty"`
+	Selector   Selector          `json:"-"`
+	Selected   Selected          `json:"-"`
+	UID        string            `json:"uid,omitempty"`
+	CreateTime int64             `json:"-"`
+	Tenant     string
+	Namespace  string
 }
 
 func (in *Stack) DeepCopy() *Stack {
@@ -197,7 +197,7 @@ type Site struct {
 	SiteAttribute []*typed.SiteAttribute  `json:"site_attributes"`
 	EipTypeName   string                  `json:"eiptype_name"`
 	SpotResources map[string]SpotResource `json:"spot_resources"`
-	Hosts         []typed.Host            `json:"-"`
+	Hosts         []*typed.Host            `json:"-"`
 }
 
 func (sn *Site) Clone() *Site {

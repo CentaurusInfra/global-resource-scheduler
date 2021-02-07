@@ -57,14 +57,6 @@ func NewVolumeTypeInformer(client client.Interface, resyncPeriod time.Duration, 
 	collector internalinterfaces.ResourceCollector) cache.SharedInformer {
 	return cache.NewSharedInformer(
 		&cache.Lister{ListFunc: func(options interface{}) ([]interface{}, error) {
-			//siteInfoMap := map[string]*typed.SiteInfo{
-			//	"ns|name": {
-			//		SiteID:           "ns|name",
-			//		Region:           "ns",
-			//		AvailabilityZone: "name",
-			//		EipNetworkID:     "34.218.224.247",
-			//	},
-			//}
 			if collector == nil {
 				return nil, errors.New("collector need to be init correctly")
 			}

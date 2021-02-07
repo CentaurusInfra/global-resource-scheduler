@@ -148,6 +148,12 @@ func (sched *Scheduler) scheduleOne() {
 	// bind scheduler result to pod
 	logger.Infof("Try to bind to site, stacks:%v", result.Stacks)
 	sched.bindStacks(result.Stacks)
+
+	// log the elapsed time for the entire schedule
+	if stack.CreateTime != 0 {
+		spendTime := time.Now().UnixNano() - stack.CreateTime
+		logger.Infof("===Finished Schedule, time consumption: %vms===", spendTime/int64(time.Millisecond))
+	}
 }
 
 // generateAllocationFromStack generate a new allocation obj from one single stack

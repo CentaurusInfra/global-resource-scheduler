@@ -20,6 +20,7 @@ package scheduler
 import (
 	"fmt"
 	"reflect"
+	"time"
 
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -243,6 +244,7 @@ func (sched *Scheduler) addPodToSchedulingQueue(obj interface{}) {
 
 	// add pod resource to a stack
 	stack := getStackFromPod(pod)
+	stack.CreateTime = time.Now().UnixNano()
 
 	if err := sched.StackQueue.Add(stack); err != nil {
 		utilruntime.HandleError(fmt.Errorf("unable to queue %T: %v", obj, err))

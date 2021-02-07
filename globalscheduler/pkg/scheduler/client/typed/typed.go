@@ -324,7 +324,7 @@ type SiteResource struct {
 	SiteID           string `json:"site_id"`
 	Region           string `json:"region"`
 	AvailabilityZone string `json:"availability_zone"`
-	Hosts            []Host `json:"hosts"`
+	Hosts            []*Host `json:"hosts"`
 }
 
 type SiteResources struct {

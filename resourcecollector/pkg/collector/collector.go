@@ -155,13 +155,13 @@ func (c *Collector) StartInformersAndRun(stopCh <-chan struct{}) {
 			time.Duration(volumeTypeInterval)*time.Second, c).Informer()
 
 		// init eip pool informer
-		eipPoolInterval := config.GlobalConf.EipPoolInterval
-		eipPoolInformer := informers.InformerFac.EipPools(informers.EIPPOOLS, "Region",
-			time.Duration(eipPoolInterval)*time.Second).Informer()
-		eipPoolInformer.AddEventHandler(
-			cache.ResourceEventHandlerFuncs{
-				ListFunc: updateEipPools,
-			})
+		//eipPoolInterval := config.GlobalConf.EipPoolInterval
+		//eipPoolInformer := informers.InformerFac.EipPools(informers.EIPPOOLS, "Region",
+		//	time.Duration(eipPoolInterval)*time.Second).Informer()
+		//eipPoolInformer.AddEventHandler(
+		//	cache.ResourceEventHandlerFuncs{
+		//		ListFunc: updateEipPools,
+		//	})
 
 		informers.InformerFac.Start(stopCh2)
 

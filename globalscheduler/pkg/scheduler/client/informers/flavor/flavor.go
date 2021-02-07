@@ -19,10 +19,12 @@ package flavor
 
 import (
 	"errors"
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient"
 	"strconv"
+	"sync"
 	"time"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client"
@@ -66,46 +68,77 @@ func NewFlavorInformer(client client.Interface, resyncPeriod time.Duration, name
 				return nil, errors.New("get site info failed")
 			}
 
-			var interfaceSlice []interface{}
-			// todo MultiExec
-			for _, info := range siteInfoCache.SiteInfoMap {
+			// Use map to deduplicate the same RegionFlavor
+			regionFlavorMap := make(map[string]typed.RegionFlavor)
+			var wg sync.WaitGroup
+			for siteID, info := range siteInfoCache.SiteInfoMap {
 				cloudClient, err := cloudclient.NewClientSet(info.EipNetworkID)
 				if err != nil {
 					logger.Warnf("FlavorInformer.NewClientSet[%s] err: %s", info.EipNetworkID, err.Error())
 					continue
 				}
 				client := cloudClient.ComputeV2()
+				if client == nil {
+					logger.Errorf("Cluster[%s] computeV2 client is null!", info.EipNetworkID)
+					continue
+				}
 
-				flasPages, err := flavors.ListDetail(client, flavors.ListOpts{}).AllPages()
-				if err != nil {
-					logger.Errorf("flavor list failed! err: %s", err.Error())
-					return nil, err
-				}
-				flas, err := flavors.ExtractFlavors(flasPages)
-				if err != nil {
-					logger.Errorf("flavor ExtractFlavors failed! err: %s", err.Error())
-					return nil, err
-				}
-				for _, flavor := range flas {
-					flv := typed.Flavor{
-						ID:    flavor.Name, // eg: "m1.small"
-						Name:  flavor.Name, // eg: "m1.small"
-						Vcpus: strconv.Itoa(flavor.VCPUs),
-						Ram:   int64(flavor.RAM),
-						OsExtraSpecs: typed.OsExtraSpecs{
-							ResourceType: "default",
-						},
+				wg.Add(1)
+				go func(siteID, region string, client *gophercloud.ServiceClient) {
+					defer wg.Done()
+					regionFlavors, err := getRegionFlavors(region, client)
+					if err != nil {
+						logger.Errorf("site[%s] list failed! err: %s", siteID, err.Error())
+						return
 					}
-					regionFlv := typed.RegionFlavor{
-						RegionFlavorID: info.Region + "|" + flavor.Name,
-						Region:         info.Region,
-						Flavor:         flv,
+					for _, rf := range regionFlavors {
+						regionFlavorMap[rf.RegionFlavorID] = rf
 					}
-					interfaceSlice = append(interfaceSlice, regionFlv)
-				}
+				}(siteID, info.Region, client)
+			}
+			wg.Wait()
+
+			// result set, []typed.RegionFlavor
+			var interfaceSlice []interface{}
+			for _, rf := range regionFlavorMap {
+				interfaceSlice = append(interfaceSlice, rf)
 			}
 			return interfaceSlice, nil
 		}}, resyncPeriod, name, key, typed.ListOpts{})
+}
+
+// Get flavor information for each cluster(az) (goroutine concurrent execution)
+func getRegionFlavors(region string, client *gophercloud.ServiceClient) ([]typed.RegionFlavor, error) {
+	flasPages, err := flavors.ListDetail(client, flavors.ListOpts{}).AllPages()
+	if err != nil {
+		logger.Errorf("flavor list failed! err: %s", err.Error())
+		return nil, err
+	}
+	flas, err := flavors.ExtractFlavors(flasPages)
+	if err != nil {
+		logger.Errorf("flavor ExtractFlavors failed! err: %s", err.Error())
+		return nil, err
+	}
+	//var interfaceSlice []interface{}
+	ret := make([]typed.RegionFlavor, 0)
+	for _, flavor := range flas {
+		flv := typed.Flavor{
+			ID:    flavor.Name, // eg: "m1.small"
+			Name:  flavor.Name, // eg: "m1.small"
+			Vcpus: strconv.Itoa(flavor.VCPUs),
+			Ram:   int64(flavor.RAM),
+			OsExtraSpecs: typed.OsExtraSpecs{
+				ResourceType: "default",
+			},
+		}
+		regionFlv := typed.RegionFlavor{
+			RegionFlavorID: region + "|" + flavor.Name,
+			Region:         region,
+			Flavor:         flv,
+		}
+		ret = append(ret, regionFlv)
+	}
+	return ret, nil
 }
 
 func (f *informerFlavor) defaultInformer(client client.Interface, resyncPeriod time.Duration, name string, key string) cache.SharedInformer {
