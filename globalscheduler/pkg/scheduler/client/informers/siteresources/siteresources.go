@@ -21,8 +21,8 @@ import (
 	"errors"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/hypervisors"
+	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient"
 	"sync"
 	"time"
@@ -63,7 +63,7 @@ func NewSiteResourcesInformer(client client.Interface, reSyncPeriod time.Duratio
 			}
 			siteInfoCache := collector.GetSiteInfos()
 			if siteInfoCache == nil || siteInfoCache.SiteInfoMap == nil {
-				logger.Errorf("get site info failed")
+				klog.Errorf("get site info failed")
 				return nil, errors.New("get site info failed")
 			}
 
@@ -73,13 +73,13 @@ func NewSiteResourcesInformer(client client.Interface, reSyncPeriod time.Duratio
 			for siteID, info := range siteInfoCache.SiteInfoMap {
 				cloudClient, err := cloudclient.NewClientSet(info.EipNetworkID)
 				if err != nil {
-					logger.Warnf("SiteResourcesInformer.NewClientSet[%s] err: %s", info.EipNetworkID, err.Error())
+					klog.Warningf("SiteResourcesInformer.NewClientSet[%s] err: %s", info.EipNetworkID, err.Error())
 					collector.RecordSiteUnreacheable(siteID)
 					continue
 				}
 				client := cloudClient.ComputeV2()
 				if client == nil {
-					logger.Errorf("Cluster[%s] computeV2 client is null!", info.EipNetworkID)
+					klog.Errorf("Cluster[%s] computeV2 client is null!", info.EipNetworkID)
 					continue
 				}
 
@@ -88,7 +88,7 @@ func NewSiteResourcesInformer(client client.Interface, reSyncPeriod time.Duratio
 					defer wg.Done()
 					ret, err := getSiteResource(siteID, region, az, client)
 					if err != nil {
-						logger.Errorf("site[%s] list failed! err: %s", siteID, err.Error())
+						klog.Errorf("site[%s] list failed! err: %s", siteID, err.Error())
 						return
 					}
 					interfaceSlice = append(interfaceSlice, ret)
@@ -104,12 +104,12 @@ func NewSiteResourcesInformer(client client.Interface, reSyncPeriod time.Duratio
 func getSiteResource(siteID, region, az string, client *gophercloud.ServiceClient) (interface{}, error) {
 	hypervisorsPages, err := hypervisors.List(client).AllPages()
 	if err != nil {
-		logger.Errorf("hypervisors list failed! err: %s", err.Error())
+		klog.Errorf("hypervisors list failed! err: %s", err.Error())
 		return nil, err
 	}
 	hs, err := hypervisors.ExtractHypervisors(hypervisorsPages)
 	if err != nil {
-		logger.Errorf("hypervisors ExtractHypervisors failed! err: %s", err.Error())
+		klog.Errorf("hypervisors ExtractHypervisors failed! err: %s", err.Error())
 		return nil, err
 	}
 

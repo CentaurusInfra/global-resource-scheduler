@@ -19,9 +19,9 @@ package volume
 import (
 	"context"
 	"fmt"
+	"k8s.io/klog"
 	"math"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
@@ -74,7 +74,7 @@ func (pl *Volume) Filter(ctx context.Context, cycleState *interfaces.CycleState,
 		if allocatableSize, ok = siteCacheInfo.TotalStorage[volType]; !ok {
 			msg := fmt.Sprintf("Site (%s) do not support required volume(%s).Support volume(%v)",
 				siteCacheInfo.GetSite().SiteID, volType, siteCacheInfo.TotalStorage)
-			logger.Debug(ctx, msg)
+			klog.Info(msg)
 			return interfaces.NewStatus(interfaces.Unschedulable, msg)
 		}
 
@@ -85,7 +85,7 @@ func (pl *Volume) Filter(ctx context.Context, cycleState *interfaces.CycleState,
 		if allocatableSize < requestedSize+size {
 			msg := fmt.Sprintf("Site (%s) do not support required volume(%s-%f).Support volume(%v)",
 				siteCacheInfo.GetSite().SiteID, volType, size, siteCacheInfo.TotalStorage)
-			logger.Debug(ctx, msg)
+			klog.Info(msg)
 			return interfaces.NewStatus(interfaces.Unschedulable, msg)
 		}
 

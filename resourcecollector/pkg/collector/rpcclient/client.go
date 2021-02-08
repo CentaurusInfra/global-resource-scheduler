@@ -20,12 +20,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"k8s.io/klog"
 	"strings"
 	"time"
 
 	"google.golang.org/grpc"
 	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/common/config"
 )
 
@@ -41,7 +41,7 @@ func GrpcUpdateClusterStatus(siteID string, state int64) error {
 	grpcHost := config.GlobalConf.ClusterControllerIP
 	client, ctx, conn, cancel, err := getGrpcClient(grpcHost)
 	if err != nil {
-		logger.Errorf("Error to make a connection to ClusterController %s", grpcHost)
+		klog.Errorf("Error to make a connection to ClusterController %s", grpcHost)
 		return err
 	}
 	defer conn.Close()
@@ -57,18 +57,18 @@ func GrpcUpdateClusterStatus(siteID string, state int64) error {
 	}
 	returnMessage, err := client.UpdateClusterStatus(ctx, req)
 	if err != nil {
-		logger.Errorf("Error to update cluster status to ClusterController, err: %s", err.Error())
+		klog.Errorf("Error to update cluster status to ClusterController, err: %s", err.Error())
 		return err
 	}
 	if returnMessage.ReturnCode == ReturnError {
-		logger.Errorf("ClusterController update cluster status err")
+		klog.Errorf("ClusterController update cluster status err")
 		return errors.New("ClusterController update cluster status err")
 	}
 	return nil
 }
 
 func getGrpcClient(grpcHost string) (pb.ResourceCollectorProtocolClient, context.Context, *grpc.ClientConn, context.CancelFunc, error) {
-	logger.Infof("get gRPC client: %s", grpcHost)
+	klog.Infof("get gRPC client: %s", grpcHost)
 	address := fmt.Sprintf("%s:%s", grpcHost, config.GlobalConf.ClusterControllerPort)
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {

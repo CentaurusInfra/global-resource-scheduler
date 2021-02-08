@@ -20,12 +20,12 @@ package internalcache
 import (
 	"encoding/json"
 	"fmt"
+	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
 	"sync"
 	"time"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	schedulerlisters "k8s.io/kubernetes/globalscheduler/pkg/scheduler/listers"
 	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
@@ -113,7 +113,7 @@ func newSiteCacheInfoListItem(ni *schedulersitecacheinfo.SiteCacheInfo) *siteCac
 func (cache *collectorCache) moveSiteCacheInfoToHead(siteID string) {
 	ni, ok := cache.siteCacheInfos[siteID]
 	if !ok {
-		logger.Errorf("No Host with name %v found in the cache", siteID)
+		klog.Errorf("No Host with name %v found in the cache", siteID)
 		return
 	}
 	// if the site info list item is already at the head, we are done.
@@ -141,7 +141,7 @@ func (cache *collectorCache) moveSiteCacheInfoToHead(siteID string) {
 func (cache *collectorCache) removeSiteCacheInfoFromList(siteID string) {
 	ni, ok := cache.siteCacheInfos[siteID]
 	if !ok {
-		logger.Errorf("No site with ID %v found in the cache", siteID)
+		klog.Errorf("No site with ID %v found in the cache", siteID)
 		return
 	}
 
@@ -239,7 +239,7 @@ func (cache *collectorCache) UpdateSnapshot(siteCacheInfoSnapshot *Snapshot) err
 			", trying to recover",
 			len(siteCacheInfoSnapshot.SiteCacheInfoList), cache.siteTree.numSites,
 			len(siteCacheInfoSnapshot.SiteCacheInfoMap), len(cache.siteCacheInfos))
-		logger.Errorf(errMsg)
+		klog.Errorf(errMsg)
 		// We will try to recover by re-creating the lists for the next scheduling cycle, but still return an
 		// error to surface the problem, the error will likely cause a failure to the current scheduling cycle.
 		cache.updateSiteCacheInfoSnapshotList(siteCacheInfoSnapshot, true)
@@ -272,7 +272,7 @@ func (cache *collectorCache) updateSiteCacheInfoSnapshotList(snapshot *Snapshot,
 			if n := snapshot.SiteCacheInfoMap[siteID]; n != nil {
 				snapshot.SiteCacheInfoList = append(snapshot.SiteCacheInfoList, n)
 			} else {
-				logger.Errorf("site %q exist in siteTree but not in siteInfoMap, this should not happen.",
+				klog.Errorf("site %q exist in siteTree but not in siteInfoMap, this should not happen.",
 					siteID)
 			}
 		}
@@ -392,10 +392,10 @@ func (cache *collectorCache) AddStack(stack *types.Stack) error {
 	case ok && cache.assumedStacks[key]:
 		if currState.stack.Selected != stack.Selected {
 			// The stack was added to a different site than it was assumed to.
-			logger.Warnf("Stack %v was assumed to be on %v but got added to %v", key, stack.Selected, currState.stack.Selected)
+			klog.Warningf("Stack %v was assumed to be on %v but got added to %v", key, stack.Selected, currState.stack.Selected)
 			// Clean this up.
 			if err := cache.removeStack(currState.stack); err != nil {
-				logger.Errorf("removing pod error: %v", err)
+				klog.Errorf("removing pod error: %v", err)
 			}
 			cache.AddStack(stack)
 		}
@@ -431,8 +431,8 @@ func (cache *collectorCache) UpdateStack(oldStack, newStack *types.Stack) error 
 	// before Update event, in which case the state would change from Assumed to Added.
 	case ok && !cache.assumedStacks[key]:
 		if currState.stack.Selected != newStack.Selected {
-			logger.Errorf("Stack %v updated on a different site than previously added to.", key)
-			logger.Errorf("Schedulercache is corrupted and can badly affect scheduling decisions")
+			klog.Errorf("Stack %v updated on a different site than previously added to.", key)
+			klog.Errorf("Schedulercache is corrupted and can badly affect scheduling decisions")
 		}
 		if err := cache.updateStack(oldStack, newStack); err != nil {
 			return err
@@ -460,9 +460,9 @@ func (cache *collectorCache) RemoveStack(stack *types.Stack) error {
 	// before Remove event, in which case the state would change from Assumed to Added.
 	case ok && !cache.assumedStacks[key]:
 		if currState.stack.Selected.SiteID != stack.Selected.SiteID {
-			logger.Errorf("Stack %v was assumed to be on %v but got added to %v", key,
+			klog.Errorf("Stack %v was assumed to be on %v but got added to %v", key,
 				stack.Selected.SiteID, currState.stack.Selected.SiteID)
-			logger.Errorf("Schedulercache is corrupted and can badly affect scheduling decisions")
+			klog.Errorf("Schedulercache is corrupted and can badly affect scheduling decisions")
 		}
 		err := cache.removeStack(currState.stack)
 		if err != nil {
@@ -596,7 +596,7 @@ func (cache *collectorCache) UpdateSiteWithEipPool(siteID string, eipPool *typed
 
 	err := siteCacheInfo.info.UpdateSiteWithEipPool(eipPool)
 	if err != nil {
-		logger.Errorf("UpdateSiteWithEipPool failed! err: %s", err)
+		klog.Errorf("UpdateSiteWithEipPool failed! err: %s", err)
 		return err
 	}
 
@@ -614,7 +614,7 @@ func (cache *collectorCache) UpdateSiteWithVolumePool(siteID string, volumePool 
 
 	err := siteCacheInfo.info.UpdateSiteWithVolumePool(volumePool)
 	if err != nil {
-		logger.Errorf("UpdateSiteWithEipPool failed! err: %s", err)
+		klog.Errorf("UpdateSiteWithEipPool failed! err: %s", err)
 		return err
 	}
 
@@ -636,7 +636,7 @@ func (cache *collectorCache) UpdateEipPool(eipPool *typed.EipPool) error {
 	for siteID := range siteIDs {
 		err := cache.UpdateSiteWithEipPool(siteID, eipPool)
 		if err != nil {
-			logger.Errorf("UpdateSiteWithEipPool failed! err: %s", err)
+			klog.Errorf("UpdateSiteWithEipPool failed! err: %s", err)
 			continue
 		}
 	}
@@ -657,7 +657,7 @@ func (cache *collectorCache) UpdateVolumePool(volumePool *typed.RegionVolumePool
 	for siteID := range siteIDs {
 		err := cache.UpdateSiteWithVolumePool(siteID, volumePool)
 		if err != nil {
-			logger.Errorf("UpdateSiteWithEipPool failed! err: %s", err)
+			klog.Errorf("UpdateSiteWithEipPool failed! err: %s", err)
 			continue
 		}
 	}
@@ -677,7 +677,7 @@ func (cache *collectorCache) UpdateSiteWithResInfo(siteID string, resInfo types.
 
 	err := siteCacheInfo.info.UpdateSiteWithResInfo(resInfo)
 	if err != nil {
-		logger.Errorf("UpdateSiteWithResInfo failed! err: %s", err)
+		klog.Errorf("UpdateSiteWithResInfo failed! err: %s", err)
 		return err
 	}
 
@@ -697,7 +697,7 @@ func (cache *collectorCache) UpdateQos(siteID string, netMetricData *types.NetMe
 
 	err := siteCacheInfo.info.UpdateQos(netMetricData)
 	if err != nil {
-		logger.Errorf("UpdateQos failed! err: %s", err)
+		klog.Errorf("UpdateQos failed! err: %s", err)
 		return err
 	}
 
@@ -715,7 +715,7 @@ func (cache *collectorCache) UpdateSiteWithRatio(region string, az string, ratio
 		if siteCacheInfo.info.GetSite().Region == region && siteCacheInfo.info.GetSite().AvailabilityZone == az {
 			err := siteCacheInfo.info.UpdateSiteWithRatio(ratios)
 			if err != nil {
-				logger.Errorf("UpdateSiteWithRatio failed! err: %s", err)
+				klog.Errorf("UpdateSiteWithRatio failed! err: %s", err)
 				return err
 			}
 
@@ -736,7 +736,7 @@ func (cache *collectorCache) UpdateSpotResources(region string, az string, spotR
 		if siteCacheInfo.info.GetSite().Region == region && siteCacheInfo.info.GetSite().AvailabilityZone == az {
 			err := siteCacheInfo.info.UpdateSpotResources(spotRes)
 			if err != nil {
-				logger.Errorf("UpdateSiteWithRatio failed! err: %s", err)
+				klog.Errorf("UpdateSiteWithRatio failed! err: %s", err)
 				return err
 			}
 			cache.moveSiteCacheInfoToHead(siteCacheInfo.info.GetSite().SiteID)
@@ -774,12 +774,12 @@ func (cache *collectorCache) PrintString() {
 	for _, siteCache := range cache.siteCacheInfos {
 		bytes, err := json.Marshal(siteCache.info)
 		if err != nil {
-			logger.Warnf("Marshal siteInfo[%s] err: %s\n", siteCache.info.GetSite().SiteID, err.Error())
+			klog.Warningf("Marshal siteInfo[%s] err: %s\n", siteCache.info.GetSite().SiteID, err.Error())
 			continue
 		}
 		str := fmt.Sprintf("collectorCache(%d/%d) siteID[%s], info: %s\n", i, total, siteCache.info.GetSite().SiteID,
 			string(bytes))
-		logger.Infof(str)
+		klog.Infof(str)
 		i++
 	}
 }
@@ -802,17 +802,17 @@ func (cache *collectorCache) cleanupAssumedStacks(now time.Time) {
 	for key := range cache.assumedStacks {
 		ps, ok := cache.stackStates[key]
 		if !ok {
-			logger.Fatalf("Key found in assumed set but not in podStates. Potentially a logical error.")
+			klog.Fatalf("Key found in assumed set but not in podStates. Potentially a logical error.")
 		}
 		if !ps.bindingFinished {
-			logger.Infof("Couldn't expire cache for stack %v/%v. Binding is still in progress.",
+			klog.Infof("Couldn't expire cache for stack %v/%v. Binding is still in progress.",
 				ps.stack.UID, ps.stack.Name)
 			continue
 		}
 		if now.After(*ps.deadline) {
-			logger.Warnf("Stack %s/%s expired", ps.stack.UID, ps.stack.Name)
+			klog.Warningf("Stack %s/%s expired", ps.stack.UID, ps.stack.Name)
 			if err := cache.expireStack(key, ps); err != nil {
-				logger.Errorf("ExpirePod failed for %s: %v", key, err)
+				klog.Errorf("ExpirePod failed for %s: %v", key, err)
 			}
 		}
 	}

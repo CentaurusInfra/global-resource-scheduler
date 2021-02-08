@@ -21,6 +21,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"k8s.io/klog"
 	"net"
 	"net/http"
 	"os"
@@ -28,7 +29,6 @@ import (
 
 	_ "k8s.io/kubernetes/globalscheduler/pkg/scheduler"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 )
 
 const (
@@ -44,7 +44,7 @@ type HTTPServer struct {
 func getServerAddress() string {
 	hostIP := config.DefaultString("address", "0.0.0.0")
 	if hostIP == "" {
-		logger.Errorf("server IP address not configured.")
+		klog.Errorf("server IP address not configured.")
 		os.Exit(1)
 	}
 
@@ -60,7 +60,7 @@ func NewHTTPServer() (*HTTPServer, error) {
 	httpAddr := getServerAddress()
 	l, err := net.Listen("tcp", httpAddr)
 	if err != nil {
-		logger.Errorf("failed to http(https) listen: %s err: %s", httpAddr, err.Error())
+		klog.Errorf("failed to http(https) listen: %s err: %s", httpAddr, err.Error())
 		return nil, err
 	}
 	hs.listener = l
@@ -94,11 +94,11 @@ func (ln tcpKeepAliveListener) Accept() (net.Conn, error) {
 	}
 	err = tc.SetKeepAlive(true)
 	if err != nil {
-		logger.Infof("Meet error when setting KeepAlive as true: %s", err.Error())
+		klog.Infof("Meet error when setting KeepAlive as true: %s", err.Error())
 	}
 	err = tc.SetKeepAlivePeriod(defaultKeepAlivePeriod)
 	if err != nil {
-		logger.Infof("Meet error when setting KeepAlivePeriod (%s): %s", defaultKeepAlivePeriod, err.Error())
+		klog.Infof("Meet error when setting KeepAlivePeriod (%s): %s", defaultKeepAlivePeriod, err.Error())
 	}
 	return tc, nil
 }
@@ -116,11 +116,11 @@ func RunServer(
 	// Shutdown server gracefully.
 	go func() {
 		<-stopCh
-		logger.Infof("shutdown Server gracefully...")
+		klog.Infof("shutdown Server gracefully...")
 		ctx, cancel := context.WithTimeout(context.Background(), shutDownTimeout)
 		err := server.Shutdown(ctx)
 		if err != nil {
-			logger.Errorf("shutdown Server failed, err: %s.", err.Error())
+			klog.Errorf("shutdown Server failed, err: %s.", err.Error())
 		}
 		cancel()
 	}()
@@ -134,7 +134,7 @@ func RunServer(
 
 	err := server.Serve(listener)
 	if err != nil {
-		logger.Errorf("Server runs failed, err: %s.", err.Error())
+		klog.Errorf("Server runs failed, err: %s.", err.Error())
 	}
 
 	msg := fmt.Sprintf("Stopped listening on %s", ln.Addr().String())

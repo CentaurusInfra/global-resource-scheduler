@@ -19,8 +19,8 @@ package stackaffinity
 import (
 	"context"
 	"fmt"
+	"k8s.io/klog"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/labels"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
@@ -41,13 +41,13 @@ func (pl *StackAffinity) Name() string {
 	return Name
 }
 
-func getAffinityScore(ctx context.Context, stack *types.Stack, siteCacheInfo *sitecacheinfo.SiteCacheInfo) (int64, *interfaces.Status) {
+func getAffinityScore(stack *types.Stack, siteCacheInfo *sitecacheinfo.SiteCacheInfo) (int64, *interfaces.Status) {
 	selector := labels.NewSelector()
 	if len(stack.Selector.StackAffinity) > 0 {
 		for _, aff := range stack.Selector.StackAffinity {
 			r, err := labels.NewRequirement(aff.Key, labels.Operator(aff.Operator), aff.StrValues)
 			if err != nil {
-				logger.Error(ctx, "NewRequirement requirement(%s) failed! err : %s", aff, err)
+				klog.Errorf("NewRequirement requirement(%s) failed! err : %s", aff, err)
 				return 0, interfaces.NewStatus(interfaces.Error, fmt.Sprintf("requirement failed."))
 			}
 			selector = selector.Add(*r)
@@ -69,13 +69,13 @@ func getAffinityScore(ctx context.Context, stack *types.Stack, siteCacheInfo *si
 	return score, nil
 }
 
-func getAntiAffinityScore(ctx context.Context, stack *types.Stack, siteCacheInfo *sitecacheinfo.SiteCacheInfo) (int64, *interfaces.Status) {
+func getAntiAffinityScore(stack *types.Stack, siteCacheInfo *sitecacheinfo.SiteCacheInfo) (int64, *interfaces.Status) {
 	selector := labels.NewSelector()
 	if len(stack.Selector.StackAntiAffinity) > 0 {
 		for _, aff := range stack.Selector.StackAntiAffinity {
 			r, err := labels.NewRequirement(aff.Key, labels.Operator(aff.Operator), aff.StrValues)
 			if err != nil {
-				logger.Error(ctx, "NewRequirement requirement(%s) failed! err : %s", aff, err)
+				klog.Errorf("NewRequirement requirement(%s) failed! err : %s", aff, err)
 				return 0, interfaces.NewStatus(interfaces.Error, fmt.Sprintf("requirement failed."))
 			}
 			selector = selector.Add(*r)
@@ -103,15 +103,15 @@ func (pl *StackAffinity) Score(ctx context.Context, state *interfaces.CycleState
 		return 0, interfaces.NewStatus(interfaces.Error, fmt.Sprintf("site not found"))
 	}
 
-	affinityScore, status := getAffinityScore(ctx, stack, siteCacheInfo)
+	affinityScore, status := getAffinityScore(stack, siteCacheInfo)
 	if status != nil {
-		logger.Error(ctx, "getAffinityScore failed! err: %s", state)
+		klog.Errorf("getAffinityScore failed! err: %s", state)
 		return 0, status
 	}
 
-	AntiaffinityScore, status := getAntiAffinityScore(ctx, stack, siteCacheInfo)
+	AntiaffinityScore, status := getAntiAffinityScore(stack, siteCacheInfo)
 	if status != nil {
-		logger.Error(ctx, "getAffinityScore failed! err: %s", state)
+		klog.Errorf("getAffinityScore failed! err: %s", state)
 		return 0, status
 	}
 

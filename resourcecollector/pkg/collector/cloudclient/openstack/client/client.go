@@ -19,7 +19,7 @@ package client
 import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
+	"k8s.io/klog"
 )
 
 func NewComputeV2Client(provider *gophercloud.ProviderClient) (*gophercloud.ServiceClient, error) {
@@ -27,7 +27,7 @@ func NewComputeV2Client(provider *gophercloud.ProviderClient) (*gophercloud.Serv
 		Region: "RegionOne",
 	})
 	if err != nil {
-		logger.Errorf("NewComputeV2 err: %s", err)
+		klog.Errorf("NewComputeV2 err: %s", err)
 		return nil, err
 	}
 	return client, nil
@@ -38,7 +38,7 @@ func NewVolumeV3Client(provider *gophercloud.ProviderClient) (*gophercloud.Servi
 		Region: "RegionOne",
 	})
 	if err != nil {
-		logger.Errorf("NewBlockStorageV3 err: %s", err)
+		klog.Errorf("NewBlockStorageV3 err: %s", err)
 		return nil, err
 	}
 	return client, nil

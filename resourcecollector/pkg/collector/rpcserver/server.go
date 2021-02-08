@@ -18,8 +18,8 @@ package rpcserver
 
 import (
 	"google.golang.org/grpc"
+	"k8s.io/klog"
 	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/common/config"
 	"net"
 )
@@ -27,14 +27,14 @@ import (
 func NewRpcServer() {
 	lis, err := net.Listen("tcp", "127.0.0.1:"+config.GlobalConf.RpcPort)
 	if err != nil {
-		logger.Fatalf("failed to listen: %v", err)
+		klog.Fatalf("failed to listen: %v", err)
 	}
-	logger.Infof("gRPC Server started, Port: " + config.GlobalConf.RpcPort)
+	klog.Infof("gRPC Server started, Port: " + config.GlobalConf.RpcPort)
 
 	s := grpc.NewServer()
 	pb.RegisterClusterProtocolServer(s, &ClusterProtocolServer{})
 
 	if err := s.Serve(lis); err != nil {
-		logger.Fatalf("failed to serve: %v", err)
+		klog.Fatalf("failed to serve: %v", err)
 	}
 }

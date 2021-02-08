@@ -22,6 +22,7 @@ import (
 	"fmt"
 	uuid "github.com/satori/go.uuid"
 	"io/ioutil"
+	"k8s.io/klog"
 	"math/rand"
 	"sort"
 	"sync"
@@ -38,7 +39,6 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/factory"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	frameworkplugins "k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins"
@@ -66,7 +66,7 @@ func InitScheduler(config *types.GSSchedulerConfiguration, stopCh <-chan struct{
 // if it runs failed, nil will be return.
 func GetScheduler() *Scheduler {
 	if scheduler == nil {
-		logger.Errorf("Scheduler need to be init correctly")
+		klog.Errorf("Scheduler need to be init correctly")
 		return scheduler
 	}
 
@@ -139,20 +139,20 @@ func (sched *Scheduler) scheduleOne() {
 	// do scheduling process
 	result, err := sched.Schedule2(tmpContext, allocation)
 	if err != nil {
-		logger.Errorf("Schedule failed, err: %s", err)
+		klog.Errorf("Schedule failed, err: %s", err)
 		return
 	}
 
-	logger.Infof("Scheduler result: %v", result)
+	klog.Infof("Scheduler result: %v", result)
 
 	// bind scheduler result to pod
-	logger.Infof("Try to bind to site, stacks:%v", result.Stacks)
+	klog.Infof("Try to bind to site, stacks:%v", result.Stacks)
 	sched.bindStacks(result.Stacks)
 
 	// log the elapsed time for the entire schedule
 	if stack.CreateTime != 0 {
 		spendTime := time.Now().UnixNano() - stack.CreateTime
-		logger.Infof("===Finished Schedule, time consumption: %vms===", spendTime/int64(time.Millisecond))
+		klog.Infof("===Finished Schedule, time consumption: %vms===", spendTime/int64(time.Millisecond))
 	}
 }
 
@@ -198,7 +198,7 @@ func (sched *Scheduler) GetResourceSnapshot(resourceCollectorApiUrl string) (int
 	// update flavor map
 	internalcache.FlavorCache.UpdateFlavorMap(snapshot.RegionFlavorMap, snapshot.FlavorMap)
 
-	logger.Infof("snapshot : %v", snapshot)
+	klog.Infof("snapshot : %v", snapshot)
 	return snapshot, nil
 }
 
@@ -346,7 +346,7 @@ func (sched *Scheduler) prioritizeSites(
 	// sort by score.
 	sort.Sort(sort.Reverse(result))
 
-	logger.Debug(ctx, "score sites: %v", result)
+	klog.Infof("score sites: %v", result)
 
 	return result, nil
 }
@@ -395,24 +395,24 @@ func (sched *Scheduler) bind(ctx context.Context, stack *types.Stack, targetSite
 // Schedule Run begins watching and scheduling. It waits for cache to be synced ,
 // then starts scheduling and blocked until the context is done.
 func (sched *Scheduler) Schedule2(ctx context.Context, allocation *types.Allocation) (result ScheduleResult, err error) {
-	logger.Debug(ctx, "Attempting to schedule allocation: %v", allocation.ID)
+	klog.Infof("Attempting to schedule allocation: %v", allocation.ID)
 
 	state := interfaces.NewCycleState()
 	schedulingCycleCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	start := time.Now()
-	logger.Debug(ctx, "[START] snapshot site...")
+	klog.Infof("[START] snapshot site...")
 	err = sched.updateSnapshot()
 	if err != nil {
-		logger.Error(ctx, "sched snapshot failed! err : %s", err)
+		klog.Errorf("sched snapshot failed! err : %s", err)
 		return result, err
 	}
 	end := time.Now()
-	logger.Debug(ctx, "[DONE] snapshot site, use_time: %d us", end.Sub(start))
+	klog.Infof("[DONE] snapshot site, use_time: %d us", end.Sub(start))
 
 	start = end
-	logger.Debug(ctx, "[START] Running prefilter plugins...")
+	klog.Infof("[START] Running prefilter plugins...")
 	// Run "prefilter" plugins.
 	preFilterStatus := sched.SchedFrame.RunPreFilterPlugins(schedulingCycleCtx, state, &allocation.Stack)
 	if !preFilterStatus.IsSuccess() {
@@ -420,28 +420,28 @@ func (sched *Scheduler) Schedule2(ctx context.Context, allocation *types.Allocat
 	}
 
 	end = time.Now()
-	logger.Debug(ctx, "[DONE] Running prefilter plugins, use_time: %d us", end.Sub(start))
+	klog.Infof("[DONE] Running prefilter plugins, use_time: %d us", end.Sub(start))
 	start = end
 
-	logger.Debug(ctx, "[START] Running filter plugins...")
+	klog.Infof("[START] Running filter plugins...")
 	filteredSitesStatuses := make(interfaces.SiteToStatusMap)
 	allocation.Stack.Selector = allocation.Selector
 	filteredSites, err := sched.findSitesThatPassFilters(ctx, state, &allocation.Stack, filteredSitesStatuses)
 	if err != nil {
-		logger.Error(ctx, "findSitesThatPassFilters failed! err: %s", err)
+		klog.Errorf("findSitesThatPassFilters failed! err: %s", err)
 		return result, err
 	}
 	end = time.Now()
-	logger.Debug(ctx, "[DONE] Running filter plugins, use_time: %d us", end.Sub(start))
+	klog.Infof("[DONE] Running filter plugins, use_time: %d us", end.Sub(start))
 	start = end
 
-	logger.Debug(ctx, "filteredSitesStatuses = %v", filteredSitesStatuses.ToString())
+	klog.Infof("filteredSitesStatuses = %v", filteredSitesStatuses.ToString())
 	if len(filteredSites) <= 0 {
-		logger.Error(ctx, "filter none site. resultStatus: %s", filteredSitesStatuses.ToString())
+		klog.Errorf("filter none site. resultStatus: %s", filteredSitesStatuses.ToString())
 		return result, nil
 	}
 
-	logger.Debug(ctx, "[START] Running preScore plugins...")
+	klog.Infof("[START] Running preScore plugins...")
 	// Run "prescore" plugins.
 	prescoreStatus := sched.SchedFrame.RunPreScorePlugins(ctx, state, &allocation.Stack, filteredSites)
 	if !prescoreStatus.IsSuccess() {
@@ -449,28 +449,28 @@ func (sched *Scheduler) Schedule2(ctx context.Context, allocation *types.Allocat
 	}
 
 	end = time.Now()
-	logger.Debug(ctx, "[DONE] Running preScore plugins, use_time: %d us", end.Sub(start))
+	klog.Infof("[DONE] Running preScore plugins, use_time: %d us", end.Sub(start))
 	start = end
 
-	logger.Debug(ctx, "[START] Running prioritizeSites plugins...")
+	klog.Infof("[START] Running prioritizeSites plugins...")
 	priorityList, err := sched.prioritizeSites(ctx, state, &allocation.Stack, filteredSites)
 	if err != nil {
-		logger.Error(ctx, "prioritizeSites failed! err: %s", err)
+		klog.Errorf("prioritizeSites failed! err: %s", err)
 		return result, err
 	}
 	end = time.Now()
-	logger.Debug(ctx, "[DONE] Running prioritizeSites plugins, use_time: %d us", end.Sub(start))
+	klog.Infof("[DONE] Running prioritizeSites plugins, use_time: %d us", end.Sub(start))
 	start = end
 
-	logger.Debug(ctx, "[START] Running StrategyPlugins plugins...")
+	klog.Infof("[START] Running StrategyPlugins plugins...")
 	siteCount, strategyStatus := sched.SchedFrame.RunStrategyPlugins(ctx, state, allocation, priorityList)
 	if !strategyStatus.IsSuccess() {
-		logger.Error(ctx, "RunStrategyPlugins failed! err: %s", err)
+		klog.Errorf("RunStrategyPlugins failed! err: %s", err)
 		return result, err
 	}
 	end = time.Now()
-	logger.Debug(ctx, "[DONE] Running StrategyPlugins plugins, use_time: %d us", end.Sub(start))
-	logger.Debug(ctx, "selected Hosts : %#v", siteCount)
+	klog.Infof("[DONE] Running StrategyPlugins plugins, use_time: %d us", end.Sub(start))
+	klog.Infof("selected Hosts : %#v", siteCount)
 	start = end
 
 	var count = 0
@@ -481,7 +481,7 @@ func (sched *Scheduler) Schedule2(ctx context.Context, allocation *types.Allocat
 			//bind
 			err = sched.bind(ctx, &newStack, value.SiteID, state)
 			if err != nil {
-				logger.Error(ctx, "bind host(%s) failed! err: %s", value.SiteID, err)
+				klog.Errorf("bind host(%s) failed! err: %s", value.SiteID, err)
 				return result, err
 			}
 			result.Stacks = append(result.Stacks, newStack)
@@ -497,12 +497,12 @@ func (sched *Scheduler) Schedule2(ctx context.Context, allocation *types.Allocat
 	}
 
 	if count < allocation.Replicas {
-		logger.Error(ctx, "not find suit host")
+		klog.Errorf("not find suit host")
 		return result, fmt.Errorf("not find suit host")
 	}
 
 	end = time.Now()
-	logger.Debug(ctx, "allocation(%s) success, use_time: %d us", allocation.ID, end.Sub(start))
+	klog.Infof("allocation(%s) success, use_time: %d us", allocation.ID, end.Sub(start))
 
 	return
 }
@@ -510,35 +510,35 @@ func (sched *Scheduler) Schedule2(ctx context.Context, allocation *types.Allocat
 // Schedule Run begins watching and scheduling. It waits for cache to be synced,
 // then starts scheduling and blocked until the context is done.
 func (sched *Scheduler) Schedule(ctx context.Context, stack *types.Stack) (result ScheduleResult, err error) {
-	logger.Info(ctx, "Attempting to schedule stack: %v/%v", stack.Name, stack.UID)
+	klog.Info(ctx, "Attempting to schedule stack: %v/%v", stack.Name, stack.UID)
 
 	state := interfaces.NewCycleState()
 	schedulingCycleCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	err = sched.snapshot()
 	if err != nil {
-		logger.Error(ctx, "sched snapshot failed! err : %s", err)
+		klog.Errorf("sched snapshot failed! err : %s", err)
 		return result, err
 	}
 
-	logger.Info(ctx, "Snapshotting scheduler cache and site infos done")
-	logger.Info(ctx, "Running prefilter plugins...")
+	klog.Info(ctx, "Snapshotting scheduler cache and site infos done")
+	klog.Info(ctx, "Running prefilter plugins...")
 	// Run "prefilter" plugins.
 	preFilterStatus := sched.SchedFrame.RunPreFilterPlugins(schedulingCycleCtx, state, stack)
 	if !preFilterStatus.IsSuccess() {
 		return result, preFilterStatus.AsError()
 	}
-	logger.Info(ctx, "Running prefilter plugins done")
+	klog.Info(ctx, "Running prefilter plugins done")
 
 	filteredSitesStatuses := make(interfaces.SiteToStatusMap)
 	filteredSites, err := sched.findSitesThatPassFilters(ctx, state, stack, filteredSitesStatuses)
 	if err != nil {
-		logger.Error(ctx, "findSitesThatPassFilters failed! err: %s", err)
+		klog.Errorf("findSitesThatPassFilters failed! err: %s", err)
 		return result, err
 	}
-	logger.Debug(ctx, "Computing predicates done, filteredSitesStatuses = %v", filteredSitesStatuses.ToString())
+	klog.Infof("Computing predicates done, filteredSitesStatuses = %v", filteredSitesStatuses.ToString())
 	if len(filteredSites) <= 0 {
-		logger.Debug(ctx, "filter none site. resultStatus: %s", filteredSitesStatuses.ToString())
+		klog.Infof("filter none site. resultStatus: %s", filteredSitesStatuses.ToString())
 		return result, nil
 	}
 
@@ -547,20 +547,20 @@ func (sched *Scheduler) Schedule(ctx context.Context, stack *types.Stack) (resul
 	if !prescoreStatus.IsSuccess() {
 		return result, prescoreStatus.AsError()
 	}
-	logger.Info(ctx, "Running prescore plugins done")
+	klog.Info(ctx, "Running prescore plugins done")
 
 	priorityList, err := sched.prioritizeSites(ctx, state, stack, filteredSites)
 	if err != nil {
-		logger.Error(ctx, "prioritizeSites failed! err: %s", err)
+		klog.Errorf("prioritizeSites failed! err: %s", err)
 		return result, err
 	}
 	host, err := sched.selectHost(priorityList)
-	logger.Info(ctx, "selectHost is %s", host)
+	klog.Info(ctx, "selectHost is %s", host)
 
 	// bind
 	err = sched.bind(ctx, stack, host, state)
 	if err != nil {
-		logger.Error(ctx, "bind host(%s) failed! err: %s", host, err)
+		klog.Errorf("bind host(%s) failed! err: %s", host, err)
 		return result, err
 	}
 
@@ -576,14 +576,14 @@ func (sched *Scheduler) buildFramework() error {
 
 	policyFile := config.String(constants.ConfPolicyFile)
 	if policyFile == "" {
-		logger.Errorf("policyFile(%s) not set!", constants.ConfPolicyFile)
+		klog.Errorf("policyFile(%s) not set!", constants.ConfPolicyFile)
 		return fmt.Errorf("policyFile(%s) not set", constants.ConfPolicyFile)
 	}
 
 	policy := &types.Policy{}
 	err := config.InitPolicyFromFile(policyFile, policy)
 	if err != nil {
-		logger.Errorf("InitPolicyFromFile %s failed! err: %s", constants.ConfPolicyFile, err)
+		klog.Errorf("InitPolicyFromFile %s failed! err: %s", constants.ConfPolicyFile, err)
 		return err
 	}
 
@@ -592,7 +592,7 @@ func (sched *Scheduler) buildFramework() error {
 		interfaces.WithSnapshotSharedLister(sched.siteCacheInfoSnapshot),
 		interfaces.WithCache(sched.SchedulerCache))
 	if err != nil {
-		logger.Errorf("NewFramework failed! err : %s", err)
+		klog.Errorf("NewFramework failed! err : %s", err)
 		return err
 	}
 
@@ -758,13 +758,13 @@ func updateEipPools(obj []interface{}) {
 	for _, eipPoolObj := range obj {
 		eipPool, ok := eipPoolObj.(typed.EipPool)
 		if !ok {
-			logger.Warnf("convert interface to (typed.EipPool) failed.")
+			klog.Warning("convert interface to (typed.EipPool) failed.")
 			continue
 		}
 
 		err := scheduler.Cache().UpdateEipPool(&eipPool)
 		if err != nil {
-			logger.Infof("UpdateEipPool failed! err: %s", err)
+			klog.Infof("UpdateEipPool failed! err: %s", err)
 		}
 	}
 }
@@ -778,13 +778,13 @@ func updateVolumePools(obj []interface{}) {
 	for _, volumePoolObj := range obj {
 		volumePool, ok := volumePoolObj.(typed.RegionVolumePool)
 		if !ok {
-			logger.Warnf("convert interface to (typed.VolumePools) failed.")
+			klog.Warning("convert interface to (typed.VolumePools) failed.")
 			continue
 		}
 
 		err := scheduler.Cache().UpdateVolumePool(&volumePool)
 		if err != nil {
-			logger.Infof("updateVolumePools failed! err: %s", err)
+			klog.Infof("updateVolumePools failed! err: %s", err)
 		}
 	}
 }
@@ -800,7 +800,7 @@ func addSitesToCache(obj []interface{}) {
 	for _, sn := range obj {
 		siteResource, ok := sn.(typed.SiteResource)
 		if !ok {
-			logger.Warnf("convert interface to (typed.SiteResource) failed.")
+			klog.Warning("convert interface to (typed.SiteResource) failed.")
 			continue
 		}
 
@@ -815,7 +815,7 @@ func addSitesToCache(obj []interface{}) {
 				info := convertToSite(siteInfo, siteResource)
 				err := scheduler.Cache().AddSite(info)
 				if err != nil {
-					logger.Infof("add site to cache failed! err: %s", err)
+					klog.Infof("add site to cache failed! err: %s", err)
 				}
 
 				isFind = true
@@ -836,7 +836,7 @@ func addSitesToCache(obj []interface{}) {
 			site.Hosts = append(site.Hosts, siteResource.Hosts...)
 			err := scheduler.Cache().AddSite(site)
 			if err != nil {
-				logger.Infof("add site to cache failed! err: %s", err)
+				klog.Infof("add site to cache failed! err: %s", err)
 			}
 		}
 	}

@@ -17,10 +17,10 @@ limitations under the License.
 package siteresources
 
 import (
+	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache"
 	"strings"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
@@ -63,7 +63,7 @@ func (r *resourceAllocationScorer) score(
 	}
 
 	var score = r.scorer(requested, allocatable, false, 0, 0)
-	logger.Infof(
+	klog.Infof(
 		"%v -> %v: %v, map of allocatable resources %v, map of requested resources %v ,score %d,",
 		stack.Name, site.SiteID, r.Name,
 		allocatable, requested, score,
@@ -187,7 +187,7 @@ func calculateResourceAllocatableRequest(siteCacheInfo *schedulersitecacheinfo.S
 		return calculateStorageAllocatableRequest(siteCacheInfo, stack)
 	}
 
-	logger.Infof("requested resource %v not considered for site score calculation", resource)
+	klog.Infof("requested resource %v not considered for site score calculation", resource)
 
 	return 0, 0
 }
