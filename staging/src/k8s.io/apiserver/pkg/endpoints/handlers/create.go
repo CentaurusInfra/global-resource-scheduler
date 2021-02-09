@@ -41,6 +41,8 @@ import (
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/apiserver/pkg/util/dryrun"
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
+	"k8s.io/kubernetes/globalscheduler/controllers/util"
+	"k8s.io/kubernetes/pkg/apis/core"
 	utiltrace "k8s.io/utils/trace"
 )
 
@@ -175,6 +177,13 @@ func createHandler(r rest.NamedCreater, scope *RequestScope, admit admission.Int
 			scope.err(err, w, req)
 			return
 		}
+		//LatencyLog - start
+		if defaultGVK.Kind == "Pod" {
+			if pod, ok := result.(*core.Pod); ok {
+				util.CheckTime(pod.Name, "api", "CreatePod-CreateHandler", 2)
+			}
+		} //LatencyLog - end
+
 		trace.Step("Object stored in database")
 
 		code := http.StatusCreated

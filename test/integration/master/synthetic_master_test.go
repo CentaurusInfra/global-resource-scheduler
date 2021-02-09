@@ -271,6 +271,7 @@ func constructBody(val string, size int, field string, t *testing.T) *appsv1.Dep
 							Image: "foo",
 						},
 					},
+					ResourceType: "Container",
 				},
 			},
 		},
@@ -402,6 +403,7 @@ var deploymentExtensions = `
         }
       },
       "spec": {
+        "resourceType": "Container",
         "containers": [{
           "name": "nginx",
           "image": "k8s.gcr.io/nginx:1.7.9"
@@ -434,6 +436,7 @@ var deploymentApps = `
         }
       },
       "spec": {
+        "resourceType": "Container",
         "containers": [{
           "name": "nginx",
           "image": "k8s.gcr.io/nginx:1.7.9"

@@ -31,6 +31,7 @@ import (
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 	"k8s.io/apiserver/pkg/endpoints/handlers/responsewriters"
 	genericapirequest "k8s.io/apiserver/pkg/endpoints/request"
+	"k8s.io/kubernetes/globalscheduler/controllers/util"
 )
 
 var (
@@ -57,6 +58,20 @@ func WithAuthentication(handler http.Handler, auth authenticator.Request, failed
 		return handler
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		//latency log -start
+		if idx := strings.Index(req.RequestURI, "/api/v1/tenants/system/namespaces/default/pods/"); idx >= 0 {
+			podName := strings.TrimPrefix(req.RequestURI, "/api/v1/tenants/system/namespaces/default/pods/")
+			//Use kubectl for both creating and deleting pods
+			if strings.Index(req.UserAgent(), "kubectl") >= 0 && req.Method == "GET" {
+				if req.Method == "GET" {
+					util.CheckTime(podName, "api", "CreatePod-Start", 1)
+				}
+				if req.Method == "DELETE" {
+					util.CheckTime(podName, "api", "DeletePod-Start", 1)
+				}
+			}
+		} //latency log - end
+
 		if len(apiAuds) > 0 {
 			req = req.WithContext(authenticator.WithAudiences(req.Context(), apiAuds))
 		}

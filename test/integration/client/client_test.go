@@ -79,6 +79,7 @@ func TestClient(t *testing.T) {
 					Name: "test",
 				},
 			},
+			ResourceType: "Container",
 		},
 	}
 
@@ -146,6 +147,7 @@ func TestAtomicPut(t *testing.T) {
 					Containers: []v1.Container{
 						{Name: "name", Image: "image"},
 					},
+					ResourceType: "Container",
 				},
 			},
 		},
@@ -224,6 +226,7 @@ func TestPatch(t *testing.T) {
 			Containers: []v1.Container{
 				{Name: "name", Image: "image"},
 			},
+			ResourceType: "Container",
 		},
 	}
 	pods := c.CoreV1().Pods("default")
@@ -752,6 +755,7 @@ func runSelfLinkTestOnNamespace(t *testing.T, c clientset.Interface, namespace s
 			Containers: []v1.Container{
 				{Name: "name", Image: "image"},
 			},
+			ResourceType: "Container",
 		},
 	}
 	pod, err := c.CoreV1().Pods(namespace).Create(&podBody)

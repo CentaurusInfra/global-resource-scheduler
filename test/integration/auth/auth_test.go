@@ -139,6 +139,7 @@ var aPod = `
     "creationTimestamp": null%s
   },
   "spec": {
+    "resourceType": "Container",
     "containers": [
       {
         "name": "foo",
@@ -170,6 +171,7 @@ var aRC = `
         }
       },
       "spec": {
+        "resourceType": "Container",
         "containers": [
           {
             "name": "foo",

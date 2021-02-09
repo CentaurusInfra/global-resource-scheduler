@@ -68,6 +68,7 @@ func validNewCronJob() *batch.CronJob {
 								ImagePullPolicy:          api.PullIfNotPresent,
 								TerminationMessagePolicy: api.TerminationMessageReadFile,
 							}},
+							ResourceType: "Container",
 						},
 					},
 				},

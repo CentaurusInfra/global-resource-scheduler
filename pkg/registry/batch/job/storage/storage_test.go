@@ -77,6 +77,7 @@ func validNewJob() *batch.Job {
 					},
 					RestartPolicy: api.RestartPolicyOnFailure,
 					DNSPolicy:     api.DNSClusterFirst,
+					ResourceType:  "Container",
 				},
 			},
 		},

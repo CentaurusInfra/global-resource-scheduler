@@ -28976,6 +28976,4 @@ spec:
   serverprice: 10
   storage:
   - storagecapacity: 256
-    typeid: sas
-
-  
+    typeid: sas 

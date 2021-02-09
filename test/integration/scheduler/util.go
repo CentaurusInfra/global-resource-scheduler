@@ -456,6 +456,7 @@ func initPausePod(cs clientset.Interface, conf *pausePodConfig) *v1.Pod {
 			NodeName:      conf.NodeName,
 			SchedulerName: conf.SchedulerName,
 			Priority:      conf.Priority,
+			ResourceType:  "Container",
 		},
 	}
 	if conf.Resources != nil {
@@ -524,7 +525,8 @@ func initPodWithContainers(cs clientset.Interface, conf *podWithContainersConfig
 			Namespace: conf.Namespace,
 		},
 		Spec: v1.PodSpec{
-			Containers: conf.Containers,
+			Containers:   conf.Containers,
+			ResourceType: "Container",
 		},
 	}
 	return pod
