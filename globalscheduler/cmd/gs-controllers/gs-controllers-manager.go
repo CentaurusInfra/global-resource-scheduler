@@ -55,7 +55,7 @@ func main() {
 	kubeconfig := flag.String("kubeconfig", "/var/run/kubernetes/admin.kubeconfig", "Path to a kubeconfig. Only required if out-of-cluster.")
 	masterURL := flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	workers := flag.Int("concurrent-workers", 0, "The number of workers that are allowed to process concurrently.")
-	grpcHost := flag.String("grpchost", "", "IP address of resource collector.")
+	grpcHost := flag.String("grpchost", "127.0.0.1", "IP address of resource collector.")
 	flag.Parse()
 	if *workers <= 0 {
 		*workers = defaultWorkers
