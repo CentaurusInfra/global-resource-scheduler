@@ -257,7 +257,9 @@ func addSitesToCache(objs []interface{}) {
 // Integrate site static information and resource information
 func convertToSite(siteInfo *typed.SiteInfo, siteResource typed.SiteResource) *types.Site {
 	result := &types.Site{
-		SiteID: siteInfo.SiteID,
+		SiteID:           siteInfo.SiteID,
+		ClusterName:      siteInfo.ClusterName,
+		ClusterNamespace: siteInfo.ClusterNamespace,
 		GeoLocation: types.GeoLocation{
 			Country:  siteInfo.Country,
 			Area:     siteInfo.Area,

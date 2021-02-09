@@ -130,30 +130,36 @@ func (sched *Scheduler) Cache() internalcache.Cache {
 // scheduleOne does the entire scheduling workflow for a single pod.
 func (sched *Scheduler) scheduleOne() {
 	stack := sched.NextStack()
-
+	logTime("done pop queue", stack.CreateTime)
 	// generate allocation from stack
 	allocation, err := sched.generateAllocationFromStack(stack)
 
-	tmpContext := context.Background()
-
 	// do scheduling process
+	tmpContext := context.Background()
 	result, err := sched.Schedule2(tmpContext, allocation)
 	if err != nil {
 		klog.Errorf("Schedule failed, err: %s", err)
+		sched.setPodScheduleErr(stack)
 		return
 	}
-
+	logTime("done Schedule2", stack.CreateTime)
 	klog.Infof("Scheduler result: %v", result)
 
 	// bind scheduler result to pod
 	klog.Infof("Try to bind to site, stacks:%v", result.Stacks)
 	sched.bindStacks(result.Stacks)
+	logTime("done bind pod to cluster", stack.CreateTime)
 
 	// log the elapsed time for the entire schedule
 	if stack.CreateTime != 0 {
 		spendTime := time.Now().UnixNano() - stack.CreateTime
 		klog.Infof("===Finished Schedule, time consumption: %vms===", spendTime/int64(time.Millisecond))
 	}
+}
+
+func logTime(timePoint string, stackCreateTime int64) {
+	spendTime := time.Now().UnixNano() - stackCreateTime
+	klog.Infof("==%s, time consumption: %vms==", timePoint, spendTime/int64(time.Millisecond))
 }
 
 // generateAllocationFromStack generate a new allocation obj from one single stack
@@ -437,8 +443,9 @@ func (sched *Scheduler) Schedule2(ctx context.Context, allocation *types.Allocat
 
 	klog.Infof("filteredSitesStatuses = %v", filteredSitesStatuses.ToString())
 	if len(filteredSites) <= 0 {
-		klog.Errorf("filter none site. resultStatus: %s", filteredSitesStatuses.ToString())
-		return result, nil
+		err := fmt.Errorf("filter none site. resultStatus: %s", filteredSitesStatuses.ToString())
+		klog.Error(err)
+		return result, err
 	}
 
 	klog.Infof("[START] Running preScore plugins...")
@@ -510,7 +517,7 @@ func (sched *Scheduler) Schedule2(ctx context.Context, allocation *types.Allocat
 // Schedule Run begins watching and scheduling. It waits for cache to be synced,
 // then starts scheduling and blocked until the context is done.
 func (sched *Scheduler) Schedule(ctx context.Context, stack *types.Stack) (result ScheduleResult, err error) {
-	klog.Info(ctx, "Attempting to schedule stack: %v/%v", stack.Name, stack.UID)
+	klog.Info(ctx, "Attempting to schedule stack: %v/%v", stack.PodName, stack.UID)
 
 	state := interfaces.NewCycleState()
 	schedulingCycleCtx, cancel := context.WithCancel(ctx)
@@ -846,7 +853,9 @@ func addSitesToCache(obj []interface{}) {
 
 func convertToSite(site typed.SiteInfo, siteResource typed.SiteResource) *types.Site {
 	result := &types.Site{
-		SiteID: site.SiteID,
+		SiteID:           site.SiteID,
+		ClusterName:      site.ClusterName,
+		ClusterNamespace: site.ClusterNamespace,
 		GeoLocation: types.GeoLocation{
 			Country:  site.Country,
 			Area:     site.Area,

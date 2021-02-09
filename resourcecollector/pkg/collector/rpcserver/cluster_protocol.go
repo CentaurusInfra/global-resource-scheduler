@@ -39,9 +39,8 @@ func (s *ClusterProtocolServer) SendClusterProfile(ctx context.Context,
 	klog.Infof("Received RPC Request")
 	ns := in.ClusterNameSpace
 	name := in.ClusterName
-	siteID := fmt.Sprintf("%s|%s", ns, name)
-	if in.ClusterSpec == nil || in.ClusterSpec.GeoLocation == nil || in.ClusterSpec.Operator == nil {
-		err := errors.New("ClusterSpec information is incomplete")
+	if in.ClusterSpec == nil || in.ClusterSpec.GeoLocation == nil || in.ClusterSpec.Region == nil {
+		err := errors.New("clusterSpec information is incomplete")
 		return getReturnMessageFromError(ns, name, &err), err
 	}
 	ip := in.ClusterSpec.ClusterIpAddress
@@ -49,6 +48,13 @@ func (s *ClusterProtocolServer) SendClusterProfile(ctx context.Context,
 		err := errors.New("cluster ip is not set")
 		return getReturnMessageFromError(ns, name, &err), err
 	}
+	region := in.ClusterSpec.Region.Region
+	az := in.ClusterSpec.Region.AvailabilityZone
+	if region == "" || az == "" {
+		err := errors.New("cluster region or az is invalid")
+		return getReturnMessageFromError(ns, name, &err), err
+	}
+	siteID := fmt.Sprintf("%s|%s", region, az)
 
 	col, err := collector.GetCollector()
 	if err != nil {
@@ -61,19 +67,22 @@ func (s *ClusterProtocolServer) SendClusterProfile(ctx context.Context,
 		klog.Infof("grpc.GrpcSendClusterProfile created- siteID[%s], IP[%s]", siteID, ip)
 		siteInfo := &typed.SiteInfo{
 			SiteID:           siteID,
-			Name:             siteID,
-			Region:           ns,
-			AvailabilityZone: name,
+			ClusterName:      in.ClusterName,
+			ClusterNamespace: in.ClusterNameSpace,
+			Region:           region,
+			AvailabilityZone: az,
 			Status:           ClusterStatusCreated,
 			City:             in.ClusterSpec.GeoLocation.City,
 			Province:         in.ClusterSpec.GeoLocation.Province,
 			Area:             in.ClusterSpec.GeoLocation.Area,
 			Country:          in.ClusterSpec.GeoLocation.Country,
-			Operator:         &typed.Operator{Name: in.ClusterSpec.Operator.Operator},
 			EipNetworkID:     ip,
 			EipTypeName:      "not known",
 			EipCidr:          nil,
 			SiteAttributes:   nil,
+		}
+		if in.ClusterSpec.Operator != nil {
+			siteInfo.Operator = &typed.Operator{Name: in.ClusterSpec.Operator.Operator}
 		}
 		col.SiteInfoCache.AddSite(siteInfo)
 		//informers.InformerFac.SyncOnSiteChange()

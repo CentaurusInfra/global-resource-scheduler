@@ -817,11 +817,11 @@ func (cache *schedulerCache) cleanupAssumedStacks(now time.Time) {
 		}
 		if !ps.bindingFinished {
 			klog.Infof("Couldn't expire cache for stack %v/%v. Binding is still in progress.",
-				ps.stack.UID, ps.stack.Name)
+				ps.stack.UID, ps.stack.PodName)
 			continue
 		}
 		if now.After(*ps.deadline) {
-			klog.Warningf("Stack %s/%s expired", ps.stack.UID, ps.stack.Name)
+			klog.Warningf("Stack %s/%s expired", ps.stack.UID, ps.stack.PodName)
 			if err := cache.expireStack(key, ps); err != nil {
 				klog.Errorf("ExpirePod failed for %s: %v", key, err)
 			}

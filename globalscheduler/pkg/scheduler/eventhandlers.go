@@ -170,12 +170,12 @@ func (sched *Scheduler) deletePodFromCache(obj interface{}) {
 
 func getStackFromPod(pod *v1.Pod) *types.Stack {
 	stack := &types.Stack{
-		Name:      pod.Name,
-		Tenant:    pod.Tenant,
-		Namespace: pod.Namespace,
-		UID:       string(pod.UID),
-		Selector:  getStackSelector(&pod.Spec.VirtualMachine.ResourceCommonInfo.Selector),
-		Resources: getStackResources(pod),
+		PodName:      pod.Name,
+		Tenant:       pod.Tenant,
+		PodNamespace: pod.Namespace,
+		UID:          string(pod.UID),
+		Selector:     getStackSelector(&pod.Spec.VirtualMachine.ResourceCommonInfo.Selector),
+		Resources:    getStackResources(pod),
 	}
 
 	return stack
@@ -306,7 +306,7 @@ func (sched *Scheduler) skipStackUpdate(stack *types.Stack) bool {
 	// Non-assumed stacks should never be skipped.
 	isAssumed, err := sched.SchedulerCache.IsAssumedStack(stack)
 	if err != nil {
-		utilruntime.HandleError(fmt.Errorf("failed to check whether stack %s/%s/%s is assumed: %v", stack.Tenant, stack.Namespace, stack.Name, err))
+		utilruntime.HandleError(fmt.Errorf("failed to check whether stack %s/%s/%s is assumed: %v", stack.Tenant, stack.PodNamespace, stack.PodName, err))
 		return false
 	}
 	if !isAssumed {
@@ -316,7 +316,7 @@ func (sched *Scheduler) skipStackUpdate(stack *types.Stack) bool {
 	// Gets the assumed stack from the cache.
 	assumedStack, err := sched.SchedulerCache.GetStack(stack)
 	if err != nil {
-		utilruntime.HandleError(fmt.Errorf("failed to get assumed stack %s/%s/%s from cache: %v", stack.Tenant, stack.Namespace, stack.Name, err))
+		utilruntime.HandleError(fmt.Errorf("failed to get assumed stack %s/%s/%s from cache: %v", stack.Tenant, stack.PodNamespace, stack.PodName, err))
 		return false
 	}
 
@@ -327,23 +327,54 @@ func (sched *Scheduler) skipStackUpdate(stack *types.Stack) bool {
 	if !reflect.DeepEqual(assumedStackCopy, stackCopy) {
 		return false
 	}
-	klog.V(3).Infof("Skipping stack %s/%s/%s update", stack.Tenant, stack.Namespace, stack.Name)
+	klog.V(3).Infof("Skipping stack %s/%s/%s update", stack.Tenant, stack.PodNamespace, stack.PodName)
 	return true
 }
 
 func (sched *Scheduler) bindStacks(assumedStacks []types.Stack) {
 	for _, newStack := range assumedStacks {
-		siteID := newStack.Selected.AvailabilityZone
-		sched.bindToSite(siteID, &newStack)
+		clusterName := newStack.Selected.ClusterName
+		//ns := newStack.Selected.ClusterNamespace
+		sched.bindToSite(clusterName, &newStack)
 	}
 }
 
-func (sched *Scheduler) bindToSite(siteID string, assumedStack *types.Stack) error {
+func (sched *Scheduler) setPodScheduleErr(reqStack *types.Stack) error {
+	// get pod first
+	pod, err := sched.Client.CoreV1().PodsWithMultiTenancy(reqStack.PodNamespace, reqStack.Tenant).Get(reqStack.PodName, metav1.GetOptions{})
+	if err != nil {
+		klog.Warningf("Failed to get status for pod %q: %v", reqStack.PodName+"/"+reqStack.PodNamespace+"/"+
+			reqStack.Tenant+"/"+reqStack.UID, err)
+		return err
+	}
+
+	// update pod status to NoSchedule
+	newStatus := v1.PodStatus{
+		Phase:  v1.PodNoSchedule,
+	}
+	klog.Infof("Attempting to update pod status from %v to %v", pod.Status, newStatus)
+	_, _, err = statusutil.PatchPodStatus(sched.Client, reqStack.Tenant, reqStack.PodNamespace, reqStack.PodName, pod.Status, newStatus)
+	if err != nil {
+		klog.Warningf("PatchPodStatus for pod %q: %v", reqStack.PodName+"/"+reqStack.PodNamespace+"/"+
+			reqStack.Tenant+"/"+reqStack.UID, err)
+		return err
+	}
+
+	klog.Infof("Update pod status from %v to %v success", pod.Status, newStatus)
+	return nil
+}
+
+func (sched *Scheduler) bindToSite(clusterName string, assumedStack *types.Stack) error {
 	binding := &v1.Binding{
-		ObjectMeta: metav1.ObjectMeta{Tenant: assumedStack.Tenant, Namespace: assumedStack.Namespace, Name: assumedStack.Name, UID: apitypes.UID(assumedStack.UID)},
+		ObjectMeta: metav1.ObjectMeta{
+			Tenant:    assumedStack.Tenant,
+			Namespace: assumedStack.PodNamespace,
+			Name:      assumedStack.PodName,
+			UID:       apitypes.UID(assumedStack.UID),
+		},
 		Target: v1.ObjectReference{
 			Kind: "Cluster",
-			Name: siteID,
+			Name: clusterName,
 		},
 	}
 
@@ -351,8 +382,8 @@ func (sched *Scheduler) bindToSite(siteID string, assumedStack *types.Stack) err
 	klog.Infof("Attempting to bind %v to %v", binding.Name, binding.Target.Name)
 	err := sched.Client.CoreV1().PodsWithMultiTenancy(binding.Namespace, binding.Tenant).Bind(binding)
 	if err != nil {
-		klog.Infof("Failed to bind stack: %v/%v/%v", assumedStack.Tenant, assumedStack.Namespace,
-			assumedStack.Name)
+		klog.Infof("Failed to bind stack: %v/%v/%v", assumedStack.Tenant, assumedStack.PodNamespace,
+			assumedStack.PodName)
 		if err := sched.SchedulerCache.ForgetStack(assumedStack); err != nil {
 			klog.Errorf("scheduler cache ForgetStack failed: %v", err)
 		}
@@ -361,9 +392,9 @@ func (sched *Scheduler) bindToSite(siteID string, assumedStack *types.Stack) err
 	}
 
 	// get pod first
-	pod, err := sched.Client.CoreV1().PodsWithMultiTenancy(assumedStack.Namespace, assumedStack.Tenant).Get(assumedStack.Name, metav1.GetOptions{})
+	pod, err := sched.Client.CoreV1().PodsWithMultiTenancy(assumedStack.PodNamespace, assumedStack.Tenant).Get(assumedStack.PodName, metav1.GetOptions{})
 	if err != nil {
-		klog.Warningf("Failed to get status for pod %q: %v", assumedStack.Name+"/"+assumedStack.Namespace+"/"+
+		klog.Warningf("Failed to get status for pod %q: %v", assumedStack.PodName+"/"+assumedStack.PodNamespace+"/"+
 			assumedStack.Tenant+"/"+assumedStack.UID, err)
 		return err
 	}
@@ -372,11 +403,11 @@ func (sched *Scheduler) bindToSite(siteID string, assumedStack *types.Stack) err
 		Phase: v1.PodBound,
 	}
 
-	// update pod status to Binded
+	// update pod status to Bound
 	klog.Infof("Attempting to update pod status from %v to %v", pod.Status, newStatus)
-	_, _, err = statusutil.PatchPodStatus(sched.Client, assumedStack.Tenant, assumedStack.Namespace, assumedStack.Name, pod.Status, newStatus)
+	_, _, err = statusutil.PatchPodStatus(sched.Client, assumedStack.Tenant, assumedStack.PodNamespace, assumedStack.PodName, pod.Status, newStatus)
 	if err != nil {
-		klog.Warningf("PatchPodStatus for pod %q: %v", assumedStack.Name+"/"+assumedStack.Namespace+"/"+
+		klog.Warningf("PatchPodStatus for pod %q: %v", assumedStack.PodName+"/"+assumedStack.PodNamespace+"/"+
 			assumedStack.Tenant+"/"+assumedStack.UID, err)
 		return err
 	}

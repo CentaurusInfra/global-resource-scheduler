@@ -49,9 +49,9 @@ func CheckIDOrName(allocation types.Allocation) error {
 		}
 	}
 
-	err := utils.CheckTitleLengthAndRegexValid(allocation.Stack.Name, 1, constants.NameMaxLen, constants.NamePattern)
+	err := utils.CheckTitleLengthAndRegexValid(allocation.Stack.PodName, 1, constants.NameMaxLen, constants.NamePattern)
 	if err != nil {
-		klog.Errorf("allocation stack Name(%#v) is invalid, err: %s", allocation.Stack.Name, err)
+		klog.Errorf("allocation stack Name(%#v) is invalid, err: %s", allocation.Stack.PodName, err)
 		return fmt.Errorf("allocation stack name is invalid")
 	}
 

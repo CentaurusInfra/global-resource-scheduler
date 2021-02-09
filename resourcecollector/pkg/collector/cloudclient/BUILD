@@ -6,11 +6,11 @@ go_library(
     importpath = "k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient",
     visibility = ["//visibility:public"],
     deps = [
-        "//globalscheduler/pkg/scheduler/common/logger:go_default_library",
         "//resourcecollector/pkg/collector/cloudclient/openstack/client:go_default_library",
         "//resourcecollector/pkg/collector/common/config:go_default_library",
         "//vendor/github.com/gophercloud/gophercloud:go_default_library",
         "//vendor/github.com/gophercloud/gophercloud/openstack:go_default_library",
+        "//vendor/k8s.io/klog:go_default_library",
     ],
 )
 

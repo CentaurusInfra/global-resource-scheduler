@@ -5,7 +5,7 @@ go_library(
     srcs = ["runtime.go"],
     importpath = "k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/runtime",
     visibility = ["//visibility:public"],
-    deps = ["//globalscheduler/pkg/scheduler/common/logger:go_default_library"],
+    deps = ["//vendor/k8s.io/klog:go_default_library"],
 )
 
 filegroup(

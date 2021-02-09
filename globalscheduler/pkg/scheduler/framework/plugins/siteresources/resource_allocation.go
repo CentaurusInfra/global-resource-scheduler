@@ -65,7 +65,7 @@ func (r *resourceAllocationScorer) score(
 	var score = r.scorer(requested, allocatable, false, 0, 0)
 	klog.Infof(
 		"%v -> %v: %v, map of allocatable resources %v, map of requested resources %v ,score %d,",
-		stack.Name, site.SiteID, r.Name,
+		stack.PodName, site.SiteID, r.Name,
 		allocatable, requested, score,
 	)
 

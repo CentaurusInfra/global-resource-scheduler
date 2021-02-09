@@ -11,13 +11,13 @@ go_library(
     deps = [
         "//globalscheduler/pkg/scheduler:go_default_library",
         "//globalscheduler/pkg/scheduler/common/apiserver:go_default_library",
-        "//globalscheduler/pkg/scheduler/common/logger:go_default_library",
         "//globalscheduler/pkg/scheduler/options:go_default_library",
         "//globalscheduler/pkg/scheduler/router:go_default_library",
         "//globalscheduler/pkg/scheduler/types:go_default_library",
         "//pkg/util/flag:go_default_library",
         "//staging/src/k8s.io/apiserver/pkg/server:go_default_library",
         "//vendor/github.com/spf13/cobra:go_default_library",
+        "//vendor/k8s.io/klog:go_default_library",
     ],
 )
 

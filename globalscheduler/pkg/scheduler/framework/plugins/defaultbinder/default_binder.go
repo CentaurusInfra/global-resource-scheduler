@@ -58,6 +58,8 @@ func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, s
 	stack.Selected.SiteID = siteID
 	stack.Selected.Region = region
 	stack.Selected.AvailabilityZone = siteCacheInfo.GetSite().AvailabilityZone
+	stack.Selected.ClusterName = siteCacheInfo.Site.ClusterName
+	stack.Selected.ClusterNamespace = siteCacheInfo.Site.ClusterNamespace
 
 	siteSelectedInfo, err := interfaces.GetSiteSelectorState(state, siteID)
 	if err != nil {

@@ -101,7 +101,7 @@ func Allocations(req *restful.Request, resp *restful.Response) {
 	}
 
 	for _, newStack := range result.Stacks {
-		respStack := types.RespStack{Name: newStack.Name, Selected: newStack.Selected}
+		respStack := types.RespStack{Name: newStack.PodName, Selected: newStack.Selected}
 		for _, server := range newStack.Resources {
 			respServer := types.RespResource{Name: server.Name,
 				FlavorID: server.FlavorIDSelected, Count: server.Count}

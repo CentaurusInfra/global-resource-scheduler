@@ -12,9 +12,9 @@ go_library(
     importpath = "k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache",
     visibility = ["//visibility:public"],
     deps = [
-        "//globalscheduler/pkg/scheduler/common/logger:go_default_library",
         "//globalscheduler/pkg/scheduler/utils/wait:go_default_library",
         "//vendor/github.com/deckarep/golang-set:go_default_library",
+        "//vendor/k8s.io/klog:go_default_library",
     ],
 )
 
