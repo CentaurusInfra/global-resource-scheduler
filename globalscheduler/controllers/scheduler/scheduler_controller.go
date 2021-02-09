@@ -28,11 +28,7 @@ import (
 	"k8s.io/kubernetes/globalscheduler/controllers/util/union"
 	clusterclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
 	schedulerclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
-	"os"
 	"os/exec"
-	"path"
-	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 
@@ -265,29 +261,30 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		//}
 
 		// Start Scheduler Process
-		// command := "./hack/globalscheduler/start_scheduler.sh " + schedulerCopy.Spec.Tag + " " + schedulerCopy.Name
-		// err = runCommand(command)
-		// if err != nil {
-		// 	return fmt.Errorf("start scheduler process failed")
-		// }
-		args := strings.Split(fmt.Sprintf("-n %s", name), " ")
-
-		//	Format the command
-		dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+		command := "./hack/globalscheduler/start_scheduler.sh " + schedulerCopy.Spec.Tag + " " + schedulerCopy.Name
+		err = runCommand(command)
 		if err != nil {
-			klog.Fatalf("Failed to get the path to the process with the err %v", err)
+			return fmt.Errorf("start scheduler process failed")
 		}
 
-		cmd := exec.Command(path.Join(dir, "mock_scheduler"), args...)
-		var out bytes.Buffer
-		var stderr bytes.Buffer
-		cmd.Stdout = &out
-		cmd.Stderr = &stderr
+		//args := strings.Split(fmt.Sprintf("-n %s", name), " ")
+		//
+		////	Format the command
+		//dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+		//if err != nil {
+		//	klog.Fatalf("Failed to get the path to the process with the err %v", err)
+		//}
+		//
+		//cmd := exec.Command(path.Join(dir, "mock_scheduler"), args...)
+		//var out bytes.Buffer
+		//var stderr bytes.Buffer
+		//cmd.Stdout = &out
+		//cmd.Stderr = &stderr
+		//
+		////	Run the command
+		//go cmd.Run()
 
-		//	Run the command
-		go cmd.Run()
-
-		klog.V(2).Infof("Running process with the result: %v / %v\n", out.String(), stderr.String())
+		//klog.V(2).Infof("Running process with the result: %v / %v\n", out.String(), stderr.String())
 
 		sc.recorder.Event(schedulerCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	case EventTypeUpdateScheduler:

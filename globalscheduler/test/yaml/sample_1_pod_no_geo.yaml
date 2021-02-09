@@ -1,20 +1,22 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: pod-no-geo
+  name: pod-no-geo-2
 spec:
   resourceType: "vm"
   virtualMachine:
     name: "openstack-pod-no-geo"
-    image: "9e2b5eb9-3bb0-469b-b901-a75d87e4d958"
+    image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     keyPairName: "demo-keypair"
-    securityGroupId: "5e9513a8-b779-4cb9-825b-a1e994f28ddc"
+    securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     flavors:
       - flavorID: "3"
     resourceCommonInfo:
      count: 1
      selector:
        regions:
-         - region: "NW"
+         - region: "NE-1"
+           availablityZone:
+           - "NE-1"
   nics:
-    - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
+    - name: "80e76da3-91c6-4b70-8fdb-d1ca1c2836cd"
