@@ -18,7 +18,6 @@ package types
 
 import (
 	"encoding/json"
-
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 )
 
@@ -113,14 +112,15 @@ type Selector struct {
 
 // Stack is resource group
 type Stack struct {
-	Name      string            `json:"name" required:"true"`
-	Labels    map[string]string `json:"labels,omitempty"`
-	Resources []*Resource       `json:"resources,omitempty"`
-	Selector  Selector          `json:"-"`
-	Selected  Selected          `json:"-"`
-	UID       string            `json:"uid,omitempty"`
-	Tenant    string
-	Namespace string
+	PodName      string            `json:"name" required:"true"`
+	Labels       map[string]string `json:"labels,omitempty"`
+	Resources    []*Resource       `json:"resources,omitempty"`
+	Selector     Selector          `json:"-"`
+	Selected     Selected          `json:"-"`
+	UID          string            `json:"uid,omitempty"`
+	CreateTime   int64             `json:"-"`
+	Tenant       string
+	PodNamespace string
 }
 
 func (in *Stack) DeepCopy() *Stack {
@@ -151,10 +151,14 @@ type RespResource struct {
 // Selected site
 type Selected struct {
 	SiteID string `json:"site_id,omitempty"`
-	//Region info
+	// Region info
 	Region string `json:"region,omitempty"`
-	//az info
+	// az info
 	AvailabilityZone string `json:"availability_zone,omitempty"`
+	// target cluster name info
+	ClusterName string `json:"cluster_name"`
+	// target cluster namespace info
+	ClusterNamespace string `json:"cluster_namespace"`
 }
 
 // RespStack
@@ -189,7 +193,9 @@ type SpotResource struct {
 
 // Site struct
 type Site struct {
-	SiteID string `json:"site_id"`
+	SiteID           string `json:"site_id"`
+	ClusterName      string `json:"cluster_name"`
+	ClusterNamespace string `json:"cluster_namespace"`
 	GeoLocation
 	RegionAzMap
 	Operator      string                  `json:"operator"`
@@ -197,17 +203,19 @@ type Site struct {
 	SiteAttribute []*typed.SiteAttribute  `json:"site_attributes"`
 	EipTypeName   string                  `json:"eiptype_name"`
 	SpotResources map[string]SpotResource `json:"spot_resources"`
-	Hosts         []typed.Host            `json:"-"`
+	Hosts         []*typed.Host           `json:"-"`
 }
 
 func (sn *Site) Clone() *Site {
 	ret := &Site{
-		SiteID:      sn.SiteID,
-		GeoLocation: sn.GeoLocation,
-		RegionAzMap: sn.RegionAzMap,
-		Operator:    sn.Operator,
-		Status:      sn.Status,
-		EipTypeName: sn.EipTypeName,
+		SiteID:           sn.SiteID,
+		ClusterName:      sn.ClusterName,
+		ClusterNamespace: sn.ClusterNamespace,
+		GeoLocation:      sn.GeoLocation,
+		RegionAzMap:      sn.RegionAzMap,
+		Operator:         sn.Operator,
+		Status:           sn.Status,
+		EipTypeName:      sn.EipTypeName,
 	}
 
 	ret.Hosts = append(ret.Hosts, sn.Hosts...)

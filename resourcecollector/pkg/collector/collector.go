@@ -18,13 +18,13 @@ package collector
 
 import (
 	"errors"
+	"k8s.io/klog"
 	"sync"
 	"time"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/common/config"
 	internalcache "k8s.io/kubernetes/resourcecollector/pkg/collector/internal/cache"
@@ -45,7 +45,7 @@ func InitCollector(stopCh <-chan struct{}) error {
 // if it runs failed, nil will be return.
 func GetCollector() (*Collector, error) {
 	if collector == nil {
-		logger.Errorf("collector need to be init correctly")
+		klog.Error("collector need to be init correctly")
 		err := errors.New("collector need to be init correctly")
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (c *Collector) RecordSiteUnreacheable(siteID string) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	c.unreachableNum[siteID]++
-	logger.Infof("RecordSiteUnreacheable site[%s] unreachableNum[%d]", siteID, c.unreachableNum[siteID])
+	klog.Infof("RecordSiteUnreacheable site[%s] unreachableNum[%d]", siteID, c.unreachableNum[siteID])
 	if c.unreachableNum[siteID] == config.GlobalConf.MaxUnreachableNum {
 		delete(c.unreachableNum, siteID)
 		go c.notifySiteUnreachable(siteID)
@@ -87,13 +87,13 @@ func (c *Collector) RecordSiteUnreacheable(siteID string) {
 }
 
 func (c *Collector) notifySiteUnreachable(siteID string) {
-	logger.Infof("site[%s] is unreachable, send grpc to cluster-controller")
+	klog.Infof("site[%s] is unreachable, send grpc to cluster-controller")
 	err := rpcclient.GrpcUpdateClusterStatus(siteID, rpcclient.StateUnreachable)
 	if err != nil {
-		logger.Errorf("send grpc to cluster-controller err: %s", err.Error())
+		klog.Errorf("send grpc to cluster-controller err: %s", err.Error())
 		return
 	}
-	logger.Infof("update site[%s] state unreachable success", siteID)
+	klog.Infof("update site[%s] state unreachable success", siteID)
 }
 
 // snapshot snapshots scheduler cache and node infos for all fit and priority
@@ -155,13 +155,13 @@ func (c *Collector) StartInformersAndRun(stopCh <-chan struct{}) {
 			time.Duration(volumeTypeInterval)*time.Second, c).Informer()
 
 		// init eip pool informer
-		eipPoolInterval := config.GlobalConf.EipPoolInterval
-		eipPoolInformer := informers.InformerFac.EipPools(informers.EIPPOOLS, "Region",
-			time.Duration(eipPoolInterval)*time.Second).Informer()
-		eipPoolInformer.AddEventHandler(
-			cache.ResourceEventHandlerFuncs{
-				ListFunc: updateEipPools,
-			})
+		//eipPoolInterval := config.GlobalConf.EipPoolInterval
+		//eipPoolInformer := informers.InformerFac.EipPools(informers.EIPPOOLS, "Region",
+		//	time.Duration(eipPoolInterval)*time.Second).Informer()
+		//eipPoolInformer.AddEventHandler(
+		//	cache.ResourceEventHandlerFuncs{
+		//		ListFunc: updateEipPools,
+		//	})
 
 		informers.InformerFac.Start(stopCh2)
 
@@ -177,13 +177,13 @@ func updateEipPools(obj []interface{}) {
 	for _, eipPoolObj := range obj {
 		eipPool, ok := eipPoolObj.(typed.EipPool)
 		if !ok {
-			logger.Warnf("convert interface to (typed.EipPool) failed.")
+			klog.Warning("convert interface to (typed.EipPool) failed.")
 			continue
 		}
 
 		err := collector.Cache().UpdateEipPool(&eipPool)
 		if err != nil {
-			logger.Infof("UpdateEipPool failed! err: %s", err)
+			klog.Infof("UpdateEipPool failed! err: %s", err)
 		}
 	}
 }
@@ -197,13 +197,13 @@ func updateVolumePools(obj []interface{}) {
 	for _, volumePoolObj := range obj {
 		volumePool, ok := volumePoolObj.(typed.RegionVolumePool)
 		if !ok {
-			logger.Warnf("convert interface to (typed.VolumePools) failed.")
+			klog.Warning("convert interface to (typed.VolumePools) failed.")
 			continue
 		}
 
 		err := collector.Cache().UpdateVolumePool(&volumePool)
 		if err != nil {
-			logger.Infof("updateVolumePools failed! err: %s", err)
+			klog.Infof("updateVolumePools failed! err: %s", err)
 		}
 	}
 }
@@ -216,7 +216,7 @@ func addSitesToCache(objs []interface{}) {
 
 	col, err := GetCollector()
 	if err != nil {
-		logger.Errorf("GetCollector err: %s", err.Error())
+		klog.Errorf("GetCollector err: %s", err.Error())
 		return
 	}
 	//siteInfos := informers.InformerFac.GetInformer(informers.SITEINFOS).GetStore().List()
@@ -226,7 +226,7 @@ func addSitesToCache(objs []interface{}) {
 	for _, obj := range objs {
 		siteResource, ok := obj.(typed.SiteResource)
 		if !ok {
-			logger.Warnf("convert interface to (typed.SiteResource) failed.")
+			klog.Warning("convert interface to (typed.SiteResource) failed.")
 			continue
 		}
 
@@ -238,7 +238,7 @@ func addSitesToCache(objs []interface{}) {
 				info := convertToSite(siteInfo, siteResource)
 				err := collector.Cache().AddSite(info)
 				if err != nil {
-					logger.Infof("add site to cache failed! err: %s", err)
+					klog.Infof("add site to cache failed! err: %s", err)
 				}
 
 				isFind = true
@@ -247,7 +247,7 @@ func addSitesToCache(objs []interface{}) {
 		}
 
 		if !isFind {
-			logger.Warnf("siteResource.SiteID[%s] is not in siteInfo, Not add to the cache", siteResource.SiteID)
+			klog.Warning("siteResource.SiteID[%s] is not in siteInfo, Not add to the cache", siteResource.SiteID)
 		}
 	}
 
@@ -257,7 +257,9 @@ func addSitesToCache(objs []interface{}) {
 // Integrate site static information and resource information
 func convertToSite(siteInfo *typed.SiteInfo, siteResource typed.SiteResource) *types.Site {
 	result := &types.Site{
-		SiteID: siteInfo.SiteID,
+		SiteID:           siteInfo.SiteID,
+		ClusterName:      siteInfo.ClusterName,
+		ClusterNamespace: siteInfo.ClusterNamespace,
 		GeoLocation: types.GeoLocation{
 			Country:  siteInfo.Country,
 			Area:     siteInfo.Area,

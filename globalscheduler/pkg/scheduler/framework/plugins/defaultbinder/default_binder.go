@@ -19,10 +19,10 @@ package defaultbinder
 import (
 	"context"
 	"fmt"
+	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"strconv"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
@@ -58,15 +58,17 @@ func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, s
 	stack.Selected.SiteID = siteID
 	stack.Selected.Region = region
 	stack.Selected.AvailabilityZone = siteCacheInfo.GetSite().AvailabilityZone
+	stack.Selected.ClusterName = siteCacheInfo.Site.ClusterName
+	stack.Selected.ClusterNamespace = siteCacheInfo.Site.ClusterNamespace
 
 	siteSelectedInfo, err := interfaces.GetSiteSelectorState(state, siteID)
 	if err != nil {
-		logger.Error(ctx, "GetSiteSelectorState failed! err: %s", err)
+		klog.Errorf("GetSiteSelectorState failed! err: %s", err)
 		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %q info failed: %v", siteID, err))
 	}
 
 	if len(stack.Resources) != len(siteSelectedInfo.Flavors) {
-		logger.Error(ctx, "flavor count not equal to server count! err: %s", err)
+		klog.Errorf("flavor count not equal to server count! err: %s", err)
 		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("siteID(%s) flavor count not equal to "+
 			"server count!", siteID))
 	}
@@ -76,12 +78,12 @@ func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, s
 		stack.Resources[i].FlavorIDSelected = flavorID
 		flv, ok := cache.FlavorCache.GetFlavor(flavorID, region)
 		if !ok {
-			logger.Warn(ctx, "flavor %s not found in region(%s)", flavorID, region)
+			klog.Warningf("flavor %s not found in region(%s)", flavorID, region)
 			continue
 		}
 		vCPUInt, err := strconv.ParseInt(flv.Vcpus, 10, 64)
 		if err != nil || vCPUInt <= 0 {
-			logger.Warn(ctx, "flavor %s is invalid in region(%s)", flavorID, region)
+			klog.Warningf("flavor %s is invalid in region(%s)", flavorID, region)
 			continue
 		}
 

@@ -18,10 +18,10 @@ package service
 
 import (
 	"fmt"
+	"k8s.io/klog"
 	"net/http"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 
@@ -36,20 +36,20 @@ func Allocations(req *restful.Request, resp *restful.Response) {
 
 	err := req.ReadEntity(&allocationReq)
 	if err != nil {
-		logger.Error(ctx, "Failed to unmarshall allocation from request body, err: %s", err)
+		klog.Errorf("Failed to unmarshall allocation from request body, err: %s", err)
 		utils.WriteFailedJSONResponse(resp, http.StatusBadRequest, utils.RequestBodyParamInvalid(err.Error()))
 		return
 	}
-	logger.Infof("ReqAllocation : %s", utils.GetJSONString(allocationReq))
+	klog.Infof("ReqAllocation : %s", utils.GetJSONString(allocationReq))
 
 	allocation := allocationReq.Allocation
 	if allocation.ID == "" {
 		allocation.ID = uuid.NewV4().String()
 	}
 
-	err = CheckIDOrName(ctx, allocation)
+	err = CheckIDOrName(allocation)
 	if err != nil {
-		logger.Error(ctx, "name/id of allocation is invalid, err: %s", err)
+		klog.Errorf("name/id of allocation is invalid, err: %s", err)
 		utils.WriteFailedJSONResponse(resp, http.StatusBadRequest,
 			utils.RequestBodyParamInvalid("name/id of allocation is invalid"))
 		return
@@ -57,31 +57,31 @@ func Allocations(req *restful.Request, resp *restful.Response) {
 
 	if allocation.Replicas <= 0 {
 		errMsg := fmt.Sprintf("allocation.Replicas(%d) is invalid", allocation.Replicas)
-		logger.Error(ctx, errMsg)
+		klog.Error(errMsg)
 		utils.WriteFailedJSONResponse(resp, http.StatusBadRequest, utils.RequestBodyParamInvalid(errMsg))
 		return
 	}
 
 	// CheckStrategy
-	err = CheckStrategy(ctx, allocation)
+	err = CheckStrategy(allocation)
 	if err != nil {
-		logger.Error(ctx, "CheckStrategy failed! err: %s", err)
+		klog.Errorf("CheckStrategy failed! err: %s", err)
 		utils.WriteFailedJSONResponse(resp, http.StatusBadRequest, utils.RequestBodyParamInvalid(err.Error()))
 		return
 	}
 
 	// Check whether the flavor is valid.
-	err = CheckFlavor(ctx, allocation)
+	err = CheckFlavor(allocation)
 	if err != nil {
-		logger.Error(ctx, "CheckFlavor failed! err : %s", err)
+		klog.Errorf("CheckFlavor failed! err : %s", err)
 		utils.WriteFailedJSONResponse(resp, http.StatusBadRequest, utils.RequestBodyParamInvalid(err.Error()))
 		return
 	}
 
 	// Check whether the storage is valid.
-	err = CheckStorage(ctx, allocation)
+	err = CheckStorage(allocation)
 	if err != nil {
-		logger.Error(ctx, "CheckStorage failed! err : %s", err)
+		klog.Errorf("CheckStorage failed! err : %s", err)
 		utils.WriteFailedJSONResponse(resp, http.StatusBadRequest, utils.RequestBodyParamInvalid(err.Error()))
 		return
 	}
@@ -89,19 +89,19 @@ func Allocations(req *restful.Request, resp *restful.Response) {
 	allocationResult := types.AllocationResult{ID: allocation.ID, Stack: []types.RespStack{}}
 	sched := scheduler.GetScheduler()
 	if sched == nil {
-		logger.Errorf("Scheduler is not init, please wait...")
+		klog.Errorf("Scheduler is not init, please wait...")
 		utils.WriteFailedJSONResponse(resp, http.StatusInternalServerError, utils.InternalServerError())
 		return
 	}
 	result, err := sched.Schedule2(ctx, &allocation)
 	if err != nil {
-		logger.Errorf("Schedule failed!, err: %s", err)
+		klog.Errorf("Schedule failed!, err: %s", err)
 		utils.WriteFailedJSONResponse(resp, http.StatusInternalServerError, utils.InternalServerWithError(err.Error()))
 		return
 	}
 
 	for _, newStack := range result.Stacks {
-		respStack := types.RespStack{Name: newStack.Name, Selected: newStack.Selected}
+		respStack := types.RespStack{Name: newStack.PodName, Selected: newStack.Selected}
 		for _, server := range newStack.Resources {
 			respServer := types.RespResource{Name: server.Name,
 				FlavorID: server.FlavorIDSelected, Count: server.Count}
