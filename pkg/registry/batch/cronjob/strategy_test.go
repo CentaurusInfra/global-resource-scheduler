@@ -46,6 +46,7 @@ func TestCronJobStrategy(t *testing.T) {
 			RestartPolicy: api.RestartPolicyOnFailure,
 			DNSPolicy:     api.DNSClusterFirst,
 			Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+			ResourceType:  "Container",
 		},
 	}
 	scheduledJob := &batch.CronJob{

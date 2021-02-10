@@ -85,6 +85,7 @@ func validNewReplicaSet() *apps.ReplicaSet {
 					},
 					RestartPolicy: api.RestartPolicyAlways,
 					DNSPolicy:     api.DNSClusterFirst,
+					ResourceType:  "container",
 				},
 			},
 			Replicas: 7,

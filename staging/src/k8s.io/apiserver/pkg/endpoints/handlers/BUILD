@@ -59,6 +59,8 @@ go_library(
     importmap = "k8s.io/kubernetes/vendor/k8s.io/apiserver/pkg/endpoints/handlers",
     importpath = "k8s.io/apiserver/pkg/endpoints/handlers",
     deps = [
+        "//globalscheduler/controllers/util:go_default_library",
+        "//pkg/apis/core:go_default_library",
         "//staging/src/k8s.io/apimachinery/pkg/api/errors:go_default_library",
         "//staging/src/k8s.io/apimachinery/pkg/api/meta:go_default_library",
         "//staging/src/k8s.io/apimachinery/pkg/apis/meta/internalversion:go_default_library",

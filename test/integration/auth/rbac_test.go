@@ -220,6 +220,7 @@ var (
         }
       },
       "spec": {
+        "resourceType": "Container",
         "containers": [
           {
             "name": "pi",

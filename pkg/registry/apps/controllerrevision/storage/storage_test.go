@@ -179,6 +179,7 @@ func newObject() runtime.Object {
 				Spec: api.PodSpec{
 					RestartPolicy: api.RestartPolicyAlways,
 					DNSPolicy:     api.DNSClusterFirst,
+					ResourceType:  "Container",
 				},
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{"foo": "bar"},

@@ -68,11 +68,11 @@ func GetEtcdStorageDataForNamespaceWithMultiTenancy(tenant, namespace string) ma
 			ExpectedEtcdPath: "/registry/services/specs/" + tenant + "/" + namespace + "/service1",
 		},
 		gvr("", "v1", "podtemplates"): {
-			Stub:             `{"metadata": {"name": "pt1name"}, "template": {"metadata": {"labels": {"pt": "01"}}, "spec": {"containers": [{"image": "fedora:latest", "name": "container9"}]}}}`,
+			Stub:             `{"metadata": {"name": "pt1name"}, "template": {"metadata": {"labels": {"pt": "01"}}, "spec": {"resourceType": "Container", "containers": [{"image": "fedora:latest", "name": "container9"}]}}}`,
 			ExpectedEtcdPath: "/registry/podtemplates/" + tenant + "/" + namespace + "/pt1name",
 		},
 		gvr("", "v1", "pods"): {
-			Stub:             `{"metadata": {"name": "pod1"}, "spec": {"containers": [{"image": "fedora:latest", "name": "container7", "resources": {"limits": {"cpu": "1M"}, "requests": {"cpu": "1M"}}}]}}`,
+			Stub:             `{"metadata": {"name": "pod1"}, "spec": {"resourceType": "Container", "containers": [{"image": "fedora:latest", "name": "container7", "resources": {"limits": {"cpu": "1M"}, "requests": {"cpu": "1M"}}}]}}`,
 			ExpectedEtcdPath: "/registry/pods/" + tenant + "/" + namespace + "/pod1",
 		},
 		gvr("", "v1", "endpoints"): {
@@ -116,7 +116,7 @@ func GetEtcdStorageDataForNamespaceWithMultiTenancy(tenant, namespace string) ma
 			ExpectedEtcdPath: "/registry/secrets/" + tenant + "/" + namespace + "/secret1",
 		},
 		gvr("", "v1", "replicationcontrollers"): {
-			Stub:             `{"metadata": {"name": "rc1"}, "spec": {"selector": {"new": "stuff"}, "template": {"metadata": {"labels": {"new": "stuff"}}, "spec": {"containers": [{"image": "fedora:latest", "name": "container8"}]}}}}`,
+			Stub:             `{"metadata": {"name": "rc1"}, "spec": {"selector": {"new": "stuff"}, "template": {"metadata": {"labels": {"new": "stuff"}}, "spec": {"resourceType": "Container", "containers": [{"image": "fedora:latest", "name": "container8"}]}}}}`,
 			ExpectedEtcdPath: "/registry/controllers/" + tenant + "/" + namespace + "/rc1",
 		},
 		gvr("", "v1", "actions"): {
@@ -132,7 +132,7 @@ func GetEtcdStorageDataForNamespaceWithMultiTenancy(tenant, namespace string) ma
 			ExpectedGVK:      gvkP("apps", "v1", "StatefulSet"),
 		},
 		gvr("apps", "v1beta1", "deployments"): {
-			Stub:             `{"metadata": {"name": "deployment2"}, "spec": {"selector": {"matchLabels": {"f": "z"}}, "template": {"metadata": {"labels": {"f": "z"}}, "spec": {"containers": [{"image": "fedora:latest", "name": "container6"}]}}}}`,
+			Stub:             `{"metadata": {"name": "deployment2"}, "spec": {"selector": {"matchLabels": {"f": "z"}}, "template": {"metadata": {"labels": {"f": "z"}}, "spec": {"resourceType": "Container", "containers": [{"image": "fedora:latest", "name": "container6"}]}}}}`,
 			ExpectedEtcdPath: "/registry/deployments/" + tenant + "/" + namespace + "/deployment2",
 			ExpectedGVK:      gvkP("apps", "v1", "Deployment"),
 		},
@@ -150,17 +150,17 @@ func GetEtcdStorageDataForNamespaceWithMultiTenancy(tenant, namespace string) ma
 			ExpectedGVK:      gvkP("apps", "v1", "StatefulSet"),
 		},
 		gvr("apps", "v1beta2", "deployments"): {
-			Stub:             `{"metadata": {"name": "deployment3"}, "spec": {"selector": {"matchLabels": {"f": "z"}}, "template": {"metadata": {"labels": {"f": "z"}}, "spec": {"containers": [{"image": "fedora:latest", "name": "container6"}]}}}}`,
+			Stub:             `{"metadata": {"name": "deployment3"}, "spec": {"selector": {"matchLabels": {"f": "z"}}, "template": {"metadata": {"labels": {"f": "z"}}, "spec": {"resourceType": "Container", "containers": [{"image": "fedora:latest", "name": "container6"}]}}}}`,
 			ExpectedEtcdPath: "/registry/deployments/" + tenant + "/" + namespace + "/deployment3",
 			ExpectedGVK:      gvkP("apps", "v1", "Deployment"),
 		},
 		gvr("apps", "v1beta2", "daemonsets"): {
-			Stub:             `{"metadata": {"name": "ds5"}, "spec": {"selector": {"matchLabels": {"a": "b"}}, "template": {"metadata": {"labels": {"a": "b"}}, "spec": {"containers": [{"image": "fedora:latest", "name": "container6"}]}}}}`,
+			Stub:             `{"metadata": {"name": "ds5"}, "spec": {"selector": {"matchLabels": {"a": "b"}}, "template": {"metadata": {"labels": {"a": "b"}}, "spec": {"resourceType": "Container", "containers": [{"image": "fedora:latest", "name": "container6"}]}}}}`,
 			ExpectedEtcdPath: "/registry/daemonsets/" + tenant + "/" + namespace + "/ds5",
 			ExpectedGVK:      gvkP("apps", "v1", "DaemonSet"),
 		},
 		gvr("apps", "v1beta2", "replicasets"): {
-			Stub:             `{"metadata": {"name": "rs2"}, "spec": {"selector": {"matchLabels": {"g": "h"}}, "template": {"metadata": {"labels": {"g": "h"}}, "spec": {"containers": [{"image": "fedora:latest", "name": "container4"}]}}}}`,
+			Stub:             `{"metadata": {"name": "rs2"}, "spec": {"selector": {"matchLabels": {"g": "h"}}, "template": {"metadata": {"labels": {"g": "h"}}, "spec": {"resourceType": "Container", "containers": [{"image": "fedora:latest", "name": "container4"}]}}}}`,
 			ExpectedEtcdPath: "/registry/replicasets/" + tenant + "/" + namespace + "/rs2",
 			ExpectedGVK:      gvkP("apps", "v1", "ReplicaSet"),
 		},
@@ -173,11 +173,11 @@ func GetEtcdStorageDataForNamespaceWithMultiTenancy(tenant, namespace string) ma
 
 		// k8s.io/kubernetes/pkg/apis/apps/v1
 		gvr("apps", "v1", "daemonsets"): {
-			Stub:             `{"metadata": {"name": "ds6"}, "spec": {"selector": {"matchLabels": {"a": "b"}}, "template": {"metadata": {"labels": {"a": "b"}}, "spec": {"containers": [{"image": "fedora:latest", "name": "container6"}]}}}}`,
+			Stub:             `{"metadata": {"name": "ds6"}, "spec": {"selector": {"matchLabels": {"a": "b"}}, "template": {"metadata": {"labels": {"a": "b"}}, "spec": {"resourceType": "Container", "containers": [{"image": "fedora:latest", "name": "container6"}]}}}}`,
 			ExpectedEtcdPath: "/registry/daemonsets/" + tenant + "/" + namespace + "/ds6",
 		},
 		gvr("apps", "v1", "deployments"): {
-			Stub:             `{"metadata": {"name": "deployment4"}, "spec": {"selector": {"matchLabels": {"f": "z"}}, "template": {"metadata": {"labels": {"f": "z"}}, "spec": {"containers": [{"image": "fedora:latest", "name": "container6"}]}}}}`,
+			Stub:             `{"metadata": {"name": "deployment4"}, "spec": {"selector": {"matchLabels": {"f": "z"}}, "template": {"metadata": {"labels": {"f": "z"}}, "spec": {"resourceType": "Container", "containers": [{"image": "fedora:latest", "name": "container6"}]}}}}`,
 			ExpectedEtcdPath: "/registry/deployments/" + tenant + "/" + namespace + "/deployment4",
 		},
 		gvr("apps", "v1", "statefulsets"): {
@@ -185,7 +185,7 @@ func GetEtcdStorageDataForNamespaceWithMultiTenancy(tenant, namespace string) ma
 			ExpectedEtcdPath: "/registry/statefulsets/" + tenant + "/" + namespace + "/ss3",
 		},
 		gvr("apps", "v1", "replicasets"): {
-			Stub:             `{"metadata": {"name": "rs3"}, "spec": {"selector": {"matchLabels": {"g": "h"}}, "template": {"metadata": {"labels": {"g": "h"}}, "spec": {"containers": [{"image": "fedora:latest", "name": "container4"}]}}}}`,
+			Stub:             `{"metadata": {"name": "rs3"}, "spec": {"selector": {"matchLabels": {"g": "h"}}, "template": {"metadata": {"labels": {"g": "h"}}, "spec": {"resourceType": "Container", "containers": [{"image": "fedora:latest", "name": "container4"}]}}}}`,
 			ExpectedEtcdPath: "/registry/replicasets/" + tenant + "/" + namespace + "/rs3",
 		},
 		gvr("apps", "v1", "controllerrevisions"): {
@@ -219,21 +219,21 @@ func GetEtcdStorageDataForNamespaceWithMultiTenancy(tenant, namespace string) ma
 
 		// k8s.io/kubernetes/pkg/apis/batch/v1
 		gvr("batch", "v1", "jobs"): {
-			Stub:             `{"metadata": {"name": "job1"}, "spec": {"manualSelector": true, "selector": {"matchLabels": {"controller-uid": "uid1"}}, "template": {"metadata": {"labels": {"controller-uid": "uid1"}}, "spec": {"containers": [{"image": "fedora:latest", "name": "container1"}], "dnsPolicy": "ClusterFirst", "restartPolicy": "Never"}}}}`,
+			Stub:             `{"metadata": {"name": "job1"}, "spec": {"manualSelector": true, "selector": {"matchLabels": {"controller-uid": "uid1"}}, "template": {"metadata": {"labels": {"controller-uid": "uid1"}}, "spec": {"resourceType": "Container", "containers": [{"image": "fedora:latest", "name": "container1"}], "dnsPolicy": "ClusterFirst", "restartPolicy": "Never"}}}}`,
 			ExpectedEtcdPath: "/registry/jobs/" + tenant + "/" + namespace + "/job1",
 		},
 		// --
 
 		// k8s.io/kubernetes/pkg/apis/batch/v1beta1
 		gvr("batch", "v1beta1", "cronjobs"): {
-			Stub:             `{"metadata": {"name": "cjv1beta1"}, "spec": {"jobTemplate": {"spec": {"template": {"metadata": {"labels": {"controller-uid": "uid0"}}, "spec": {"containers": [{"image": "fedora:latest", "name": "container0"}], "dnsPolicy": "ClusterFirst", "restartPolicy": "Never"}}}}, "schedule": "* * * * *"}}`,
+			Stub:             `{"metadata": {"name": "cjv1beta1"}, "spec": {"jobTemplate": {"spec": {"template": {"metadata": {"labels": {"controller-uid": "uid0"}}, "spec": {"resourceType": "Container", "containers": [{"image": "fedora:latest", "name": "container0"}], "dnsPolicy": "ClusterFirst", "restartPolicy": "Never"}}}}, "schedule": "* * * * *"}}`,
 			ExpectedEtcdPath: "/registry/cronjobs/" + tenant + "/" + namespace + "/cjv1beta1",
 		},
 		// --
 
 		// k8s.io/kubernetes/pkg/apis/batch/v2alpha1
 		gvr("batch", "v2alpha1", "cronjobs"): {
-			Stub:             `{"metadata": {"name": "cjv2alpha1"}, "spec": {"jobTemplate": {"spec": {"template": {"metadata": {"labels": {"controller-uid": "uid0"}}, "spec": {"containers": [{"image": "fedora:latest", "name": "container0"}], "dnsPolicy": "ClusterFirst", "restartPolicy": "Never"}}}}, "schedule": "* * * * *"}}`,
+			Stub:             `{"metadata": {"name": "cjv2alpha1"}, "spec": {"jobTemplate": {"spec": {"template": {"metadata": {"labels": {"controller-uid": "uid0"}}, "spec": {"resourceType": "Container", "containers": [{"image": "fedora:latest", "name": "container0"}], "dnsPolicy": "ClusterFirst", "restartPolicy": "Never"}}}}, "schedule": "* * * * *"}}`,
 			ExpectedEtcdPath: "/registry/cronjobs/" + tenant + "/" + namespace + "/cjv2alpha1",
 			ExpectedGVK:      gvkP("batch", "v1beta1", "CronJob"),
 		},
@@ -271,7 +271,7 @@ func GetEtcdStorageDataForNamespaceWithMultiTenancy(tenant, namespace string) ma
 
 		// k8s.io/kubernetes/pkg/apis/extensions/v1beta1
 		gvr("extensions", "v1beta1", "daemonsets"): {
-			Stub:             `{"metadata": {"name": "ds1"}, "spec": {"selector": {"matchLabels": {"u": "t"}}, "template": {"metadata": {"labels": {"u": "t"}}, "spec": {"containers": [{"image": "fedora:latest", "name": "container5"}]}}}}`,
+			Stub:             `{"metadata": {"name": "ds1"}, "spec": {"selector": {"matchLabels": {"u": "t"}}, "template": {"metadata": {"labels": {"u": "t"}}, "spec": {"resourceType": "Container", "containers": [{"image": "fedora:latest", "name": "container5"}]}}}}`,
 			ExpectedEtcdPath: "/registry/daemonsets/" + tenant + "/" + namespace + "/ds1",
 			ExpectedGVK:      gvkP("apps", "v1", "DaemonSet"),
 		},
@@ -291,12 +291,12 @@ func GetEtcdStorageDataForNamespaceWithMultiTenancy(tenant, namespace string) ma
 			ExpectedGVK:      gvkP("networking.k8s.io", "v1", "NetworkPolicy"),
 		},
 		gvr("extensions", "v1beta1", "deployments"): {
-			Stub:             `{"metadata": {"name": "deployment1"}, "spec": {"selector": {"matchLabels": {"f": "z"}}, "template": {"metadata": {"labels": {"f": "z"}}, "spec": {"containers": [{"image": "fedora:latest", "name": "container6"}]}}}}`,
+			Stub:             `{"metadata": {"name": "deployment1"}, "spec": {"selector": {"matchLabels": {"f": "z"}}, "template": {"metadata": {"labels": {"f": "z"}}, "spec": {"resourceType": "Container", "containers": [{"image": "fedora:latest", "name": "container6"}]}}}}`,
 			ExpectedEtcdPath: "/registry/deployments/" + tenant + "/" + namespace + "/deployment1",
 			ExpectedGVK:      gvkP("apps", "v1", "Deployment"),
 		},
 		gvr("extensions", "v1beta1", "replicasets"): {
-			Stub:             `{"metadata": {"name": "rs1"}, "spec": {"selector": {"matchLabels": {"g": "h"}}, "template": {"metadata": {"labels": {"g": "h"}}, "spec": {"containers": [{"image": "fedora:latest", "name": "container4"}]}}}}`,
+			Stub:             `{"metadata": {"name": "rs1"}, "spec": {"selector": {"matchLabels": {"g": "h"}}, "template": {"metadata": {"labels": {"g": "h"}}, "spec": {"resourceType": "Container", "containers": [{"image": "fedora:latest", "name": "container4"}]}}}}`,
 			ExpectedEtcdPath: "/registry/replicasets/" + tenant + "/" + namespace + "/rs1",
 			ExpectedGVK:      gvkP("apps", "v1", "ReplicaSet"),
 		},

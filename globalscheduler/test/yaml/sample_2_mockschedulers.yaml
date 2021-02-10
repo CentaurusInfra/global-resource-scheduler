@@ -1,20 +1,13 @@
 apiVersion: globalscheduler.com/v1
 kind: Scheduler
 metadata:
-  name: apple-1
+  name: mockscheduler1
 spec:
   tag: "1"
 ---
 apiVersion: globalscheduler.com/v1
 kind: Scheduler
 metadata:
-  name: orange-2
+  name: mockscheduler2
 spec:
   tag: "2"
----
-apiVersion: globalscheduler.com/v1
-kind: Scheduler
-metadata:
-  name: banana-3
-spec:
-  tag: "3"
