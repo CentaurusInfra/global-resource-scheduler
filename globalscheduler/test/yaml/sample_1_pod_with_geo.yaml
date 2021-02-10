@@ -21,5 +21,7 @@ spec:
          country: "US"
        regions:
          - region: "NW-1"
+           availablityZone:
+           - "NW-1"
   nics:
     - name: "c32fa6da-ee3f-4c65-80a7-c920c0a9ce7e"
