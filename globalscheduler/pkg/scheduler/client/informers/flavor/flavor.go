@@ -123,7 +123,7 @@ func getRegionFlavors(region string, client *gophercloud.ServiceClient) ([]typed
 	ret := make([]typed.RegionFlavor, 0)
 	for _, flavor := range flas {
 		flv := typed.Flavor{
-			ID:    flavor.Name, // eg: "m1.small"
+			ID:    flavor.ID,   // eg: "2"
 			Name:  flavor.Name, // eg: "m1.small"
 			Vcpus: strconv.Itoa(flavor.VCPUs),
 			Ram:   int64(flavor.RAM),
