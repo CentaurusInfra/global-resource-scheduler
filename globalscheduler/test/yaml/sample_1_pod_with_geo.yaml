@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: pod-with-geo
+  name: pod-with-geo-2
 spec:
   resourceType: "vm"
   virtualMachine:
@@ -10,7 +10,7 @@ spec:
     keyPairName: "demo-keypair"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     flavors:
-      - flavorID: "3"
+      - flavorID: "42"
     resourceCommonInfo:
      count: 1
      selector:
