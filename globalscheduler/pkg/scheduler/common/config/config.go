@@ -26,7 +26,7 @@ import (
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
-	//"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 
 	"github.com/go-chassis/go-archaius"
 	"github.com/spf13/cast"
@@ -43,15 +43,15 @@ func Init() {
 	}
 	conf = archaius.GetConfigFactory()
 
-	//confLocation := utils.GetConfigDirectory()
-	confFilePath := filepath.Join("/home/ubuntu/go/src/k8s.io/arktos/conf/", "conf.yaml")
+	confLocation := utils.GetConfigDirectory()
+	confFilePath := filepath.Join(confLocation, "conf.yaml")
 	err = archaius.AddFile(confFilePath)
 	if err != nil {
 		fmt.Printf("failed to AddFile %s, error: %+v\n", confFilePath, err.Error())
 		os.Exit(1)
 	}
 
-	regionFilePath := filepath.Join("/home/ubuntu/go/src/k8s.io/arktos/conf/", "region.yaml")
+	regionFilePath := filepath.Join(confLocation, "region.yaml")
 	err = archaius.AddFile(regionFilePath)
 	if err != nil {
 		fmt.Printf("failed to AddFile %s, error: %+v\n", regionFilePath, err.Error())
