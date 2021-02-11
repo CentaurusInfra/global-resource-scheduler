@@ -254,5 +254,5 @@ func GetStackPriority(stack *types.Stack) int32 {
 func GetStackFullName(stack *types.Stack) string {
 	// Use underscore as the delimiter because it is not allowed in stack name
 	// (DNS subdomain format).
-	return stack.Name + "_" + stack.Namespace
+	return stack.PodName + "_" + stack.PodNamespace
 }

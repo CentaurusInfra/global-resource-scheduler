@@ -20,10 +20,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"k8s.io/klog"
 	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector"
 )
 
@@ -37,12 +36,11 @@ type ClusterProtocolServer struct{}
 // services - Send cluster profile
 func (s *ClusterProtocolServer) SendClusterProfile(ctx context.Context,
 	in *pb.ClusterProfile) (*pb.ReturnMessageClusterProfile, error) {
-	logger.Infof("Received RPC Request")
+	klog.Infof("Received RPC Request")
 	ns := in.ClusterNameSpace
 	name := in.ClusterName
-	siteID := fmt.Sprintf("%s|%s", ns, name)
-	if in.ClusterSpec == nil || in.ClusterSpec.GeoLocation == nil || in.ClusterSpec.Operator == nil {
-		err := errors.New("ClusterSpec information is incomplete")
+	if in.ClusterSpec == nil || in.ClusterSpec.GeoLocation == nil || in.ClusterSpec.Region == nil {
+		err := errors.New("clusterSpec information is incomplete")
 		return getReturnMessageFromError(ns, name, &err), err
 	}
 	ip := in.ClusterSpec.ClusterIpAddress
@@ -50,44 +48,54 @@ func (s *ClusterProtocolServer) SendClusterProfile(ctx context.Context,
 		err := errors.New("cluster ip is not set")
 		return getReturnMessageFromError(ns, name, &err), err
 	}
+	region := in.ClusterSpec.Region.Region
+	az := in.ClusterSpec.Region.AvailabilityZone
+	if region == "" || az == "" {
+		err := errors.New("cluster region or az is invalid")
+		return getReturnMessageFromError(ns, name, &err), err
+	}
+	siteID := fmt.Sprintf("%s|%s", region, az)
 
 	col, err := collector.GetCollector()
 	if err != nil {
-		logger.Error(ctx, "get new collector failed, err: %s", err.Error())
+		klog.Errorf("get new collector failed, err: %s", err.Error())
 		err := errors.New("server internal error")
 		return getReturnMessageFromError(ns, name, &err), err
 	}
 	switch in.ClusterStatus {
 	case ClusterStatusCreated:
-		logger.Infof("grpc.GrpcSendClusterProfile created- siteID[%s], IP[%s]", siteID, ip)
+		klog.Infof("grpc.GrpcSendClusterProfile created- siteID[%s], IP[%s]", siteID, ip)
 		siteInfo := &typed.SiteInfo{
 			SiteID:           siteID,
-			Name:             siteID,
-			Region:           ns,
-			AvailabilityZone: name,
+			ClusterName:      in.ClusterName,
+			ClusterNamespace: in.ClusterNameSpace,
+			Region:           region,
+			AvailabilityZone: az,
 			Status:           ClusterStatusCreated,
 			City:             in.ClusterSpec.GeoLocation.City,
 			Province:         in.ClusterSpec.GeoLocation.Province,
 			Area:             in.ClusterSpec.GeoLocation.Area,
 			Country:          in.ClusterSpec.GeoLocation.Country,
-			Operator:         &typed.Operator{Name: in.ClusterSpec.Operator.Operator},
 			EipNetworkID:     ip,
 			EipTypeName:      "not known",
 			EipCidr:          nil,
 			SiteAttributes:   nil,
 		}
+		if in.ClusterSpec.Operator != nil {
+			siteInfo.Operator = &typed.Operator{Name: in.ClusterSpec.Operator.Operator}
+		}
 		col.SiteInfoCache.AddSite(siteInfo)
-		informers.InformerFac.SyncOnSiteChange()
+		//informers.InformerFac.SyncOnSiteChange()
 	case ClusterStatusDeleted:
-		logger.Infof("grpc.GrpcSendClusterProfile deleted- siteID[%s], IP[%s]", siteID, ip)
+		klog.Infof("grpc.GrpcSendClusterProfile deleted- siteID[%s], IP[%s]", siteID, ip)
 		col.SiteInfoCache.RemoveSite(siteID)
 		err := col.ResourceCache.RemoveSite(siteID)
 		if err != nil {
-			logger.Errorf("col.ResourceCache.RemoveSite err: %s", err.Error())
+			klog.Errorf("col.ResourceCache.RemoveSite err: %s", err.Error())
 		}
-		informers.InformerFac.SyncOnSiteChange()
+		//informers.InformerFac.SyncOnSiteChange()
 	default:
-		logger.Infof("grpc.GrpcSendClusterProfile status error[%s]- siteID[%s], IP[%s]", in.ClusterStatus, siteID, ip)
+		klog.Infof("grpc.GrpcSendClusterProfile status error[%s]- siteID[%s], IP[%s]", in.ClusterStatus, siteID, ip)
 		err := errors.New("status error")
 		return getReturnMessageFromError(ns, name, &err), err
 	}

@@ -301,7 +301,8 @@ type SiteAttribute struct {
 
 type SiteInfo struct {
 	SiteID           string           `json:"site_id"`
-	Name             string           `json:"name"`
+	ClusterName      string           `json:"cluster_name"`
+	ClusterNamespace string           `json:"cluster_namespace"`
 	Region           string           `json:"region"`
 	AvailabilityZone string           `json:"availability_zone"`
 	Status           string           `json:"status"`
@@ -321,10 +322,10 @@ type SiteInfos struct {
 }
 
 type SiteResource struct {
-	SiteID           string `json:"site_id"`
-	Region           string `json:"region"`
-	AvailabilityZone string `json:"availability_zone"`
-	Hosts            []Host `json:"hosts"`
+	SiteID           string  `json:"site_id"`
+	Region           string  `json:"region"`
+	AvailabilityZone string  `json:"availability_zone"`
+	Hosts            []*Host `json:"hosts"`
 }
 
 type SiteResources struct {

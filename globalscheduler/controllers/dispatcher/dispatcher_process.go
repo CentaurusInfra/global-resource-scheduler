@@ -203,6 +203,7 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 				util.CheckTime(pod.Name, "dispatcher", "DeletePod-End", 2)
 			}()
 		} else {
+			util.CheckTime(pod.Name, "dispatcher", "CreatePod-End", 2)
 			p.totalPodCreateNum += 1
 			// Calculate create latency
 			podCreateTime := pod.CreationTimestamp
@@ -235,7 +236,7 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 						klog.Warningf("The pod %v failed to update its apiserver dtatbase status to failed with the error %v", pod.ObjectMeta.Name, err)
 					}
 				}
-				util.CheckTime(pod.Name, "dispatcher", "CreatePod-End", 2)
+				// util.CheckTime(pod.Name, "dispatcher", "CreatePod-End", 2)
 			}()
 		}
 	}

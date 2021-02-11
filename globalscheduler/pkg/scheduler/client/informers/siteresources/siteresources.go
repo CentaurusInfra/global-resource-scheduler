@@ -19,10 +19,12 @@ package siteresources
 
 import (
 	"errors"
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/hypervisors"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient"
+	"sync"
 	"time"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client"
@@ -65,8 +67,9 @@ func NewSiteResourcesInformer(client client.Interface, reSyncPeriod time.Duratio
 				return nil, errors.New("get site info failed")
 			}
 
+			// result set, []typed.SiteResource
 			var interfaceSlice []interface{}
-			// todo MultiExec
+			var wg sync.WaitGroup
 			for siteID, info := range siteInfoCache.SiteInfoMap {
 				cloudClient, err := cloudclient.NewClientSet(info.EipNetworkID)
 				if err != nil {
@@ -75,39 +78,60 @@ func NewSiteResourcesInformer(client client.Interface, reSyncPeriod time.Duratio
 					continue
 				}
 				client := cloudClient.ComputeV2()
+				if client == nil {
+					logger.Errorf("Cluster[%s] computeV2 client is null!", info.EipNetworkID)
+					continue
+				}
 
-				hypervisorsPages, err := hypervisors.List(client).AllPages()
-				if err != nil {
-					logger.Errorf("hypervisors list failed! err: %s", err.Error())
-					return nil, err
-				}
-				hypervisors, err := hypervisors.ExtractHypervisors(hypervisorsPages)
-				if err != nil {
-					logger.Errorf("hypervisors ExtractHypervisors failed! err: %s", err.Error())
-					return nil, err
-				}
-				for _, h := range hypervisors {
-					hosts := make([]typed.Host, 0)
-					host := typed.Host{
-						UsedVCPUs:    h.VCPUsUsed,
-						UsedMem:      h.MemoryMBUsed,
-						TotalVCPUs:   h.VCPUs,
-						TotalMem:     h.MemoryMB,
-						ResourceType: "default",
+				wg.Add(1)
+				go func(siteID, region, az string, client *gophercloud.ServiceClient) {
+					defer wg.Done()
+					ret, err := getSiteResource(siteID, region, az, client)
+					if err != nil {
+						logger.Errorf("site[%s] list failed! err: %s", siteID, err.Error())
+						return
 					}
-					hosts = append(hosts, host)
-					sr := typed.SiteResource{
-						SiteID:           info.SiteID,
-						Region:           info.Region,
-						AvailabilityZone: info.AvailabilityZone,
-						Hosts:            hosts,
-					}
-					interfaceSlice = append(interfaceSlice, sr)
-				}
+					interfaceSlice = append(interfaceSlice, ret)
+				}(siteID, info.Region, info.AvailabilityZone, client)
 			}
+			wg.Wait()
+
 			return interfaceSlice, nil
 		}}, reSyncPeriod, name, key, nil)
+}
 
+// Get host resource information for each cluster(az) (goroutine concurrent execution)
+func getSiteResource(siteID, region, az string, client *gophercloud.ServiceClient) (interface{}, error) {
+	hypervisorsPages, err := hypervisors.List(client).AllPages()
+	if err != nil {
+		logger.Errorf("hypervisors list failed! err: %s", err.Error())
+		return nil, err
+	}
+	hs, err := hypervisors.ExtractHypervisors(hypervisorsPages)
+	if err != nil {
+		logger.Errorf("hypervisors ExtractHypervisors failed! err: %s", err.Error())
+		return nil, err
+	}
+
+	hosts := make([]*typed.Host, 0)
+	// each host
+	for _, h := range hs {
+		host := &typed.Host{
+			UsedVCPUs:    h.VCPUsUsed,
+			UsedMem:      h.MemoryMBUsed,
+			TotalVCPUs:   h.VCPUs,
+			TotalMem:     h.MemoryMB,
+			ResourceType: "default",
+		}
+		hosts = append(hosts, host)
+	}
+	sr := typed.SiteResource{
+		SiteID:           siteID,
+		Region:           region,
+		AvailabilityZone: az,
+		Hosts:            hosts,
+	}
+	return sr, nil
 }
 
 func (f *informerSiteResources) defaultInformer(client client.Interface, resyncPeriod time.Duration, name string, key string) cache.SharedInformer {
