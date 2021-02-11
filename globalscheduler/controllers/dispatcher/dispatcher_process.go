@@ -174,8 +174,7 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 			klog.Warningf("Failed to get host from the cluster %v", pod.Spec.ClusterName)
 			return
 		}
-		//latency - token, err := p.getToken(host)
-		_, err = p.getToken(host)
+		token, err := p.getToken(host)
 		if err != nil {
 			klog.Warningf("Failed to get token from host %v", host)
 			return
@@ -195,13 +194,12 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 			averageDeleteLatency := int(p.totalDeleteLatency) / p.totalPodDeleteNum
 			klog.V(2).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Total Number of Pods Deleted: %d, Average Delete Latency: %d Millisecond %%%%%%%%%%%%%%%%%%%%%%%%%%", p.totalPodDeleteNum, averageDeleteLatency)
 			go func() {
-				//latency
-				/*err = openstack.DeleteInstance(host, token, pod.Status.ClusterInstanceId)
+				err = openstack.DeleteInstance(host, token, pod.Status.ClusterInstanceId)
 				if err == nil {
 					klog.V(3).Infof("The openstack vm for the pod %v has been deleted at the host %v", pod.ObjectMeta.Name, host)
 				} else {
 					klog.Warningf("The openstack vm for the pod %v failed to delete with the error %v", pod.ObjectMeta.Name, err)
-				}*/
+				}
 				util.CheckTime(pod.Name, "dispatcher", "DeletePod-End", 2)
 			}()
 		} else {
@@ -219,8 +217,7 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 			averageCreateLatency := int(p.totalCreateLatency) / p.totalPodCreateNum
 			klog.V(2).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Total Number of Pods Created: %d, Average Create Latency: %d Millisecond %%%%%%%%%%%%%%%%%%%%%%%%%%", p.totalPodCreateNum, averageCreateLatency)
 			go func() {
-				//latency
-				//instanceId, err := openstack.ServerCreate(host, token, &pod.Spec)
+				instanceId, err := openstack.ServerCreate(host, token, &pod.Spec)
 				instanceId := "cluster0"
 				err = nil
 				if err == nil {
