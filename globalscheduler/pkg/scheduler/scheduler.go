@@ -153,7 +153,7 @@ func (sched *Scheduler) scheduleOne() {
 	// log the elapsed time for the entire schedule
 	if stack.CreateTime != 0 {
 		spendTime := time.Now().UnixNano() - stack.CreateTime
-		klog.Infof("===Finished Schedule, time consumption: %vms===", spendTime/int64(time.Millisecond))
+		klog.Infof("===Finished Schedule %s, time consumption: %vms===", stack.PodName, spendTime/int64(time.Millisecond))
 	}
 }
 

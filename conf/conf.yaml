@@ -3,4 +3,4 @@ master: 127.0.0.1:8080
 kubeconfig: /var/run/kubernetes/admin.kubeconfig
 
 scheduler_policy: edgecloud
-scheduler_policy_file: /home/ubuntu/go/src/k8s.io/arktos/conf/edgecloud_policy.yaml
+scheduler_policy_file: /var/run/kubernetes/edgecloud_policy.yaml
