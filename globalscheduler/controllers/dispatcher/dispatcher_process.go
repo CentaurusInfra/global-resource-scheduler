@@ -218,8 +218,6 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 			klog.V(2).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Total Number of Pods Created: %d, Average Create Latency: %d Millisecond %%%%%%%%%%%%%%%%%%%%%%%%%%", p.totalPodCreateNum, averageCreateLatency)
 			go func() {
 				instanceId, err := openstack.ServerCreate(host, token, &pod.Spec)
-				instanceId := "cluster0"
-				err = nil
 				if err == nil {
 					klog.V(3).Infof("The openstack vm for the pod %v has been created at the host %v", pod.ObjectMeta.Name, host)
 					pod.Status.ClusterInstanceId = instanceId
