@@ -23,22 +23,19 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
-	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/klog"
-	"k8s.io/kubernetes/globalscheduler/controllers/util/union"
+	"k8s.io/kubernetes/globalscheduler/controllers/util"
 	clusterclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
 	schedulerclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
 	"os/exec"
 	"sync"
 	"time"
 
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 
 	clusterinformers "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/informers/externalversions/cluster/v1"
@@ -48,8 +45,6 @@ import (
 	schedulerinformers "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/informers/externalversions/scheduler/v1"
 	schedulerlisters "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/listers/scheduler/v1"
 	schedulercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
-
-	gld "k8s.io/kubernetes/globalscheduler/controllers/util/geoLocationDistribute"
 )
 
 const (
@@ -69,19 +64,18 @@ type SchedulerController struct {
 	clusterInformer   clusterlisters.ClusterLister
 	schedulerSynced   cache.InformerSynced
 
-	geoLocationDistribute *gld.GeoLocationDistribute
-
 	// workqueue is a rate limited work queue. This is used to queue work to be
 	// processed instead of performing it as soon as a change happens. This
 	// means we can ensure we only process a fixed amount of resources at a
 	// time, and makes it easy to ensure we are never processing the same item
 	// simultaneously in two different workers.
 	workqueue workqueue.RateLimitingInterface
-	// recorder is an event recorder for recording Event resources to the
-	// Kubernetes API.
-	recorder record.EventRecorder
 	// mutex for updating schedulers
 	mu sync.Mutex
+	// Create a tree of all the geolocations and their union information
+	countryNode *ClusterInfoNode
+	// sccheduler list
+	schedulers []*schedulercrdv1.Scheduler
 }
 
 // NewSchedulerController returns a new scheduler controller
@@ -97,11 +91,6 @@ func NewSchedulerController(
 	// Add sample-controller types to the default Kubernetes Scheme so Events can be
 	// logged for sample-controller types.
 	utilruntime.Must(schedulerscheme.AddToScheme(scheme.Scheme))
-	klog.V(4).Info("Creating event broadcaster")
-	eventBroadcaster := record.NewBroadcaster()
-	eventBroadcaster.StartLogging(klog.Infof)
-	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeclientset.CoreV1().Events("")})
-	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 
 	controller := &SchedulerController{
 		kubeclientset:          kubeclientset,
@@ -111,9 +100,9 @@ func NewSchedulerController(
 		schedulerInformer:      schedulerInformer.Lister(),
 		clusterInformer:        clusterInformer.Lister(),
 		schedulerSynced:        schedulerInformer.Informer().HasSynced,
-		geoLocationDistribute:  gld.New(),
 		workqueue:              workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Scheduler"),
-		recorder:               recorder,
+		countryNode:            NewClusterInfoNode(),
+		schedulers:             make([]*schedulercrdv1.Scheduler, 0),
 	}
 
 	klog.Info("Setting up scheduler event handlers")
@@ -125,7 +114,6 @@ func NewSchedulerController(
 
 	clusterInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    controller.addCluster,
-		UpdateFunc: controller.updateCluster,
 		DeleteFunc: controller.deleteCluster,
 	})
 
@@ -231,6 +219,8 @@ func (sc *SchedulerController) processNextWorkItem() bool {
 // converge the two. It then updates the Status block of the Scheduler resource
 // with the current status of the resource.
 func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
 	// Convert the namespace/name string into a distinct namespace and name
 	namespace, name, err := cache.SplitMetaNamespaceKey(key.Value)
 	if err != nil {
@@ -244,13 +234,6 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		schedulerCopy, err := sc.getScheduler(namespace, name)
 		if err != nil {
 			return err
-		}
-
-		sc.geoLocationDistribute.SchedulersName = append(sc.geoLocationDistribute.SchedulersName, schedulerCopy.Name)
-
-		err = sc.balanceScheduler(namespace)
-		if err != nil {
-			return fmt.Errorf("balanceScheduler function failed")
 		}
 
 		// We don't need homescheduler anymore. Will delete it in the future.
@@ -286,62 +269,9 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 
 		//klog.V(2).Infof("Running process with the result: %v / %v\n", out.String(), stderr.String())
 
-		sc.recorder.Event(schedulerCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
-	case EventTypeUpdateScheduler:
-		klog.Infof("Event Type '%s'", EventTypeUpdateScheduler)
-		schedulerCopy, err := sc.getScheduler(namespace, name)
-		if err != nil {
-			return err
-		}
-
-		err = sc.balanceScheduler(namespace)
-		if err != nil {
-			return fmt.Errorf("balanceScheduler function failed")
-		}
-
-		sc.recorder.Event(schedulerCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
+		//sc.recorder.Event(schedulerCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	case EventTypeDeleteScheduler:
 		klog.Infof("Event Type '%s'", EventTypeDeleteScheduler)
-		err = sc.balanceScheduler(namespace)
-		if err != nil {
-			return fmt.Errorf("balanceScheduler function failed")
-		}
-	case EventTypeAddCluster:
-		klog.Infof("Event Type '%s'", EventTypeAddCluster)
-		clusterCopy, err := sc.getCluster(namespace, name)
-		if err != nil {
-			return err
-		}
-
-		sc.geoLocationDistribute.ClustersName = append(sc.geoLocationDistribute.ClustersName, clusterCopy.Name)
-
-		// Store the data according to Cluster geoLocation different fields
-		sc.addClusterToGeoMap(clusterCopy)
-
-		err = sc.balanceScheduler(namespace)
-		if err != nil {
-			return fmt.Errorf("balanceScheduler function failed")
-		}
-
-		sc.recorder.Event(clusterCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
-	case EventTypeUpdateCluster:
-		klog.Infof("Event Type '%s'", EventTypeUpdateCluster)
-		clusterCopy, err := sc.getCluster(namespace, name)
-		if err != nil {
-			return err
-		}
-		err = sc.balanceScheduler(namespace)
-		if err != nil {
-			return fmt.Errorf("balanceScheduler function failed")
-		}
-
-		sc.recorder.Event(clusterCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
-	case EventTypeDeleteCluster:
-		klog.Infof("Event Type '%s'", EventTypeDeleteCluster)
-		err = sc.balanceScheduler(namespace)
-		if err != nil {
-			return fmt.Errorf("balanceScheduler function failed")
-		}
 	}
 	return nil
 }
@@ -362,59 +292,69 @@ func (sc *SchedulerController) getScheduler(namespace string, name string) (*sch
 	return schedulerCopy, nil
 }
 
-func (sc *SchedulerController) getCluster(namespace string, name string) (*clustercrdv1.Cluster, error) {
-	// Get the Cluster resource with this namespace/name
-	cluster, err := sc.clusterInformer.Clusters(namespace).Get(name)
-	if err != nil {
-		// The Cluster resource may no longer exist, in which case we stop
-		// processing.
-		if errors.IsNotFound(err) {
-			runtime.HandleError(fmt.Errorf("failed to list cluster by: %s/%s", namespace, name))
-			return cluster, nil
-		}
-		return nil, err
-	}
-	clusterCopy := cluster.DeepCopy()
-	return clusterCopy, nil
-}
-
 func (sc *SchedulerController) addCluster(clusterObj interface{}) {
-	sc.enqueue(clusterObj, EventTypeAddCluster)
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
+	if cluster, ok := clusterObj.(*clustercrdv1.Cluster); ok {
+		sc.countryNode.AddCluster(cluster, 0)
+		if err := sc.balance(cluster.ObjectMeta.GetNamespace(), []*ClusterInfoNode{sc.countryNode}); err != nil {
+			klog.Warningf("Failed to balance schedulers with error %v", err)
+		}
+	} else {
+		klog.Warningf("Failed to convert the added object %v to a cluster", clusterObj)
+	}
 }
 
 func (sc *SchedulerController) addScheduler(schedulerObj interface{}) {
-	sc.enqueue(schedulerObj, EventTypeCreateScheduler)
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
+	if scheduler, ok := schedulerObj.(*schedulercrdv1.Scheduler); ok {
+		sc.schedulers = append(sc.schedulers, scheduler)
+		if err := sc.balance(scheduler.ObjectMeta.GetNamespace(), []*ClusterInfoNode{sc.countryNode}); err != nil {
+			klog.Warningf("Failed to balance schedulers with error %v", err)
+		} else {
+			klog.V(2).Infof("The scheduler %s has been balanced\n", scheduler.GetName())
+			sc.enqueue(schedulerObj, EventTypeCreateScheduler)
+		}
+
+	} else {
+		klog.Warningf("Failed to convert the added object %v to a scheduler", schedulerObj)
+	}
 }
 
 func (sc *SchedulerController) updateScheduler(old, new interface{}) {
-	oldScheduler := old.(*schedulercrdv1.Scheduler)
-	newScheduler := new.(*schedulercrdv1.Scheduler)
-	if oldScheduler.ResourceVersion == newScheduler.ResourceVersion {
-		return
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
+	oldScheduler, ok := old.(*schedulercrdv1.Scheduler)
+	if !ok {
+		klog.Warningf("Failed to convert the old updated object %v to a scheduler", old)
 	}
-	sc.enqueue(new, EventTypeUpdateScheduler)
+	newScheduler, ok := new.(*schedulercrdv1.Scheduler)
+	if !ok {
+		klog.Warningf("Failed to convert the new updated object %v to a scheduler", new)
+	}
+	for idx, scheduler := range sc.schedulers {
+		if scheduler.Name == oldScheduler.Name {
+			sc.schedulers[idx] = newScheduler
+			break
+		}
+	}
 }
 
 //deleteScheduler takes a deleted Scheduler resource and converts it into a namespace/name
 //string which is then put into the work queue. This method should *not* be
 //passed resources of any type other than Scheduler.
 func (sc *SchedulerController) deleteScheduler(schedulerObj interface{}) {
-	scheduler, ok := schedulerObj.(*schedulercrdv1.Scheduler)
-	if !ok {
-		klog.Warningf("Failed to convert an deleted object  %+v to a scheduler", schedulerObj)
-		return
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
+	if scheduler, ok := schedulerObj.(*schedulercrdv1.Scheduler); ok {
+		sc.schedulers = append(sc.schedulers, scheduler)
+		if err := sc.balance(scheduler.ObjectMeta.GetNamespace(), []*ClusterInfoNode{sc.countryNode}); err != nil {
+			klog.Warningf("Failed to balance schedulers with error %v", err)
+		}
+	} else {
+		klog.Warningf("Failed to convert the added object %v to a scheduler", schedulerObj)
 	}
-
-	sc.geoLocationDistribute = gld.RemoveSchedulerName(scheduler, sc.geoLocationDistribute)
-	sc.recorder.Event(scheduler, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
-
-	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(schedulerObj)
-	if err != nil {
-		runtime.HandleError(err)
-		return
-	}
-	keyWithEventType := NewKeyWithEventType(EventTypeDeleteScheduler, key)
-	sc.workqueue.AddRateLimited(keyWithEventType)
 }
 
 // enqueue takes a Scheduler resource and converts it into a namespace/name
@@ -430,69 +370,147 @@ func (sc *SchedulerController) enqueue(obj interface{}, eventType EventType) {
 	sc.workqueue.AddRateLimited(keyWithEventType)
 }
 
-func (sc *SchedulerController) updateCluster(old, new interface{}) {
-	oldCluster := old.(*clustercrdv1.Cluster)
-	newCluster := new.(*clustercrdv1.Cluster)
-	if oldCluster.ResourceVersion == newCluster.ResourceVersion {
-		return
+func (sc *SchedulerController) deleteCluster(clusterObj interface{}) {
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
+	if cluster, ok := clusterObj.(*clustercrdv1.Cluster); ok {
+		sc.countryNode.DelCluster(cluster, 0)
+		if err := sc.balance(cluster.ObjectMeta.GetNamespace(), []*ClusterInfoNode{sc.countryNode}); err != nil {
+			klog.Warningf("Failed to balance schedulers with error %v", err)
+		}
+	} else {
+		klog.Warningf("Failed to convert the deleted object %v to a cluster", clusterObj)
 	}
-	sc.enqueue(new, EventTypeUpdateCluster)
 }
 
-func (sc *SchedulerController) deleteCluster(obj interface{}) {
-	cluster, ok := obj.(*clustercrdv1.Cluster)
-	if !ok {
-		klog.Warningf("Failed to convert an deleted object  %+v to a cluster", obj)
-		return
+func (sc *SchedulerController) balance(namespace string, nodes []*ClusterInfoNode) error {
+	schedulersLen := len(sc.schedulers)
+	nodesLen := len(nodes)
+
+	if nodesLen == 0 || schedulersLen == 0 {
+		return nil
 	}
 
-	sc.geoLocationDistribute = gld.RemoveClusterFromGeoMap(cluster, sc.geoLocationDistribute)
-	sc.recorder.Event(cluster, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
-
-	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
-	if err != nil {
-		runtime.HandleError(err)
-		return
+	if schedulersLen > nodesLen {
+		nextLevelNodes := make([]*ClusterInfoNode, 0)
+		for _, node := range nodes {
+			if len(node.infoMap) > 0 {
+				for _, nextLevelNode := range node.infoMap {
+					nextLevelNodes = append(nextLevelNodes, nextLevelNode)
+				}
+			}
+		}
+		return sc.balance(namespace, nextLevelNodes)
 	}
 
-	keyWithEventType := NewKeyWithEventType(EventTypeDeleteCluster, key)
-	sc.workqueue.AddRateLimited(keyWithEventType)
-}
+	nodeIdxBounds := util.EvenlyDivide(schedulersLen, int64(nodesLen-1))
 
-func (sc *SchedulerController) updateUnion(obj *schedulercrdv1.Scheduler, namespace string) error {
-	newUnion := schedulercrdv1.ClusterUnion{}
-	for _, v := range obj.Spec.Cluster {
-		clusterObj, err := sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(v, metav1.GetOptions{})
+	for schedulerIdx, nodeIdxBound := range nodeIdxBounds {
+		clusters := make(map[string]bool)
+		unionGeoLocation := make(map[clustercrdv1.GeolocationInfo]bool)
+		unionRegion := make(map[clustercrdv1.RegionInfo]bool)
+		unionOperator := make(map[clustercrdv1.OperatorInfo]bool)
+		unionFlavor := make(map[clustercrdv1.FlavorInfo]bool)
+		unionStorage := make(map[clustercrdv1.StorageSpec]bool)
+		unionEipCapacity := make(map[int64]bool)
+		unionCPUCapacity := make(map[int64]bool)
+		unionMemCapacity := make(map[int64]bool)
+		unionServerPrice := make(map[int64]bool)
+
+		for idx := nodeIdxBound[0]; idx <= nodeIdxBound[1]; idx++ {
+			for key := range nodes[idx].clusterMap {
+				clusters[key.(string)] = true
+			}
+			for key := range nodes[idx].clusterUnionMap.GeoLocationMap {
+				unionGeoLocation[key.(clustercrdv1.GeolocationInfo)] = true
+			}
+			for key := range nodes[idx].clusterUnionMap.RegionMap {
+				unionRegion[key.(clustercrdv1.RegionInfo)] = true
+			}
+			for key := range nodes[idx].clusterUnionMap.OperatorMap {
+				unionOperator[key.(clustercrdv1.OperatorInfo)] = true
+			}
+			for key := range nodes[idx].clusterUnionMap.FlavorMap {
+				unionFlavor[key.(clustercrdv1.FlavorInfo)] = true
+			}
+			for key := range nodes[idx].clusterUnionMap.StorageMap {
+				unionStorage[key.(clustercrdv1.StorageSpec)] = true
+			}
+			for key := range nodes[idx].clusterUnionMap.EipCapacityMap {
+				unionEipCapacity[key.(int64)] = true
+			}
+			for key := range nodes[idx].clusterUnionMap.CPUCapacityMap {
+				unionCPUCapacity[key.(int64)] = true
+			}
+			for key := range nodes[idx].clusterUnionMap.MemCapacityMap {
+				unionMemCapacity[key.(int64)] = true
+			}
+			for key := range nodes[idx].clusterUnionMap.ServerPriceMap {
+				unionServerPrice[key.(int64)] = true
+			}
+		}
+		latestScheduler, err := sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Get(sc.schedulers[schedulerIdx].GetName(), metav1.GetOptions{})
+		if err != nil {
+			return fmt.Errorf("Failed to get scheduler %s", sc.schedulers[schedulerIdx].GetName())
+		}
+		latestScheduler.Spec.Union = schedulercrdv1.ClusterUnion{}
+
+		combinedCluster := make([]string, 0)
+		for key := range clusters {
+			combinedCluster = append(combinedCluster, key)
+		}
+		latestScheduler.Spec.Cluster = combinedCluster
+
+		combinedGeoLcation := make([]*clustercrdv1.GeolocationInfo, 0)
+		for key := range unionGeoLocation {
+			combinedGeoLcation = append(combinedGeoLcation, key.DeepCopy())
+		}
+		latestScheduler.Spec.Union.GeoLocation = combinedGeoLcation
+
+		combinedRegion := make([]*clustercrdv1.RegionInfo, 0)
+		for key := range unionRegion {
+			combinedRegion = append(combinedRegion, key.DeepCopy())
+		}
+		latestScheduler.Spec.Union.Region = combinedRegion
+
+		combinedOperator := make([]*clustercrdv1.OperatorInfo, 0)
+		for key := range unionOperator {
+			combinedOperator = append(combinedOperator, key.DeepCopy())
+		}
+		latestScheduler.Spec.Union.Operator = combinedOperator
+
+		combinedFlavor := make([]*clustercrdv1.FlavorInfo, 0)
+		for key := range unionFlavor {
+			combinedFlavor = append(combinedFlavor, key.DeepCopy())
+		}
+		latestScheduler.Spec.Union.Flavors = combinedFlavor
+
+		combinedStorage := make([]*clustercrdv1.StorageSpec, 0)
+		for key := range unionStorage {
+			combinedStorage = append(combinedStorage, key.DeepCopy())
+		}
+		latestScheduler.Spec.Union.Storage = combinedStorage
+
+		latestScheduler.Spec.Union.EipCapacity = getMapKeys(unionEipCapacity)
+		latestScheduler.Spec.Union.CPUCapacity = getMapKeys(unionCPUCapacity)
+		latestScheduler.Spec.Union.MemCapacity = getMapKeys(unionMemCapacity)
+		latestScheduler.Spec.Union.ServerPrice = getMapKeys(unionServerPrice)
+
+		_, err = sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Update(latestScheduler)
 		if err != nil {
 			return err
 		}
-		newUnion = union.UpdateUnion(newUnion, clusterObj)
 	}
-	obj.Spec.Union = newUnion
-	_, err := sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Update(obj)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
-//func (sc *SchedulerController) updateClusterBinding(schedulerCopy *schedulercrdv1.Scheduler, namespace string) error {
-//	clusterIdList := sc.consistentHash.GetIdList(schedulerCopy.Name)
-//	for _, v := range clusterIdList {
-//		clusterObj, err := sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(v, metav1.GetOptions{})
-//		if err != nil {
-//			return err
-//		}
-//		clusterObj.Spec.HomeScheduler = schedulerCopy.Name
-//		_, err = sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Update(clusterObj)
-//		if err != nil {
-//			return err
-//		}
-//	}
-//
-//	return nil
-//}
+func getMapKeys(m map[int64]bool) []int64 {
+	res := make([]int64, 0)
+	for key := range m {
+		res = append(res, key)
+	}
+	return res
+}
 
 func runCommand(command string) error {
 	cmd := exec.Command("/bin/bash", "-c", command)
@@ -502,122 +520,5 @@ func runCommand(command string) error {
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-func (sc *SchedulerController) addClusterToGeoMap(clusterCopy *clustercrdv1.Cluster) {
-	clusterLocation := clusterCopy.Spec.GeoLocation
-	clusterCountry := clusterLocation.Country
-	clusterArea := clusterLocation.Area
-	clusterProvince := clusterLocation.Province
-	clusterCity := clusterLocation.City
-
-	sc.geoLocationDistribute.CountryMap[clusterCountry] = append(sc.geoLocationDistribute.CountryMap[clusterCountry], clusterCopy.Name)
-	sc.geoLocationDistribute.AreaMap[clusterArea] = append(sc.geoLocationDistribute.AreaMap[clusterArea], clusterCopy.Name)
-	sc.geoLocationDistribute.ProvinceMap[clusterProvince] = append(sc.geoLocationDistribute.ProvinceMap[clusterProvince], clusterCopy.Name)
-	sc.geoLocationDistribute.CityMap[clusterCity] = append(sc.geoLocationDistribute.CityMap[clusterCity], clusterCopy.Name)
-}
-
-func (sc *SchedulerController) balanceScheduler(namespace string) error {
-	sc.mu.Lock()
-	defer sc.mu.Unlock()
-
-	schedulersLength := len(sc.geoLocationDistribute.SchedulersName)
-	if len(sc.geoLocationDistribute.CountryMap) == 0 || schedulersLength == 0 {
-		return nil
-	}
-
-	if len(sc.geoLocationDistribute.CountryMap) >= schedulersLength {
-		if schedulersLength == 1 {
-			schedulerName := sc.geoLocationDistribute.SchedulersName[0]
-			schedulerObj, err := sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Get(schedulerName, metav1.GetOptions{})
-			if err != nil {
-				return fmt.Errorf("scheduler object Get Failed")
-			}
-
-			schedulerObj.Spec.Cluster = sc.geoLocationDistribute.ClustersName
-
-			unions := schedulercrdv1.ClusterUnion{}
-			for _, cluster := range schedulerObj.Spec.Cluster {
-				clusterObj, err := sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(cluster, metav1.GetOptions{})
-				if err != nil {
-					return fmt.Errorf("cluster object get failed")
-				}
-				unions = union.UpdateUnion(unions, clusterObj)
-			}
-			schedulerObj.Spec.Union = unions
-
-			_, err = sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Update(schedulerObj)
-			if err != nil {
-				return fmt.Errorf("scheduler object Update Failed")
-			}
-		} else {
-			err := sc.updateSchedulersWithClusters(sc.geoLocationDistribute.CountryMap, namespace, schedulersLength)
-			if err != nil {
-				return err
-			}
-		}
-	} else if len(sc.geoLocationDistribute.AreaMap) >= schedulersLength {
-		err := sc.updateSchedulersWithClusters(sc.geoLocationDistribute.AreaMap, namespace, schedulersLength)
-		if err != nil {
-			return err
-		}
-	} else if len(sc.geoLocationDistribute.ProvinceMap) >= schedulersLength {
-		err := sc.updateSchedulersWithClusters(sc.geoLocationDistribute.ProvinceMap, namespace, schedulersLength)
-		if err != nil {
-			return err
-		}
-	} else if len(sc.geoLocationDistribute.CityMap) >= schedulersLength {
-		err := sc.updateSchedulersWithClusters(sc.geoLocationDistribute.CityMap, namespace, schedulersLength)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (sc *SchedulerController) updateSchedulersWithClusters(dataMap map[string][]string, namespace string, schedulersLength int) error {
-	schedulerIdx := 0
-	mapClustersToScheduler := make(map[string][]string)
-	for _, clusters := range dataMap {
-		schedulerName := sc.geoLocationDistribute.SchedulersName[schedulerIdx]
-
-		_, exist := mapClustersToScheduler[schedulerName]
-		if exist {
-			mapClustersToScheduler[schedulerName] = append(mapClustersToScheduler[schedulerName], clusters...)
-		} else {
-			mapClustersToScheduler[schedulerName] = clusters
-		}
-
-		schedulerIdx++
-		if schedulerIdx == schedulersLength {
-			schedulerIdx = 0
-		}
-	}
-
-	for schedulerName, clusters := range mapClustersToScheduler {
-		schedulerObj, err := sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Get(schedulerName, metav1.GetOptions{})
-		if err != nil {
-			return fmt.Errorf("scheduler object Get Failed")
-		}
-
-		schedulerObj.Spec.Cluster = clusters
-		unions := schedulercrdv1.ClusterUnion{}
-		for _, clusterName := range clusters {
-			clusterObj, err := sc.clusterclient.GlobalschedulerV1().Clusters(namespace).Get(clusterName, metav1.GetOptions{})
-			if err != nil {
-				return fmt.Errorf("cluster object get failed")
-			}
-			unions = union.UpdateUnion(unions, clusterObj)
-		}
-		schedulerObj.Spec.Union = unions
-
-		_, err = sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Update(schedulerObj)
-		if err != nil {
-			return fmt.Errorf("scheduler object Update Failed")
-		}
-	}
-
 	return nil
 }
