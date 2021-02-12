@@ -141,6 +141,28 @@ func (p *Process) Run(quit chan struct{}) {
 			}
 			p.schedulers = append(p.schedulers, *scheduler)
 			klog.V(4).Infof("A new scheduler %s has been added", scheduler.Name)
+			klog.V(4).Infof("****current schedulers are %v", p.schedulers)
+		},
+		UpdateFunc: func(oldObject, newObject interface{}) {
+			oldScheduler, ok := oldObject.(*schedulerv1.Scheduler)
+			if !ok {
+				klog.Warningf("Failed to convert the object  %+v to an old scheduler", oldScheduler)
+				return
+			}
+			newScheduler, ok := oldObject.(*schedulerv1.Scheduler)
+			if !ok {
+				klog.Warningf("Failed to convert the object  %+v to a new scheduler", newScheduler)
+				return
+			}
+			if !reflect.DeepEqual(oldScheduler, newScheduler) {
+				for idx, item := range p.schedulers {
+					if reflect.DeepEqual(item, oldScheduler) {
+						p.schedulers[idx] = *newScheduler
+						klog.V(4).Infof("The current scheduler map is %v", p.schedulers)
+						return
+					}
+				}
+			}
 		},
 		DeleteFunc: func(obj interface{}) {
 			scheduler, ok := obj.(*schedulerv1.Scheduler)
