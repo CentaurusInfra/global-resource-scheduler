@@ -108,7 +108,6 @@ func NewSchedulerController(
 	klog.Info("Setting up scheduler event handlers")
 	schedulerInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    controller.addScheduler,
-		UpdateFunc: controller.updateScheduler,
 		DeleteFunc: controller.deleteScheduler,
 	})
 
@@ -322,25 +321,6 @@ func (sc *SchedulerController) addScheduler(schedulerObj interface{}) {
 	}
 }
 
-func (sc *SchedulerController) updateScheduler(old, new interface{}) {
-	sc.mu.Lock()
-	defer sc.mu.Unlock()
-	oldScheduler, ok := old.(*schedulercrdv1.Scheduler)
-	if !ok {
-		klog.Warningf("Failed to convert the old updated object %v to a scheduler", old)
-	}
-	newScheduler, ok := new.(*schedulercrdv1.Scheduler)
-	if !ok {
-		klog.Warningf("Failed to convert the new updated object %v to a scheduler", new)
-	}
-	for idx, scheduler := range sc.schedulers {
-		if scheduler.Name == oldScheduler.Name {
-			sc.schedulers[idx] = newScheduler
-			break
-		}
-	}
-}
-
 //deleteScheduler takes a deleted Scheduler resource and converts it into a namespace/name
 //string which is then put into the work queue. This method should *not* be
 //passed resources of any type other than Scheduler.
@@ -496,10 +476,11 @@ func (sc *SchedulerController) balance(namespace string, nodes []*ClusterInfoNod
 		latestScheduler.Spec.Union.MemCapacity = getMapKeys(unionMemCapacity)
 		latestScheduler.Spec.Union.ServerPrice = getMapKeys(unionServerPrice)
 
-		_, err = sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Update(latestScheduler)
+		updatedScheduler, err := sc.schedulerclient.GlobalschedulerV1().Schedulers(namespace).Update(latestScheduler)
 		if err != nil {
 			return err
 		}
+		sc.schedulers[schedulerIdx] = updatedScheduler
 	}
 	return nil
 }
