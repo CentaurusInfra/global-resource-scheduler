@@ -330,8 +330,8 @@ func (sc *SchedulerController) deleteScheduler(schedulerObj interface{}) {
 		schedulerLen := len(sc.schedulers)
 		for idx, sched := range sc.schedulers {
 			if scheduler.Name == sched.Name && scheduler.Namespace == sched.Namespace {
-				sc.schedulers[idx] = sc.schedulers[schedulerLen - 1]
-				sc.schedulers = sc.schedulers[:schedulerLen - 1]
+				sc.schedulers[idx] = sc.schedulers[schedulerLen-1]
+				sc.schedulers = sc.schedulers[:schedulerLen-1]
 				break
 			}
 		}
