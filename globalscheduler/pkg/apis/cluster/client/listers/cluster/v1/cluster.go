@@ -21,7 +21,9 @@ package v1
 import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
+	clusterscheme "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned/scheme"
 	v1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 )
 
@@ -100,5 +102,17 @@ func (s clusterNamespaceLister) Get(name string) (*v1.Cluster, error) {
 	if !exists {
 		return nil, errors.NewNotFound(v1.Resource("cluster"), name)
 	}
-	return obj.(*v1.Cluster), nil
+	cluster := obj.(*v1.Cluster)
+	gvks, _, err := clusterscheme.Scheme.ObjectKinds(cluster)
+	for _, gvk := range gvks {
+		if len(gvk.Kind) == 0 {
+			continue
+		}
+		if len(gvk.Version) == 0 || gvk.Version == runtime.APIVersionInternal {
+			continue
+		}
+		cluster.GetObjectKind().SetGroupVersionKind(gvk)
+		break
+	}
+	return cluster, nil
 }
