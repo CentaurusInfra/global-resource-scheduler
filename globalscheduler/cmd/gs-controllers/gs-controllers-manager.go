@@ -111,7 +111,7 @@ func main() {
 	if err != nil {
 		klog.Fatalf("Error building clusterclientset: %s", err.Error())
 	}
-	clusterInformerFactory := clusterinformer.NewSharedInformerFactory(clusterClientset, time.Second*30)
+	clusterInformerFactory := clusterinformer.NewSharedInformerFactory(clusterClientset, 0)
 	clusterInformer := clusterInformerFactory.Globalscheduler().V1().Clusters()
 	clusterController := cluster.NewClusterController(kubeClientset, apiextensionsClient, clusterClientset, clusterInformer, *grpcHost)
 	err = clusterController.CreateClusterCRD()
