@@ -67,6 +67,8 @@ const (
 	ClusterUpdateYes int = 2
 )
 
+var deleteClusters map[string]clusterv1.Cluster
+
 // Cluster Controller Struct
 type ClusterController struct {
 	kubeclientset          kubernetes.Interface
@@ -112,6 +114,7 @@ func NewClusterController(
 		UpdateFunc: c.updateCluster,
 		DeleteFunc: c.deleteCluster,
 	})
+	deleteClusters = make(map[string]clusterv1.Cluster)
 	return c
 }
 
@@ -161,13 +164,17 @@ func (c *ClusterController) updateCluster(oldObject, newObject interface{}) {
 }
 
 func (c *ClusterController) deleteCluster(object interface{}) {
+	resource := object.(*clusterv1.Cluster)
+	cluster := resource.DeepCopy()
 	key, err := controller.KeyFunc(object)
 	if err != nil {
 		utilruntime.HandleError(fmt.Errorf("couldn't get key for object %#v: %v", object, err))
 		return
 	}
 	c.Enqueue(key, EventType_Delete)
+	deleteClusters[key] = cluster
 	klog.Infof("Enqueue Delete Cluster - %v", key)
+	klog.Infof("Enqueue Delete Cluster Object - %v", cluster)
 }
 
 // Enqueue puts key of the cluster object in the work queue
@@ -242,7 +249,7 @@ func (c *ClusterController) syncHandler(keyWithEventType KeyWithEventType) error
 
 	//This performs controller logic such as gRPC handling
 	klog.Infof("gRPC Client Request -%v, %v ", keyWithEventType.EventType, clusterName)
-	result, err := c.gRPCRequest(keyWithEventType.EventType, nameSpace, clusterName)
+	result, err := c.gRPCRequest(key, keyWithEventType.EventType, nameSpace, clusterName)
 	if !result {
 		klog.Errorf("Failed a cluster processing - event: %v, key: %v, error:", keyWithEventType, key, err)
 		c.workqueue.AddRateLimited(keyWithEventType)
@@ -296,7 +303,7 @@ func (c *ClusterController) getclusterInfo(cluster *clusterv1.Cluster) (clusterN
 }
 
 //This is gRPC client, and performs controller logic including gRPC handling
-func (c *ClusterController) gRPCRequest(event EventType, clusterNameSpace string, clusterName string) (response bool, err error) {
+func (c *ClusterController) gRPCRequest(key string, event EventType, clusterNameSpace string, clusterName string) (response bool, err error) {
 	//clusterNameSpace := cluster.ObjectMeta.Namespace
 	//clusterName := cluster.ObjectMeta.Name
 	switch event {
@@ -328,7 +335,8 @@ func (c *ClusterController) gRPCRequest(event EventType, clusterNameSpace string
 		//When deleting a cluster, API Server deletes the cluster before cluster controller watches the event.
 		//So, ClusterController cannot get cluster info from etcd.
 		//To send grpc delete request to ResourceCollector, ClusterController makes a dummy new cluster
-		cluster := c.newCluster(clusterNameSpace, clusterName)
+		//cluster := c.newCluster(clusterNameSpace, clusterName)
+		cluster := deleteClusters[key]
 		if err != nil || cluster == nil {
 			klog.Errorf("Failed to retrieve cluster in local cache by cluster name - %s", clusterName)
 			return false, err
@@ -339,6 +347,7 @@ func (c *ClusterController) gRPCRequest(event EventType, clusterNameSpace string
 			cluster.Status = ClusterStatusDeleted
 			response := grpc.GrpcSendClusterProfile(c.grpcHost, cluster)
 			klog.Infof("gRPC request is sent %v", response)
+			delete(deleteClusters, key)
 		}
 		break
 	default:
