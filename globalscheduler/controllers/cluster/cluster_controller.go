@@ -135,7 +135,9 @@ func (c *ClusterController) updateCluster(oldObject, newObject interface{}) {
 	}
 	oldResource := oldObject.(*clusterv1.Cluster)
 	newResource := newObject.(*clusterv1.Cluster)
-	eventType, err := c.determineEventType(oldResource, newResource)
+	oldResourceCopy := oldResource.DeepCopy()
+	newResourceCopy := newResource.DeepCopy()
+	eventType, err := c.determineEventType(oldResourceCopy, newResourceCopy)
 	if err != nil {
 		klog.Errorf("Unexpected string in queue; discarding - %v ", key2)
 		return
@@ -143,7 +145,7 @@ func (c *ClusterController) updateCluster(oldObject, newObject interface{}) {
 	switch eventType {
 	case ClusterUpdateNo:
 		{
-			klog.Infof("No actual change in clusters, discarding -%v ", newResource.Name)
+			klog.Infof("No actual change in clusters, discarding -%v ", newResourceCopy.Name)
 			break
 		}
 	case ClusterUpdateYes:
@@ -254,12 +256,12 @@ func (c *ClusterController) syncHandler(keyWithEventType KeyWithEventType) error
 	if keyWithEventType.EventType != EventType_Delete {
 		cluster, err := c.clusterlister.Clusters(nameSpace).Get(clusterName)
 		clusterCopy := cluster.DeepCopy()
-		clusterCopy.Status = "HANDLED"
+		clusterCopy.Status = "HandledByClusterController"
 		if err != nil || cluster == nil {
 			klog.Errorf("Failed to retrieve cluster in local cache by cluster name - %s", clusterName)
 			return err
 		}
-		c.recorder.Event(clusterCopy, corev1.EventTypeNormal, SuccessSynched, MessageResourceSynched)
+		//c.recorder.Event(clusterCopy, corev1.EventTypeNormal, SuccessSynched, MessageResourceSynched)
 	}
 	return nil
 }

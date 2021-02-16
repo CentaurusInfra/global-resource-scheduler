@@ -277,15 +277,15 @@ func (dc *DispatcherController) syncHandler(key *KeyWithEventType) error {
 		dc.recorder.Event(dispatcherCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	case EventTypeUpdateDispatcher:
 		klog.Infof("Event Type '%s'", EventTypeUpdateDispatcher)
-		dispatcherCopy, err := dc.getDispatcher(namespace, name)
-		if err != nil {
-			return err
-		}
+		// dispatcherCopy, err := dc.getDispatcher(namespace, name)
+		// if err != nil {
+		// 	return err
+		// }
 
 		if err := dc.balance(); err != nil {
 			klog.Fatalf("Failed to balance the clusters among dispatchers with error %v", err)
 		}
-		dc.recorder.Event(dispatcherCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
+		//dc.recorder.Event(dispatcherCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	case EventTypeDeleteDispatcher:
 		klog.Infof("Event Type '%s'", EventTypeDeleteDispatcher)
 		if err := dc.balance(); err != nil {
@@ -293,24 +293,24 @@ func (dc *DispatcherController) syncHandler(key *KeyWithEventType) error {
 		}
 	case EventTypeAddCluster:
 		klog.Infof("Event Type '%s'", EventTypeAddCluster)
-		clusterCopy, err := dc.getCluster(namespace, name)
-		if err != nil {
-			return err
-		}
+		// clusterCopy, err := dc.getCluster(namespace, name)
+		// if err != nil {
+		// 	return err
+		// }
 		if err := dc.balance(); err != nil {
 			klog.Fatalf("Failed to balance the clusters among dispatchers with error %v", err)
 		}
-		dc.recorder.Event(clusterCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
+		//dc.recorder.Event(clusterCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	case EventTypeUpdateCluster:
 		klog.Infof("Event Type '%s'", EventTypeUpdateCluster)
-		clusterCopy, err := dc.getCluster(namespace, name)
-		if err != nil {
-			return err
-		}
+		// clusterCopy, err := dc.getCluster(namespace, name)
+		// if err != nil {
+		// 	return err
+		// }
 		if err := dc.balance(); err != nil {
 			klog.Fatalf("Failed to balance the clusters among dispatchers with error %v", err)
 		}
-		dc.recorder.Event(clusterCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
+		//dc.recorder.Event(clusterCopy, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	case EventTypeDeleteCluster:
 		klog.Infof("Event Type '%s'", EventTypeDeleteCluster)
 		if err := dc.balance(); err != nil {
