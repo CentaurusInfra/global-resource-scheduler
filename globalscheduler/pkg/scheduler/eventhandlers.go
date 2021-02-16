@@ -390,28 +390,28 @@ func (sched *Scheduler) bindToSite(clusterName string, assumedStack *types.Stack
 
 		return err
 	}
-
-	// get pod first
-	pod, err := sched.Client.CoreV1().PodsWithMultiTenancy(assumedStack.PodNamespace, assumedStack.Tenant).Get(assumedStack.PodName, metav1.GetOptions{})
-	if err != nil {
-		klog.Warningf("Failed to get status for pod %q: %v", assumedStack.PodName+"/"+assumedStack.PodNamespace+"/"+
-			assumedStack.Tenant+"/"+assumedStack.UID, err)
-		return err
-	}
-
-	newStatus := v1.PodStatus{
-		Phase: v1.PodBound,
-	}
-
-	// update pod status to Bound
-	klog.Infof("Attempting to update pod status from %v to %v", pod.Status, newStatus)
-	_, _, err = statusutil.PatchPodStatus(sched.Client, assumedStack.Tenant, assumedStack.PodNamespace, assumedStack.PodName, pod.Status, newStatus)
-	if err != nil {
-		klog.Warningf("PatchPodStatus for pod %q: %v", assumedStack.PodName+"/"+assumedStack.PodNamespace+"/"+
-			assumedStack.Tenant+"/"+assumedStack.UID, err)
-		return err
-	}
-
-	klog.Infof("Update pod status from %v to %v success", pod.Status, newStatus)
+	// The following codes are commented since the Bind method has already update the pod status phase to Bound
+	//// get pod first
+	//pod, err := sched.Client.CoreV1().PodsWithMultiTenancy(assumedStack.PodNamespace, assumedStack.Tenant).Get(assumedStack.PodName, metav1.GetOptions{})
+	//if err != nil {
+	//	klog.Warningf("Failed to get status for pod %q: %v", assumedStack.PodName+"/"+assumedStack.PodNamespace+"/"+
+	//		assumedStack.Tenant+"/"+assumedStack.UID, err)
+	//	return err
+	//}
+	//
+	//newStatus := v1.PodStatus{
+	//	Phase: v1.PodBound,
+	//}
+	//
+	//// update pod status to Bound
+	//klog.Infof("Attempting to update pod status from %v to %v", pod.Status, newStatus)
+	//_, _, err = statusutil.PatchPodStatus(sched.Client, assumedStack.Tenant, assumedStack.PodNamespace, assumedStack.PodName, pod.Status, newStatus)
+	//if err != nil {
+	//	klog.Warningf("PatchPodStatus for pod %q: %v", assumedStack.PodName+"/"+assumedStack.PodNamespace+"/"+
+	//		assumedStack.Tenant+"/"+assumedStack.UID, err)
+	//	return err
+	//}
+	//
+	//klog.Infof("Update pod status from %v to %v success", pod.Status, newStatus)
 	return nil
 }
