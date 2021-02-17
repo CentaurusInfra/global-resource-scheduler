@@ -11,6 +11,7 @@ go_library(
     importpath = "k8s.io/kubernetes/globalscheduler/controllers/dispatcher",
     visibility = ["//visibility:public"],
     deps = [
+        "//globalscheduler/controllers:go_default_library",
         "//globalscheduler/controllers/util:go_default_library",
         "//globalscheduler/controllers/util/openstack:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/clientset/versioned:go_default_library",

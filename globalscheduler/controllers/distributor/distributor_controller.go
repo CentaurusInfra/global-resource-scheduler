@@ -21,9 +21,7 @@ import (
 	"fmt"
 	corev1 "k8s.io/api/core/v1"
 	apiextensions "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
-	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -35,6 +33,7 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog"
+	"k8s.io/kubernetes/globalscheduler/controllers"
 	"k8s.io/kubernetes/globalscheduler/controllers/util"
 	distributortype "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor"
 	distributorclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/client/clientset/versioned"
@@ -279,47 +278,7 @@ func (c *DistributorController) createCustomResourceDefinition() *apiextensions.
 	}
 }
 func (c *DistributorController) EnsureCustomResourceDefinitionCreation() error {
-	distributor := c.createCustomResourceDefinition()
-	_, err := c.apiextensionsclientset.ApiextensionsV1beta1().CustomResourceDefinitions().Create(distributor)
-	if err != nil && !errors.IsAlreadyExists(err) {
-		return err
-	}
-
-	operation := func() (bool, error) {
-		manifest, err := c.apiextensionsclientset.ApiextensionsV1beta1().CustomResourceDefinitions().Get(distributor.Name, metav1.GetOptions{})
-		if err != nil {
-			return false, err
-		}
-
-		for _, cond := range manifest.Status.Conditions {
-			switch cond.Type {
-			case apiextensionsv1beta1.Established:
-				if cond.Status == apiextensionsv1beta1.ConditionTrue {
-					return true, nil
-				}
-			case apiextensionsv1beta1.NamesAccepted:
-				if cond.Status == apiextensionsv1beta1.ConditionFalse {
-					return false, fmt.Errorf("name %s conflicts", distributor.Name)
-				}
-			}
-		}
-
-		return false, fmt.Errorf("%s not established", distributor.Name)
-	}
-	err = wait.Poll(1*time.Second, 10*time.Second, func() (bool, error) {
-		return operation()
-	})
-
-	if err != nil {
-		deleteErr := c.apiextensionsclientset.ApiextensionsV1beta1().CustomResourceDefinitions().Delete(distributor.Name, nil)
-		if deleteErr != nil {
-			return deleteErr
-		}
-
-		return err
-	}
-
-	return nil
+	return controllers.CreateCRD(c.apiextensionsclientset, c.createCustomResourceDefinition())
 }
 
 // Create a distributor for testing purpose

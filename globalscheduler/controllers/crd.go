@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"fmt"
-	"k8s.io/kubernetes/globalscheduler/pkg/apis/distributor"
 	"time"
 
 	apiextv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
@@ -69,12 +68,12 @@ func waitForCRD(cs clientset.Interface, crd *apiextv1beta1.CustomResourceDefinit
 				}
 			case apiextv1beta1.NamesAccepted:
 				if cond.Status == apiextv1beta1.ConditionFalse {
-					return false, fmt.Errorf("name %s conflicts", distributor.Name)
+					return false, fmt.Errorf("name %s conflicts", crd.Name)
 				}
 			}
 		}
 
-		return false, fmt.Errorf("%s not established", distributor.Name)
+		return false, fmt.Errorf("%s not established", crd.Name)
 	}
 	err := wait.Poll(1*time.Second, 10*time.Second, func() (bool, error) {
 		return operation()

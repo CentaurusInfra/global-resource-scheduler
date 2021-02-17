@@ -17,45 +17,12 @@ limitations under the License.
 package scheduler
 
 import (
-	"fmt"
 	apiextensions "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/klog"
-	"time"
+	"k8s.io/kubernetes/globalscheduler/controllers"
 )
 
-func (sc *SchedulerController) doesSchedulerCRDExist() (bool, error) {
-	schedulerCrd, err := sc.apiextensionsclientset.ApiextensionsV1beta1().CustomResourceDefinitions().Get("schedulers.globalscheduler.com", metav1.GetOptions{})
-
-	if err != nil {
-		return false, err
-	}
-
-	// Check whether the CRD is accepted.
-	for _, condition := range schedulerCrd.Status.Conditions {
-		if condition.Type == apiextensions.Established &&
-			condition.Status == apiextensions.ConditionTrue {
-			return true, nil
-		}
-	}
-
-	return false, fmt.Errorf("CRD is not accepted")
-}
-
-func (sc *SchedulerController) waitSchedulerCRDAccepted() error {
-	err := wait.Poll(1*time.Second, 10*time.Second, func() (bool, error) {
-		return sc.doesSchedulerCRDExist()
-	})
-
-	return err
-}
-
 func (sc *SchedulerController) CreateSchedulerCRD() error {
-	if result, _ := sc.doesSchedulerCRDExist(); result {
-		return nil
-	}
-
 	schedulerCrd := &apiextensions.CustomResourceDefinition{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "schedulers.globalscheduler.com",
@@ -187,12 +154,5 @@ func (sc *SchedulerController) CreateSchedulerCRD() error {
 			},
 		},
 	}
-
-	_, err := sc.apiextensionsclientset.ApiextensionsV1beta1().CustomResourceDefinitions().Create(schedulerCrd)
-
-	if err != nil {
-		klog.Fatalf(err.Error())
-	}
-
-	return sc.waitSchedulerCRDAccepted()
+	return controllers.CreateCRD(sc.apiextensionsclientset, schedulerCrd)
 }
