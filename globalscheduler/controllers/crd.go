@@ -28,7 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-func CreateCRD(cs clientset.Interface, crd *apiextv1beta1.CustomResourceDefinition) error {
+func CreateCRD(cs clientset.Interface, crd  *apiextv1beta1.CustomResourceDefinition) error {
 	if err := createCRD(cs, crd); err != nil {
 		return err
 	}
@@ -73,7 +73,7 @@ func waitForCRD(cs clientset.Interface, crd *apiextv1beta1.CustomResourceDefinit
 			}
 		}
 
-		return false, fmt.Errorf("%s not established", crd.Name)
+		return false, fmt.Errorf("%s not established with the final conditions %v", crd.Name, manifest.Status.Conditions)
 	}
 	err := wait.Poll(1*time.Second, 10*time.Second, func() (bool, error) {
 		return operation()
