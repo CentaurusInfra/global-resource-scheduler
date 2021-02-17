@@ -59,7 +59,7 @@ type DispatcherController struct {
 	// stop channel
 	stopCh <-chan struct{}
 	// cluster mapping
-	clustermap map[string]*clustercrdv1.Cluster
+	clusters []string
 	// dispatcher list
 	dispatchers []*dispatchercrdv1.Dispatcher
 }
@@ -87,7 +87,7 @@ func NewDispatcherController(
 		clusterclient:          clusterclient,
 		dispatcherInformer:     dispatcherInformer.Informer(),
 		clusterInformer:        clusterInformer.Informer(),
-		clustermap:             make(map[string]*clustercrdv1.Cluster, 0),
+		clusters:               make([]string, 0),
 		dispatchers:            make([]*dispatchercrdv1.Dispatcher, 0),
 	}
 
@@ -109,22 +109,22 @@ func (dc *DispatcherController) addDispatcher(obj interface{}) {
 				dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 				if err != nil {
 					klog.Fatalf("Failed to get the path to the process with the err %v", err)
-				}
+				} else {
+					cmd := exec.Command(path.Join(dir, "dispatcher_process"), args...)
+					var out bytes.Buffer
+					var stderr bytes.Buffer
+					cmd.Stdout = &out
+					cmd.Stderr = &stderr
 
-				cmd := exec.Command(path.Join(dir, "dispatcher_process"), args...)
-				var out bytes.Buffer
-				var stderr bytes.Buffer
-				cmd.Stdout = &out
-				cmd.Stderr = &stderr
+					//	Run the command
+					go cmd.Run()
 
-				//	Run the command
-				go cmd.Run()
+					//	Output our results
+					klog.V(2).Infof("Running process with the result: %v / %v\n", out.String(), stderr.String())
 
-				//	Output our results
-				klog.V(2).Infof("Running process with the result: %v / %v\n", out.String(), stderr.String())
-
-				if err != nil {
-					klog.Warningf("Failed to run dispatcher process %v - %v with the err %v", dispatcher.Namespace, dispatcher.Name, err)
+					if err != nil {
+						klog.Warningf("Failed to run dispatcher process %v - %v with the err %v", dispatcher.Namespace, dispatcher.Name, err)
+					}
 				}
 			}()
 		}
@@ -155,7 +155,8 @@ func (dc *DispatcherController) addCluster(obj interface{}) {
 	dc.mu.Lock()
 	defer dc.mu.Unlock()
 	if cluster, ok := obj.(*clustercrdv1.Cluster); ok {
-		dc.clustermap[cluster.Name] = cluster
+		dc.clusters = append(dc.clusters, cluster.Name)
+		sort.Strings(dc.clusters)
 		if err := dc.balance(); err != nil {
 			klog.Fatalf("Failed to balance the clusters among dispatchers with error %v", err)
 		}
@@ -168,7 +169,14 @@ func (dc *DispatcherController) deleteCluster(obj interface{}) {
 	dc.mu.Lock()
 	defer dc.mu.Unlock()
 	if cluster, ok := obj.(*clustercrdv1.Cluster); ok {
-		delete(dc.clustermap, cluster.Name)
+		clusterlen := len(dc.clusters)
+		for idx, clustername := range dc.clusters {
+			if clustername == cluster.Name {
+				dc.clusters[idx] = dc.clusters[clusterlen-1]
+				dc.clusters = dc.clusters[0 : clusterlen-1]
+			}
+		}
+		sort.Strings(dc.clusters)
 		if err := dc.balance(); err != nil {
 			klog.Fatalf("Failed to balance the clusters among dispatchers with error %v", err)
 		}
@@ -202,16 +210,12 @@ func (dc *DispatcherController) balance() error {
 	if len(dc.dispatchers) == 0 {
 		return nil
 	}
-	clusternames := make([]string, 0, len(dc.clustermap))
-	for key := range dc.clustermap {
-		clusternames = append(clusternames, key)
-	}
-	sort.Strings(clusternames)
-	if len(dc.dispatchers) > 0 && len(clusternames) > 0 {
-		ranges := util.EvenlyDivide(len(dc.dispatchers), int64(len(clusternames)-1))
+
+	if len(dc.clusters) > 0 {
+		ranges := util.EvenlyDivide(len(dc.dispatchers), int64(len(dc.clusters)-1))
 		for idx, dispatcher := range dc.dispatchers {
 			if idx < len(ranges) {
-				dispatcher.Spec.ClusterRange = dispatchercrdv1.DispatcherRange{Start: clusternames[ranges[idx][0]], End: clusternames[ranges[idx][1]]}
+				dispatcher.Spec.ClusterRange = dispatchercrdv1.DispatcherRange{Start: dc.clusters[ranges[idx][0]], End: dc.clusters[ranges[idx][1]]}
 			} else {
 				dispatcher.Spec.ClusterRange = dispatchercrdv1.DispatcherRange{}
 			}
