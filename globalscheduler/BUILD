@@ -12,11 +12,7 @@ filegroup(
     srcs = [
         ":package-srcs",
         "//globalscheduler/cmd:all-srcs",
-        "//globalscheduler/controllers/cluster:all-srcs",
-        "//globalscheduler/controllers/dispatcher:all-srcs",
-        "//globalscheduler/controllers/distributor:all-srcs",
-        "//globalscheduler/controllers/scheduler:all-srcs",
-        "//globalscheduler/controllers/util:all-srcs",
+        "//globalscheduler/controllers:all-srcs",
         "//globalscheduler/grpc/cluster:all-srcs",
         "//globalscheduler/pkg/apis/cluster:all-srcs",
         "//globalscheduler/pkg/apis/dispatcher:all-srcs",
