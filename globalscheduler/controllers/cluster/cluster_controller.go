@@ -66,8 +66,6 @@ const (
 	ClusterUpdateYes int = 2
 )
 
-var deleteClusters map[string]*clusterv1.Cluster
-
 // Cluster Controller Struct
 type ClusterController struct {
 	kubeclientset          kubernetes.Interface
@@ -78,6 +76,7 @@ type ClusterController struct {
 	workqueue              workqueue.RateLimitingInterface
 	recorder               record.EventRecorder
 	grpcHost               string
+	deletedClusters        map[string]*clusterv1.Cluster
 }
 
 func NewClusterController(
@@ -104,6 +103,7 @@ func NewClusterController(
 		workqueue:              workqueue,
 		recorder:               recorder,
 		grpcHost:               grpcHost,
+		deletedClusters:         make(map[string]*clusterv1.Cluster),
 	}
 
 	//KeyFunc is defined at controller.lookup_cache.go
@@ -113,7 +113,6 @@ func NewClusterController(
 		UpdateFunc: c.updateCluster,
 		DeleteFunc: c.deleteCluster,
 	})
-	deleteClusters = make(map[string]*clusterv1.Cluster)
 	return c
 }
 
@@ -172,7 +171,7 @@ func (c *ClusterController) deleteCluster(object interface{}) {
 		return
 	}
 	c.Enqueue(key, EventType_Delete)
-	deleteClusters[key] = cluster
+	c.deletedClusters[key] = cluster
 	klog.Infof("Enqueue Delete Cluster: %v", key)
 }
 
@@ -317,7 +316,7 @@ func (c *ClusterController) gRPCRequest(key string, event EventType, clusterName
 			clusterCopy.Status = ClusterStatusCreated
 			response := grpc.GrpcSendClusterProfile(c.grpcHost, clusterCopy)
 			klog.Infof("gRPC response - create a cluster, response: %v", response)
-		}
+		}		
 		break
 	case EventType_Update:
 		cluster, err := c.clusterlister.Clusters(clusterNameSpace).Get(clusterName)
@@ -332,8 +331,8 @@ func (c *ClusterController) gRPCRequest(key string, event EventType, clusterName
 	case EventType_Delete:
 		//When deleting a cluster, API Server deletes the cluster before cluster controller watches the event.
 		//so, ClusterController cannot get the deleted cluster's info from etcd.
-		//To solve this issue, ClusterController stores/retrieve deleted cluster objects in a map named deleteClusters
-		cluster := deleteClusters[key]
+		//To solve this issue, ClusterController stores/retrieve deleted cluster objects in a map named deletedClusters
+		cluster := c.deletedClusters[key]
 		clusterCopy := cluster.DeepCopy()
 		if cluster == nil {
 			klog.Errorf("Failed to retrieve cluster in map by cluster name - %s", clusterName)
@@ -342,9 +341,9 @@ func (c *ClusterController) gRPCRequest(key string, event EventType, clusterName
 		if c.grpcHost != "" {
 			klog.Infof("ggRPC request - delete a cluster, host: %v, cluster profile: %v ", c.grpcHost, clusterCopy)
 			clusterCopy.Status = ClusterStatusDeleted
-			response := grpc.GrpcSendClusterProfile(c.grpcHost, clusterCopy)
-			delete(deleteClusters, key)
-			klog.Infof("gRPC response - delete a cluster, response: %v", response)
+			response := grpc.GrpcSendClusterProfile(c.grpcHost, clusterCopy)					
+			delete(c.deletedClusters, key)
+			klog.Infof("gRPC response - delete a cluster, response: %v", response)		
 		}
 		break
 	default:
