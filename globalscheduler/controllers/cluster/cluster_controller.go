@@ -103,7 +103,7 @@ func NewClusterController(
 		workqueue:              workqueue,
 		recorder:               recorder,
 		grpcHost:               grpcHost,
-		deletedClusters:         make(map[string]*clusterv1.Cluster),
+		deletedClusters:        make(map[string]*clusterv1.Cluster),
 	}
 
 	//KeyFunc is defined at controller.lookup_cache.go
@@ -316,7 +316,7 @@ func (c *ClusterController) gRPCRequest(key string, event EventType, clusterName
 			clusterCopy.Status = ClusterStatusCreated
 			response := grpc.GrpcSendClusterProfile(c.grpcHost, clusterCopy)
 			klog.Infof("gRPC response - create a cluster, response: %v", response)
-		}		
+		}
 		break
 	case EventType_Update:
 		cluster, err := c.clusterlister.Clusters(clusterNameSpace).Get(clusterName)
@@ -341,9 +341,9 @@ func (c *ClusterController) gRPCRequest(key string, event EventType, clusterName
 		if c.grpcHost != "" {
 			klog.Infof("ggRPC request - delete a cluster, host: %v, cluster profile: %v ", c.grpcHost, clusterCopy)
 			clusterCopy.Status = ClusterStatusDeleted
-			response := grpc.GrpcSendClusterProfile(c.grpcHost, clusterCopy)					
+			response := grpc.GrpcSendClusterProfile(c.grpcHost, clusterCopy)
 			delete(c.deletedClusters, key)
-			klog.Infof("gRPC response - delete a cluster, response: %v", response)		
+			klog.Infof("gRPC response - delete a cluster, response: %v", response)
 		}
 		break
 	default:
