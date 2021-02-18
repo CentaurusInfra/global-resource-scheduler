@@ -154,7 +154,7 @@ func (dc *DispatcherController) addCluster(obj interface{}) {
 	dc.mu.Lock()
 	defer dc.mu.Unlock()
 	if cluster, ok := obj.(*clustercrdv1.Cluster); ok {
-		util.InsertIntoSortedArray(dc.clusters, cluster.Name)
+		dc.clusters = util.InsertIntoSortedArray(dc.clusters, cluster.Name)
 		if err := dc.balance(); err != nil {
 			klog.Fatalf("Failed to balance the clusters among dispatchers with error %v", err)
 		}
@@ -167,7 +167,7 @@ func (dc *DispatcherController) deleteCluster(obj interface{}) {
 	dc.mu.Lock()
 	defer dc.mu.Unlock()
 	if cluster, ok := obj.(*clustercrdv1.Cluster); ok {
-		util.RemoveFromSortedArray(dc.clusters, cluster.Name)
+		dc.clusters = util.RemoveFromSortedArray(dc.clusters, cluster.Name)
 		if err := dc.balance(); err != nil {
 			klog.Fatalf("Failed to balance the clusters among dispatchers with error %v", err)
 		}

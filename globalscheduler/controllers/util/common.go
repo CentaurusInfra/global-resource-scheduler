@@ -82,7 +82,7 @@ func RemoveFromSortedArray(ss []string, s string) []string {
 		ssLen := len(ss)
 		if i < ssLen && ss[i] == s {
 			if ssLen > 0 {
-				copy(ss[i: ssLen-1], ss[i+1: ssLen])
+				copy(ss[i:ssLen-1], ss[i+1:ssLen])
 				return ss[:ssLen-1]
 			}
 		}
