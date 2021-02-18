@@ -39,7 +39,6 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"sort"
 	"strings"
 	"sync"
 )
@@ -155,8 +154,7 @@ func (dc *DispatcherController) addCluster(obj interface{}) {
 	dc.mu.Lock()
 	defer dc.mu.Unlock()
 	if cluster, ok := obj.(*clustercrdv1.Cluster); ok {
-		dc.clusters = append(dc.clusters, cluster.Name)
-		sort.Strings(dc.clusters)
+		util.InsertIntoSortedArray(dc.clusters, cluster.Name)
 		if err := dc.balance(); err != nil {
 			klog.Fatalf("Failed to balance the clusters among dispatchers with error %v", err)
 		}
@@ -169,14 +167,7 @@ func (dc *DispatcherController) deleteCluster(obj interface{}) {
 	dc.mu.Lock()
 	defer dc.mu.Unlock()
 	if cluster, ok := obj.(*clustercrdv1.Cluster); ok {
-		clusterlen := len(dc.clusters)
-		for idx, clustername := range dc.clusters {
-			if clustername == cluster.Name {
-				dc.clusters[idx] = dc.clusters[clusterlen-1]
-				dc.clusters = dc.clusters[0 : clusterlen-1]
-			}
-		}
-		sort.Strings(dc.clusters)
+		util.RemoveFromSortedArray(dc.clusters, cluster.Name)
 		if err := dc.balance(); err != nil {
 			klog.Fatalf("Failed to balance the clusters among dispatchers with error %v", err)
 		}
