@@ -28,7 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-func CreateCRD(cs clientset.Interface, crd  *apiextv1beta1.CustomResourceDefinition) error {
+func CreateCRD(cs clientset.Interface, crd *apiextv1beta1.CustomResourceDefinition) error {
 	if err := createCRD(cs, crd); err != nil {
 		return err
 	}
