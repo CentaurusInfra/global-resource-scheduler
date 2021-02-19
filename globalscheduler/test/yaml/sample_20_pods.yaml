@@ -3,14 +3,14 @@ kind: Pod
 metadata:
   name: "pod-1"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm1"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -29,14 +29,14 @@ kind: Pod
 metadata:
   name: "pod-2"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm2"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -55,14 +55,14 @@ kind: Pod
 metadata:
   name: "pod-3"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm3"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -81,14 +81,14 @@ kind: Pod
 metadata:
   name: "pod-4"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm4"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -107,14 +107,14 @@ kind: Pod
 metadata:
   name: "pod-5"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm5"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -133,14 +133,14 @@ kind: Pod
 metadata:
   name: "pod-6"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm6"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -159,14 +159,14 @@ kind: Pod
 metadata:
   name: "pod-7"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm7"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -185,14 +185,14 @@ kind: Pod
 metadata:
   name: "pod-8"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm8"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -211,14 +211,14 @@ kind: Pod
 metadata:
   name: "pod-9"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm9"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -237,14 +237,14 @@ kind: Pod
 metadata:
   name: "pod-10"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm10"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -263,14 +263,14 @@ kind: Pod
 metadata:
   name: "pod-11"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm11"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -289,14 +289,14 @@ kind: Pod
 metadata:
   name: "pod-12"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm12"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -315,14 +315,14 @@ kind: Pod
 metadata:
   name: "pod-13"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm13"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -341,14 +341,14 @@ kind: Pod
 metadata:
   name: "pod-14"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm14"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -367,14 +367,14 @@ kind: Pod
 metadata:
   name: "pod-15"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm15"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -393,14 +393,14 @@ kind: Pod
 metadata:
   name: "pod-16"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm16"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -419,14 +419,14 @@ kind: Pod
 metadata:
   name: "pod-17"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm17"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -445,14 +445,14 @@ kind: Pod
 metadata:
   name: "pod-18"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm18"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -471,14 +471,14 @@ kind: Pod
 metadata:
   name: "pod-19"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm19"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:
@@ -497,14 +497,14 @@ kind: Pod
 metadata:
   name: "pod-20"
 spec:
-  resourceType: "vm":
+  resourceType: "vm"
   virtualMachine:
     name: "demo-vm20"
     image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
     securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
     keyPairName: "demo-keypair"
     flavors:
-    - flavorID: "2"
+    - flavorID: "42"
     resourceCommonInfo:
       count: 1
       selector:

@@ -135,7 +135,9 @@ func (c *ClusterController) updateCluster(oldObject, newObject interface{}) {
 	}
 	oldResource := oldObject.(*clusterv1.Cluster)
 	newResource := newObject.(*clusterv1.Cluster)
-	eventType, err := c.determineEventType(oldResource, newResource)
+	oldResourceCopy := oldResource.DeepCopy()
+	newResourceCopy := newResource.DeepCopy()
+	eventType, err := c.determineEventType(oldResourceCopy, newResourceCopy)
 	if err != nil {
 		klog.Errorf("Unexpected string in queue; discarding - %v ", key2)
 		return
@@ -143,7 +145,7 @@ func (c *ClusterController) updateCluster(oldObject, newObject interface{}) {
 	switch eventType {
 	case ClusterUpdateNo:
 		{
-			klog.Infof("No actual change in clusters, discarding -%v ", newResource.Name)
+			klog.Infof("No actual change in clusters, discarding -%v ", newResourceCopy.Name)
 			break
 		}
 	case ClusterUpdateYes:
@@ -250,14 +252,16 @@ func (c *ClusterController) syncHandler(keyWithEventType KeyWithEventType) error
 		klog.Infof(" Processed a cluster - %v", key)
 		c.workqueue.Forget(key)
 	}
-	klog.Infof("Cluster Handled: %v, Event: %v\n", clusterName, key)
+	klog.Infof("Cluster Handled by ClusterController: %v, Event: %v\n", clusterName, key)
 	if keyWithEventType.EventType != EventType_Delete {
 		cluster, err := c.clusterlister.Clusters(nameSpace).Get(clusterName)
+		clusterCopy := cluster.DeepCopy()
+		clusterCopy.Status = "HandledByClusterController"
 		if err != nil || cluster == nil {
 			klog.Errorf("Failed to retrieve cluster in local cache by cluster name - %s", clusterName)
 			return err
 		}
-		c.recorder.Event(cluster, corev1.EventTypeNormal, SuccessSynched, MessageResourceSynched)
+		//c.recorder.Event(clusterCopy, corev1.EventTypeNormal, SuccessSynched, MessageResourceSynched)
 	}
 	return nil
 }
@@ -297,31 +301,31 @@ func (c *ClusterController) getclusterInfo(cluster *clusterv1.Cluster) (clusterN
 
 //This is gRPC client, and performs controller logic including gRPC handling
 func (c *ClusterController) gRPCRequest(event EventType, clusterNameSpace string, clusterName string) (response bool, err error) {
-	//clusterNameSpace := cluster.ObjectMeta.Namespace
-	//clusterName := cluster.ObjectMeta.Name
 	switch event {
 	case EventType_Create:
 		cluster, err := c.clusterlister.Clusters(clusterNameSpace).Get(clusterName)
+		clusterCopy := cluster.DeepCopy()
 		if err != nil || cluster == nil {
 			klog.Errorf("Failed to retrieve cluster in local cache by cluster name - %s", clusterName)
 			return false, err
 		}
 		if c.grpcHost != "" {
-			cluster.Status = ClusterStatusCreated
-			klog.Infof("grpc.GrpcSendClusterProfile -%v, %v ", c.grpcHost, cluster)
-			response := grpc.GrpcSendClusterProfile(c.grpcHost, cluster)
+			clusterCopy.Status = ClusterStatusCreated
+			klog.Infof("grpc.GrpcSendClusterProfile -%v, %v ", c.grpcHost, clusterCopy)
+			response := grpc.GrpcSendClusterProfile(c.grpcHost, clusterCopy)
 			klog.Infof("gRPC request is sent %v", response)
 		}
 		klog.Infof("Cluster creation %s, %s", clusterNameSpace, clusterName)
 		break
 	case EventType_Update:
 		cluster, err := c.clusterlister.Clusters(clusterNameSpace).Get(clusterName)
+		clusterCopy := cluster.DeepCopy()
 		if err != nil || cluster == nil {
 			klog.Errorf("Failed to retrieve cluster in local cache by cluster name - %s", clusterName)
 			return false, err
 		}
 		if c.grpcHost != "" {
-			cluster.Status = ClusterStatusUpdated
+			clusterCopy.Status = ClusterStatusUpdated
 			klog.Infof("Cluster update   %v", clusterName)
 		}
 	case EventType_Delete:
@@ -329,15 +333,16 @@ func (c *ClusterController) gRPCRequest(event EventType, clusterNameSpace string
 		//So, ClusterController cannot get cluster info from etcd.
 		//To send grpc delete request to ResourceCollector, ClusterController makes a dummy new cluster
 		cluster := c.newCluster(clusterNameSpace, clusterName)
+		clusterCopy := cluster.DeepCopy()
 		if err != nil || cluster == nil {
 			klog.Errorf("Failed to retrieve cluster in local cache by cluster name - %s", clusterName)
 			return false, err
 		}
 		klog.Infof("Cluster deletion  %v", clusterName)
 		if c.grpcHost != "" {
-			klog.Infof("grpc.GrpcSendClusterProfile -%v, %v ", c.grpcHost, cluster)
-			cluster.Status = ClusterStatusDeleted
-			response := grpc.GrpcSendClusterProfile(c.grpcHost, cluster)
+			klog.Infof("grpc.GrpcSendClusterProfile -%v, %v ", c.grpcHost, clusterCopy)
+			clusterCopy.Status = ClusterStatusDeleted
+			response := grpc.GrpcSendClusterProfile(c.grpcHost, clusterCopy)
 			klog.Infof("gRPC request is sent %v", response)
 		}
 		break
@@ -359,7 +364,7 @@ func (c *ClusterController) newCluster(namespace string, name string) *clusterv1
 			Namespace: namespace,
 		},
 		Spec: clusterv1.ClusterSpec{
-			IpAddress: "",
+			IpAddress: "0.0.0.0",
 		},
 	}
 }

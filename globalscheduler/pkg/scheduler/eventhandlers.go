@@ -350,7 +350,7 @@ func (sched *Scheduler) setPodScheduleErr(reqStack *types.Stack) error {
 
 	// update pod status to NoSchedule
 	newStatus := v1.PodStatus{
-		Phase:  v1.PodNoSchedule,
+		Phase: v1.PodNoSchedule,
 	}
 	klog.Infof("Attempting to update pod status from %v to %v", pod.Status, newStatus)
 	_, _, err = statusutil.PatchPodStatus(sched.Client, reqStack.Tenant, reqStack.PodNamespace, reqStack.PodName, pod.Status, newStatus)

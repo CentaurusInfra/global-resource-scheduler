@@ -112,15 +112,15 @@ type Selector struct {
 
 // Stack is resource group
 type Stack struct {
-	PodName       string            `json:"name" required:"true"`
-	Labels     map[string]string `json:"labels,omitempty"`
-	Resources  []*Resource       `json:"resources,omitempty"`
-	Selector   Selector          `json:"-"`
-	Selected   Selected          `json:"-"`
-	UID        string            `json:"uid,omitempty"`
-	CreateTime int64             `json:"-"`
-	Tenant     string
-	PodNamespace  string
+	PodName      string            `json:"name" required:"true"`
+	Labels       map[string]string `json:"labels,omitempty"`
+	Resources    []*Resource       `json:"resources,omitempty"`
+	Selector     Selector          `json:"-"`
+	Selected     Selected          `json:"-"`
+	UID          string            `json:"uid,omitempty"`
+	CreateTime   int64             `json:"-"`
+	Tenant       string
+	PodNamespace string
 }
 
 func (in *Stack) DeepCopy() *Stack {
