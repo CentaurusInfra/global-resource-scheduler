@@ -134,7 +134,7 @@ func (sched *Scheduler) scheduleOne() {
 	allocation, err := sched.generateAllocationFromStack(stack)
 	start := stack.CreateTime
 	end := time.Now().UnixNano()
-	klog.Infof("===done pop queue, time consumption: %vms===", (start-end)/int64(time.Millisecond))
+	klog.Infof("===done pop queue, time consumption: %vms===", (end-start)/int64(time.Millisecond))
 
 	// 2.do scheduling process
 	start = end
@@ -146,7 +146,7 @@ func (sched *Scheduler) scheduleOne() {
 		return
 	}
 	end = time.Now().UnixNano()
-	klog.Infof("===done Scheduling pipline, time consumption: %vms===", (start-end)/int64(time.Millisecond))
+	klog.Infof("===done Scheduling pipline, time consumption: %vms===", (end-start)/int64(time.Millisecond))
 	klog.Infof("Scheduler result: %v", result)
 
 	// 3.bind scheduler result to pod
@@ -154,7 +154,7 @@ func (sched *Scheduler) scheduleOne() {
 	klog.Infof("Try to bind to site, stacks:%v", result.Stacks)
 	sched.bindStacks(result.Stacks)
 	end = time.Now().UnixNano()
-	klog.Infof("===done bind pod to cluster, time consumption: %vms===", (start-end)/int64(time.Millisecond))
+	klog.Infof("===done bind pod to cluster, time consumption: %vms===", (end-start)/int64(time.Millisecond))
 
 	// log the elapsed time for the entire schedule
 	if stack.CreateTime != 0 {
@@ -416,7 +416,7 @@ func (sched *Scheduler) Schedule(ctx context.Context, allocation *types.Allocati
 		return result, err
 	}
 	end := time.Now().UnixNano()
-	klog.Infof("[DONE] snapshot site, use_time: %d ms", (start-end)/int64(time.Millisecond))
+	klog.Infof("[DONE] snapshot site, use_time: %d ms", (end-start)/int64(time.Millisecond))
 
 	start = end
 	klog.Infof("[START] Running prefilter plugins...")
@@ -427,7 +427,7 @@ func (sched *Scheduler) Schedule(ctx context.Context, allocation *types.Allocati
 	}
 
 	end = time.Now().UnixNano()
-	klog.Infof("[DONE] Running prefilter plugins, use_time: %d ms", (start-end)/int64(time.Millisecond))
+	klog.Infof("[DONE] Running prefilter plugins, use_time: %d ms", (end-start)/int64(time.Millisecond))
 	start = end
 
 	klog.Infof("[START] Running filter plugins...")
@@ -439,7 +439,7 @@ func (sched *Scheduler) Schedule(ctx context.Context, allocation *types.Allocati
 		return result, err
 	}
 	end = time.Now().UnixNano()
-	klog.Infof("[DONE] Running filter plugins, use_time: %d ms", (start-end)/int64(time.Millisecond))
+	klog.Infof("[DONE] Running filter plugins, use_time: %d ms", (end-start)/int64(time.Millisecond))
 	start = end
 
 	klog.Infof("filteredSitesStatuses = %v", filteredSitesStatuses.ToString())
@@ -457,7 +457,7 @@ func (sched *Scheduler) Schedule(ctx context.Context, allocation *types.Allocati
 	}
 
 	end = time.Now().UnixNano()
-	klog.Infof("[DONE] Running preScore plugins, use_time: %d ms", (start-end)/int64(time.Millisecond))
+	klog.Infof("[DONE] Running preScore plugins, use_time: %d ms", (end-start)/int64(time.Millisecond))
 	start = end
 
 	klog.Infof("[START] Running prioritizeSites plugins...")
@@ -467,7 +467,7 @@ func (sched *Scheduler) Schedule(ctx context.Context, allocation *types.Allocati
 		return result, err
 	}
 	end = time.Now().UnixNano()
-	klog.Infof("[DONE] Running prioritizeSites plugins, use_time: %d ms", (start-end)/int64(time.Millisecond))
+	klog.Infof("[DONE] Running prioritizeSites plugins, use_time: %d ms", (end-start)/int64(time.Millisecond))
 	start = end
 
 	klog.Infof("[START] Running StrategyPlugins plugins...")
@@ -477,7 +477,7 @@ func (sched *Scheduler) Schedule(ctx context.Context, allocation *types.Allocati
 		return result, err
 	}
 	end = time.Now().UnixNano()
-	klog.Infof("[DONE] Running StrategyPlugins plugins, use_time: %d ms", (start-end)/int64(time.Millisecond))
+	klog.Infof("[DONE] Running StrategyPlugins plugins, use_time: %d ms", (end-start)/int64(time.Millisecond))
 	klog.Infof("selected Hosts : %#v", siteCount)
 	start = end
 
@@ -510,7 +510,7 @@ func (sched *Scheduler) Schedule(ctx context.Context, allocation *types.Allocati
 	}
 
 	end = time.Now().UnixNano()
-	klog.Infof("allocation(%s) success, use_time: %d ms", allocation.ID, (start-end)/int64(time.Millisecond))
+	klog.Infof("allocation(%s) success, use_time: %d ms", allocation.ID, (end-start)/int64(time.Millisecond))
 
 	return
 }
