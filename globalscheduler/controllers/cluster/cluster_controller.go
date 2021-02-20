@@ -105,7 +105,7 @@ func NewClusterController(
 		grpcHost:               grpcHost,
 	}
 
-	//KeyFunc : controller.lookup_cache.go
+	//KeyFunc is defined at controller.lookup_cache.go
 	klog.Infof("Setting up event handlers")
 	clusterInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    c.addCluster,
@@ -117,20 +117,19 @@ func NewClusterController(
 
 func (c *ClusterController) addCluster(object interface{}) {
 	key, err := controller.KeyFunc(object)
-	//cluster := object.(*clusterv1.Cluster)
 	if err != nil {
-		utilruntime.HandleError(fmt.Errorf("couldn't get key for object %#v: %v", object, err))
+		utilruntime.HandleError(fmt.Errorf("couldn't get key for object: %v, error: %v", object, err))
 		return
 	}
 	c.Enqueue(key, EventType_Create)
-	klog.Infof("Enqueue Create cluster -%v ", key)
+	klog.Infof("Enqueue Create cluster: %v", key)
 }
 
 func (c *ClusterController) updateCluster(oldObject, newObject interface{}) {
 	key1, err1 := controller.KeyFunc(oldObject)
 	key2, err2 := controller.KeyFunc(newObject)
 	if key1 == "" || key2 == "" || err1 != nil || err2 != nil {
-		klog.Errorf("Unexpected string in queue; discarding - %v", key2)
+		klog.Errorf("Unexpected string in queue; discarding: %v", key2)
 		return
 	}
 	oldResource := oldObject.(*clusterv1.Cluster)
@@ -139,24 +138,24 @@ func (c *ClusterController) updateCluster(oldObject, newObject interface{}) {
 	newResourceCopy := newResource.DeepCopy()
 	eventType, err := c.determineEventType(oldResourceCopy, newResourceCopy)
 	if err != nil {
-		klog.Errorf("Unexpected string in queue; discarding - %v ", key2)
+		klog.Errorf("Unexpected string in queue; discarding: %v", key2)
 		return
 	}
 	switch eventType {
 	case ClusterUpdateNo:
 		{
-			klog.Infof("No actual change in clusters, discarding -%v ", newResourceCopy.Name)
+			klog.Infof("No actual change in clusters, discarding: %v", newResourceCopy.Name)
 			break
 		}
 	case ClusterUpdateYes:
 		{
 			c.Enqueue(key2, EventType_Update)
-			klog.Infof("Enqueue Update Cluster - %v", key2)
+			klog.Infof("Enqueue Update Cluster: %v", key2)
 			break
 		}
 	default:
 		{
-			klog.Errorf("Unexpected cluster update event; discarding - %v", key2)
+			klog.Errorf("Unexpected cluster update event; discarding: %v", key2)
 			return
 		}
 	}
@@ -165,11 +164,11 @@ func (c *ClusterController) updateCluster(oldObject, newObject interface{}) {
 func (c *ClusterController) deleteCluster(object interface{}) {
 	key, err := controller.KeyFunc(object)
 	if err != nil {
-		utilruntime.HandleError(fmt.Errorf("couldn't get key for object %#v: %v", object, err))
+		utilruntime.HandleError(fmt.Errorf("couldn't get key for object: %v, error: %v", object, err))
 		return
 	}
 	c.Enqueue(key, EventType_Delete)
-	klog.Infof("Enqueue Delete Cluster - %v", key)
+	klog.Infof("Enqueue Delete Cluster: %v", key)
 }
 
 // Enqueue puts key of the cluster object in the work queue
@@ -179,7 +178,7 @@ func (c *ClusterController) Enqueue(key string, eventType EventType) {
 }
 
 func (c *ClusterController) RunController(workers int, stopCh <-chan struct{}, wg *sync.WaitGroup) {
-	klog.Info("gs-controllers-manager starts cluster controller.")
+	klog.Info("gs-controllers-manager starts cluster controller")
 	defer wg.Done()
 	c.Run(workers, stopCh)
 }
@@ -222,7 +221,7 @@ func (c *ClusterController) processNextWorkItem() bool {
 	defer c.workqueue.Done(key)
 	if err := c.syncHandler(eventKey); err != nil {
 		c.workqueue.AddRateLimited(eventKey)
-		utilruntime.HandleError(fmt.Errorf("Handle %v of key %v failed with %v", "serivce", key, err))
+		utilruntime.HandleError(fmt.Errorf("Handle of cluster key %v failed with %v", key, err))
 	}
 	c.workqueue.Forget(key)
 	klog.Infof("Successfully synced %s", key)
@@ -243,22 +242,22 @@ func (c *ClusterController) syncHandler(keyWithEventType KeyWithEventType) error
 	nameSpace, clusterName, err := cache.SplitMetaNamespaceKey(key)
 
 	//This performs controller logic such as gRPC handling
-	klog.Infof("gRPC Client Request -%v, %v ", keyWithEventType.EventType, clusterName)
+	klog.Infof("gRPC processing - event: %v, cluster name: %v", keyWithEventType.EventType, clusterName)
 	result, err := c.gRPCRequest(keyWithEventType.EventType, nameSpace, clusterName)
 	if !result {
-		klog.Errorf("Failed a cluster processing - event: %v, key: %v, error:", keyWithEventType, key, err)
+		klog.Errorf("Failed a cluster processing - event: %v, key: %v, error: %v", keyWithEventType, key, err)
 		c.workqueue.AddRateLimited(keyWithEventType)
 	} else {
-		klog.Infof(" Processed a cluster - %v", key)
+		klog.Infof(" Processed a cluster: %v", key)
 		c.workqueue.Forget(key)
 	}
-	klog.Infof("Cluster Handled by ClusterController: %v, Event: %v\n", clusterName, key)
+	klog.Infof("Cluster was handled by ClusterController - event: %v, cluster name: %v", keyWithEventType.EventType, clusterName)
 	if keyWithEventType.EventType != EventType_Delete {
 		cluster, err := c.clusterlister.Clusters(nameSpace).Get(clusterName)
 		clusterCopy := cluster.DeepCopy()
 		clusterCopy.Status = "HandledByClusterController"
 		if err != nil || cluster == nil {
-			klog.Errorf("Failed to retrieve cluster in local cache by cluster name - %s", clusterName)
+			klog.Errorf("Failed to retrieve cluster in local cache by cluster name: %s", clusterName)
 			return err
 		}
 		//c.recorder.Event(clusterCopy, corev1.EventTypeNormal, SuccessSynched, MessageResourceSynched)
@@ -306,14 +305,14 @@ func (c *ClusterController) gRPCRequest(event EventType, clusterNameSpace string
 		cluster, err := c.clusterlister.Clusters(clusterNameSpace).Get(clusterName)
 		clusterCopy := cluster.DeepCopy()
 		if err != nil || cluster == nil {
-			klog.Errorf("Failed to retrieve cluster in local cache by cluster name - %s", clusterName)
+			klog.Errorf("Failed to retrieve cluster in local cache by cluster name: %s", clusterName)
 			return false, err
 		}
 		if c.grpcHost != "" {
 			clusterCopy.Status = ClusterStatusCreated
-			klog.Infof("grpc.GrpcSendClusterProfile -%v, %v ", c.grpcHost, clusterCopy)
+			klog.Infof("gRPC request - create a cluster, host: %v, cluster profile: %v", c.grpcHost, clusterCopy)
 			response := grpc.GrpcSendClusterProfile(c.grpcHost, clusterCopy)
-			klog.Infof("gRPC request is sent %v", response)
+			klog.Infof("gRPC response - create a cluster, response: %v", response)
 		}
 		klog.Infof("Cluster creation %s, %s", clusterNameSpace, clusterName)
 		break
@@ -326,8 +325,8 @@ func (c *ClusterController) gRPCRequest(event EventType, clusterNameSpace string
 		}
 		if c.grpcHost != "" {
 			clusterCopy.Status = ClusterStatusUpdated
-			klog.Infof("Cluster update   %v", clusterName)
 		}
+		klog.Infof("Cluster update %s, %s", clusterNameSpace, clusterName)
 	case EventType_Delete:
 		//When deleting a cluster, API Server deletes the cluster before cluster controller watches the event.
 		//So, ClusterController cannot get cluster info from etcd.
@@ -335,20 +334,20 @@ func (c *ClusterController) gRPCRequest(event EventType, clusterNameSpace string
 		cluster := c.newCluster(clusterNameSpace, clusterName)
 		clusterCopy := cluster.DeepCopy()
 		if err != nil || cluster == nil {
-			klog.Errorf("Failed to retrieve cluster in local cache by cluster name - %s", clusterName)
+			klog.Errorf("Failed to retrieve cluster in map by cluster name - %s", clusterName)
 			return false, err
-		}
-		klog.Infof("Cluster deletion  %v", clusterName)
+		}		
 		if c.grpcHost != "" {
-			klog.Infof("grpc.GrpcSendClusterProfile -%v, %v ", c.grpcHost, clusterCopy)
+			klog.Infof("gRPC request - delete a cluster, host: %v, cluster profile: %v ", c.grpcHost, clusterCopy)
 			clusterCopy.Status = ClusterStatusDeleted
 			response := grpc.GrpcSendClusterProfile(c.grpcHost, clusterCopy)
-			klog.Infof("gRPC request is sent %v", response)
+			klog.Infof("gRPC response - delete a cluster, response: %v", response)
 		}
+		klog.Infof("Cluster deletion %s, %s", clusterNameSpace, clusterName)
 		break
 	default:
 		klog.Infof("cluster event is not correct - %v", event)
-		err = fmt.Errorf("cluster event is not correct - %v", event)
+		err = fmt.Errorf("cluster event %v is not correct", event)
 		return false, err
 	}
 	klog.Infof("gRPC request is sent")
