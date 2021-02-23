@@ -145,7 +145,7 @@ func (s *sharedInformer) SyncOnce() {
 		s.hasSynced = true
 		return
 	}
-
+	// Record the data's key obtained this time
 	newKeysSet := mapset.NewSet()
 	for _, item := range listObj {
 		rVal := reflect.ValueOf(item)
@@ -156,19 +156,19 @@ func (s *sharedInformer) SyncOnce() {
 		if !rVal.IsValid() {
 			continue
 		}
-
+		// value of object field corresponding to informer key
 		val := rVal.FieldByName(s.key).String()
 		s.store.Add(val, item)
 		newKeysSet.Add(val)
 	}
-
-	oldKeys := s.store.ListKeys()
-	oldKeysSet := mapset.NewSet()
-	for _, key := range oldKeys {
-		oldKeysSet.Add(key)
+	// Record current data's key
+	curKeys := s.store.ListKeys()
+	curKeysSet := mapset.NewSet()
+	for _, key := range curKeys {
+		curKeysSet.Add(key)
 	}
-
-	diffKeys := oldKeysSet.Difference(newKeysSet)
+	// Delete objects that are not collected this time
+	diffKeys := curKeysSet.Difference(newKeysSet)
 	for key := range diffKeys.Iter() {
 		s.store.Delete(key.(string))
 	}

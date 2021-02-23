@@ -1,6 +1,0 @@
-apiVersion: globalscheduler.com/v1
-kind: Dispatcher
-metadata:
-  name: sample
-spec:
-  cluster: ["c1", "c2"]

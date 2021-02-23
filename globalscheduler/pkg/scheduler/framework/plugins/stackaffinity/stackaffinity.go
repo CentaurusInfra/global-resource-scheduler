@@ -97,14 +97,8 @@ func getAntiAffinityScore(ctx context.Context, stack *types.Stack, siteCacheInfo
 
 // Score invoked at the score extension point.
 func (pl *StackAffinity) Score(ctx context.Context, state *interfaces.CycleState,
-	stack *types.Stack, siteID string) (int64, *interfaces.Status) {
-	siteCacheInfo, err := pl.handle.SnapshotSharedLister().SiteCacheInfos().Get(siteID)
-	if err != nil {
-		return 0, interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %s from Snapshot: %v",
-			siteCacheInfo.Site().SiteID, err))
-	}
-
-	site := siteCacheInfo.Site()
+	stack *types.Stack, siteCacheInfo *sitecacheinfo.SiteCacheInfo) (int64, *interfaces.Status) {
+	site := siteCacheInfo.GetSite()
 	if site == nil {
 		return 0, interfaces.NewStatus(interfaces.Error, fmt.Sprintf("site not found"))
 	}

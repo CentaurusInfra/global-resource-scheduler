@@ -27,6 +27,98 @@ type Testcase struct {
 	ExpectedResult [][]int64
 }
 
+func TestEvenlyDivide0(t *testing.T) {
+	testcases := []Testcase{
+		{Size: 0, ExpectedResult: make([][]int64, 0)},
+		{Size: 1, ExpectedResult: [][]int64{{0, 0}}},
+		{Size: 2, ExpectedResult: [][]int64{{0, 0}}},
+		{Size: 3, ExpectedResult: [][]int64{{0, 0}}},
+		{Size: 4, ExpectedResult: [][]int64{{0, 0}}},
+		{Size: 5, ExpectedResult: [][]int64{{0, 0}}},
+		{Size: 6, ExpectedResult: [][]int64{{0, 0}}},
+		{Size: 7, ExpectedResult: [][]int64{{0, 0}}},
+	}
+	for _, testcase := range testcases {
+		res := EvenlyDivide(testcase.Size, 0)
+		if testcase.Size > 0 && !reflect.DeepEqual(res, testcase.ExpectedResult) {
+			t.Errorf("The test result %v is not expected as %v", res, testcase.ExpectedResult)
+		} else if testcase.Size == 0 {
+			if len(res) != 0 {
+				t.Errorf("The test result %v is not empty as expected", res)
+			}
+		}
+	}
+}
+
+func TestEvenlyDivide1(t *testing.T) {
+	testcases := []Testcase{
+		{Size: 0, ExpectedResult: make([][]int64, 0)},
+		{Size: 1, ExpectedResult: [][]int64{{0, 1}}},
+		{Size: 2, ExpectedResult: [][]int64{{0, 0}, {1, 1}}},
+		{Size: 3, ExpectedResult: [][]int64{{0, 0}, {1, 1}}},
+		{Size: 4, ExpectedResult: [][]int64{{0, 0}, {1, 1}}},
+		{Size: 5, ExpectedResult: [][]int64{{0, 0}, {1, 1}}},
+		{Size: 6, ExpectedResult: [][]int64{{0, 0}, {1, 1}}},
+		{Size: 7, ExpectedResult: [][]int64{{0, 0}, {1, 1}}},
+	}
+	for _, testcase := range testcases {
+		res := EvenlyDivide(testcase.Size, 1)
+		if testcase.Size > 0 && !reflect.DeepEqual(res, testcase.ExpectedResult) {
+			t.Errorf("The test result %v is not expected as %v", res, testcase.ExpectedResult)
+		} else if testcase.Size == 0 {
+			if len(res) != 0 {
+				t.Errorf("The test result %v is not empty as expected", res)
+			}
+		}
+	}
+}
+
+func TestEvenlyDivide2(t *testing.T) {
+	testcases := []Testcase{
+		{Size: 0, ExpectedResult: make([][]int64, 0)},
+		{Size: 1, ExpectedResult: [][]int64{{0, 2}}},
+		{Size: 2, ExpectedResult: [][]int64{{0, 1}, {2, 2}}},
+		{Size: 3, ExpectedResult: [][]int64{{0, 0}, {1, 1}, {2, 2}}},
+		{Size: 4, ExpectedResult: [][]int64{{0, 0}, {1, 1}, {2, 2}}},
+		{Size: 5, ExpectedResult: [][]int64{{0, 0}, {1, 1}, {2, 2}}},
+		{Size: 6, ExpectedResult: [][]int64{{0, 0}, {1, 1}, {2, 2}}},
+		{Size: 7, ExpectedResult: [][]int64{{0, 0}, {1, 1}, {2, 2}}},
+	}
+	for _, testcase := range testcases {
+		res := EvenlyDivide(testcase.Size, 2)
+		if testcase.Size > 0 && !reflect.DeepEqual(res, testcase.ExpectedResult) {
+			t.Errorf("The test result %v is not expected as %v", res, testcase.ExpectedResult)
+		} else if testcase.Size == 0 {
+			if len(res) != 0 {
+				t.Errorf("The test result %v is not empty as expected", res)
+			}
+		}
+	}
+}
+
+func TestEvenlyDivide3(t *testing.T) {
+	testcases := []Testcase{
+		{Size: 0, ExpectedResult: make([][]int64, 0)},
+		{Size: 1, ExpectedResult: [][]int64{{0, 3}}},
+		{Size: 2, ExpectedResult: [][]int64{{0, 1}, {2, 3}}},
+		{Size: 3, ExpectedResult: [][]int64{{0, 1}, {2, 2}, {3, 3}}},
+		{Size: 4, ExpectedResult: [][]int64{{0, 0}, {1, 1}, {2, 2}, {3, 3}}},
+		{Size: 5, ExpectedResult: [][]int64{{0, 0}, {1, 1}, {2, 2}, {3, 3}}},
+		{Size: 6, ExpectedResult: [][]int64{{0, 0}, {1, 1}, {2, 2}, {3, 3}}},
+		{Size: 7, ExpectedResult: [][]int64{{0, 0}, {1, 1}, {2, 2}, {3, 3}}},
+	}
+	for _, testcase := range testcases {
+		res := EvenlyDivide(testcase.Size, 3)
+		if testcase.Size > 0 && !reflect.DeepEqual(res, testcase.ExpectedResult) {
+			t.Errorf("The test result %v is not expected as %v", res, testcase.ExpectedResult)
+		} else if testcase.Size == 0 {
+			if len(res) != 0 {
+				t.Errorf("The test result %v is not empty as expected", res)
+			}
+		}
+	}
+}
+
 func TestEvenlyDivide100(t *testing.T) {
 	testcases := []Testcase{
 		{Size: 0, ExpectedResult: make([][]int64, 0)},
@@ -72,5 +164,56 @@ func TestEvenlyDivideInt64(t *testing.T) {
 				t.Errorf("The test result %v is not empty as expected", res)
 			}
 		}
+	}
+}
+
+func TestInsertIntoSortedArray(t *testing.T) {
+	sortedstrings := []string{}
+	sortedstrings = InsertIntoSortedArray(sortedstrings, "a")
+	if !reflect.DeepEqual(sortedstrings, []string{"a"}) {
+		t.Errorf("The test result %v is not as expected", sortedstrings)
+	}
+	sortedstrings = []string{"a", "c"}
+	sortedstrings = InsertIntoSortedArray(sortedstrings, "b")
+	if !reflect.DeepEqual(sortedstrings, []string{"a", "b", "c"}) {
+		t.Errorf("The test result %v is not as expected", sortedstrings)
+	}
+	sortedstrings = []string{"b", "c"}
+	sortedstrings = InsertIntoSortedArray(sortedstrings, "a")
+	if !reflect.DeepEqual(sortedstrings, []string{"a", "b", "c"}) {
+		t.Errorf("The test result %v is not as expected", sortedstrings)
+	}
+	sortedstrings = []string{"a", "b"}
+	sortedstrings = InsertIntoSortedArray(sortedstrings, "c")
+	if !reflect.DeepEqual(sortedstrings, []string{"a", "b", "c"}) {
+		t.Errorf("The test result %v is not as expected", sortedstrings)
+	}
+}
+
+func TestRemoveIntoSortedArray(t *testing.T) {
+	sortedstrings := []string{}
+	sortedstrings = RemoveFromSortedArray(sortedstrings, "a")
+	if len(sortedstrings) != 0 {
+		t.Errorf("The test result %v is not as expected", sortedstrings)
+	}
+	sortedstrings = []string{"a", "c"}
+	sortedstrings = InsertIntoSortedArray(sortedstrings, "b")
+	if reflect.DeepEqual(sortedstrings, []string{"a", "c"}) {
+		t.Errorf("The test result %v is not as expected", sortedstrings)
+	}
+	sortedstrings = []string{"a", "b", "c"}
+	sortedstrings = InsertIntoSortedArray(sortedstrings, "a")
+	if reflect.DeepEqual(sortedstrings, []string{"b", "c"}) {
+		t.Errorf("The test result %v is not as expected", sortedstrings)
+	}
+	sortedstrings = []string{"a", "b", "c"}
+	sortedstrings = InsertIntoSortedArray(sortedstrings, "b")
+	if reflect.DeepEqual(sortedstrings, []string{"a", "c"}) {
+		t.Errorf("The test result %v is not as expected", sortedstrings)
+	}
+	sortedstrings = []string{"a", "b", "c"}
+	sortedstrings = InsertIntoSortedArray(sortedstrings, "c")
+	if reflect.DeepEqual(sortedstrings, []string{"a", "b"}) {
+		t.Errorf("The test result %v is not as expected", sortedstrings)
 	}
 }

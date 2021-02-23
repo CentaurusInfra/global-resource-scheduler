@@ -1,7 +1,13 @@
 apiVersion: globalscheduler.com/v1
 kind: Scheduler
 metadata:
-  name: mockscheduler
+  name: mockscheduler1
 spec:
   tag: "1"
-  cluster: ["c1"]
+---
+apiVersion: globalscheduler.com/v1
+kind: Scheduler
+metadata:
+  name: mockscheduler2
+spec:
+  tag: "2"

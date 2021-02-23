@@ -203,16 +203,16 @@ func (p *PriorityQueue) Add(stack *types.Stack) error {
 	defer p.lock.Unlock()
 	pInfo := p.newStackInfo(stack)
 	if err := p.activeQ.Add(pInfo); err != nil {
-		klog.Errorf("Error adding stack %v/%v/%v to the scheduling queue: %v", stack.Tenant, stack.Namespace, stack.Name, err)
+		klog.Errorf("Error adding stack %v/%v/%v to the scheduling queue: %v", stack.Tenant, stack.PodNamespace, stack.PodName, err)
 		return err
 	}
 	if p.unschedulableQ.get(stack) != nil {
-		klog.Errorf("Error: stack %v/%v/%v is already in the unschedulable queue.", stack.Tenant, stack.Namespace, stack.Name)
+		klog.Errorf("Error: stack %v/%v/%v is already in the unschedulable queue.", stack.Tenant, stack.PodNamespace, stack.PodName)
 		p.unschedulableQ.delete(stack)
 	}
 	// Delete stack from backoffQ if it is backing off
 	if err := p.stackBackoffQ.Delete(pInfo); err == nil {
-		klog.Errorf("Error: stack %v/%v/%v is already in the stackBackoff queue.", stack.Tenant, stack.Namespace, stack.Name)
+		klog.Errorf("Error: stack %v/%v/%v is already in the stackBackoff queue.", stack.Tenant, stack.PodNamespace, stack.PodName)
 	}
 	p.nominatedStacks.add(stack, "")
 	p.cond.Broadcast()
@@ -238,7 +238,7 @@ func (p *PriorityQueue) AddIfNotPresent(stack *types.Stack) error {
 	}
 	err := p.activeQ.Add(pInfo)
 	if err != nil {
-		klog.Errorf("Error adding stack %v/%v/%v to the scheduling queue: %v", stack.Tenant, stack.Namespace, stack.Name, err)
+		klog.Errorf("Error adding stack %v/%v/%v to the scheduling queue: %v", stack.Tenant, stack.PodNamespace, stack.PodName, err)
 	} else {
 		p.nominatedStacks.add(stack, "")
 		p.cond.Broadcast()
@@ -250,8 +250,8 @@ func (p *PriorityQueue) AddIfNotPresent(stack *types.Stack) error {
 func nsNameForStack(stack *types.Stack) ktypes.NamespacedName {
 	return ktypes.NamespacedName{
 		Tenant:    stack.Tenant,
-		Namespace: stack.Namespace,
-		Name:      stack.Name,
+		Namespace: stack.PodNamespace,
+		Name:      stack.PodName,
 	}
 }
 
@@ -315,7 +315,7 @@ func (p *PriorityQueue) AddUnschedulableIfNotPresent(stack *types.Stack, stackSc
 	// it to unschedulableQ.
 	if p.moveRequestCycle >= stackSchedulingCycle {
 		if err := p.stackBackoffQ.Add(pInfo); err != nil {
-			return fmt.Errorf("error adding stack %v to the backoff queue: %v", stack.Name, err)
+			return fmt.Errorf("error adding stack %v to the backoff queue: %v", stack.PodName, err)
 		}
 	} else {
 		p.unschedulableQ.addOrUpdate(pInfo)
@@ -500,11 +500,11 @@ func (p *PriorityQueue) MoveAllToActiveQueue() {
 		stack := pInfo.Stack
 		if p.isStackBackingOff(stack) {
 			if err := p.stackBackoffQ.Add(pInfo); err != nil {
-				klog.Errorf("Error adding stack %v to the backoff queue: %v", stack.Name, err)
+				klog.Errorf("Error adding stack %v to the backoff queue: %v", stack.PodName, err)
 			}
 		} else {
 			if err := p.activeQ.Add(pInfo); err != nil {
-				klog.Errorf("Error adding stack %v to the scheduling queue: %v", stack.Name, err)
+				klog.Errorf("Error adding stack %v to the scheduling queue: %v", stack.PodName, err)
 			}
 		}
 	}
@@ -519,11 +519,11 @@ func (p *PriorityQueue) moveStacksToActiveQueue(stackInfoList []*framework.Stack
 		stack := pInfo.Stack
 		if p.isStackBackingOff(stack) {
 			if err := p.stackBackoffQ.Add(pInfo); err != nil {
-				klog.Errorf("Error adding stack %v to the backoff queue: %v", stack.Name, err)
+				klog.Errorf("Error adding stack %v to the backoff queue: %v", stack.PodName, err)
 			}
 		} else {
 			if err := p.activeQ.Add(pInfo); err != nil {
-				klog.Errorf("Error adding stack %v to the scheduling queue: %v", stack.Name, err)
+				klog.Errorf("Error adding stack %v to the scheduling queue: %v", stack.PodName, err)
 			}
 		}
 		p.unschedulableQ.delete(stack)
@@ -685,7 +685,7 @@ func (npm *nominatedStackMap) add(p *types.Stack, siteID string) {
 	npm.nominatedStackToSite[p.UID] = nnn
 	for _, np := range npm.nominatedStacks[nnn] {
 		if np.UID == p.UID {
-			klog.V(4).Infof("Stack %v/%v/%v already exists in the nominated map!", p.Tenant, p.Namespace, p.Name)
+			klog.V(4).Infof("Stack %v/%v/%v already exists in the nominated map!", p.Tenant, p.PodNamespace, p.PodName)
 			return
 		}
 	}
@@ -750,7 +750,7 @@ func MakeNextStackFunc(queue SchedulingQueue) func() *types.Stack {
 	return func() *types.Stack {
 		stack, err := queue.Pop()
 		if err == nil {
-			klog.V(4).Infof("About to try and schedule stack %v/%v/%v", stack.Tenant, stack.Namespace, stack.Name)
+			klog.V(4).Infof("About to try and schedule stack %v/%v/%v", stack.Tenant, stack.PodNamespace, stack.PodName)
 			return stack
 		}
 		klog.Errorf("Error while retrieving next stack from scheduling queue: %v", err)
@@ -761,5 +761,5 @@ func MakeNextStackFunc(queue SchedulingQueue) func() *types.Stack {
 func stackInfoKeyFunc(obj interface{}) (string, error) {
 	stack := obj.(*framework.StackInfo).Stack
 	// return tenant + namespace + name as keyFunc
-	return stack.Tenant + "/" + stack.Namespace + "/" + stack.Name, nil
+	return stack.Tenant + "/" + stack.PodNamespace + "/" + stack.PodName, nil
 }

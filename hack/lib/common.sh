@@ -482,11 +482,18 @@ function kube::common::start_kubescheduler {
 }
 
 function kube::common::start_gs_scheduler {
-    GS_SCHEDULER_LOG=${LOG_DIR}/gs-scheduler.log
-    ${CONTROLPLANE_SUDO} "${GO_OUT}/gs-scheduler" --schedulername="scheduler1"  > "${GS_SCHEDULER_LOG}" 2>&1 &
+    CONTROLPLANE_SUDO=$(test -w "${CERT_DIR}" || echo "sudo -E")
+    GS_SCHEDULER_LOG=${LOG_DIR}/gs-scheduler$1.log
+    ${CONTROLPLANE_SUDO} "${GO_OUT}/gs-scheduler" --schedulername="$2"  > "${GS_SCHEDULER_LOG}" 2>&1 &
     GS_SCHEDULER_PID=$!
 }
 
+function kube::common::start_resource_collector {
+    CONTROLPLANE_SUDO=$(test -w "${CERT_DIR}" || echo "sudo -E")
+    RESOURCE_COLLECTOR_LOG=${LOG_DIR}/resource_collector.log
+    ${CONTROLPLANE_SUDO} "${GO_OUT}/resource-collector"  > "${RESOURCE_COLLECTOR_LOG}" 2>&1 &
+    RESOURCE_COLLECTOR_PID=$!
+}
 
 function kube::common::start_kubelet {
     KUBELET_LOG=${LOG_DIR}/kubelet.log

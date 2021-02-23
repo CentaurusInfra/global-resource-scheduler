@@ -1,5 +1,6 @@
 /*
 Copyright 2017 The Kubernetes Authors.
+Copyright 2020 Authors of Arktos - file modified.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -131,6 +132,7 @@ func TestServiceAccountTokenCreate(t *testing.T) {
 			Spec: v1.PodSpec{
 				ServiceAccountName: sa.Name,
 				Containers:         []v1.Container{{Name: "test-container", Image: "nginx"}},
+				ResourceType:       "Container",
 			},
 		}
 		otherpod = &v1.Pod{
@@ -141,6 +143,7 @@ func TestServiceAccountTokenCreate(t *testing.T) {
 			Spec: v1.PodSpec{
 				ServiceAccountName: "other-" + sa.Name,
 				Containers:         []v1.Container{{Name: "test-container", Image: "nginx"}},
+				ResourceType:       "Container",
 			},
 		}
 		secret = &v1.Secret{

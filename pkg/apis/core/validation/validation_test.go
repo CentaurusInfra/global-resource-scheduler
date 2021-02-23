@@ -3943,6 +3943,7 @@ func TestHugePagesIsolation(t *testing.T) {
 		{ // Basic fields.
 			ObjectMeta: metav1.ObjectMeta{Name: "123", Namespace: "ns", Tenant: "te"},
 			Spec: core.PodSpec{
+				ResourceType: "container",
 				Containers: []core.Container{
 					{
 						Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File",
@@ -6461,6 +6462,7 @@ func TestValidatePodSpec(t *testing.T) {
 			Containers:    []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		},
 		{ // Populate all fields.
 			Volumes: []core.Volume{
@@ -6476,6 +6478,7 @@ func TestValidatePodSpec(t *testing.T) {
 			DNSPolicy:             core.DNSClusterFirst,
 			ActiveDeadlineSeconds: &activeDeadlineSeconds,
 			ServiceAccountName:    "acct",
+			ResourceType:          "container",
 		},
 		{ // Populate all fields with larger active deadline.
 			Volumes: []core.Volume{
@@ -6491,6 +6494,7 @@ func TestValidatePodSpec(t *testing.T) {
 			DNSPolicy:             core.DNSClusterFirst,
 			ActiveDeadlineSeconds: &activeDeadlineSecondsMax,
 			ServiceAccountName:    "acct",
+			ResourceType:          "container",
 		},
 		{ // Populate HostNetwork.
 			Containers: []core.Container{
@@ -6504,6 +6508,7 @@ func TestValidatePodSpec(t *testing.T) {
 			},
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		},
 		{ // Populate RunAsUser SupplementalGroups FSGroup with minID 0
 			Containers: []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
@@ -6514,6 +6519,7 @@ func TestValidatePodSpec(t *testing.T) {
 			},
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		},
 		{ // Populate RunAsUser SupplementalGroups FSGroup with maxID 2147483647
 			Containers: []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
@@ -6524,6 +6530,7 @@ func TestValidatePodSpec(t *testing.T) {
 			},
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		},
 		{ // Populate HostIPC.
 			SecurityContext: &core.PodSecurityContext{
@@ -6533,6 +6540,7 @@ func TestValidatePodSpec(t *testing.T) {
 			Containers:    []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		},
 		{ // Populate HostPID.
 			SecurityContext: &core.PodSecurityContext{
@@ -6542,12 +6550,14 @@ func TestValidatePodSpec(t *testing.T) {
 			Containers:    []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		},
 		{ // Populate Affinity.
 			Volumes:       []core.Volume{{Name: "vol", VolumeSource: core.VolumeSource{EmptyDir: &core.EmptyDirVolumeSource{}}}},
 			Containers:    []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		},
 		{ // Populate HostAliases.
 			HostAliases:   []core.HostAlias{{IP: "12.34.56.78", Hostnames: []string{"host1", "host2"}}},
@@ -6555,6 +6565,7 @@ func TestValidatePodSpec(t *testing.T) {
 			Containers:    []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		},
 		{ // Populate HostAliases with `foo.bar` hostnames.
 			HostAliases:   []core.HostAlias{{IP: "12.34.56.78", Hostnames: []string{"host1.foo", "host2.bar"}}},
@@ -6562,6 +6573,7 @@ func TestValidatePodSpec(t *testing.T) {
 			Containers:    []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		},
 		{ // Populate HostAliases with HostNetwork.
 			HostAliases: []core.HostAlias{{IP: "12.34.56.78", Hostnames: []string{"host1.foo", "host2.bar"}}},
@@ -6571,6 +6583,7 @@ func TestValidatePodSpec(t *testing.T) {
 			},
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		},
 		{ // Populate PriorityClassName.
 			Volumes:           []core.Volume{{Name: "vol", VolumeSource: core.VolumeSource{EmptyDir: &core.EmptyDirVolumeSource{}}}},
@@ -6578,6 +6591,7 @@ func TestValidatePodSpec(t *testing.T) {
 			RestartPolicy:     core.RestartPolicyAlways,
 			DNSPolicy:         core.DNSClusterFirst,
 			PriorityClassName: "valid-name",
+			ResourceType:      "container",
 		},
 		{ // Populate ShareProcessNamespace
 			Volumes:       []core.Volume{{Name: "vol", VolumeSource: core.VolumeSource{EmptyDir: &core.EmptyDirVolumeSource{}}}},
@@ -6587,12 +6601,14 @@ func TestValidatePodSpec(t *testing.T) {
 			SecurityContext: &core.PodSecurityContext{
 				ShareProcessNamespace: &[]bool{true}[0],
 			},
+			ResourceType: "container",
 		},
 		{ // Populate RuntimeClassName
 			Containers:       []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
 			RestartPolicy:    core.RestartPolicyAlways,
 			DNSPolicy:        core.DNSClusterFirst,
 			RuntimeClassName: utilpointer.StringPtr("valid-sandbox"),
+			ResourceType:     "container",
 		},
 	}
 	for i := range successCases {
@@ -6615,37 +6631,44 @@ func TestValidatePodSpec(t *testing.T) {
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
 			Containers:    []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
+			ResourceType:  "container",
 		},
 		"no containers": {
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		},
 		"bad container": {
 			Containers:    []core.Container{{}},
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		},
 		"bad init container": {
 			Containers:     []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
 			InitContainers: []core.Container{{}},
 			RestartPolicy:  core.RestartPolicyAlways,
 			DNSPolicy:      core.DNSClusterFirst,
+			ResourceType:   "container",
 		},
 		"bad DNS policy": {
 			DNSPolicy:     core.DNSPolicy("invalid"),
 			RestartPolicy: core.RestartPolicyAlways,
 			Containers:    []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
+			ResourceType:  "container",
 		},
 		"bad service account name": {
 			Containers:         []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
 			RestartPolicy:      core.RestartPolicyAlways,
 			DNSPolicy:          core.DNSClusterFirst,
 			ServiceAccountName: "invalidName",
+			ResourceType:       "container",
 		},
 		"bad restart policy": {
 			RestartPolicy: "UnknowPolicy",
 			DNSPolicy:     core.DNSClusterFirst,
 			Containers:    []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
+			ResourceType:  "container",
 		},
 		"with hostNetwork hostPort not equal to containerPort": {
 			Containers: []core.Container{
@@ -6688,6 +6711,7 @@ func TestValidatePodSpec(t *testing.T) {
 			},
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		},
 		"bad runAsUser large than math.MaxInt32": {
 			Containers: []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
@@ -6697,6 +6721,7 @@ func TestValidatePodSpec(t *testing.T) {
 			},
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		},
 		"bad runAsUser less than 0": {
 			Containers: []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
@@ -6706,6 +6731,7 @@ func TestValidatePodSpec(t *testing.T) {
 			},
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		},
 		"bad fsGroup large than math.MaxInt32": {
 			Containers: []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
@@ -6715,6 +6741,7 @@ func TestValidatePodSpec(t *testing.T) {
 			},
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		},
 		"bad fsGroup less than 0": {
 			Containers: []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
@@ -6724,6 +6751,7 @@ func TestValidatePodSpec(t *testing.T) {
 			},
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		},
 		"bad-active-deadline-seconds": {
 			Volumes: []core.Volume{
@@ -6737,6 +6765,7 @@ func TestValidatePodSpec(t *testing.T) {
 			NodeName:              "foobar",
 			DNSPolicy:             core.DNSClusterFirst,
 			ActiveDeadlineSeconds: &activeDeadlineSeconds,
+			ResourceType:          "container",
 		},
 		"active-deadline-seconds-too-large": {
 			Volumes: []core.Volume{
@@ -6750,6 +6779,7 @@ func TestValidatePodSpec(t *testing.T) {
 			NodeName:              "foobar",
 			DNSPolicy:             core.DNSClusterFirst,
 			ActiveDeadlineSeconds: &activeDeadlineSecondsTooLarge,
+			ResourceType:          "container",
 		},
 		"bad nodeName": {
 			NodeName:      "node name",
@@ -6757,6 +6787,7 @@ func TestValidatePodSpec(t *testing.T) {
 			Containers:    []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		},
 		"bad PriorityClassName": {
 			Volumes:           []core.Volume{{Name: "vol", VolumeSource: core.VolumeSource{EmptyDir: &core.EmptyDirVolumeSource{}}}},
@@ -6764,6 +6795,7 @@ func TestValidatePodSpec(t *testing.T) {
 			RestartPolicy:     core.RestartPolicyAlways,
 			DNSPolicy:         core.DNSClusterFirst,
 			PriorityClassName: "InvalidName",
+			ResourceType:      "container",
 		},
 		"ShareProcessNamespace and HostPID both set": {
 			Volumes:       []core.Volume{{Name: "vol", VolumeSource: core.VolumeSource{EmptyDir: &core.EmptyDirVolumeSource{}}}},
@@ -6774,12 +6806,14 @@ func TestValidatePodSpec(t *testing.T) {
 				HostPID:               true,
 				ShareProcessNamespace: &[]bool{true}[0],
 			},
+			ResourceType: "container",
 		},
 		"bad RuntimeClassName": {
 			Containers:       []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
 			RestartPolicy:    core.RestartPolicyAlways,
 			DNSPolicy:        core.DNSClusterFirst,
 			RuntimeClassName: utilpointer.StringPtr("invalid/sandbox"),
+			ResourceType:     "container",
 		},
 	}
 	for k, v := range failureCases {
@@ -6819,6 +6853,17 @@ func TestValidateVirtualMachine(t *testing.T) {
 			Name:            "vm-test-01",
 			KeyPairName:     "my-key-pair-01",
 			ImagePullPolicy: "IfNotPresent",
+			ResourceCommonInfo: core.ResourceCommonInfo{
+				Selector: core.ResourceSelector{
+					Operator: "chinatelecom",
+				},
+				Count: 1,
+			},
+			Flavors: []core.ResourceFlavor{
+				{
+					FlavorID: "c2",
+				},
+			},
 		},
 	}
 
@@ -6861,6 +6906,7 @@ func extendPodSpecwithTolerations(in core.PodSpec, tolerations []core.Toleration
 	out.RestartPolicy = in.RestartPolicy
 	out.DNSPolicy = in.DNSPolicy
 	out.Tolerations = tolerations
+	out.ResourceType = in.ResourceType
 	return out
 }
 
@@ -6870,6 +6916,7 @@ func TestValidatePod(t *testing.T) {
 			Containers:    []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
 			RestartPolicy: core.RestartPolicyAlways,
 			DNSPolicy:     core.DNSClusterFirst,
+			ResourceType:  "container",
 		}
 		if affinity != nil {
 			spec.Affinity = affinity
@@ -6885,6 +6932,7 @@ func TestValidatePod(t *testing.T) {
 				Containers:    []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
 				RestartPolicy: core.RestartPolicyAlways,
 				DNSPolicy:     core.DNSClusterFirst,
+				ResourceType:  "container",
 			},
 		},
 		{ // Just about everything.
@@ -6899,7 +6947,8 @@ func TestValidatePod(t *testing.T) {
 				NodeSelector: map[string]string{
 					"key": "value",
 				},
-				NodeName: "foobar",
+				NodeName:     "foobar",
+				ResourceType: "container",
 			},
 		},
 		{ // Serialized node affinity requirements.
@@ -7261,6 +7310,7 @@ func TestValidatePod(t *testing.T) {
 				Containers:     []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
 				RestartPolicy:  core.RestartPolicyAlways,
 				DNSPolicy:      core.DNSClusterFirst,
+				ResourceType:   "container",
 			},
 		},
 		{ // localhost AppArmor profile for a container
@@ -7284,6 +7334,7 @@ func TestValidatePod(t *testing.T) {
 				Containers:    []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
 				RestartPolicy: core.RestartPolicyAlways,
 				DNSPolicy:     core.DNSClusterFirst,
+				ResourceType:  "container",
 				SecurityContext: &core.PodSecurityContext{
 					Sysctls: []core.Sysctl{
 						{
@@ -7324,6 +7375,7 @@ func TestValidatePod(t *testing.T) {
 				Containers:    []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
 				RestartPolicy: core.RestartPolicyAlways,
 				DNSPolicy:     core.DNSClusterFirst,
+				ResourceType:  "container",
 			},
 		},
 		{ // valid extended resources for regular container
@@ -7348,6 +7400,7 @@ func TestValidatePod(t *testing.T) {
 				},
 				RestartPolicy: core.RestartPolicyAlways,
 				DNSPolicy:     core.DNSClusterFirst,
+				ResourceType:  "container",
 			},
 		},
 		{ // valid serviceaccount token projected volume with serviceaccount name specified
@@ -7357,6 +7410,7 @@ func TestValidatePod(t *testing.T) {
 				Containers:         []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
 				RestartPolicy:      core.RestartPolicyAlways,
 				DNSPolicy:          core.DNSClusterFirst,
+				ResourceType:       "container",
 				Volumes: []core.Volume{
 					{
 						Name: "projected-volume",
@@ -7396,6 +7450,7 @@ func TestValidatePod(t *testing.T) {
 					RestartPolicy: core.RestartPolicyAlways,
 					DNSPolicy:     core.DNSClusterFirst,
 					Containers:    []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
+					ResourceType:  "container",
 				},
 			},
 		},
@@ -7418,6 +7473,7 @@ func TestValidatePod(t *testing.T) {
 					RestartPolicy: core.RestartPolicyAlways,
 					DNSPolicy:     core.DNSClusterFirst,
 					Containers:    []core.Container{{Name: "ctr", Image: " something ", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
+					ResourceType:  "container",
 				},
 			},
 		},
@@ -7429,6 +7485,7 @@ func TestValidatePod(t *testing.T) {
 					RestartPolicy: core.RestartPolicyAlways,
 					DNSPolicy:     core.DNSClusterFirst,
 					Containers:    []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
+					ResourceType:  "container",
 				},
 			},
 		},
@@ -7437,7 +7494,8 @@ func TestValidatePod(t *testing.T) {
 			spec: core.Pod{
 				ObjectMeta: metav1.ObjectMeta{Name: "abc", Namespace: "ns", Tenant: "te"},
 				Spec: core.PodSpec{
-					Containers: []core.Container{{}},
+					Containers:   []core.Container{{}},
+					ResourceType: "container",
 				},
 			},
 		},
@@ -7456,6 +7514,7 @@ func TestValidatePod(t *testing.T) {
 					RestartPolicy: core.RestartPolicyAlways,
 					DNSPolicy:     core.DNSClusterFirst,
 					Containers:    []core.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
+					ResourceType:  "container",
 				},
 			},
 		},
@@ -10737,6 +10796,7 @@ func TestValidateReplicationControllerUpdate(t *testing.T) {
 				RestartPolicy: core.RestartPolicyAlways,
 				DNSPolicy:     core.DNSClusterFirst,
 				Containers:    []core.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
+				ResourceType:  "container",
 			},
 		},
 	}
@@ -10750,6 +10810,7 @@ func TestValidateReplicationControllerUpdate(t *testing.T) {
 				DNSPolicy:     core.DNSClusterFirst,
 				Containers:    []core.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
 				Volumes:       []core.Volume{{Name: "gcepd", VolumeSource: core.VolumeSource{GCEPersistentDisk: &core.GCEPersistentDiskVolumeSource{PDName: "my-PD", FSType: "ext4", Partition: 1, ReadOnly: false}}}},
+				ResourceType:  "container",
 			},
 		},
 	}
@@ -10759,6 +10820,7 @@ func TestValidateReplicationControllerUpdate(t *testing.T) {
 			Spec: core.PodSpec{
 				RestartPolicy: core.RestartPolicyAlways,
 				DNSPolicy:     core.DNSClusterFirst,
+				ResourceType:  "container",
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Labels: invalidSelector,
@@ -10900,6 +10962,7 @@ func TestValidateReplicationController(t *testing.T) {
 				RestartPolicy: core.RestartPolicyAlways,
 				DNSPolicy:     core.DNSClusterFirst,
 				Containers:    []core.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
+				ResourceType:  "container",
 			},
 		},
 	}
@@ -10913,6 +10976,7 @@ func TestValidateReplicationController(t *testing.T) {
 				RestartPolicy: core.RestartPolicyAlways,
 				DNSPolicy:     core.DNSClusterFirst,
 				Containers:    []core.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: "File"}},
+				ResourceType:  "container",
 			},
 		},
 	}
@@ -10922,6 +10986,7 @@ func TestValidateReplicationController(t *testing.T) {
 			Spec: core.PodSpec{
 				RestartPolicy: core.RestartPolicyAlways,
 				DNSPolicy:     core.DNSClusterFirst,
+				ResourceType:  "container",
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Labels: invalidSelector,

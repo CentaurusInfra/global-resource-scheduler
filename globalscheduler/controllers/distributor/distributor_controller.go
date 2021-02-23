@@ -21,9 +21,7 @@ import (
 	"fmt"
 	corev1 "k8s.io/api/core/v1"
 	apiextensions "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
-	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -35,6 +33,8 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog"
+	"k8s.io/kubernetes/globalscheduler/controllers"
+	"k8s.io/kubernetes/globalscheduler/controllers/util"
 	distributortype "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor"
 	distributorclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/client/clientset/versioned"
 	distributorscheme "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/client/clientset/versioned/scheme"
@@ -264,56 +264,21 @@ func (c *DistributorController) createCustomResourceDefinition() *apiextensions.
 			},
 			AdditionalPrinterColumns: []apiextensions.CustomResourceColumnDefinition{
 				{
-					Name:     "range",
-					Type:     "string",
-					JSONPath: ".spec.range",
+					Name:     "pod_hashkey_start",
+					Type:     "integer",
+					JSONPath: ".spec.range.start",
+				},
+				{
+					Name:     "pod_hashkey_end",
+					Type:     "integer",
+					JSONPath: ".spec.range.end",
 				},
 			},
 		},
 	}
 }
 func (c *DistributorController) EnsureCustomResourceDefinitionCreation() error {
-	distributor := c.createCustomResourceDefinition()
-	_, err := c.apiextensionsclientset.ApiextensionsV1beta1().CustomResourceDefinitions().Create(distributor)
-	if err != nil && !errors.IsAlreadyExists(err) {
-		return err
-	}
-
-	operation := func() (bool, error) {
-		manifest, err := c.apiextensionsclientset.ApiextensionsV1beta1().CustomResourceDefinitions().Get(distributor.Name, metav1.GetOptions{})
-		if err != nil {
-			return false, err
-		}
-
-		for _, cond := range manifest.Status.Conditions {
-			switch cond.Type {
-			case apiextensionsv1beta1.Established:
-				if cond.Status == apiextensionsv1beta1.ConditionTrue {
-					return true, nil
-				}
-			case apiextensionsv1beta1.NamesAccepted:
-				if cond.Status == apiextensionsv1beta1.ConditionFalse {
-					return false, fmt.Errorf("name %s conflicts", distributor.Name)
-				}
-			}
-		}
-
-		return false, fmt.Errorf("%s not established", distributor.Name)
-	}
-	err = wait.Poll(1*time.Second, 10*time.Second, func() (bool, error) {
-		return operation()
-	})
-
-	if err != nil {
-		deleteErr := c.apiextensionsclientset.ApiextensionsV1beta1().CustomResourceDefinitions().Delete(distributor.Name, nil)
-		if deleteErr != nil {
-			return deleteErr
-		}
-
-		return err
-	}
-
-	return nil
+	return controllers.CreateCRD(c.apiextensionsclientset, c.createCustomResourceDefinition())
 }
 
 // Create a distributor for testing purpose
@@ -331,30 +296,23 @@ func (c *DistributorController) rebalance(namespace string) error {
 	distributors, err := c.lister.Distributors(namespace).List(labels.Everything())
 	if err == nil {
 		size := len(distributors)
+		klog.V(3).Infof("Get the %d distributors to balance", size)
 		if size < 1 {
 			return nil
 		}
 		// hash function can only get uint32, uint64
 		// k8s code base does not deal with uint32 properly
 		// uint64 > MaxInt64 will have issue in converter. Need to map to 0 - maxInt64
-		var start int64 = 0
-		var end int64 = 0
-		chunk := math.MaxInt64 / int64(size)
-		mod := math.MaxInt64 % size
+		ranges := util.EvenlyDivide(len(distributors), math.MaxInt64)
 		for i, d := range distributors {
-			end = start + chunk - 1
-			if i <= mod {
-				end += 1
-			}
-			d.Spec.Range = distributorv1.DistributorRange{Start: start, End: end}
+			d.Spec.Range = distributorv1.DistributorRange{Start: ranges[i][0], End: ranges[i][1]}
 			updated, err := c.clientset.GlobalschedulerV1().Distributors(namespace).Update(d)
 			if err != nil {
 				klog.Warningf("Failed to updated the distributor %v with the err %v", d, err)
 				return err
 			} else {
-				klog.V(3).Infof("Updated the distributor %v", updated)
+				klog.V(3).Infof("Updated the distributor %s with %v", updated.GetName(), updated.Spec.Range)
 			}
-			start = end + 1
 		}
 	}
 	return err

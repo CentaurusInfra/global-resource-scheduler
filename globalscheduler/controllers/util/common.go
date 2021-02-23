@@ -16,7 +16,10 @@ limitations under the License.
 
 package util
 
-import "math"
+import (
+	"math"
+	"sort"
+)
 
 func RemoveCluster(clusters []string, clusterName string) []string {
 	var idx int
@@ -35,10 +38,11 @@ func EvenlyDivideInt64(size int) [][]int64 {
 }
 
 func EvenlyDivide(size int, upper int64) [][]int64 {
+	res := make([][]int64, 0)
 	if size <= 0 {
-		return make([][]int64, 0)
+		return res
 	}
-	res := make([][]int64, size)
+
 	// hash function can only get uint32, uint64
 	// k8s code base does not deal with uint32 properly
 	// uint64 > MaxInt64 will have issue in converter. Need to map to 0 - maxInt64
@@ -46,15 +50,42 @@ func EvenlyDivide(size int, upper int64) [][]int64 {
 	var end int64 = 0
 	chunk := upper / int64(size)
 	mod := upper % int64(size)
-	for i := range res {
+	i := 0
+	for i < size {
 		end = start + chunk - 1
 		if int64(i) <= mod {
 			end += 1
 		}
-		res[i] = make([]int64, 2)
-		res[i][0] = start
-		res[i][1] = end
+		if start > upper || end > upper {
+			return res
+		}
+		resItem := make([]int64, 2)
+		resItem[0] = start
+		resItem[1] = end
+		res = append(res, resItem)
+		i = i + 1
 		start = end + 1
 	}
 	return res
+}
+
+func InsertIntoSortedArray(ss []string, s string) []string {
+	i := sort.SearchStrings(ss, s)
+	ss = append(ss, "")
+	copy(ss[i+1:], ss[i:])
+	ss[i] = s
+	return ss
+}
+
+func RemoveFromSortedArray(ss []string, s string) []string {
+	if i := sort.SearchStrings(ss, s); i >= 0 {
+		ssLen := len(ss)
+		if i < ssLen && ss[i] == s {
+			if ssLen > 0 {
+				copy(ss[i:ssLen-1], ss[i+1:ssLen])
+				return ss[:ssLen-1]
+			}
+		}
+	}
+	return ss
 }

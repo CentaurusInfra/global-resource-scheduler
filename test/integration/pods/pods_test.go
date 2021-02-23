@@ -59,6 +59,7 @@ func TestPodUpdateActiveDeadlineSeconds(t *testing.T) {
 						Image: "fakeimage",
 					},
 				},
+				ResourceType: "Container",
 			},
 		}
 	}
@@ -173,6 +174,7 @@ func TestPodReadOnlyFilesystem(t *testing.T) {
 					},
 				},
 			},
+			ResourceType: "Container",
 		},
 	}
 

@@ -18,48 +18,17 @@ limitations under the License.
 package cluster
 
 import (
-	"fmt"
-	"time"
-
 	corev1 "k8s.io/api/core/v1"
 	apiextensions "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog"
+	"k8s.io/kubernetes/globalscheduler/controllers"
 	clusterv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 )
 
-func (c *ClusterController) doesCRDExist() (bool, error) {
-	crd, err := c.apiextensionsclientset.ApiextensionsV1beta1().CustomResourceDefinitions().Get(clusterv1.Name, metav1.GetOptions{})
-
-	if err != nil {
-		return false, err
-	}
-
-	// Check whether the CRD is accepted.
-	for _, condition := range crd.Status.Conditions {
-		if condition.Type == apiextensions.Established &&
-			condition.Status == apiextensions.ConditionTrue {
-			return true, nil
-		}
-	}
-
-	return false, fmt.Errorf("CRD is not accepted")
-}
-
-func (c *ClusterController) waitCRDAccepted() error {
-	err := wait.Poll(1*time.Second, 10*time.Second, func() (bool, error) {
-		return c.doesCRDExist()
-	})
-
-	return err
-}
-
 // CreateCRD creates a custom resource definition, Cluster.
 func (c *ClusterController) CreateClusterCRD() error {
-	if result, _ := c.doesCRDExist(); result {
-		return nil
-	}
+
 	crd := &apiextensions.CustomResourceDefinition{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: clusterv1.Name,
@@ -183,12 +152,7 @@ func (c *ClusterController) CreateClusterCRD() error {
 			},
 		},
 	}
-	_, err := c.apiextensionsclientset.ApiextensionsV1beta1().CustomResourceDefinitions().Create(crd)
-	if err != nil {
-		klog.Errorf(err.Error())
-	}
-	klog.Info("Registered a cluster CRD")
-	return c.waitCRDAccepted()
+	return controllers.CreateCRD(c.apiextensionsclientset, crd)
 }
 
 // Create a cluster object.

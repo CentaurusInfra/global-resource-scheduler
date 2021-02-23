@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-geo-2
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: openstack-pod-with-geo
+    image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
+    keyPairName: "demo-keypair"
+    securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
+    flavors:
+      - flavorID: "42"
+    resourceCommonInfo:
+     count: 1
+     selector:
+       geoLocation:
+         city: "Bellevue"
+         area: NW-1
+         province: "Washington"
+         country: "US"
+       regions:
+         - region: "NW-1"
+           availablityZone:
+           - "NW-1"
+  nics:
+    - name: "80e76da3-91c6-4b70-8fdb-d1ca1c2836cd"

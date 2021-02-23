@@ -29,7 +29,7 @@ func main() {
 	namespace := flag.String("ns", "", "The namespace of the dispatcher process")
 	name := flag.String("n", "", "The name of the dispatcher process")
 	logFile := flag.String("logfile", "/tmp/gs_dispatcher_process.log", "The log file of the dispatcher process")
-	logLevel := flag.String("loglevel", "2", "The log level of the dispatcher process")
+	logLevel := flag.String("loglevel", "3", "The log level of the dispatcher process")
 
 	flag.Parse()
 	util.InitKlog(*namespace, *name, *logFile, *logLevel)

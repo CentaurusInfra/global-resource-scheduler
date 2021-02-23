@@ -70,9 +70,9 @@ function start_scheduler {
 
   tag=$(($1))
   schedulerid=$2
-  kube::common::start_kubescheduler $tag $schedulerid
+  kube::common::start_gs_scheduler $tag $schedulerid
   
-  echo "Done Starting Scheduler $tag "
+  echo "Done Starting Scheduler $tag"
 }
 
 start_scheduler $@

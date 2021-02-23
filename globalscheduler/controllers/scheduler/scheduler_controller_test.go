@@ -25,8 +25,6 @@ import (
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	core "k8s.io/client-go/testing"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/tools/record"
-	"k8s.io/kubernetes/globalscheduler/controllers/util/consistenthashing"
 	clusterfake "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned/fake"
 	clusterinformers "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/informers/externalversions"
 	clustercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
@@ -136,7 +134,6 @@ func (f *fixture) newController() (*SchedulerController, schedulerinformers.Shar
 
 	p := NewSchedulerController(f.kubeclient, f.apiextensionsclient, f.schedulerClient, f.clusterClient, si.Globalscheduler().V1().Schedulers(), ci.Globalscheduler().V1().Clusters())
 	p.schedulerSynced = alwaysReady
-	p.recorder = &record.FakeRecorder{}
 
 	for _, f := range f.schedulerLister {
 		si.Globalscheduler().V1().Schedulers().Informer().GetIndexer().Add(f)
@@ -158,9 +155,6 @@ func (f *fixture) runExpectError(fooName string, eventType EventType) {
 
 func (f *fixture) runController(fooName string, startInformer bool, expectError bool, eventType EventType) {
 	p, si, ci := f.newController()
-	p.consistentHash = consistenthashing.New()
-	input := []string{"scheduler1"}
-	p.consistentHash.Add(input)
 	if startInformer {
 		stopCh := make(chan struct{})
 		defer close(stopCh)
@@ -204,19 +198,6 @@ func (f *fixture) runController(fooName string, startInformer bool, expectError 
 		}
 		if len(f.clusterActions) > len(clusterActions) {
 			f.t.Errorf("%d additional expected actions:%+v", len(f.clusterActions)-len(clusterActions), f.clusterActions[len(clusterActions):])
-		}
-	} else if eventType == EventTypeUpdateScheduler {
-		schedulerActions := filterInformersActions(f.schedulerClient.Actions())
-		for i, action := range schedulerActions {
-			if len(f.schedulerActions) < i+1 {
-				f.t.Errorf("%d unexpected actions: %+v", len(schedulerActions)-len(f.schedulerActions), schedulerActions[i:])
-				break
-			}
-			expectedAction := f.schedulerActions[i]
-			checkAction(expectedAction, action, f.t)
-		}
-		if len(f.schedulerActions) > len(schedulerActions) {
-			f.t.Errorf("%d additional expected actions:%+v", len(f.schedulerActions)-len(schedulerActions), f.schedulerActions[len(schedulerActions):])
 		}
 	}
 }
@@ -360,7 +341,6 @@ func TestCreatesCluster(t *testing.T) {
 	f.clusterLister = append(f.clusterLister, cluster)
 	f.clusterobjects = append(f.clusterobjects, cluster)
 	f.expectCreateClusterAction(cluster)
-	f.expectUpdateClusterAction(cluster)
 	f.run(getClusterKey(cluster, t), EventTypeAddCluster)
 }
 

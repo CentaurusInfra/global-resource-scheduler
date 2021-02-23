@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "common.go",
         "klog.go",
+        "latency_log.go",
     ],
     importpath = "k8s.io/kubernetes/globalscheduler/controllers/util",
     visibility = ["//visibility:public"],
@@ -26,6 +27,7 @@ filegroup(
     srcs = [
         ":package-srcs",
         "//globalscheduler/controllers/util/consistenthashing:all-srcs",
+        "//globalscheduler/controllers/util/geoLocationDistribute:all-srcs",
         "//globalscheduler/controllers/util/openstack:all-srcs",
         "//globalscheduler/controllers/util/union:all-srcs",
     ],

@@ -6431,6 +6431,8 @@ func autoConvert_v1_PodStatus_To_core_PodStatus(in *v1.PodStatus, out *core.PodS
 		return err
 	}
 	out.ClusterInstanceId = in.ClusterInstanceId
+	out.DistributorName = in.DistributorName
+	out.DispatcherName = in.DispatcherName
 	return nil
 }
 
@@ -6457,6 +6459,8 @@ func autoConvert_core_PodStatus_To_v1_PodStatus(in *core.PodStatus, out *v1.PodS
 		return err
 	}
 	out.ClusterInstanceId = in.ClusterInstanceId
+	out.DistributorName = in.DistributorName
+	out.DispatcherName = in.DispatcherName
 	return nil
 }
 

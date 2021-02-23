@@ -30,5 +30,6 @@ type NewInformerFunc func(client.Interface, time.Duration, string, string) cache
 // SharedInformerFactory a small interface to allow for adding an informer without an import cycle
 type SharedInformerFactory interface {
 	Start(stopCh <-chan struct{})
+	SyncOnSiteChange()
 	InformerFor(name string, key string, newFunc NewInformerFunc) cache.SharedInformer
 }

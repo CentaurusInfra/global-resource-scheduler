@@ -18,6 +18,9 @@ KUBE_ROOT=$(dirname "${BASH_SOURCE[0]}")/../..
 
 source "${KUBE_ROOT}/hack/lib/common-var-init.sh"
 
+# export CONFIG_BASE for resource-collector
+export CONFIG_BASE=${KUBE_ROOT}/conf
+
 # sanity check for OpenStack provider
 if [ "${CLOUD_PROVIDER}" == "openstack" ]; then
     if [ "${CLOUD_CONFIG}" == "" ]; then
@@ -104,7 +107,7 @@ do
 done
 
 if [ "x${GO_OUT}" == "x" ]; then
-    make -C "${KUBE_ROOT}" WHAT="cmd/kubectl cmd/hyperkube cmd/kube-apiserver cmd/kubelet cmd/kube-proxy cmd/kube-controller-manager globalscheduler/cmd/gs-controllers globalscheduler/cmd/dispatcher_process  globalscheduler/cmd/distributor_process globalscheduler/cmd/scheduler_process globalscheduler/cmd/grpc-server"
+    make -C "${KUBE_ROOT}" WHAT="cmd/kubectl cmd/hyperkube cmd/kube-apiserver cmd/kubelet cmd/kube-proxy cmd/kube-controller-manager globalscheduler/cmd/gs-controllers globalscheduler/cmd/dispatcher_process  globalscheduler/cmd/distributor_process globalscheduler/cmd/scheduler_process globalscheduler/cmd/grpc-server cmd/gs-scheduler cmd/resource-collector"
 else
     echo "skipped the build."
 fi
@@ -458,6 +461,8 @@ if [[ "${START_MODE}" != "kubeletonly" ]]; then
     kube::common::start_kubeproxy
   fi
   # kube::common::start_kubescheduler
+  sudo cp ${CONFIG_BASE}/edgecloud_policy.yaml ${CERT_DIR}
+  kube::common::start_resource_collector
   start_kubedns
   if [[ "${ENABLE_NODELOCAL_DNS:-}" == "true" ]]; then
     start_nodelocaldns

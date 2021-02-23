@@ -44,14 +44,14 @@ func (pl *SiteAvailability) Name() string {
 func (pl *SiteAvailability) Filter(ctx context.Context, cycleState *interfaces.CycleState, stack *types.Stack,
 	siteCacheInfo *sitecacheinfo.SiteCacheInfo) *interfaces.Status {
 
-	if siteCacheInfo.Site().Status == constants.SiteStatusOffline || siteCacheInfo.Site().Status == constants.SiteStatusSellout {
-		msg := fmt.Sprintf("Site(%s) status is %s, not available!", siteCacheInfo.Site().SiteID, siteCacheInfo.Site().Status)
+	if siteCacheInfo.GetSite().Status == constants.SiteStatusOffline || siteCacheInfo.GetSite().Status == constants.SiteStatusSellout {
+		msg := fmt.Sprintf("Site(%s) status is %s, not available!", siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().Status)
 		logger.Debugf(msg)
 		return interfaces.NewStatus(interfaces.Unschedulable, msg)
 	}
 
-	if stack.Selector.SiteID != "" && stack.Selector.SiteID != siteCacheInfo.Site().SiteID {
-		msg := fmt.Sprintf("Site(%s) not suitable!", siteCacheInfo.Site().SiteID)
+	if stack.Selector.SiteID != "" && stack.Selector.SiteID != siteCacheInfo.GetSite().SiteID {
+		msg := fmt.Sprintf("Site(%s) not suitable!", siteCacheInfo.GetSite().SiteID)
 		logger.Debugf(msg)
 		return interfaces.NewStatus(interfaces.Unschedulable, msg)
 	}
