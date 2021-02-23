@@ -32,6 +32,7 @@ import (
 const (
 	ReturnError      = 0
 	ReturnOK         = 1
+
 	StateReady       = 1
 	StateDown        = 2
 	StateUnreachable = 3
@@ -46,13 +47,13 @@ func GrpcUpdateClusterStatus(siteID string, state int64) error {
 	}
 	defer conn.Close()
 	defer cancel()
-	region, az, err := ParseRegionAZ(siteID)
+	clusterNamespace, clusterName, err := ParseSiteID(siteID)
 	if err != nil {
 		return err
 	}
 	req := &pb.ClusterState{
-		NameSpace: region,
-		Name:      az,
+		NameSpace: clusterNamespace,
+		Name:      clusterName,
 		State:     state,
 	}
 	returnMessage, err := client.UpdateClusterStatus(ctx, req)
@@ -80,8 +81,8 @@ func getGrpcClient(grpcHost string) (pb.ResourceCollectorProtocolClient, context
 	return client, ctx, conn, cancel, nil
 }
 
-func ParseRegionAZ(regionAZ string) (region string, az string, err error) {
-	strs := strings.Split(regionAZ, "|")
+func ParseSiteID(siteID string) (clusterNamespace string, clusterName string, err error) {
+	strs := strings.Split(siteID, "|")
 	if len(strs) != 2 {
 		return "", "", errors.New("invalid node format")
 	}
