@@ -377,6 +377,7 @@ func (c *ClusterController) verifyClusterInfo(cluster *clusterv1.Cluster) (verif
 		klog.Infof("cluster ipAddress:%s, region:%s, az:%s, or custer name:%s is null", ipAddress, region, az, clusterName)
 		return verified
 	}
+	verified = true
 	return verified
 }
 
