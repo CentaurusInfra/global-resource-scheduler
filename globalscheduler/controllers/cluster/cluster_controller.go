@@ -119,8 +119,8 @@ func NewClusterController(
 func (c *ClusterController) addCluster(object interface{}) {
 	resource := object.(*clusterv1.Cluster)
 	clusterCopy := resource.DeepCopy()
-	if verifyClusterInfo(clusterCopy) == false {
-		klog.Infof(" Cluster data is not correct: %v", cluster)
+	if c.verifyClusterInfo(clusterCopy) == false {
+		klog.Infof(" Cluster data is not correct: %v", clusterCopy)
 	}
 	key, err := controller.KeyFunc(object)
 	if err != nil {
@@ -136,7 +136,7 @@ func (c *ClusterController) updateCluster(oldObject, newObject interface{}) {
 	newResource := newObject.(*clusterv1.Cluster)
 	oldClusterCopy := oldResource.DeepCopy()
 	newClusterCopy := newResource.DeepCopy()
-	if verifyClusterInfo(newClusterCopy) {
+	if c.verifyClusterInfo(newClusterCopy) {
 		klog.Infof(" Cluster data is not correct: %v", newResource)
 	}
 	key1, err1 := controller.KeyFunc(oldObject)
@@ -174,10 +174,10 @@ func (c *ClusterController) updateCluster(oldObject, newObject interface{}) {
 func (c *ClusterController) deleteCluster(object interface{}) {
 	resource := object.(*clusterv1.Cluster)
 	clusterCopy := resource.DeepCopy()
-	if verifyClusterInfo(clusterCopy) == false {
-		klog.Infof(" Cluster data is not correct: %v", cluster)
+	if c.verifyClusterInfo(clusterCopy) == false {
+		klog.Infof(" Cluster data is not correct: %v", clusterCopy)
 		return
-	}	
+	}
 	key, err := controller.KeyFunc(object)
 	if err != nil {
 		utilruntime.HandleError(fmt.Errorf("couldn't get key for object: %v, error: %v", object, err))
@@ -372,13 +372,11 @@ func (c *ClusterController) verifyClusterInfo(cluster *clusterv1.Cluster) (verif
 	ipAddress := cluster.Spec.IpAddress
 	region := cluster.Spec.Region.Region
 	az := cluster.Spec.Region.AvailabilityZone
-	siteID := fmt.Sprintf("%s|%s", region, az)
 	clusterName := cluster.Name
-	if ipAddress == nil || region == nil || az == nil || clusterName == nil  {
-		err = fmt.Errorf("required cluster spec data is null")
+	if ipAddress == "" || region == "" || az == "" || clusterName == "" {
+		klog.Infof("cluster ipAddress:%s, region:%s, az:%s, or custer name:%s is null", ipAddress, region, az, clusterName)
 		return verified
 	}
-	verified = (clusterName == siteID)
 	return verified
 }
 

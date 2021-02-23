@@ -15,13 +15,14 @@ limitations under the License.
 */
 
 //This functon creates cluster dataset up to 1000
-//usage example: go run main.go -file=test.yaml -max=5000
+//usage example: go run main.go -file=test.yaml -max=1000
 package main
 
 import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 )
 
 const (
@@ -162,115 +163,115 @@ func main() {
 	azNumber := 1
 	for i := 0; i < 7; i++ { //storage, 7(all possible combination of storages) = 2**3(the # of types) -1
 		for j := 0; i < 7; j++ { //favor
-			for k := 0; k < len(regions); k++ {			
-			_, err := f.WriteString("apiVersion: globalscheduler.com/v1\n")
-			_, err = f.WriteString("kind: Cluster\n")
-			_, err = f.WriteString("metadata:\n")
-			//s := fmt.Sprintf("  name: cluster%d\n", clusterNumber)
-			//_, err = f.WriteString(s)
-			s := fmt.Sprintf("  name: %s|az%d\n", regions[k].region, azNumber)				
-			_, err = f.WriteString(s)
-			_, err = f.WriteString("  namespace: default\n")
-			_, err = f.WriteString("spec:\n")
-			_, err = f.WriteString("  cpucapacity: 8\n")
-			_, err = f.WriteString("  eipcapacity: 3\n")
-			_, err = f.WriteString("  flavors:\n")
-			switch jj := j % 6; jj {
-			case 0:
-				_, err = f.WriteString("  - flavorid: \"" + flavors[0].flavorid + "\"\n")
-				_, err = f.WriteString("    totalcapacity: " + flavors[0].totalcapacity + "\n")
-			case 1:
-				_, err = f.WriteString("  - flavorid: \"" + flavors[1].flavorid + "\"\n")
-				_, err = f.WriteString("    totalcapacity: " + flavors[1].totalcapacity + "\n")
-			case 2:
-				_, err = f.WriteString("  - flavorid: \"" + flavors[2].flavorid + "\"\n")
-				_, err = f.WriteString("    totalcapacity: " + flavors[2].totalcapacity + "\n")
-			case 3:
-				_, err = f.WriteString("  - flavorid: \"" + flavors[0].flavorid + "\"\n")
-				_, err = f.WriteString("    totalcapacity: " + flavors[0].totalcapacity + "\n")
-				_, err = f.WriteString("  - flavorid: \"" + flavors[1].flavorid + "\"\n")
-				_, err = f.WriteString("    totalcapacity: " + flavors[1].totalcapacity + "\n")
-			case 4:
-				_, err = f.WriteString("  - flavorid: \"" + flavors[0].flavorid + "\"\n")
-				_, err = f.WriteString("    totalcapacity: " + flavors[0].totalcapacity + "\n")
-				_, err = f.WriteString("  - flavorid: \"" + flavors[2].flavorid + "\"\n")
-				_, err = f.WriteString("    totalcapacity: " + flavors[2].totalcapacity + "\n")
-			case 5:
-				_, err = f.WriteString("  - flavorid: \"" + flavors[1].flavorid + "\"\n")
-				_, err = f.WriteString("    totalcapacity: " + flavors[1].totalcapacity + "\n")
-				_, err = f.WriteString("  - flavorid: \"" + flavors[2].flavorid + "\"\n")
-				_, err = f.WriteString("    totalcapacity: " + flavors[2].totalcapacity + "\n")
-			case 6:
-				_, err = f.WriteString("  - flavorid: \"" + flavors[0].flavorid + "\"\n")
-				_, err = f.WriteString("    totalcapacity: " + flavors[0].totalcapacity + "\n")
-				_, err = f.WriteString("  - flavorid: \"" + flavors[1].flavorid + "\"\n")
-				_, err = f.WriteString("    totalcapacity: " + flavors[1].totalcapacity + "\n")
-				_, err = f.WriteString("  - flavorid: \"" + flavors[2].flavorid + "\"\n")
-				_, err = f.WriteString("    totalcapacity: " + flavors[2].totalcapacity + "\n")
-			default:
-				_, err = f.WriteString("  - flavorid: \"" + flavors[0].flavorid + "\"\n")
-				_, err = f.WriteString("    totalcapacity: " + flavors[0].totalcapacity + "\n")
-			} //end of switch
-			_, err = f.WriteString("  geolocation:\n")
-			_, err = f.WriteString("    area: " + regions[k].area + "\n")
-			_, err = f.WriteString("    city: " + regions[k].city + "\n")
-			_, err = f.WriteString("    country: " + regions[k].country + "\n")
-			_, err = f.WriteString("    province: " + regions[k].province + "\n")
-			_, err = f.WriteString("  ipaddress: " + OpenstackIP + "\n")
-			_, err = f.WriteString("  memcapacity: 256\n")
-			_, err = f.WriteString("  operator:\n")
-			_, err = f.WriteString("    operator: globalscheduler\n")
-			_, err = f.WriteString("  region:\n")
-			s = fmt.Sprintf("    availabilityzone: az%d\n", azNumber)
-			_, err = f.WriteString(s)
-			//_, err = f.WriteString("      availabilityzone: " + regions[k].availabilityzone + "\n")
-			_, err = f.WriteString("    region: " + regions[k].region + "\n")
-			_, err = f.WriteString("  serverprice: 10\n")
-			_, err = f.WriteString("  storage:\n")
-			switch ii := i % 6; ii {
-			case 0:
-				_, err = f.WriteString("  - storagecapacity: " + storages[0].storagecapacity + "\n")
-				_, err = f.WriteString("    typeid: " + storages[0].typeid + "\n")
-			case 1:
-				_, err = f.WriteString("  - storagecapacity: " + storages[1].storagecapacity + "\n")
-				_, err = f.WriteString("    typeid: " + storages[1].typeid + "\n")
-			case 2:
-				_, err = f.WriteString("  - storagecapacity: " + storages[2].storagecapacity + "\n")
-				_, err = f.WriteString("    typeid: " + storages[2].typeid + "\n")
-			case 3:
-				_, err = f.WriteString("  - storagecapacity: " + storages[0].storagecapacity + "\n")
-				_, err = f.WriteString("    typeid: " + storages[0].typeid + "\n")
-				_, err = f.WriteString("  - storagecapacity: " + storages[1].storagecapacity + "\n")
-				_, err = f.WriteString("    typeid: " + storages[1].typeid + "\n")
-			case 4:
-				_, err = f.WriteString("  - storagecapacity: " + storages[0].storagecapacity + "\n")
-				_, err = f.WriteString("    typeid: " + storages[0].typeid + "\n")
-				_, err = f.WriteString("  - storagecapacity: " + storages[2].storagecapacity + "\n")
-				_, err = f.WriteString("    typeid: " + storages[2].typeid + "\n")
-			case 5:
-				_, err = f.WriteString("  - storagecapacity: " + storages[1].storagecapacity + "\n")
-				_, err = f.WriteString("    typeid: " + storages[1].typeid + "\n")
-				_, err = f.WriteString("  - storagecapacity: " + storages[2].storagecapacity + "\n")
-				_, err = f.WriteString("    typeid: " + storages[2].typeid + "\n")
-			case 6:
-				_, err = f.WriteString("  - storagecapacity: " + storages[0].storagecapacity + "\n")
-				_, err = f.WriteString("    typeid: " + storages[0].typeid + "\n")
-				_, err = f.WriteString("  - storagecapacity: " + storages[1].storagecapacity + "\n")
-				_, err = f.WriteString("    typeid: " + storages[1].typeid + "\n")
-				_, err = f.WriteString("  - storagecapacity: " + storages[2].storagecapacity + "\n")
-				_, err = f.WriteString("    typeid: " + storages[2].typeid + "\n")
-			default:
-				_, err = f.WriteString("  - storagecapacity: " + storages[0].storagecapacity + "\n")
-				_, err = f.WriteString("    typeid: " + storages[0].typeid + "\n")
-			} //end of switch
-			if clusterNumber < *max-1 {
-				_, err = f.WriteString("---\n")
-			}
-			check(err)			
-			clusterNumber++
-			if clusterNumber >= *max {
-				break
-			}		
+			for k := 0; k < len(regions); k++ {
+				_, err := f.WriteString("apiVersion: globalscheduler.com/v1\n")
+				_, err = f.WriteString("kind: Cluster\n")
+				_, err = f.WriteString("metadata:\n")
+				//s := fmt.Sprintf("  name: cluster%d\n", clusterNumber)
+				//_, err = f.WriteString(s)
+				s := fmt.Sprintf("  name: %s.az%d\n", strings.ToLower(regions[k].region), azNumber)
+				_, err = f.WriteString(s)
+				_, err = f.WriteString("  namespace: default\n")
+				_, err = f.WriteString("spec:\n")
+				_, err = f.WriteString("  cpucapacity: 8\n")
+				_, err = f.WriteString("  eipcapacity: 3\n")
+				_, err = f.WriteString("  flavors:\n")
+				switch jj := j % 6; jj {
+				case 0:
+					_, err = f.WriteString("  - flavorid: \"" + flavors[0].flavorid + "\"\n")
+					_, err = f.WriteString("    totalcapacity: " + flavors[0].totalcapacity + "\n")
+				case 1:
+					_, err = f.WriteString("  - flavorid: \"" + flavors[1].flavorid + "\"\n")
+					_, err = f.WriteString("    totalcapacity: " + flavors[1].totalcapacity + "\n")
+				case 2:
+					_, err = f.WriteString("  - flavorid: \"" + flavors[2].flavorid + "\"\n")
+					_, err = f.WriteString("    totalcapacity: " + flavors[2].totalcapacity + "\n")
+				case 3:
+					_, err = f.WriteString("  - flavorid: \"" + flavors[0].flavorid + "\"\n")
+					_, err = f.WriteString("    totalcapacity: " + flavors[0].totalcapacity + "\n")
+					_, err = f.WriteString("  - flavorid: \"" + flavors[1].flavorid + "\"\n")
+					_, err = f.WriteString("    totalcapacity: " + flavors[1].totalcapacity + "\n")
+				case 4:
+					_, err = f.WriteString("  - flavorid: \"" + flavors[0].flavorid + "\"\n")
+					_, err = f.WriteString("    totalcapacity: " + flavors[0].totalcapacity + "\n")
+					_, err = f.WriteString("  - flavorid: \"" + flavors[2].flavorid + "\"\n")
+					_, err = f.WriteString("    totalcapacity: " + flavors[2].totalcapacity + "\n")
+				case 5:
+					_, err = f.WriteString("  - flavorid: \"" + flavors[1].flavorid + "\"\n")
+					_, err = f.WriteString("    totalcapacity: " + flavors[1].totalcapacity + "\n")
+					_, err = f.WriteString("  - flavorid: \"" + flavors[2].flavorid + "\"\n")
+					_, err = f.WriteString("    totalcapacity: " + flavors[2].totalcapacity + "\n")
+				case 6:
+					_, err = f.WriteString("  - flavorid: \"" + flavors[0].flavorid + "\"\n")
+					_, err = f.WriteString("    totalcapacity: " + flavors[0].totalcapacity + "\n")
+					_, err = f.WriteString("  - flavorid: \"" + flavors[1].flavorid + "\"\n")
+					_, err = f.WriteString("    totalcapacity: " + flavors[1].totalcapacity + "\n")
+					_, err = f.WriteString("  - flavorid: \"" + flavors[2].flavorid + "\"\n")
+					_, err = f.WriteString("    totalcapacity: " + flavors[2].totalcapacity + "\n")
+				default:
+					_, err = f.WriteString("  - flavorid: \"" + flavors[0].flavorid + "\"\n")
+					_, err = f.WriteString("    totalcapacity: " + flavors[0].totalcapacity + "\n")
+				} //end of switch
+				_, err = f.WriteString("  geolocation:\n")
+				_, err = f.WriteString("    area: " + regions[k].area + "\n")
+				_, err = f.WriteString("    city: " + regions[k].city + "\n")
+				_, err = f.WriteString("    country: " + regions[k].country + "\n")
+				_, err = f.WriteString("    province: " + regions[k].province + "\n")
+				_, err = f.WriteString("  ipaddress: " + OpenstackIP + "\n")
+				_, err = f.WriteString("  memcapacity: 256\n")
+				_, err = f.WriteString("  operator:\n")
+				_, err = f.WriteString("    operator: globalscheduler\n")
+				_, err = f.WriteString("  region:\n")
+				s = fmt.Sprintf("    availabilityzone: az%d\n", azNumber)
+				_, err = f.WriteString(s)
+				//_, err = f.WriteString("      availabilityzone: " + regions[k].availabilityzone + "\n")
+				_, err = f.WriteString("    region: " + regions[k].region + "\n")
+				_, err = f.WriteString("  serverprice: 10\n")
+				_, err = f.WriteString("  storage:\n")
+				switch ii := i % 6; ii {
+				case 0:
+					_, err = f.WriteString("  - storagecapacity: " + storages[0].storagecapacity + "\n")
+					_, err = f.WriteString("    typeid: " + storages[0].typeid + "\n")
+				case 1:
+					_, err = f.WriteString("  - storagecapacity: " + storages[1].storagecapacity + "\n")
+					_, err = f.WriteString("    typeid: " + storages[1].typeid + "\n")
+				case 2:
+					_, err = f.WriteString("  - storagecapacity: " + storages[2].storagecapacity + "\n")
+					_, err = f.WriteString("    typeid: " + storages[2].typeid + "\n")
+				case 3:
+					_, err = f.WriteString("  - storagecapacity: " + storages[0].storagecapacity + "\n")
+					_, err = f.WriteString("    typeid: " + storages[0].typeid + "\n")
+					_, err = f.WriteString("  - storagecapacity: " + storages[1].storagecapacity + "\n")
+					_, err = f.WriteString("    typeid: " + storages[1].typeid + "\n")
+				case 4:
+					_, err = f.WriteString("  - storagecapacity: " + storages[0].storagecapacity + "\n")
+					_, err = f.WriteString("    typeid: " + storages[0].typeid + "\n")
+					_, err = f.WriteString("  - storagecapacity: " + storages[2].storagecapacity + "\n")
+					_, err = f.WriteString("    typeid: " + storages[2].typeid + "\n")
+				case 5:
+					_, err = f.WriteString("  - storagecapacity: " + storages[1].storagecapacity + "\n")
+					_, err = f.WriteString("    typeid: " + storages[1].typeid + "\n")
+					_, err = f.WriteString("  - storagecapacity: " + storages[2].storagecapacity + "\n")
+					_, err = f.WriteString("    typeid: " + storages[2].typeid + "\n")
+				case 6:
+					_, err = f.WriteString("  - storagecapacity: " + storages[0].storagecapacity + "\n")
+					_, err = f.WriteString("    typeid: " + storages[0].typeid + "\n")
+					_, err = f.WriteString("  - storagecapacity: " + storages[1].storagecapacity + "\n")
+					_, err = f.WriteString("    typeid: " + storages[1].typeid + "\n")
+					_, err = f.WriteString("  - storagecapacity: " + storages[2].storagecapacity + "\n")
+					_, err = f.WriteString("    typeid: " + storages[2].typeid + "\n")
+				default:
+					_, err = f.WriteString("  - storagecapacity: " + storages[0].storagecapacity + "\n")
+					_, err = f.WriteString("    typeid: " + storages[0].typeid + "\n")
+				} //end of switch
+				if clusterNumber < *max-1 {
+					_, err = f.WriteString("---\n")
+				}
+				check(err)
+				clusterNumber++
+				if clusterNumber >= *max {
+					break
+				}
 			} //end of for k
 			if clusterNumber >= *max {
 				break
@@ -280,5 +281,5 @@ func main() {
 		if clusterNumber >= *max {
 			break
 		}
-	}//end of for i
+	} //end of for i
 }
