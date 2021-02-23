@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 //This functon creates cluster dataset up to 1000
-//usage example: go run main.go -file=test.yaml -max=100
+//usage example: go run main.go -file=test.yaml -max=5000
 package main
 
 import (
