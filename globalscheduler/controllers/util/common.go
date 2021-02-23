@@ -16,7 +16,10 @@ limitations under the License.
 
 package util
 
-import "math"
+import (
+	"math"
+	"sort"
+)
 
 func RemoveCluster(clusters []string, clusterName string) []string {
 	var idx int
@@ -64,4 +67,25 @@ func EvenlyDivide(size int, upper int64) [][]int64 {
 		start = end + 1
 	}
 	return res
+}
+
+func InsertIntoSortedArray(ss []string, s string) []string {
+	i := sort.SearchStrings(ss, s)
+	ss = append(ss, "")
+	copy(ss[i+1:], ss[i:])
+	ss[i] = s
+	return ss
+}
+
+func RemoveFromSortedArray(ss []string, s string) []string {
+	if i := sort.SearchStrings(ss, s); i >= 0 {
+		ssLen := len(ss)
+		if i < ssLen && ss[i] == s {
+			if ssLen > 0 {
+				copy(ss[i:ssLen-1], ss[i+1:ssLen])
+				return ss[:ssLen-1]
+			}
+		}
+	}
+	return ss
 }

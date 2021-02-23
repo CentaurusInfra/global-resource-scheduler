@@ -26,9 +26,9 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: vm$1
-    image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
+    image: "36aaa966-8046-4380-9ccf-a14faedd0ee8"
     keyPairName: "demo-keypair"
-    securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
+    securityGroupId: "87e1ca08-2298-4aa8-bebd-7122f5ebd574"
     flavors:
       - flavorID: "42"
     resourceCommonInfo:
@@ -45,7 +45,7 @@ spec:
            - "$4"
 
   nics:
-    - name: "80e76da3-91c6-4b70-8fdb-d1ca1c2836cd"
+    - name: "88810613-c9b2-4ea8-8d0b-0928b23b8828"
 EOF
 }
 
