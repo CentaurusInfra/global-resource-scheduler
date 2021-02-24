@@ -6,10 +6,16 @@
 3. Go to another terminal, do the following:
 --cd global-resource-scheduler/globalscheduler/test/yaml
 --kubectl apply -f sample_1000_clusters.yaml to create 1000 clusters
---wait for resoruce collector's collectorCache completing update of cluster/site info from openstack, then do the following:
+--wait for resoruce collector's collectorCache completing update of cluster/site info from openstack, i.e., 
+do "tail -f /tmp/resource_collector.log and make it sure that all the sites are added to the collector cache". 
+Then do the following:
 --kubectl apply -f sample_2_schedulers.yaml to create 2 schedulers
 --kubectl apply -f sample_2_distributors.yaml to create 2 distrbutors
 --kubectl apply -f sample_2_dispatchers.yaml to create 2 dispatchers
+
+You can verify the successful creation of the scheduler/distributor/dispatcher processes via: 
+
+"kubectl get ..." or "ps -ef | grep ..."
 
 4. now you can do the following to create 100 PODs/s
 global-resource-scheduler/hack/globalscheduler/test/create_pods.sh 100 0.01
