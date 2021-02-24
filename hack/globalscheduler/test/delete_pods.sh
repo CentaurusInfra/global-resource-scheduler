@@ -17,7 +17,7 @@ locs=("NewYork NewYork NE-1 US" "Bellevue Washington NW-1 US" "Orlando Florida S
 
 function create_pod {
 # Create multiple YAML objects from stdin
-cat <<EOF | cluster/kubectl.sh apply -f -
+cat <<EOF | cluster/kubectl.sh delete -f -
 apiVersion: v1
 kind: Pod
 metadata:
