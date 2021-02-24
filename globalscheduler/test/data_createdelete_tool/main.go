@@ -22,6 +22,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	//"strings"
 )
 
 const (
@@ -61,7 +62,7 @@ func main() {
 	if *max > 9999 {
 		*max = 1000
 	}
-	var regions [10]Location
+	var regions [20]Location
 	var flavors [3]Flavor
 	var storages [3]Storage
 
@@ -135,6 +136,76 @@ func main() {
 	regions[9].country = "US"
 	regions[9].province = "Nebraska"
 
+	regions[10].availabilityzone = "NE-3"
+	regions[10].region = "NE-3"
+	regions[10].area = "NE-3"
+	regions[10].city = "Baltimore"
+	regions[10].country = "US"
+	regions[10].province = "Maryland"
+
+	regions[11].availabilityzone = "NW-3"
+	regions[11].region = "NW-3"
+	regions[11].area = "NW-3"
+	regions[11].city = "Seattle"
+	regions[11].country = "US"
+	regions[11].province = "Washington"
+
+	regions[12].availabilityzone = "SE-3"
+	regions[12].region = "SE-3"
+	regions[12].area = "SE-3"
+	regions[12].city = "Tampa"
+	regions[12].country = "US"
+	regions[12].province = "Florida"
+
+	regions[13].availabilityzone = "SW-3"
+	regions[13].region = "SW-3"
+	regions[13].area = "SW-3"
+	regions[13].city = "Dallas"
+	regions[13].country = "US"
+	regions[13].province = "Texas"
+
+	regions[14].availabilityzone = "Central-3"
+	regions[14].region = "Central-3"
+	regions[14].area = "Central-3"
+	regions[14].city = "TwinCity"
+	regions[14].country = "US"
+	regions[14].province = "Minnesota"
+
+	regions[15].availabilityzone = "NE-4"
+	regions[15].region = "NE-4"
+	regions[15].area = "NE-4"
+	regions[15].city = "Pittsburgh"
+	regions[15].country = "US"
+	regions[15].province = "Pennsylvania"
+
+	regions[16].availabilityzone = "NW-4"
+	regions[16].region = "NW-4"
+	regions[16].area = "NW-4"
+	regions[16].city = "LosAngeles"
+	regions[16].country = "US"
+	regions[16].province = "California"
+
+	regions[17].availabilityzone = "SE-4"
+	regions[17].region = "SE-4"
+	regions[17].area = "SE-4"
+	regions[17].city = "Columbia "
+	regions[17].country = "US"
+	regions[17].province = "SouthCarolina"
+
+	regions[18].availabilityzone = "SW-4"
+	regions[18].region = "SW-4"
+	regions[18].area = "SW-4"
+	regions[18].city = "Dallas"
+	regions[18].country = "US"
+	regions[18].province = "Texas"
+
+	regions[19].availabilityzone = "Central-4"
+	regions[19].region = "Central-4"
+	regions[19].area = "Central-4"
+	regions[19].city = "St.Louis"
+	regions[19].country = "US"
+	regions[19].province = "Missouri"
+
 	flavors[0].flavorid = "1"
 	flavors[0].totalcapacity = "1000"
 
@@ -159,13 +230,16 @@ func main() {
 	defer f.Close()
 
 	clusterNumber := 0
-	for i := 0; i < 7; i++ { //storage
+	azNumber := 1
+	for i := 0; i < 7; i++ { //storage, 7(all possible combination of storages) = 2**3(the # of types) -1
 		for j := 0; i < 7; j++ { //favor
 			for k := 0; k < len(regions); k++ {
 				_, err := f.WriteString("apiVersion: globalscheduler.com/v1\n")
 				_, err = f.WriteString("kind: Cluster\n")
 				_, err = f.WriteString("metadata:\n")
 				s := fmt.Sprintf("  name: cluster%d\n", clusterNumber)
+				//_, err = f.WriteString(s)
+				//s := fmt.Sprintf("  name: %s.az%d\n", strings.ToLower(regions[k].region), azNumber)
 				_, err = f.WriteString(s)
 				_, err = f.WriteString("  namespace: default\n")
 				_, err = f.WriteString("spec:\n")
@@ -207,7 +281,7 @@ func main() {
 				default:
 					_, err = f.WriteString("  - flavorid: \"" + flavors[0].flavorid + "\"\n")
 					_, err = f.WriteString("    totalcapacity: " + flavors[0].totalcapacity + "\n")
-				}
+				} //end of switch
 				_, err = f.WriteString("  geolocation:\n")
 				_, err = f.WriteString("    area: " + regions[k].area + "\n")
 				_, err = f.WriteString("    city: " + regions[k].city + "\n")
@@ -216,10 +290,12 @@ func main() {
 				_, err = f.WriteString("  ipaddress: " + OpenstackIP + "\n")
 				_, err = f.WriteString("  memcapacity: 256\n")
 				_, err = f.WriteString("  operator:\n")
-				_, err = f.WriteString("      operator: globalscheduler\n")
+				_, err = f.WriteString("    operator: globalscheduler\n")
 				_, err = f.WriteString("  region:\n")
-				_, err = f.WriteString("      availabilityzone: " + regions[k].availabilityzone + "\n")
-				_, err = f.WriteString("      region: " + regions[k].region + "\n")
+				s = fmt.Sprintf("    availabilityzone: az%d\n", azNumber)
+				_, err = f.WriteString(s)
+				//_, err = f.WriteString("      availabilityzone: " + regions[k].availabilityzone + "\n")
+				_, err = f.WriteString("    region: " + regions[k].region + "\n")
 				_, err = f.WriteString("  serverprice: 10\n")
 				_, err = f.WriteString("  storage:\n")
 				switch ii := i % 6; ii {
@@ -257,9 +333,7 @@ func main() {
 				default:
 					_, err = f.WriteString("  - storagecapacity: " + storages[0].storagecapacity + "\n")
 					_, err = f.WriteString("    typeid: " + storages[0].typeid + "\n")
-				}
-				_, err = f.WriteString("  homescheduler: scheduler0\n")
-				_, err = f.WriteString("  homedispatcher: dispatcher0\n")
+				} //end of switch
 				if clusterNumber < *max-1 {
 					_, err = f.WriteString("---\n")
 				}
@@ -268,13 +342,14 @@ func main() {
 				if clusterNumber >= *max {
 					break
 				}
-			}
+			} //end of for k
 			if clusterNumber >= *max {
 				break
 			}
-		}
+			azNumber++
+		} //end of for j
 		if clusterNumber >= *max {
 			break
 		}
-	}
+	} //end of for i
 }
