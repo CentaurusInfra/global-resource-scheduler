@@ -56,13 +56,13 @@ type SiteCacheInfo struct {
 
 	// We store TotalResources (which is Site.Status.Allocatable.*) explicitly
 	// as int64, to avoid conversions and accessing map.
-	TotalResources map[string]*types.CPUAndMemory `json:"allocatableCPUAndMemory"`
+	TotalResources map[string]*types.CPUAndMemory `json:"totalCPUAndMemory"`
 
 	// Total requested resources of all resources on this Site. This includes assumed
 	RequestedStorage map[string]float64 `json:"requestedStorage"`
 
 	// We store TotalStorage  explicitly
-	TotalStorage map[string]float64 `json:"allocatableStorage"`
+	TotalStorage map[string]float64 `json:"totalStorage"`
 
 	// We store requestedFlavor  explicitly
 	// as int64, to avoid conversions and accessing map.

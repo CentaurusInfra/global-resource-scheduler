@@ -73,7 +73,7 @@ func validNewPod() *api.Pod {
 			DNSPolicy:     api.DNSClusterFirst,
 
 			TerminationGracePeriodSeconds: &grace,
-			ResourceType:                  "container",
+			ResourceType:                  "Container",
 			Containers: []api.Container{
 				{
 					Name:            "foo",
@@ -436,6 +436,9 @@ func TestConvertToTableList(t *testing.T) {
 		{Name: "Status", Type: "string", Description: "The aggregate status of the containers in this pod."},
 		{Name: "Restarts", Type: "integer", Description: "The number of times the containers in this pod have been restarted."},
 		{Name: "Age", Type: "string", Description: metav1.ObjectMeta{}.SwaggerDoc()["creationTimestamp"]},
+		{Name: "Distributor", Type: "string", Description: "The name of global resource distributor"},
+		{Name: "Scheduler", Type: "string", Description: "The name of global resource Scheduler"},
+		{Name: "Dispatcher", Type: "string", Description: "The name of global resource dispatcher"},
 		{Name: "IP", Type: "string", Priority: 1, Description: v1.PodStatus{}.SwaggerDoc()["podIP"]},
 		{Name: "Node", Type: "string", Priority: 1, Description: v1.PodSpec{}.SwaggerDoc()["nodeName"]},
 		{Name: "Nominated Node", Type: "string", Priority: 1, Description: v1.PodStatus{}.SwaggerDoc()["nominatedNodeName"]},
@@ -496,7 +499,7 @@ func TestConvertToTableList(t *testing.T) {
 			out: &metav1beta1.Table{
 				ColumnDefinitions: columns,
 				Rows: []metav1beta1.TableRow{
-					{Cells: []interface{}{"", int64(0), "0/0", "", int64(0), "<unknown>", "<none>", "<none>", "<none>", "<none>"}, Object: runtime.RawExtension{Object: &api.Pod{}}},
+					{Cells: []interface{}{"", int64(0), "0/0", "", int64(0), "<unknown>", "", "", "", "<none>", "<none>", "<none>", "<none>"}, Object: runtime.RawExtension{Object: &api.Pod{}}},
 				},
 			},
 		},
@@ -505,7 +508,7 @@ func TestConvertToTableList(t *testing.T) {
 			out: &metav1beta1.Table{
 				ColumnDefinitions: columns,
 				Rows: []metav1beta1.TableRow{
-					{Cells: []interface{}{"foo", int64(0), "1/2", "Pending", int64(10), "370d", "10.1.2.3", "test-node", "nominated-node", "1/2"}, Object: runtime.RawExtension{Object: pod1}},
+					{Cells: []interface{}{"foo", int64(0), "1/2", "Pending", int64(10), "370d", "", "", "", "10.1.2.3", "test-node", "nominated-node", "1/2"}, Object: runtime.RawExtension{Object: pod1}},
 				},
 			},
 		},
@@ -808,6 +811,7 @@ func TestEtcdUpdateScheduled(t *testing.T) {
 			},
 			SecurityContext: &api.PodSecurityContext{},
 			SchedulerName:   api.DefaultSchedulerName,
+			ResourceType:    "Container",
 		},
 	}, nil, 1, false)
 	if err != nil {
@@ -840,6 +844,7 @@ func TestEtcdUpdateScheduled(t *testing.T) {
 			SecurityContext:               &api.PodSecurityContext{},
 			SchedulerName:                 api.DefaultSchedulerName,
 			EnableServiceLinks:            &enableServiceLinks,
+			ResourceType:                  "Container",
 		},
 	}
 	_, _, err = storage.Update(ctx, podIn.Name, rest.DefaultUpdatedObjectInfo(&podIn), rest.ValidateAllObjectFunc, rest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
@@ -883,6 +888,7 @@ func TestEtcdUpdateStatus(t *testing.T) {
 			},
 			SecurityContext: &api.PodSecurityContext{},
 			SchedulerName:   api.DefaultSchedulerName,
+			ResourceType:    "Container",
 		},
 	}
 	err := storage.Storage.Create(ctx, key, &podStart, nil, 0, false)
@@ -908,6 +914,7 @@ func TestEtcdUpdateStatus(t *testing.T) {
 			},
 			SecurityContext: &api.PodSecurityContext{},
 			SchedulerName:   api.DefaultSchedulerName,
+			ResourceType:    "Container",
 		},
 		Status: api.PodStatus{
 			Phase:   api.PodRunning,

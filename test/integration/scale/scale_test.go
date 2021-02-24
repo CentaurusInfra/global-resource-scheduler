@@ -195,7 +195,7 @@ var (
 
 	podStub = corev1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{"foo": "bar"}},
-		Spec:       corev1.PodSpec{Containers: []corev1.Container{{Name: "test", Image: "busybox"}}},
+		Spec:       corev1.PodSpec{Containers: []corev1.Container{{Name: "test", Image: "busybox"}}, ResourceType: "Container"},
 	}
 
 	rcStub = &corev1.ReplicationController{

@@ -36,7 +36,7 @@ type Route struct {
 
 // Register routes
 func Register() {
-	apiVersion := "/" + config.APIVersion
+	apiVersion := "/" + config.GlobalConf.APIVersion
 
 	ws := new(restful.WebService)
 	ws.Path(apiVersion).Consumes(restful.MIME_JSON, restful.MIME_XML).Produces(restful.MIME_JSON, restful.MIME_XML)

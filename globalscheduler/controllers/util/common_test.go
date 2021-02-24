@@ -166,3 +166,54 @@ func TestEvenlyDivideInt64(t *testing.T) {
 		}
 	}
 }
+
+func TestInsertIntoSortedArray(t *testing.T) {
+	sortedstrings := []string{}
+	sortedstrings = InsertIntoSortedArray(sortedstrings, "a")
+	if !reflect.DeepEqual(sortedstrings, []string{"a"}) {
+		t.Errorf("The test result %v is not as expected", sortedstrings)
+	}
+	sortedstrings = []string{"a", "c"}
+	sortedstrings = InsertIntoSortedArray(sortedstrings, "b")
+	if !reflect.DeepEqual(sortedstrings, []string{"a", "b", "c"}) {
+		t.Errorf("The test result %v is not as expected", sortedstrings)
+	}
+	sortedstrings = []string{"b", "c"}
+	sortedstrings = InsertIntoSortedArray(sortedstrings, "a")
+	if !reflect.DeepEqual(sortedstrings, []string{"a", "b", "c"}) {
+		t.Errorf("The test result %v is not as expected", sortedstrings)
+	}
+	sortedstrings = []string{"a", "b"}
+	sortedstrings = InsertIntoSortedArray(sortedstrings, "c")
+	if !reflect.DeepEqual(sortedstrings, []string{"a", "b", "c"}) {
+		t.Errorf("The test result %v is not as expected", sortedstrings)
+	}
+}
+
+func TestRemoveIntoSortedArray(t *testing.T) {
+	sortedstrings := []string{}
+	sortedstrings = RemoveFromSortedArray(sortedstrings, "a")
+	if len(sortedstrings) != 0 {
+		t.Errorf("The test result %v is not as expected", sortedstrings)
+	}
+	sortedstrings = []string{"a", "c"}
+	sortedstrings = InsertIntoSortedArray(sortedstrings, "b")
+	if reflect.DeepEqual(sortedstrings, []string{"a", "c"}) {
+		t.Errorf("The test result %v is not as expected", sortedstrings)
+	}
+	sortedstrings = []string{"a", "b", "c"}
+	sortedstrings = InsertIntoSortedArray(sortedstrings, "a")
+	if reflect.DeepEqual(sortedstrings, []string{"b", "c"}) {
+		t.Errorf("The test result %v is not as expected", sortedstrings)
+	}
+	sortedstrings = []string{"a", "b", "c"}
+	sortedstrings = InsertIntoSortedArray(sortedstrings, "b")
+	if reflect.DeepEqual(sortedstrings, []string{"a", "c"}) {
+		t.Errorf("The test result %v is not as expected", sortedstrings)
+	}
+	sortedstrings = []string{"a", "b", "c"}
+	sortedstrings = InsertIntoSortedArray(sortedstrings, "c")
+	if reflect.DeepEqual(sortedstrings, []string{"a", "b"}) {
+		t.Errorf("The test result %v is not as expected", sortedstrings)
+	}
+}

@@ -237,8 +237,8 @@ func TestGetObjects(t *testing.T) {
 	cmd.SetOutput(buf)
 	cmd.Run(cmd, []string{"pods", "foo"})
 
-	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE
-foo    0         0/0              0          <unknown>
+	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE         DISTRIBUTOR   SCHEDULER   DISPATCHER
+foo    0         0/0              0          <unknown>                             
 `
 	if e, a := expected, buf.String(); e != a {
 		t.Errorf("expected\n%v\ngot\n%v", e, a)
@@ -263,8 +263,8 @@ func TestGetObjectsShowKind(t *testing.T) {
 	cmd.Flags().Set("show-kind", "true")
 	cmd.Run(cmd, []string{"pods", "foo"})
 
-	expected := `NAME      HASHKEY   READY   STATUS   RESTARTS   AGE
-pod/foo   0         0/0              0          <unknown>
+	expected := `NAME      HASHKEY   READY   STATUS   RESTARTS   AGE         DISTRIBUTOR   SCHEDULER   DISPATCHER
+pod/foo   0         0/0              0          <unknown>                             
 `
 	if e, a := expected, buf.String(); e != a {
 		t.Errorf("expected\n%v\ngot\n%v", e, a)
@@ -315,9 +315,9 @@ func TestGetMultipleResourceTypesShowKinds(t *testing.T) {
 	cmd.SetOutput(buf)
 	cmd.Run(cmd, []string{"all"})
 
-	expected := `NAME      HASHKEY   READY   STATUS   RESTARTS   AGE
-pod/foo   0         0/0              0          <unknown>
-pod/bar   0         0/0              0          <unknown>
+	expected := `NAME      HASHKEY   READY   STATUS   RESTARTS   AGE         DISTRIBUTOR   SCHEDULER   DISPATCHER
+pod/foo   0         0/0              0          <unknown>                             
+pod/bar   0         0/0              0          <unknown>                             
 NAME          TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
 service/baz   ClusterIP   <none>       <none>        <none>    <unknown>
 `
@@ -344,8 +344,8 @@ func TestGetObjectsShowLabels(t *testing.T) {
 	cmd.Flags().Set("show-labels", "true")
 	cmd.Run(cmd, []string{"pods", "foo"})
 
-	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE         LABELS
-foo    0         0/0              0          <unknown>   <none>
+	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE         DISTRIBUTOR   SCHEDULER   DISPATCHER   LABELS
+foo    0         0/0              0          <unknown>                                          <none>
 `
 	if e, a := expected, buf.String(); e != a {
 		t.Errorf("expected\n%v\ngot\n%v", e, a)
@@ -494,10 +494,10 @@ func TestGetSortedObjects(t *testing.T) {
 	cmd.Flags().Set("sort-by", ".metadata.name")
 	cmd.Run(cmd, []string{"pods"})
 
-	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE
-a      0         0/0              0          <unknown>
-b      0         0/0              0          <unknown>
-c      0         0/0              0          <unknown>
+	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE         DISTRIBUTOR   SCHEDULER   DISPATCHER
+a      0         0/0              0          <unknown>                             
+b      0         0/0              0          <unknown>                             
+c      0         0/0              0          <unknown>                             
 `
 	if e, a := expected, buf.String(); e != a {
 		t.Errorf("expected\n%v\ngot\n%v", e, a)
@@ -764,8 +764,8 @@ func TestGetObjectsIdentifiedByFile(t *testing.T) {
 	cmd.Flags().Set("filename", "../../../../test/e2e/testing-manifests/statefulset/cassandra/controller.yaml")
 	cmd.Run(cmd, []string{})
 
-	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE
-foo    0         0/0              0          <unknown>
+	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE         DISTRIBUTOR   SCHEDULER   DISPATCHER
+foo    0         0/0              0          <unknown>                             
 `
 	if e, a := expected, buf.String(); e != a {
 		t.Errorf("expected\n%v\ngot\n%v", e, a)
@@ -789,9 +789,9 @@ func TestGetListObjects(t *testing.T) {
 	cmd.SetOutput(buf)
 	cmd.Run(cmd, []string{"pods"})
 
-	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE
-foo    0         0/0              0          <unknown>
-bar    0         0/0              0          <unknown>
+	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE         DISTRIBUTOR   SCHEDULER   DISPATCHER
+foo    0         0/0              0          <unknown>                             
+bar    0         0/0              0          <unknown>                             
 `
 	if e, a := expected, buf.String(); e != a {
 		t.Errorf("expected\n%v\ngot\n%v", e, a)
@@ -914,9 +914,9 @@ func TestGetMultipleTypeObjects(t *testing.T) {
 	cmd.SetOutput(buf)
 	cmd.Run(cmd, []string{"pods,services"})
 
-	expected := `NAME      HASHKEY   READY   STATUS   RESTARTS   AGE
-pod/foo   0         0/0              0          <unknown>
-pod/bar   0         0/0              0          <unknown>
+	expected := `NAME      HASHKEY   READY   STATUS   RESTARTS   AGE         DISTRIBUTOR   SCHEDULER   DISPATCHER
+pod/foo   0         0/0              0          <unknown>                             
+pod/bar   0         0/0              0          <unknown>                             
 NAME          TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
 service/baz   ClusterIP   <none>       <none>        <none>    <unknown>
 `
@@ -1063,9 +1063,9 @@ func TestGetMultipleTypeObjectsWithLabelSelector(t *testing.T) {
 	cmd.Flags().Set("selector", "a=b")
 	cmd.Run(cmd, []string{"pods,services"})
 
-	expected := `NAME      HASHKEY   READY   STATUS   RESTARTS   AGE
-pod/foo   0         0/0              0          <unknown>
-pod/bar   0         0/0              0          <unknown>
+	expected := `NAME      HASHKEY   READY   STATUS   RESTARTS   AGE         DISTRIBUTOR   SCHEDULER   DISPATCHER
+pod/foo   0         0/0              0          <unknown>                             
+pod/bar   0         0/0              0          <unknown>                             
 NAME          TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
 service/baz   ClusterIP   <none>       <none>        <none>    <unknown>
 `
@@ -1106,9 +1106,9 @@ func TestGetMultipleTypeObjectsWithFieldSelector(t *testing.T) {
 	cmd.Flags().Set("field-selector", "a=b")
 	cmd.Run(cmd, []string{"pods,services"})
 
-	expected := `NAME      HASHKEY   READY   STATUS   RESTARTS   AGE
-pod/foo   0         0/0              0          <unknown>
-pod/bar   0         0/0              0          <unknown>
+	expected := `NAME      HASHKEY   READY   STATUS   RESTARTS   AGE         DISTRIBUTOR   SCHEDULER   DISPATCHER
+pod/foo   0         0/0              0          <unknown>                             
+pod/bar   0         0/0              0          <unknown>                             
 NAME          TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
 service/baz   ClusterIP   <none>       <none>        <none>    <unknown>
 `
@@ -1306,11 +1306,11 @@ func TestWatchLabelSelector(t *testing.T) {
 	cmd.Flags().Set("selector", "a=b")
 	cmd.Run(cmd, []string{"pods"})
 
-	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE
-bar    0         0/0              0          <unknown>
-foo    0         0/0              0          <unknown>
-foo    0         0/0              0          <unknown>
-foo    0         0/0              0          <unknown>
+	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE         DISTRIBUTOR   SCHEDULER   DISPATCHER
+bar    0         0/0              0          <unknown>                             
+foo    0         0/0              0          <unknown>                             
+foo    0         0/0              0          <unknown>                             
+foo    0         0/0              0          <unknown>                             
 `
 	if e, a := expected, buf.String(); e != a {
 		t.Errorf("expected\n%v\ngot\n%v", e, a)
@@ -1357,11 +1357,11 @@ func TestWatchFieldSelector(t *testing.T) {
 	cmd.Flags().Set("field-selector", "a=b")
 	cmd.Run(cmd, []string{"pods"})
 
-	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE
-bar    0         0/0              0          <unknown>
-foo    0         0/0              0          <unknown>
-foo    0         0/0              0          <unknown>
-foo    0         0/0              0          <unknown>
+	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE         DISTRIBUTOR   SCHEDULER   DISPATCHER
+bar    0         0/0              0          <unknown>                             
+foo    0         0/0              0          <unknown>                             
+foo    0         0/0              0          <unknown>                             
+foo    0         0/0              0          <unknown>                             
 `
 	if e, a := expected, buf.String(); e != a {
 		t.Errorf("expected\n%v\ngot\n%v", e, a)
@@ -1401,10 +1401,10 @@ func TestWatchResource(t *testing.T) {
 	cmd.Flags().Set("watch", "true")
 	cmd.Run(cmd, []string{"pods", "foo"})
 
-	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE
-foo    0         0/0              0          <unknown>
-foo    0         0/0              0          <unknown>
-foo    0         0/0              0          <unknown>
+	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE         DISTRIBUTOR   SCHEDULER   DISPATCHER
+foo    0         0/0              0          <unknown>                             
+foo    0         0/0              0          <unknown>                             
+foo    0         0/0              0          <unknown>                             
 `
 	if e, a := expected, buf.String(); e != a {
 		t.Errorf("expected\n%v\ngot\n%v", e, a)
@@ -1552,10 +1552,10 @@ func TestWatchResourceIdentifiedByFile(t *testing.T) {
 	cmd.Flags().Set("filename", "../../../../test/e2e/testing-manifests/statefulset/cassandra/controller.yaml")
 	cmd.Run(cmd, []string{})
 
-	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE
-foo    0         0/0              0          <unknown>
-foo    0         0/0              0          <unknown>
-foo    0         0/0              0          <unknown>
+	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE         DISTRIBUTOR   SCHEDULER   DISPATCHER
+foo    0         0/0              0          <unknown>                             
+foo    0         0/0              0          <unknown>                             
+foo    0         0/0              0          <unknown>                             
 `
 	if e, a := expected, buf.String(); e != a {
 		t.Errorf("expected\n%v\ngot\n%v", e, a)
@@ -1595,9 +1595,9 @@ func TestWatchOnlyResource(t *testing.T) {
 	cmd.Flags().Set("watch-only", "true")
 	cmd.Run(cmd, []string{"pods", "foo"})
 
-	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE
-foo    0         0/0              0          <unknown>
-foo    0         0/0              0          <unknown>
+	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE         DISTRIBUTOR   SCHEDULER   DISPATCHER
+foo    0         0/0              0          <unknown>                             
+foo    0         0/0              0          <unknown>                             
 `
 	if e, a := expected, buf.String(); e != a {
 		t.Errorf("expected\n%v\ngot\n%v", e, a)
@@ -1640,9 +1640,9 @@ func TestWatchOnlyList(t *testing.T) {
 	cmd.Flags().Set("watch-only", "true")
 	cmd.Run(cmd, []string{"pods"})
 
-	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE
-foo    0         0/0              0          <unknown>
-foo    0         0/0              0          <unknown>
+	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE         DISTRIBUTOR   SCHEDULER   DISPATCHER
+foo    0         0/0              0          <unknown>                             
+foo    0         0/0              0          <unknown>                             
 `
 	if e, a := expected, buf.String(); e != a {
 		t.Errorf("expected\n%v\ngot\n%v", e, a)
@@ -1690,9 +1690,9 @@ func TestGetMultipleTypeObjectsWithLabelRangeSelector(t *testing.T) {
 	cmd.Flags().Set("selector", "a='{gt:10,lt:50}'")
 	cmd.Run(cmd, []string{"pods"})
 
-	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE
-foo    10        0/0              0          <unknown>
-bar    30        0/0              0          <unknown>
+	expected := `NAME   HASHKEY   READY   STATUS   RESTARTS   AGE         DISTRIBUTOR   SCHEDULER   DISPATCHER
+foo    10        0/0              0          <unknown>                             
+bar    30        0/0              0          <unknown>                             
 `
 	if e, a := expected, buf.String(); e != a {
 		t.Errorf("expected\n%v\ngot\n%v", e, a)

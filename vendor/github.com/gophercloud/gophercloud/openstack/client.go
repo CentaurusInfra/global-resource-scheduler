@@ -3,6 +3,8 @@ package openstack
 import (
 	"fmt"
 	"reflect"
+	"regexp"
+	"strings"
 
 	"github.com/gophercloud/gophercloud"
 	tokens2 "github.com/gophercloud/gophercloud/openstack/identity/v2/tokens"
@@ -95,6 +97,17 @@ func Authenticate(client *gophercloud.ProviderClient, options gophercloud.AuthOp
 	chosen, endpoint, err := utils.ChooseVersion(client, versions)
 	if err != nil {
 		return err
+	}
+
+	// ===edit===
+	re, err := regexp.Compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
+	if err != nil {
+		return err
+	}
+	intranetIP := string(re.Find([]byte(endpoint)))
+	publicIP := string(re.Find([]byte(client.IdentityEndpoint)))
+	if publicIP != "" {
+		endpoint = strings.Replace(endpoint, intranetIP, publicIP, 1)
 	}
 
 	switch chosen.ID {

@@ -18,17 +18,19 @@ limitations under the License.
 package flavor
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"path/filepath"
+	"errors"
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient"
+	"strconv"
+	"sync"
 	"time"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/internalinterfaces"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 )
 
 // InformerFlavor provides access to a shared informer and lister for Flavors.
@@ -37,51 +39,113 @@ type InformerFlavor interface {
 }
 
 type informerFlavor struct {
-	factory internalinterfaces.SharedInformerFactory
-	name    string
-	key     string
-	period  time.Duration
+	factory   internalinterfaces.SharedInformerFactory
+	name      string
+	key       string
+	period    time.Duration
+	collector internalinterfaces.ResourceCollector
 }
 
 // New initial the informerFlavor
-func New(f internalinterfaces.SharedInformerFactory, name string, key string, period time.Duration) InformerFlavor {
-	return &informerFlavor{factory: f, name: name, key: key, period: period}
+func New(f internalinterfaces.SharedInformerFactory, name string, key string, period time.Duration,
+	collector internalinterfaces.ResourceCollector) InformerFlavor {
+	return &informerFlavor{factory: f, name: name, key: key, period: period, collector: collector}
 }
 
 // NewFlavorInformer constructs a new informer for flavor.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFlavorInformer(client client.Interface, resyncPeriod time.Duration, name string, key string) cache.SharedInformer {
+func NewFlavorInformer(client client.Interface, resyncPeriod time.Duration, name string, key string,
+	collector internalinterfaces.ResourceCollector) cache.SharedInformer {
 	return cache.NewSharedInformer(
 		&cache.Lister{ListFunc: func(options interface{}) ([]interface{}, error) {
-			// read flavor init data
-			confLocation := utils.GetConfigDirectory()
-			confFilePath := filepath.Join(confLocation, "flavors.json")
-			file, err := ioutil.ReadFile(confFilePath)
-			if err != nil {
-				return nil, fmt.Errorf("read flavor data error:%v", err)
+			if collector == nil {
+				return nil, errors.New("collector need to be init correctly")
+			}
+			siteInfoCache := collector.GetSiteInfos()
+			if siteInfoCache == nil || siteInfoCache.SiteInfoMap == nil {
+				logger.Errorf("get site info failed")
+				return nil, errors.New("get site info failed")
 			}
 
-			var flavors typed.RegionFlavors
-			err = json.Unmarshal(file, &flavors)
-			if err != nil {
-				return nil, fmt.Errorf("unmarshal flavor data error:%v", err)
-			}
+			// Use map to deduplicate the same RegionFlavor
+			regionFlavorMap := make(map[string]typed.RegionFlavor)
+			var wg sync.WaitGroup
+			for siteID, info := range siteInfoCache.SiteInfoMap {
+				cloudClient, err := cloudclient.NewClientSet(info.EipNetworkID)
+				if err != nil {
+					logger.Warnf("FlavorInformer.NewClientSet[%s] err: %s", info.EipNetworkID, err.Error())
+					continue
+				}
+				client := cloudClient.ComputeV2()
+				if client == nil {
+					logger.Errorf("Cluster[%s] computeV2 client is null!", info.EipNetworkID)
+					continue
+				}
 
+				wg.Add(1)
+				go func(siteID, region string, client *gophercloud.ServiceClient) {
+					defer wg.Done()
+					regionFlavors, err := getRegionFlavors(region, client)
+					if err != nil {
+						logger.Errorf("site[%s] list failed! err: %s", siteID, err.Error())
+						return
+					}
+					for _, rf := range regionFlavors {
+						regionFlavorMap[rf.RegionFlavorID] = rf
+					}
+				}(siteID, info.Region, client)
+			}
+			wg.Wait()
+
+			// result set, []typed.RegionFlavor
 			var interfaceSlice []interface{}
-			for _, flavor := range flavors.Flavors {
-				interfaceSlice = append(interfaceSlice, flavor)
+			for _, rf := range regionFlavorMap {
+				interfaceSlice = append(interfaceSlice, rf)
 			}
-
 			return interfaceSlice, nil
 		}}, resyncPeriod, name, key, typed.ListOpts{})
+}
+
+// Get flavor information for each cluster(az) (goroutine concurrent execution)
+func getRegionFlavors(region string, client *gophercloud.ServiceClient) ([]typed.RegionFlavor, error) {
+	flasPages, err := flavors.ListDetail(client, flavors.ListOpts{}).AllPages()
+	if err != nil {
+		logger.Errorf("flavor list failed! err: %s", err.Error())
+		return nil, err
+	}
+	flas, err := flavors.ExtractFlavors(flasPages)
+	if err != nil {
+		logger.Errorf("flavor ExtractFlavors failed! err: %s", err.Error())
+		return nil, err
+	}
+	//var interfaceSlice []interface{}
+	ret := make([]typed.RegionFlavor, 0)
+	for _, flavor := range flas {
+		flv := typed.Flavor{
+			ID:    flavor.ID,
+			Name:  flavor.Name, // eg: "m1.small"
+			Vcpus: strconv.Itoa(flavor.VCPUs),
+			Ram:   int64(flavor.RAM),
+			OsExtraSpecs: typed.OsExtraSpecs{
+				ResourceType: "default",
+			},
+		}
+		regionFlv := typed.RegionFlavor{
+			RegionFlavorID: region + "|" + flavor.Name,
+			Region:         region,
+			Flavor:         flv,
+		}
+		ret = append(ret, regionFlv)
+	}
+	return ret, nil
 }
 
 func (f *informerFlavor) defaultInformer(client client.Interface, resyncPeriod time.Duration, name string, key string) cache.SharedInformer {
 	if f.period > 0 {
 		resyncPeriod = f.period
 	}
-	return NewFlavorInformer(client, resyncPeriod, name, key)
+	return NewFlavorInformer(client, resyncPeriod, name, key, f.collector)
 }
 
 func (f *informerFlavor) Informer() cache.SharedInformer {

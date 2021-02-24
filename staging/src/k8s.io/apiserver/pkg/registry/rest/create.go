@@ -79,7 +79,6 @@ func BeforeCreate(strategy RESTCreateStrategy, ctx context.Context, obj runtime.
 	if kerr != nil {
 		return kerr
 	}
-
 	if strategy.NamespaceScoped() {
 		if !ValidNamespace(ctx, objectMeta) {
 			return errors.NewBadRequest("the namespace of the provided object does not match the namespace sent on the request")
@@ -129,7 +128,6 @@ func BeforeCreate(strategy RESTCreateStrategy, ctx context.Context, obj runtime.
 	}
 
 	strategy.Canonicalize(obj)
-
 	return nil
 }
 

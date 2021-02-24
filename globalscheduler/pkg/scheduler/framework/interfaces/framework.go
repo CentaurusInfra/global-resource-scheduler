@@ -20,10 +20,10 @@ package interfaces
 import (
 	"context"
 	"fmt"
+	"k8s.io/klog"
 	"reflect"
 	"time"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	internalcache "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache"
 	schedulerlisters "k8s.io/kubernetes/globalscheduler/pkg/scheduler/listers"
 	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
@@ -228,12 +228,12 @@ func (f *framework) RunPreFilterPlugins(ctx context.Context, state *CycleState, 
 		if !status.IsSuccess() {
 			if status.IsUnschedulable() {
 				msg := fmt.Sprintf("rejected by %q at prefilter: %v", pl.Name(), status.Message())
-				logger.Infof(msg)
+				klog.Infof(msg)
 				return NewStatus(status.Code(), msg)
 			}
 			msg := fmt.Sprintf("error while running %q prefilter plugin for pod %q: %v", pl.Name(),
-				stack.Name, status.Message())
-			logger.Errorf(msg)
+				stack.PodName, status.Message())
+			klog.Errorf(msg)
 			return NewStatus(Error, msg)
 		}
 	}
@@ -268,7 +268,7 @@ func (f *framework) RunFilterPlugins(
 				// Filter plugins are not supposed to return any status other than
 				// Success or Unschedulable.
 				firstFailedStatus = NewStatus(Error, fmt.Sprintf("running %q filter plugin for pod %q: %v",
-					pl.Name(), stack.Name, pluginStatus.Message()))
+					pl.Name(), stack.PodName, pluginStatus.Message()))
 				return map[string]*Status{pl.Name(): firstFailedStatus}
 			}
 			statuses[pl.Name()] = pluginStatus
@@ -299,8 +299,8 @@ func (f *framework) RunPreScorePlugins(
 		status = f.runPreScorePlugin(ctx, pl, state, stack, sites)
 		if !status.IsSuccess() {
 			msg := fmt.Sprintf("error while running %q prescore plugin for pod %q: %v", pl.Name(),
-				stack.Name, status.Message())
-			logger.Errorf(msg)
+				stack.PodName, status.Message())
+			klog.Errorf(msg)
 			return NewStatus(Error, msg)
 		}
 	}
@@ -343,8 +343,8 @@ func (f *framework) RunScorePlugins(ctx context.Context, state *CycleState, stac
 		}
 	})
 	if err := errCh.ReceiveError(); err != nil {
-		msg := fmt.Sprintf("error while running score plugin for pod %q: %v", stack.Name, err)
-		logger.Errorf("%s", msg)
+		msg := fmt.Sprintf("error while running score plugin for pod %q: %v", stack.PodName, err)
+		klog.Errorf("%s", msg)
 		return nil, NewStatus(Error, msg)
 	}
 
@@ -368,8 +368,8 @@ func (f *framework) RunScorePlugins(ctx context.Context, state *CycleState, stac
 		}
 	})
 	if err := errCh.ReceiveError(); err != nil {
-		msg := fmt.Sprintf("error while applying score defaultWeights for pod %q: %v", stack.Name, err)
-		logger.Errorf("%s", msg)
+		msg := fmt.Sprintf("error while applying score defaultWeights for pod %q: %v", stack.PodName, err)
+		klog.Errorf("%s", msg)
 		return nil, NewStatus(Error, msg)
 	}
 
@@ -391,8 +391,8 @@ func (f *framework) RunPreBindPlugins(ctx context.Context, state *CycleState, st
 		status = f.runPreBindPlugin(ctx, pl, state, stack, siteID)
 		if !status.IsSuccess() {
 			msg := fmt.Sprintf("error while running %q prebind plugin for pod %q: %v", pl.Name(),
-				stack.Name, status.Message())
-			logger.Errorf("%s", msg)
+				stack.PodName, status.Message())
+			klog.Errorf("%s", msg)
 			return NewStatus(Error, msg)
 		}
 	}
@@ -416,8 +416,8 @@ func (f *framework) RunBindPlugins(ctx context.Context, state *CycleState, stack
 			continue
 		}
 		if !status.IsSuccess() {
-			msg := fmt.Sprintf("plugin %q failed to bind pod \"%v\": %v", bp.Name(), stack.Name, status.Message())
-			logger.Errorf("%s", msg)
+			msg := fmt.Sprintf("plugin %q failed to bind pod \"%v\": %v", bp.Name(), stack.PodName, status.Message())
+			klog.Errorf("%s", msg)
 			return NewStatus(Error, msg)
 		}
 		return status
@@ -451,8 +451,8 @@ func (f *framework) RunReservePlugins(ctx context.Context, state *CycleState, st
 		status = f.runReservePlugin(ctx, pl, state, stack, siteID)
 		if !status.IsSuccess() {
 			msg := fmt.Sprintf("error while running %q reserve plugin for pod %q: %v", pl.Name(),
-				stack.Name, status.Message())
-			logger.Errorf(msg)
+				stack.PodName, status.Message())
+			klog.Errorf(msg)
 			return NewStatus(Error, msg)
 		}
 	}
@@ -503,8 +503,8 @@ func (f *framework) RunStrategyPlugins(ctx context.Context, state *CycleState,
 		countList, status = pl.Strategy(ctx, state, allocations, countList)
 		if !status.IsSuccess() {
 			msg := fmt.Sprintf("plugin %q failed to Strategy \"%v\": %v", pl.Name(),
-				allocations.Stack.Name, status.Message())
-			logger.Errorf("%s", msg)
+				allocations.Stack.PodName, status.Message())
+			klog.Errorf("%s", msg)
 			return nil, NewStatus(Error, msg)
 		}
 	}

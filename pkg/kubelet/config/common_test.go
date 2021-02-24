@@ -72,6 +72,7 @@ func testDecodeSinglePod(t *testing.T, tenant string) {
 			SecurityContext:    &v1.PodSecurityContext{},
 			SchedulerName:      core.DefaultSchedulerName,
 			EnableServiceLinks: &enableServiceLinks,
+			ResourceType:       "Container",
 		},
 	}
 	json, err := runtime.Encode(testapi.Default.Codec(), pod)
@@ -146,6 +147,7 @@ func testDecodePodList(t *testing.T, tenant string) {
 			SecurityContext:    &v1.PodSecurityContext{},
 			SchedulerName:      core.DefaultSchedulerName,
 			EnableServiceLinks: &enableServiceLinks,
+			ResourceType:       "Container",
 		},
 	}
 	podList := &v1.PodList{

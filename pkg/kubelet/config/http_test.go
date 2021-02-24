@@ -162,6 +162,7 @@ func testExtractPodsFromHTTP(t *testing.T, tenant string) {
 					Containers:      []v1.Container{{Name: "1", Image: "foo", ImagePullPolicy: v1.PullAlways, TerminationMessagePolicy: v1.TerminationMessageReadFile}},
 					SecurityContext: &v1.PodSecurityContext{},
 					SchedulerName:   api.DefaultSchedulerName,
+					ResourceType:    "Container",
 				},
 				Status: v1.PodStatus{
 					Phase: v1.PodPending,
@@ -194,6 +195,7 @@ func testExtractPodsFromHTTP(t *testing.T, tenant string) {
 							ImagePullPolicy:          "Always",
 							TerminationMessagePolicy: v1.TerminationMessageReadFile,
 						}},
+						ResourceType: "Container",
 					},
 					Status: v1.PodStatus{
 						Phase: v1.PodPending,
@@ -219,6 +221,7 @@ func testExtractPodsFromHTTP(t *testing.T, tenant string) {
 							Containers:      []v1.Container{{Name: "1", Image: "foo", ImagePullPolicy: v1.PullAlways, TerminationMessagePolicy: v1.TerminationMessageReadFile}},
 							SecurityContext: &v1.PodSecurityContext{},
 							SchedulerName:   api.DefaultSchedulerName,
+							ResourceType:    "Container",
 						},
 						Status: v1.PodStatus{
 							Phase: v1.PodPending,
@@ -235,6 +238,7 @@ func testExtractPodsFromHTTP(t *testing.T, tenant string) {
 							Containers:      []v1.Container{{Name: "2", Image: "bar:bartag", ImagePullPolicy: "", TerminationMessagePolicy: v1.TerminationMessageReadFile}},
 							SecurityContext: &v1.PodSecurityContext{},
 							SchedulerName:   api.DefaultSchedulerName,
+							ResourceType:    "Container",
 						},
 						Status: v1.PodStatus{
 							Phase: v1.PodPending,
@@ -269,6 +273,7 @@ func testExtractPodsFromHTTP(t *testing.T, tenant string) {
 							ImagePullPolicy:          "Always",
 							TerminationMessagePolicy: v1.TerminationMessageReadFile,
 						}},
+						ResourceType: "Container",
 					},
 					Status: v1.PodStatus{
 						Phase: v1.PodPending,
@@ -299,6 +304,7 @@ func testExtractPodsFromHTTP(t *testing.T, tenant string) {
 							ImagePullPolicy:          "IfNotPresent",
 							TerminationMessagePolicy: v1.TerminationMessageReadFile,
 						}},
+						ResourceType: "Container",
 					},
 					Status: v1.PodStatus{
 						Phase: v1.PodPending,
@@ -368,8 +374,9 @@ func testURLWithHeader(t *testing.T, tenant string) {
 			Tenant:    tenant,
 		},
 		Spec: v1.PodSpec{
-			NodeName:   "localhost",
-			Containers: []v1.Container{{Name: "1", Image: "foo", ImagePullPolicy: v1.PullAlways}},
+			NodeName:     "localhost",
+			Containers:   []v1.Container{{Name: "1", Image: "foo", ImagePullPolicy: v1.PullAlways}},
+			ResourceType: "Container",
 		},
 	}
 	data, err := json.Marshal(pod)

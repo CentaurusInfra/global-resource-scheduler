@@ -41,12 +41,12 @@ func TestSkipStackUpdate(t *testing.T) {
 		{
 			name: "Assumed stack with same stack",
 			stack: &types.Stack{
-				Name: "stack01",
+				PodName: "stack01",
 			},
 			isAssumedStackFunc: func(*types.Stack) bool { return true },
 			getStackFunc: func(*types.Stack) *types.Stack {
 				return &types.Stack{
-					Name: "stack01",
+					PodName: "stack01",
 				}
 			},
 			expected: true,
@@ -54,12 +54,12 @@ func TestSkipStackUpdate(t *testing.T) {
 		{
 			name: "Assumed stack with different stack",
 			stack: &types.Stack{
-				Name: "stack01",
+				PodName: "stack01",
 			},
 			isAssumedStackFunc: func(*types.Stack) bool { return true },
 			getStackFunc: func(*types.Stack) *types.Stack {
 				return &types.Stack{
-					Name: "stack02",
+					PodName: "stack02",
 				}
 			},
 			expected: false,

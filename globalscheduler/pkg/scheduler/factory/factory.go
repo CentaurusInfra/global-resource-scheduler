@@ -50,6 +50,6 @@ func NewPodInformer(schedulerName string, client clientset.Interface,
 	lw := cache.NewListWatchFromClient(client.CoreV1(), string(v1.ResourcePods), metav1.NamespaceAll, selector)
 	return &podInformer{
 		informer: cache.NewSharedIndexInformer(lw, &v1.Pod{}, resyncPeriod,
-		cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}),
+			cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}),
 	}
 }

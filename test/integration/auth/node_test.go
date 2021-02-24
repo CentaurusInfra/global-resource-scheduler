@@ -199,8 +199,9 @@ func TestNodeAuthorizer(t *testing.T) {
 			_, err := client.CoreV1().Pods("ns").Create(&corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{Name: "node2normalpod"},
 				Spec: corev1.PodSpec{
-					NodeName:   "node2",
-					Containers: []corev1.Container{{Name: "image", Image: "busybox"}},
+					NodeName:     "node2",
+					ResourceType: "Container",
+					Containers:   []corev1.Container{{Name: "image", Image: "busybox"}},
 					Volumes: []corev1.Volume{
 						{Name: "secret", VolumeSource: corev1.VolumeSource{Secret: &corev1.SecretVolumeSource{SecretName: "mysecret"}}},
 						{Name: "cm", VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{Name: "myconfigmap"}}}},
@@ -236,8 +237,9 @@ func TestNodeAuthorizer(t *testing.T) {
 					Annotations: map[string]string{corev1.MirrorPodAnnotationKey: "true"},
 				},
 				Spec: corev1.PodSpec{
-					NodeName:   "node2",
-					Containers: []corev1.Container{{Name: "image", Image: "busybox"}},
+					NodeName:     "node2",
+					ResourceType: "Container",
+					Containers:   []corev1.Container{{Name: "image", Image: "busybox"}},
 				},
 			})
 			return err

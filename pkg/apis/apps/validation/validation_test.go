@@ -44,6 +44,7 @@ func TestValidateStatefulSet(t *testing.T) {
 				RestartPolicy: api.RestartPolicyAlways,
 				DNSPolicy:     api.DNSClusterFirst,
 				Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent"}},
+				ResourceType:  "Container",
 			},
 		},
 	}
@@ -54,6 +55,7 @@ func TestValidateStatefulSet(t *testing.T) {
 			Spec: api.PodSpec{
 				RestartPolicy: api.RestartPolicyAlways,
 				DNSPolicy:     api.DNSClusterFirst,
+				ResourceType:  "Container",
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Labels: invalidLabels,
@@ -71,6 +73,7 @@ func TestValidateStatefulSet(t *testing.T) {
 				RestartPolicy:         api.RestartPolicyOnFailure,
 				DNSPolicy:             api.DNSClusterFirst,
 				ActiveDeadlineSeconds: &invalidTime,
+				ResourceType:          "Container",
 			},
 		},
 	}
@@ -259,6 +262,7 @@ func TestValidateStatefulSet(t *testing.T) {
 						RestartPolicy: api.RestartPolicyOnFailure,
 						DNSPolicy:     api.DNSClusterFirst,
 						Containers:    []api.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent"}},
+						ResourceType:  "Container",
 					},
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: validLabels,
@@ -281,6 +285,7 @@ func TestValidateStatefulSet(t *testing.T) {
 						RestartPolicy: api.RestartPolicyNever,
 						DNSPolicy:     api.DNSClusterFirst,
 						Containers:    []api.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent"}},
+						ResourceType:  "Container",
 					},
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: validLabels,
@@ -529,6 +534,7 @@ func TestValidateStatefulSetUpdate(t *testing.T) {
 				RestartPolicy: api.RestartPolicyAlways,
 				DNSPolicy:     api.DNSClusterFirst,
 				Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent"}},
+				ResourceType:  "Container",
 			},
 		},
 	}
@@ -550,6 +556,7 @@ func TestValidateStatefulSetUpdate(t *testing.T) {
 				DNSPolicy:     api.DNSClusterFirst,
 				Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent"}},
 				Volumes:       []api.Volume{{Name: "gcepd", VolumeSource: api.VolumeSource{GCEPersistentDisk: &api.GCEPersistentDiskVolumeSource{PDName: "my-PD", FSType: "ext4", Partition: 1, ReadOnly: false}}}},
+				ResourceType:  "Container",
 			},
 		},
 	}
@@ -559,6 +566,7 @@ func TestValidateStatefulSetUpdate(t *testing.T) {
 			Spec: api.PodSpec{
 				RestartPolicy: api.RestartPolicyAlways,
 				DNSPolicy:     api.DNSClusterFirst,
+				ResourceType:  "Container",
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Labels: invalidLabels,
@@ -795,6 +803,7 @@ func TestValidateControllerRevision(t *testing.T) {
 				Spec: api.PodSpec{
 					RestartPolicy: api.RestartPolicyAlways,
 					DNSPolicy:     api.DNSClusterFirst,
+					ResourceType:  "Container",
 				},
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{"foo": "bar"},
@@ -865,6 +874,7 @@ func TestValidateControllerRevisionUpdate(t *testing.T) {
 				Spec: api.PodSpec{
 					RestartPolicy: api.RestartPolicyAlways,
 					DNSPolicy:     api.DNSClusterFirst,
+					ResourceType:  "Container",
 				},
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{"foo": "bar"},
@@ -880,6 +890,7 @@ func TestValidateControllerRevisionUpdate(t *testing.T) {
 				Spec: api.PodSpec{
 					RestartPolicy: api.RestartPolicyAlways,
 					DNSPolicy:     api.DNSClusterFirst,
+					ResourceType:  "Container",
 				},
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{"foo": "bar"},
@@ -1325,11 +1336,13 @@ func TestValidateDaemonSetUpdate(t *testing.T) {
 		RestartPolicy: api.RestartPolicyAlways,
 		DNSPolicy:     api.DNSClusterFirst,
 		Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+		ResourceType:  "Container",
 	}
 	validPodSpecDef := api.PodSpec{
 		RestartPolicy: api.RestartPolicyAlways,
 		DNSPolicy:     api.DNSClusterFirst,
 		Containers:    []api.Container{{Name: "def", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+		ResourceType:  "Container",
 	}
 	validPodSpecNodeSelector := api.PodSpec{
 		NodeSelector:  validSelector,
@@ -1337,12 +1350,14 @@ func TestValidateDaemonSetUpdate(t *testing.T) {
 		RestartPolicy: api.RestartPolicyAlways,
 		DNSPolicy:     api.DNSClusterFirst,
 		Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+		ResourceType:  "Container",
 	}
 	validPodSpecVolume := api.PodSpec{
 		Volumes:       []api.Volume{{Name: "gcepd", VolumeSource: api.VolumeSource{GCEPersistentDisk: &api.GCEPersistentDiskVolumeSource{PDName: "my-PD", FSType: "ext4", Partition: 1, ReadOnly: false}}}},
 		RestartPolicy: api.RestartPolicyAlways,
 		DNSPolicy:     api.DNSClusterFirst,
 		Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+		ResourceType:  "Container",
 	}
 
 	validPodTemplateAbc := api.PodTemplate{
@@ -1392,6 +1407,7 @@ func TestValidateDaemonSetUpdate(t *testing.T) {
 				// no containers specified
 				RestartPolicy: api.RestartPolicyAlways,
 				DNSPolicy:     api.DNSClusterFirst,
+				ResourceType:  "Conainer",
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Labels: validSelector,
@@ -1812,6 +1828,7 @@ func TestValidateDaemonSet(t *testing.T) {
 				RestartPolicy: api.RestartPolicyAlways,
 				DNSPolicy:     api.DNSClusterFirst,
 				Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+				ResourceType:  "Container",
 			},
 		},
 	}
@@ -1821,6 +1838,7 @@ func TestValidateDaemonSet(t *testing.T) {
 			Spec: api.PodSpec{
 				RestartPolicy: api.RestartPolicyAlways,
 				DNSPolicy:     api.DNSClusterFirst,
+				ResourceType:  "Container",
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Labels: invalidSelector,
@@ -1957,6 +1975,7 @@ func TestValidateDaemonSet(t *testing.T) {
 						RestartPolicy: api.RestartPolicyOnFailure,
 						DNSPolicy:     api.DNSClusterFirst,
 						Containers:    []api.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+						ResourceType:  "Container",
 					},
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: validSelector,
@@ -1977,6 +1996,7 @@ func TestValidateDaemonSet(t *testing.T) {
 						RestartPolicy: api.RestartPolicyNever,
 						DNSPolicy:     api.DNSClusterFirst,
 						Containers:    []api.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+						ResourceType:  "Container",
 					},
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: validSelector,
@@ -2051,6 +2071,7 @@ func validDeployment() *apps.Deployment {
 							TerminationMessagePolicy: api.TerminationMessageReadFile,
 						},
 					},
+					ResourceType: "Container",
 				},
 			},
 			RollbackTo: &apps.RollbackConfig{
@@ -2522,6 +2543,7 @@ func TestValidateReplicaSetStatusUpdate(t *testing.T) {
 				RestartPolicy: api.RestartPolicyAlways,
 				DNSPolicy:     api.DNSClusterFirst,
 				Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+				ResourceType:  "Container",
 			},
 		},
 	}
@@ -2605,6 +2627,7 @@ func TestValidateReplicaSetUpdate(t *testing.T) {
 				RestartPolicy: api.RestartPolicyAlways,
 				DNSPolicy:     api.DNSClusterFirst,
 				Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+				ResourceType:  "Container",
 			},
 		},
 	}
@@ -2618,6 +2641,7 @@ func TestValidateReplicaSetUpdate(t *testing.T) {
 				DNSPolicy:     api.DNSClusterFirst,
 				Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
 				Volumes:       []api.Volume{{Name: "gcepd", VolumeSource: api.VolumeSource{GCEPersistentDisk: &api.GCEPersistentDiskVolumeSource{PDName: "my-PD", FSType: "ext4", Partition: 1, ReadOnly: false}}}},
+				ResourceType:  "Container",
 			},
 		},
 	}
@@ -2627,6 +2651,7 @@ func TestValidateReplicaSetUpdate(t *testing.T) {
 			Spec: api.PodSpec{
 				RestartPolicy: api.RestartPolicyAlways,
 				DNSPolicy:     api.DNSClusterFirst,
+				ResourceType:  "Container",
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Labels: invalidLabels,
@@ -2768,6 +2793,7 @@ func TestValidateReplicaSet(t *testing.T) {
 				RestartPolicy: api.RestartPolicyAlways,
 				DNSPolicy:     api.DNSClusterFirst,
 				Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+				ResourceType:  "Container",
 			},
 		},
 	}
@@ -2781,6 +2807,7 @@ func TestValidateReplicaSet(t *testing.T) {
 				RestartPolicy: api.RestartPolicyAlways,
 				DNSPolicy:     api.DNSClusterFirst,
 				Containers:    []api.Container{{Name: "abc", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+				ResourceType:  "Container",
 			},
 		},
 	}
@@ -2790,6 +2817,7 @@ func TestValidateReplicaSet(t *testing.T) {
 			Spec: api.PodSpec{
 				RestartPolicy: api.RestartPolicyAlways,
 				DNSPolicy:     api.DNSClusterFirst,
+				ResourceType:  "Container",
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Labels: invalidLabels,
@@ -2936,6 +2964,7 @@ func TestValidateReplicaSet(t *testing.T) {
 						RestartPolicy: api.RestartPolicyOnFailure,
 						DNSPolicy:     api.DNSClusterFirst,
 						Containers:    []api.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+						ResourceType:  "Container",
 					},
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: validLabels,
@@ -2956,6 +2985,7 @@ func TestValidateReplicaSet(t *testing.T) {
 						RestartPolicy: api.RestartPolicyNever,
 						DNSPolicy:     api.DNSClusterFirst,
 						Containers:    []api.Container{{Name: "ctr", Image: "image", ImagePullPolicy: "IfNotPresent", TerminationMessagePolicy: api.TerminationMessageReadFile}},
+						ResourceType:  "Container",
 					},
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: validLabels,

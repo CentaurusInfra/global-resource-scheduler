@@ -21,11 +21,11 @@ import (
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog"
+	"k8s.io/kubernetes/globalscheduler/controllers/util"
 	clustercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 	distributortype "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor"
 	distributorclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/client/clientset/versioned"
@@ -141,6 +141,28 @@ func (p *Process) Run(quit chan struct{}) {
 			}
 			p.schedulers = append(p.schedulers, *scheduler)
 			klog.V(4).Infof("A new scheduler %s has been added", scheduler.Name)
+			klog.V(4).Infof("****current schedulers are %v", p.schedulers)
+		},
+		UpdateFunc: func(oldObject, newObject interface{}) {
+			oldScheduler, ok := oldObject.(*schedulerv1.Scheduler)
+			if !ok {
+				klog.Warningf("Failed to convert the object  %+v to an old scheduler", oldScheduler)
+				return
+			}
+			newScheduler, ok := oldObject.(*schedulerv1.Scheduler)
+			if !ok {
+				klog.Warningf("Failed to convert the object  %+v to a new scheduler", newScheduler)
+				return
+			}
+			if !reflect.DeepEqual(oldScheduler, newScheduler) {
+				for idx, item := range p.schedulers {
+					if reflect.DeepEqual(item, oldScheduler) {
+						p.schedulers[idx] = *newScheduler
+						klog.V(4).Infof("The current scheduler map is %v", p.schedulers)
+						return
+					}
+				}
+			}
 		},
 		DeleteFunc: func(obj interface{}) {
 			scheduler, ok := obj.(*schedulerv1.Scheduler)
@@ -163,7 +185,7 @@ func (p *Process) Run(quit chan struct{}) {
 	go podInformer.Run(quit)
 	go distributorInformer.Run(quit)
 
-	wait.Until(p.ScheduleOne, 0, quit)
+	<-quit
 }
 
 func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
@@ -184,8 +206,9 @@ func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
 			if pod.Spec.ResourceType != "vm" {
 				return
 			}
+			util.CheckTime(pod.Name, "distributor", "CreatePod-Start", 1)
 			go func() {
-				p.podQueue <- pod
+				p.ScheduleOne(pod)
 			}()
 		},
 	})
@@ -193,13 +216,10 @@ func (p *Process) initPodInformers(start, end int64) cache.SharedIndexInformer {
 }
 
 // ScheduleOne is to process pods by assign a scheduler to it
-func (p *Process) ScheduleOne() {
-	pod := <-p.podQueue
+func (p *Process) ScheduleOne(pod *v1.Pod) {
 	if pod != nil {
 		klog.V(4).Infof("Found a pod %v-%v to schedule:", pod.Namespace, pod.Name)
-
 		scheduler, err := p.findFit(pod)
-
 		if err != nil {
 			klog.Warningf("Failed to find scheduler that fits scheduler with the error %v", err)
 			return
@@ -214,8 +234,8 @@ func (p *Process) ScheduleOne() {
 			}
 			return
 		}
-
 		klog.V(3).Infof("Assigned pod [%s/%s] on %s\n", pod.Namespace, pod.Name, scheduler)
+		util.CheckTime(pod.Name, "distributor", "CreatePod-End", 2)
 	}
 }
 
@@ -229,7 +249,6 @@ func (p *Process) findFit(pod *v1.Pod) (string, error) {
 }
 
 func (p *Process) bindPod(pod *v1.Pod, scheduler string) error {
-
 	return p.clientset.CoreV1().Pods(pod.Namespace).Bind(&v1.Binding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      pod.Name,
@@ -239,6 +258,7 @@ func (p *Process) bindPod(pod *v1.Pod, scheduler string) error {
 			APIVersion: "v1",
 			Kind:       "Scheduler",
 			Name:       scheduler,
+			FieldPath:  p.name,
 		},
 	})
 }

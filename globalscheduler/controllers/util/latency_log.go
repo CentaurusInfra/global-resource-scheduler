@@ -13,6 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#! /bin/sh
-protoc --go_out=plugins=grpc:. cluster.proto
-protoc --go_out=plugins=grpc:. clusterstate.proto
+
+package util
+
+import (
+	"k8s.io/klog"
+	"time"
+)
+
+func CheckTime(podName string, moduleName string, funcName string, start int) {
+	checkTime := time.Now().UTC()
+	timestamp := int(checkTime.UnixNano() / 1000000)
+	klog.Infof("\n LatencyLog %s %s %s %v %v \n", podName, moduleName, funcName, start, timestamp)
+}
