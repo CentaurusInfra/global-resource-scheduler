@@ -93,7 +93,7 @@ func Allocations(req *restful.Request, resp *restful.Response) {
 		utils.WriteFailedJSONResponse(resp, http.StatusInternalServerError, utils.InternalServerError())
 		return
 	}
-	result, err := sched.Schedule2(ctx, &allocation)
+	result, err := sched.Schedule(ctx, &allocation)
 	if err != nil {
 		klog.Errorf("Schedule failed!, err: %s", err)
 		utils.WriteFailedJSONResponse(resp, http.StatusInternalServerError, utils.InternalServerWithError(err.Error()))

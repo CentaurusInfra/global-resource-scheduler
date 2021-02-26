@@ -21,7 +21,7 @@ import (
 	"errors"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
+	"k8s.io/klog"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient"
 	"strconv"
 	"sync"
@@ -64,7 +64,7 @@ func NewFlavorInformer(client client.Interface, resyncPeriod time.Duration, name
 			}
 			siteInfoCache := collector.GetSiteInfos()
 			if siteInfoCache == nil || siteInfoCache.SiteInfoMap == nil {
-				logger.Errorf("get site info failed")
+				klog.Errorf("get site info failed")
 				return nil, errors.New("get site info failed")
 			}
 
@@ -74,12 +74,12 @@ func NewFlavorInformer(client client.Interface, resyncPeriod time.Duration, name
 			for siteID, info := range siteInfoCache.SiteInfoMap {
 				cloudClient, err := cloudclient.NewClientSet(info.EipNetworkID)
 				if err != nil {
-					logger.Warnf("FlavorInformer.NewClientSet[%s] err: %s", info.EipNetworkID, err.Error())
+					klog.Warningf("FlavorInformer.NewClientSet[%s] err: %s", info.EipNetworkID, err.Error())
 					continue
 				}
 				client := cloudClient.ComputeV2()
 				if client == nil {
-					logger.Errorf("Cluster[%s] computeV2 client is null!", info.EipNetworkID)
+					klog.Errorf("Cluster[%s] computeV2 client is null!", info.EipNetworkID)
 					continue
 				}
 
@@ -88,7 +88,7 @@ func NewFlavorInformer(client client.Interface, resyncPeriod time.Duration, name
 					defer wg.Done()
 					regionFlavors, err := getRegionFlavors(region, client)
 					if err != nil {
-						logger.Errorf("site[%s] list failed! err: %s", siteID, err.Error())
+						klog.Errorf("site[%s] list failed! err: %s", siteID, err.Error())
 						return
 					}
 					for _, rf := range regionFlavors {
@@ -111,19 +111,19 @@ func NewFlavorInformer(client client.Interface, resyncPeriod time.Duration, name
 func getRegionFlavors(region string, client *gophercloud.ServiceClient) ([]typed.RegionFlavor, error) {
 	flasPages, err := flavors.ListDetail(client, flavors.ListOpts{}).AllPages()
 	if err != nil {
-		logger.Errorf("flavor list failed! err: %s", err.Error())
+		klog.Errorf("flavor list failed! err: %s", err.Error())
 		return nil, err
 	}
 	flas, err := flavors.ExtractFlavors(flasPages)
 	if err != nil {
-		logger.Errorf("flavor ExtractFlavors failed! err: %s", err.Error())
+		klog.Errorf("flavor ExtractFlavors failed! err: %s", err.Error())
 		return nil, err
 	}
 	//var interfaceSlice []interface{}
 	ret := make([]typed.RegionFlavor, 0)
 	for _, flavor := range flas {
 		flv := typed.Flavor{
-			ID:    flavor.ID,
+			ID:    flavor.ID,   // eg: "2"
 			Name:  flavor.Name, // eg: "m1.small"
 			Vcpus: strconv.Itoa(flavor.VCPUs),
 			Ram:   int64(flavor.RAM),

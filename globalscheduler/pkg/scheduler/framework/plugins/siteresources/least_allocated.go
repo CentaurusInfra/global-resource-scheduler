@@ -49,7 +49,7 @@ func (la *LeastAllocated) Score(ctx context.Context, state *interfaces.CycleStat
 	// prioritizes based on the minimum of the average of the fraction of requested to capacity.
 	//
 	// Details:
-	// (cpu((capacity-sum(requested))*10/capacity) + memory((capacity-sum(requested))*10/capacity))/2
+	// (cpu((capacity-sum(requested))/capacity) + memory((capacity-sum(requested))/capacity))/2*weight
 	return la.score(stack, siteCacheInfo)
 }
 

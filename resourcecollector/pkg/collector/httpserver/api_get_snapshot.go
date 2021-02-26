@@ -17,9 +17,9 @@ limitations under the License.
 package httpserver
 
 import (
+	"k8s.io/klog"
 	"net/http"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector"
 
@@ -30,14 +30,14 @@ import (
 func GetSnapshot(req *restful.Request, resp *restful.Response) {
 	col, err := collector.GetCollector()
 	if err != nil {
-		logger.Errorf("get new collector failed, err: %s", err.Error())
+		klog.Errorf("get new collector failed, err: %s", err.Error())
 		utils.WriteFailedJSONResponse(resp, http.StatusInternalServerError, utils.InternalServerError())
 		return
 	}
 
 	snapshot, err := col.GetSnapshot()
 	if err != nil {
-		logger.Errorf("Collector snapshot failed! err : %s", err)
+		klog.Errorf("Collector snapshot failed! err : %s", err)
 		utils.WriteFailedJSONResponse(resp, http.StatusInternalServerError, utils.InternalServerError())
 		return
 	}

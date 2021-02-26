@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	genericapiserver "k8s.io/apiserver/pkg/server"
+	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/apiserver"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/options"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/router"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
@@ -67,7 +67,7 @@ specify the name of the scheduler.`,
 
 // Run runt the service and other period monitor to make sure the consistency.
 func Run(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}) error {
-	logger.Infof("Global Scheduler Running...")
+	klog.Infof("Global Scheduler Running...")
 
 	// init scheduler
 	scheduler.InitScheduler(config, stopCh)
@@ -96,7 +96,7 @@ func StartAPI(stopCh <-chan struct{}) error {
 	router.Register()
 	hs, err := apiserver.NewHTTPServer()
 	if err != nil {
-		logger.Errorf("new http server failed!, err: %s", err.Error())
+		klog.Errorf("new http server failed!, err: %s", err.Error())
 		return err
 	}
 

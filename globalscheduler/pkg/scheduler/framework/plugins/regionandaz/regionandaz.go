@@ -18,9 +18,9 @@ package regionandaz
 
 import (
 	"context"
+	"k8s.io/klog"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
@@ -103,13 +103,13 @@ func (pl *RegionAndAz) Strategy(ctx context.Context, state *interfaces.CycleStat
 	for _, siteScore := range siteScoreList {
 		selectorInfo, err := interfaces.GetSiteSelectorState(state, siteScore.SiteID)
 		if err != nil {
-			logger.Error(ctx, "GetSiteSelectorState %s failed! err: %s", siteScore.SiteID, err)
+			klog.Errorf("GetSiteSelectorState %s failed! err: %s", siteScore.SiteID, err)
 			continue
 		}
 
 		siteCacheInfo, err := pl.handle.SnapshotSharedLister().SiteCacheInfos().Get(siteScore.SiteID)
 		if err != nil {
-			logger.Error(ctx, "get siteScore info %s failed! err: %s", siteScore.SiteID, err)
+			klog.Errorf("get siteScore info %s failed! err: %s", siteScore.SiteID, err)
 			continue
 		}
 
@@ -137,7 +137,7 @@ func (pl *RegionAndAz) Strategy(ctx context.Context, state *interfaces.CycleStat
 	}
 
 	if finalRegion == "" {
-		logger.Error(ctx, "we need (%d) stack, now support region-count(%#v)", allocations.Replicas, regionMap)
+		klog.Errorf("we need (%d) stack, now support region-count(%#v)", allocations.Replicas, regionMap)
 		return nil, interfaces.NewStatus(interfaces.Unschedulable, "region Capability cannot meet the needs")
 	}
 

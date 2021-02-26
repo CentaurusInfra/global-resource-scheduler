@@ -19,9 +19,9 @@ package siteavailability
 import (
 	"context"
 	"fmt"
+	"k8s.io/klog"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
@@ -46,13 +46,13 @@ func (pl *SiteAvailability) Filter(ctx context.Context, cycleState *interfaces.C
 
 	if siteCacheInfo.GetSite().Status == constants.SiteStatusOffline || siteCacheInfo.GetSite().Status == constants.SiteStatusSellout {
 		msg := fmt.Sprintf("Site(%s) status is %s, not available!", siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().Status)
-		logger.Debugf(msg)
+		klog.Info(msg)
 		return interfaces.NewStatus(interfaces.Unschedulable, msg)
 	}
 
 	if stack.Selector.SiteID != "" && stack.Selector.SiteID != siteCacheInfo.GetSite().SiteID {
 		msg := fmt.Sprintf("Site(%s) not suitable!", siteCacheInfo.GetSite().SiteID)
-		logger.Debugf(msg)
+		klog.Info(msg)
 		return interfaces.NewStatus(interfaces.Unschedulable, msg)
 	}
 

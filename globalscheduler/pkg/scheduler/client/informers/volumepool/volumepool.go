@@ -20,8 +20,8 @@ package volumepool
 import (
 	"errors"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerstats"
+	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient"
 	"time"
 
@@ -62,7 +62,7 @@ func NewVolumePoolInformer(client client.Interface, resyncPeriod time.Duration, 
 			}
 			siteInfoCache := collector.GetSiteInfos()
 			if siteInfoCache == nil || siteInfoCache.SiteInfoMap == nil {
-				logger.Errorf("get site info failed")
+				klog.Errorf("get site info failed")
 				return nil, errors.New("get site info failed")
 			}
 
@@ -71,7 +71,7 @@ func NewVolumePoolInformer(client client.Interface, resyncPeriod time.Duration, 
 			for _, info := range siteInfoCache.SiteInfoMap {
 				cloudClient, err := cloudclient.NewClientSet(info.EipNetworkID)
 				if err != nil {
-					logger.Warnf("VolumePool.NewClientSet[%s] err: %s", info.EipNetworkID, err.Error())
+					klog.Warningf("VolumePool.NewClientSet[%s] err: %s", info.EipNetworkID, err.Error())
 					continue
 				}
 				client := cloudClient.VolumeV3()
@@ -81,12 +81,12 @@ func NewVolumePoolInformer(client client.Interface, resyncPeriod time.Duration, 
 				}
 				allPages, err := schedulerstats.List(client, listOpts).AllPages()
 				if err != nil {
-					logger.Errorf("schedulerstats list failed! err: %s", err.Error())
+					klog.Errorf("schedulerstats list failed! err: %s", err.Error())
 					return nil, err
 				}
 				allStats, err := schedulerstats.ExtractStoragePools(allPages)
 				if err != nil {
-					logger.Errorf("schedulerstats ExtractStoragePools failed! err: %s", err.Error())
+					klog.Errorf("schedulerstats ExtractStoragePools failed! err: %s", err.Error())
 					return nil, err
 				}
 				volPools := typed.VolumePools{}

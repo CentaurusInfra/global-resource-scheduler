@@ -20,55 +20,53 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
+	"k8s.io/klog"
 	"time"
 
 	"google.golang.org/grpc"
 	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/common/config"
 )
 
 const (
-	ReturnError      = 0
-	ReturnOK         = 1
+	ReturnError = 0
+	ReturnOK    = 1
+
 	StateReady       = 1
 	StateDown        = 2
 	StateUnreachable = 3
 )
 
-func GrpcUpdateClusterStatus(siteID string, state int64) error {
+func GrpcUpdateClusterStatus(clusterNamespace, clusterName string, state int64) error {
 	grpcHost := config.GlobalConf.ClusterControllerIP
 	client, ctx, conn, cancel, err := getGrpcClient(grpcHost)
 	if err != nil {
-		logger.Errorf("Error to make a connection to ClusterController %s", grpcHost)
+		klog.Errorf("Error to make a connection to ClusterController %s", grpcHost)
 		return err
 	}
 	defer conn.Close()
 	defer cancel()
-	region, az, err := ParseRegionAZ(siteID)
-	if err != nil {
-		return err
-	}
+
 	req := &pb.ClusterState{
-		NameSpace: region,
-		Name:      az,
+		NameSpace: clusterNamespace,
+		Name:      clusterName,
 		State:     state,
 	}
 	returnMessage, err := client.UpdateClusterStatus(ctx, req)
 	if err != nil {
-		logger.Errorf("Error to update cluster status to ClusterController, err: %s", err.Error())
+		klog.Errorf("Error to update cluster status to ClusterController, err: %s", err.Error())
 		return err
 	}
+
 	if returnMessage.ReturnCode == ReturnError {
-		logger.Errorf("ClusterController update cluster status err")
+		klog.Errorf("ClusterController update cluster status err")
 		return errors.New("ClusterController update cluster status err")
 	}
 	return nil
 }
 
 func getGrpcClient(grpcHost string) (pb.ResourceCollectorProtocolClient, context.Context, *grpc.ClientConn, context.CancelFunc, error) {
-	logger.Infof("get gRPC client: %s", grpcHost)
+	klog.Infof("get gRPC client: %s", grpcHost)
 	address := fmt.Sprintf("%s:%s", grpcHost, config.GlobalConf.ClusterControllerPort)
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
@@ -78,12 +76,4 @@ func getGrpcClient(grpcHost string) (pb.ResourceCollectorProtocolClient, context
 	client := pb.NewResourceCollectorProtocolClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	return client, ctx, conn, cancel, nil
-}
-
-func ParseRegionAZ(regionAZ string) (region string, az string, err error) {
-	strs := strings.Split(regionAZ, "|")
-	if len(strs) != 2 {
-		return "", "", errors.New("invalid node format")
-	}
-	return strs[0], strs[1], nil
 }
