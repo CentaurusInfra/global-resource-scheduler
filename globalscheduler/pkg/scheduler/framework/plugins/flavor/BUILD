@@ -9,10 +9,10 @@ go_library(
         "//globalscheduler/pkg/scheduler/client/typed:go_default_library",
         "//globalscheduler/pkg/scheduler/common/config:go_default_library",
         "//globalscheduler/pkg/scheduler/common/constants:go_default_library",
-        "//globalscheduler/pkg/scheduler/common/logger:go_default_library",
         "//globalscheduler/pkg/scheduler/framework/interfaces:go_default_library",
         "//globalscheduler/pkg/scheduler/sitecacheinfo:go_default_library",
         "//globalscheduler/pkg/scheduler/types:go_default_library",
+        "//vendor/k8s.io/klog:go_default_library",
     ],
 )
 

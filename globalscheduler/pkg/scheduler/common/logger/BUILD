@@ -1,16 +1,3 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
-
-go_library(
-    name = "go_default_library",
-    srcs = ["logger.go"],
-    importpath = "k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger",
-    visibility = ["//visibility:public"],
-    deps = [
-        "//globalscheduler/pkg/scheduler/common/logger/trace:go_default_library",
-        "//vendor/k8s.io/klog:go_default_library",
-    ],
-)
-
 filegroup(
     name = "package-srcs",
     srcs = glob(["**"]),
