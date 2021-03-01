@@ -142,13 +142,13 @@ func (c *ClusterController) updateCluster(oldObject, newObject interface{}) {
 	key1, err1 := controller.KeyFunc(oldObject)
 	key2, err2 := controller.KeyFunc(newObject)
 	if key1 == "" || key2 == "" || err1 != nil || err2 != nil {
-		klog.Errorf("Unexpected string in queue; discarding: %v", key2)
+		klog.Errorf("Unexpected string in queue, discarding: %v", key2)
 		return
 	}
 
 	eventType, err := c.determineEventType(oldClusterCopy, newClusterCopy)
 	if err != nil {
-		klog.Errorf("Unexpected string in queue; discarding: %v", key2)
+		klog.Errorf("Unexpected string in queue, discarding: %v", key2)
 		return
 	}
 	switch eventType {
@@ -165,7 +165,7 @@ func (c *ClusterController) updateCluster(oldObject, newObject interface{}) {
 		}
 	default:
 		{
-			klog.Errorf("Unexpected cluster update event; discarding: %v", key2)
+			klog.Errorf("Unexpected cluster update event, discarding: %v", key2)
 			return
 		}
 	}
@@ -380,17 +380,3 @@ func (c *ClusterController) verifyClusterInfo(cluster *clusterv1.Cluster) (verif
 	verified = true
 	return verified
 }
-
-//create dummy cluster for grpc delete request
-/*func (c *ClusterController) newCluster(namespace string, name string) *clusterv1.Cluster {
-	return &clusterv1.Cluster{
-		TypeMeta: metav1.TypeMeta{Kind: clusterv1.Kind, APIVersion: clusterv1.SchemeGroupVersion.String()},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Spec: clusterv1.ClusterSpec{
-			IpAddress: "0.0.0.0",
-		},
-	}
-}*/
