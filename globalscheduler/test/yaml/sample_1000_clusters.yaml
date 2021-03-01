@@ -1,7 +1,7 @@
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az1
+  name: cluster0
   namespace: default
 spec:
   cpucapacity: 8
@@ -29,7 +29,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az1
+  name: cluster1
   namespace: default
 spec:
   cpucapacity: 8
@@ -57,7 +57,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az1
+  name: cluster2
   namespace: default
 spec:
   cpucapacity: 8
@@ -85,7 +85,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az1
+  name: cluster3
   namespace: default
 spec:
   cpucapacity: 8
@@ -113,7 +113,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az1
+  name: cluster4
   namespace: default
 spec:
   cpucapacity: 8
@@ -141,7 +141,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az1
+  name: cluster5
   namespace: default
 spec:
   cpucapacity: 8
@@ -169,7 +169,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az1
+  name: cluster6
   namespace: default
 spec:
   cpucapacity: 8
@@ -197,7 +197,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az1
+  name: cluster7
   namespace: default
 spec:
   cpucapacity: 8
@@ -225,7 +225,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az1
+  name: cluster8
   namespace: default
 spec:
   cpucapacity: 8
@@ -253,7 +253,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az1
+  name: cluster9
   namespace: default
 spec:
   cpucapacity: 8
@@ -281,7 +281,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az2
+  name: cluster10
   namespace: default
 spec:
   cpucapacity: 8
@@ -309,7 +309,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az2
+  name: cluster11
   namespace: default
 spec:
   cpucapacity: 8
@@ -337,7 +337,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az2
+  name: cluster12
   namespace: default
 spec:
   cpucapacity: 8
@@ -365,7 +365,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az2
+  name: cluster13
   namespace: default
 spec:
   cpucapacity: 8
@@ -393,7 +393,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az2
+  name: cluster14
   namespace: default
 spec:
   cpucapacity: 8
@@ -421,7 +421,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az2
+  name: cluster15
   namespace: default
 spec:
   cpucapacity: 8
@@ -449,7 +449,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az2
+  name: cluster16
   namespace: default
 spec:
   cpucapacity: 8
@@ -477,7 +477,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az2
+  name: cluster17
   namespace: default
 spec:
   cpucapacity: 8
@@ -505,7 +505,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az2
+  name: cluster18
   namespace: default
 spec:
   cpucapacity: 8
@@ -533,7 +533,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az2
+  name: cluster19
   namespace: default
 spec:
   cpucapacity: 8
@@ -561,7 +561,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az3
+  name: cluster20
   namespace: default
 spec:
   cpucapacity: 8
@@ -589,7 +589,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az3
+  name: cluster21
   namespace: default
 spec:
   cpucapacity: 8
@@ -617,7 +617,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az3
+  name: cluster22
   namespace: default
 spec:
   cpucapacity: 8
@@ -645,7 +645,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az3
+  name: cluster23
   namespace: default
 spec:
   cpucapacity: 8
@@ -673,7 +673,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az3
+  name: cluster24
   namespace: default
 spec:
   cpucapacity: 8
@@ -701,7 +701,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az3
+  name: cluster25
   namespace: default
 spec:
   cpucapacity: 8
@@ -729,7 +729,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az3
+  name: cluster26
   namespace: default
 spec:
   cpucapacity: 8
@@ -757,7 +757,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az3
+  name: cluster27
   namespace: default
 spec:
   cpucapacity: 8
@@ -785,7 +785,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az3
+  name: cluster28
   namespace: default
 spec:
   cpucapacity: 8
@@ -813,7 +813,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az3
+  name: cluster29
   namespace: default
 spec:
   cpucapacity: 8
@@ -841,7 +841,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az4
+  name: cluster30
   namespace: default
 spec:
   cpucapacity: 8
@@ -871,7 +871,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az4
+  name: cluster31
   namespace: default
 spec:
   cpucapacity: 8
@@ -901,7 +901,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az4
+  name: cluster32
   namespace: default
 spec:
   cpucapacity: 8
@@ -931,7 +931,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az4
+  name: cluster33
   namespace: default
 spec:
   cpucapacity: 8
@@ -961,7 +961,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az4
+  name: cluster34
   namespace: default
 spec:
   cpucapacity: 8
@@ -991,7 +991,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az4
+  name: cluster35
   namespace: default
 spec:
   cpucapacity: 8
@@ -1021,7 +1021,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az4
+  name: cluster36
   namespace: default
 spec:
   cpucapacity: 8
@@ -1051,7 +1051,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az4
+  name: cluster37
   namespace: default
 spec:
   cpucapacity: 8
@@ -1081,7 +1081,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az4
+  name: cluster38
   namespace: default
 spec:
   cpucapacity: 8
@@ -1111,7 +1111,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az4
+  name: cluster39
   namespace: default
 spec:
   cpucapacity: 8
@@ -1141,7 +1141,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az5
+  name: cluster40
   namespace: default
 spec:
   cpucapacity: 8
@@ -1171,7 +1171,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az5
+  name: cluster41
   namespace: default
 spec:
   cpucapacity: 8
@@ -1201,7 +1201,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az5
+  name: cluster42
   namespace: default
 spec:
   cpucapacity: 8
@@ -1231,7 +1231,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az5
+  name: cluster43
   namespace: default
 spec:
   cpucapacity: 8
@@ -1261,7 +1261,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az5
+  name: cluster44
   namespace: default
 spec:
   cpucapacity: 8
@@ -1291,7 +1291,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az5
+  name: cluster45
   namespace: default
 spec:
   cpucapacity: 8
@@ -1321,7 +1321,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az5
+  name: cluster46
   namespace: default
 spec:
   cpucapacity: 8
@@ -1351,7 +1351,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az5
+  name: cluster47
   namespace: default
 spec:
   cpucapacity: 8
@@ -1381,7 +1381,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az5
+  name: cluster48
   namespace: default
 spec:
   cpucapacity: 8
@@ -1411,7 +1411,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az5
+  name: cluster49
   namespace: default
 spec:
   cpucapacity: 8
@@ -1441,7 +1441,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az6
+  name: cluster50
   namespace: default
 spec:
   cpucapacity: 8
@@ -1471,7 +1471,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az6
+  name: cluster51
   namespace: default
 spec:
   cpucapacity: 8
@@ -1501,7 +1501,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az6
+  name: cluster52
   namespace: default
 spec:
   cpucapacity: 8
@@ -1531,7 +1531,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az6
+  name: cluster53
   namespace: default
 spec:
   cpucapacity: 8
@@ -1561,7 +1561,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az6
+  name: cluster54
   namespace: default
 spec:
   cpucapacity: 8
@@ -1591,7 +1591,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az6
+  name: cluster55
   namespace: default
 spec:
   cpucapacity: 8
@@ -1621,7 +1621,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az6
+  name: cluster56
   namespace: default
 spec:
   cpucapacity: 8
@@ -1651,7 +1651,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az6
+  name: cluster57
   namespace: default
 spec:
   cpucapacity: 8
@@ -1681,7 +1681,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az6
+  name: cluster58
   namespace: default
 spec:
   cpucapacity: 8
@@ -1711,7 +1711,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az6
+  name: cluster59
   namespace: default
 spec:
   cpucapacity: 8
@@ -1741,7 +1741,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az7
+  name: cluster60
   namespace: default
 spec:
   cpucapacity: 8
@@ -1769,7 +1769,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az7
+  name: cluster61
   namespace: default
 spec:
   cpucapacity: 8
@@ -1797,7 +1797,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az7
+  name: cluster62
   namespace: default
 spec:
   cpucapacity: 8
@@ -1825,7 +1825,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az7
+  name: cluster63
   namespace: default
 spec:
   cpucapacity: 8
@@ -1853,7 +1853,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az7
+  name: cluster64
   namespace: default
 spec:
   cpucapacity: 8
@@ -1881,7 +1881,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az7
+  name: cluster65
   namespace: default
 spec:
   cpucapacity: 8
@@ -1909,7 +1909,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az7
+  name: cluster66
   namespace: default
 spec:
   cpucapacity: 8
@@ -1937,7 +1937,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az7
+  name: cluster67
   namespace: default
 spec:
   cpucapacity: 8
@@ -1965,7 +1965,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az7
+  name: cluster68
   namespace: default
 spec:
   cpucapacity: 8
@@ -1993,7 +1993,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az7
+  name: cluster69
   namespace: default
 spec:
   cpucapacity: 8
@@ -2021,7 +2021,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az8
+  name: cluster70
   namespace: default
 spec:
   cpucapacity: 8
@@ -2049,7 +2049,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az8
+  name: cluster71
   namespace: default
 spec:
   cpucapacity: 8
@@ -2077,7 +2077,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az8
+  name: cluster72
   namespace: default
 spec:
   cpucapacity: 8
@@ -2105,7 +2105,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az8
+  name: cluster73
   namespace: default
 spec:
   cpucapacity: 8
@@ -2133,7 +2133,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az8
+  name: cluster74
   namespace: default
 spec:
   cpucapacity: 8
@@ -2161,7 +2161,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az8
+  name: cluster75
   namespace: default
 spec:
   cpucapacity: 8
@@ -2189,7 +2189,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az8
+  name: cluster76
   namespace: default
 spec:
   cpucapacity: 8
@@ -2217,7 +2217,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az8
+  name: cluster77
   namespace: default
 spec:
   cpucapacity: 8
@@ -2245,7 +2245,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az8
+  name: cluster78
   namespace: default
 spec:
   cpucapacity: 8
@@ -2273,7 +2273,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az8
+  name: cluster79
   namespace: default
 spec:
   cpucapacity: 8
@@ -2301,7 +2301,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az9
+  name: cluster80
   namespace: default
 spec:
   cpucapacity: 8
@@ -2329,7 +2329,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az9
+  name: cluster81
   namespace: default
 spec:
   cpucapacity: 8
@@ -2357,7 +2357,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az9
+  name: cluster82
   namespace: default
 spec:
   cpucapacity: 8
@@ -2385,7 +2385,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az9
+  name: cluster83
   namespace: default
 spec:
   cpucapacity: 8
@@ -2413,7 +2413,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az9
+  name: cluster84
   namespace: default
 spec:
   cpucapacity: 8
@@ -2441,7 +2441,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az9
+  name: cluster85
   namespace: default
 spec:
   cpucapacity: 8
@@ -2469,7 +2469,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az9
+  name: cluster86
   namespace: default
 spec:
   cpucapacity: 8
@@ -2497,7 +2497,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az9
+  name: cluster87
   namespace: default
 spec:
   cpucapacity: 8
@@ -2525,7 +2525,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az9
+  name: cluster88
   namespace: default
 spec:
   cpucapacity: 8
@@ -2553,7 +2553,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az9
+  name: cluster89
   namespace: default
 spec:
   cpucapacity: 8
@@ -2581,7 +2581,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az10
+  name: cluster90
   namespace: default
 spec:
   cpucapacity: 8
@@ -2611,7 +2611,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az10
+  name: cluster91
   namespace: default
 spec:
   cpucapacity: 8
@@ -2641,7 +2641,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az10
+  name: cluster92
   namespace: default
 spec:
   cpucapacity: 8
@@ -2671,7 +2671,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az10
+  name: cluster93
   namespace: default
 spec:
   cpucapacity: 8
@@ -2701,7 +2701,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az10
+  name: cluster94
   namespace: default
 spec:
   cpucapacity: 8
@@ -2731,7 +2731,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az10
+  name: cluster95
   namespace: default
 spec:
   cpucapacity: 8
@@ -2761,7 +2761,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az10
+  name: cluster96
   namespace: default
 spec:
   cpucapacity: 8
@@ -2791,7 +2791,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az10
+  name: cluster97
   namespace: default
 spec:
   cpucapacity: 8
@@ -2821,7 +2821,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az10
+  name: cluster98
   namespace: default
 spec:
   cpucapacity: 8
@@ -2851,7 +2851,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az10
+  name: cluster99
   namespace: default
 spec:
   cpucapacity: 8
@@ -2881,7 +2881,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az11
+  name: cluster100
   namespace: default
 spec:
   cpucapacity: 8
@@ -2911,7 +2911,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az11
+  name: cluster101
   namespace: default
 spec:
   cpucapacity: 8
@@ -2941,7 +2941,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az11
+  name: cluster102
   namespace: default
 spec:
   cpucapacity: 8
@@ -2971,7 +2971,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az11
+  name: cluster103
   namespace: default
 spec:
   cpucapacity: 8
@@ -3001,7 +3001,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az11
+  name: cluster104
   namespace: default
 spec:
   cpucapacity: 8
@@ -3031,7 +3031,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az11
+  name: cluster105
   namespace: default
 spec:
   cpucapacity: 8
@@ -3061,7 +3061,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az11
+  name: cluster106
   namespace: default
 spec:
   cpucapacity: 8
@@ -3091,7 +3091,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az11
+  name: cluster107
   namespace: default
 spec:
   cpucapacity: 8
@@ -3121,7 +3121,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az11
+  name: cluster108
   namespace: default
 spec:
   cpucapacity: 8
@@ -3151,7 +3151,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az11
+  name: cluster109
   namespace: default
 spec:
   cpucapacity: 8
@@ -3181,7 +3181,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az12
+  name: cluster110
   namespace: default
 spec:
   cpucapacity: 8
@@ -3211,7 +3211,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az12
+  name: cluster111
   namespace: default
 spec:
   cpucapacity: 8
@@ -3241,7 +3241,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az12
+  name: cluster112
   namespace: default
 spec:
   cpucapacity: 8
@@ -3271,7 +3271,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az12
+  name: cluster113
   namespace: default
 spec:
   cpucapacity: 8
@@ -3301,7 +3301,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az12
+  name: cluster114
   namespace: default
 spec:
   cpucapacity: 8
@@ -3331,7 +3331,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az12
+  name: cluster115
   namespace: default
 spec:
   cpucapacity: 8
@@ -3361,7 +3361,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az12
+  name: cluster116
   namespace: default
 spec:
   cpucapacity: 8
@@ -3391,7 +3391,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az12
+  name: cluster117
   namespace: default
 spec:
   cpucapacity: 8
@@ -3421,7 +3421,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az12
+  name: cluster118
   namespace: default
 spec:
   cpucapacity: 8
@@ -3451,7 +3451,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az12
+  name: cluster119
   namespace: default
 spec:
   cpucapacity: 8
@@ -3481,7 +3481,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az13
+  name: cluster120
   namespace: default
 spec:
   cpucapacity: 8
@@ -3509,7 +3509,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az13
+  name: cluster121
   namespace: default
 spec:
   cpucapacity: 8
@@ -3537,7 +3537,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az13
+  name: cluster122
   namespace: default
 spec:
   cpucapacity: 8
@@ -3565,7 +3565,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az13
+  name: cluster123
   namespace: default
 spec:
   cpucapacity: 8
@@ -3593,7 +3593,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az13
+  name: cluster124
   namespace: default
 spec:
   cpucapacity: 8
@@ -3621,7 +3621,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az13
+  name: cluster125
   namespace: default
 spec:
   cpucapacity: 8
@@ -3649,7 +3649,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az13
+  name: cluster126
   namespace: default
 spec:
   cpucapacity: 8
@@ -3677,7 +3677,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az13
+  name: cluster127
   namespace: default
 spec:
   cpucapacity: 8
@@ -3705,7 +3705,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az13
+  name: cluster128
   namespace: default
 spec:
   cpucapacity: 8
@@ -3733,7 +3733,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az13
+  name: cluster129
   namespace: default
 spec:
   cpucapacity: 8
@@ -3761,7 +3761,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az14
+  name: cluster130
   namespace: default
 spec:
   cpucapacity: 8
@@ -3789,7 +3789,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az14
+  name: cluster131
   namespace: default
 spec:
   cpucapacity: 8
@@ -3817,7 +3817,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az14
+  name: cluster132
   namespace: default
 spec:
   cpucapacity: 8
@@ -3845,7 +3845,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az14
+  name: cluster133
   namespace: default
 spec:
   cpucapacity: 8
@@ -3873,7 +3873,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az14
+  name: cluster134
   namespace: default
 spec:
   cpucapacity: 8
@@ -3901,7 +3901,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az14
+  name: cluster135
   namespace: default
 spec:
   cpucapacity: 8
@@ -3929,7 +3929,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az14
+  name: cluster136
   namespace: default
 spec:
   cpucapacity: 8
@@ -3957,7 +3957,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az14
+  name: cluster137
   namespace: default
 spec:
   cpucapacity: 8
@@ -3985,7 +3985,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az14
+  name: cluster138
   namespace: default
 spec:
   cpucapacity: 8
@@ -4013,7 +4013,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az14
+  name: cluster139
   namespace: default
 spec:
   cpucapacity: 8
@@ -4041,7 +4041,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az15
+  name: cluster140
   namespace: default
 spec:
   cpucapacity: 8
@@ -4069,7 +4069,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az15
+  name: cluster141
   namespace: default
 spec:
   cpucapacity: 8
@@ -4097,7 +4097,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az15
+  name: cluster142
   namespace: default
 spec:
   cpucapacity: 8
@@ -4125,7 +4125,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az15
+  name: cluster143
   namespace: default
 spec:
   cpucapacity: 8
@@ -4153,7 +4153,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az15
+  name: cluster144
   namespace: default
 spec:
   cpucapacity: 8
@@ -4181,7 +4181,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az15
+  name: cluster145
   namespace: default
 spec:
   cpucapacity: 8
@@ -4209,7 +4209,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az15
+  name: cluster146
   namespace: default
 spec:
   cpucapacity: 8
@@ -4237,7 +4237,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az15
+  name: cluster147
   namespace: default
 spec:
   cpucapacity: 8
@@ -4265,7 +4265,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az15
+  name: cluster148
   namespace: default
 spec:
   cpucapacity: 8
@@ -4293,7 +4293,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az15
+  name: cluster149
   namespace: default
 spec:
   cpucapacity: 8
@@ -4321,7 +4321,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az16
+  name: cluster150
   namespace: default
 spec:
   cpucapacity: 8
@@ -4351,7 +4351,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az16
+  name: cluster151
   namespace: default
 spec:
   cpucapacity: 8
@@ -4381,7 +4381,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az16
+  name: cluster152
   namespace: default
 spec:
   cpucapacity: 8
@@ -4411,7 +4411,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az16
+  name: cluster153
   namespace: default
 spec:
   cpucapacity: 8
@@ -4441,7 +4441,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az16
+  name: cluster154
   namespace: default
 spec:
   cpucapacity: 8
@@ -4471,7 +4471,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az16
+  name: cluster155
   namespace: default
 spec:
   cpucapacity: 8
@@ -4501,7 +4501,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az16
+  name: cluster156
   namespace: default
 spec:
   cpucapacity: 8
@@ -4531,7 +4531,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az16
+  name: cluster157
   namespace: default
 spec:
   cpucapacity: 8
@@ -4561,7 +4561,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az16
+  name: cluster158
   namespace: default
 spec:
   cpucapacity: 8
@@ -4591,7 +4591,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az16
+  name: cluster159
   namespace: default
 spec:
   cpucapacity: 8
@@ -4621,7 +4621,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az17
+  name: cluster160
   namespace: default
 spec:
   cpucapacity: 8
@@ -4651,7 +4651,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az17
+  name: cluster161
   namespace: default
 spec:
   cpucapacity: 8
@@ -4681,7 +4681,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az17
+  name: cluster162
   namespace: default
 spec:
   cpucapacity: 8
@@ -4711,7 +4711,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az17
+  name: cluster163
   namespace: default
 spec:
   cpucapacity: 8
@@ -4741,7 +4741,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az17
+  name: cluster164
   namespace: default
 spec:
   cpucapacity: 8
@@ -4771,7 +4771,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az17
+  name: cluster165
   namespace: default
 spec:
   cpucapacity: 8
@@ -4801,7 +4801,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az17
+  name: cluster166
   namespace: default
 spec:
   cpucapacity: 8
@@ -4831,7 +4831,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az17
+  name: cluster167
   namespace: default
 spec:
   cpucapacity: 8
@@ -4861,7 +4861,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az17
+  name: cluster168
   namespace: default
 spec:
   cpucapacity: 8
@@ -4891,7 +4891,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az17
+  name: cluster169
   namespace: default
 spec:
   cpucapacity: 8
@@ -4921,7 +4921,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az18
+  name: cluster170
   namespace: default
 spec:
   cpucapacity: 8
@@ -4951,7 +4951,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az18
+  name: cluster171
   namespace: default
 spec:
   cpucapacity: 8
@@ -4981,7 +4981,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az18
+  name: cluster172
   namespace: default
 spec:
   cpucapacity: 8
@@ -5011,7 +5011,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az18
+  name: cluster173
   namespace: default
 spec:
   cpucapacity: 8
@@ -5041,7 +5041,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az18
+  name: cluster174
   namespace: default
 spec:
   cpucapacity: 8
@@ -5071,7 +5071,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az18
+  name: cluster175
   namespace: default
 spec:
   cpucapacity: 8
@@ -5101,7 +5101,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az18
+  name: cluster176
   namespace: default
 spec:
   cpucapacity: 8
@@ -5131,7 +5131,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az18
+  name: cluster177
   namespace: default
 spec:
   cpucapacity: 8
@@ -5161,7 +5161,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az18
+  name: cluster178
   namespace: default
 spec:
   cpucapacity: 8
@@ -5191,7 +5191,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az18
+  name: cluster179
   namespace: default
 spec:
   cpucapacity: 8
@@ -5221,7 +5221,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az19
+  name: cluster180
   namespace: default
 spec:
   cpucapacity: 8
@@ -5249,7 +5249,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az19
+  name: cluster181
   namespace: default
 spec:
   cpucapacity: 8
@@ -5277,7 +5277,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az19
+  name: cluster182
   namespace: default
 spec:
   cpucapacity: 8
@@ -5305,7 +5305,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az19
+  name: cluster183
   namespace: default
 spec:
   cpucapacity: 8
@@ -5333,7 +5333,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az19
+  name: cluster184
   namespace: default
 spec:
   cpucapacity: 8
@@ -5361,7 +5361,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az19
+  name: cluster185
   namespace: default
 spec:
   cpucapacity: 8
@@ -5389,7 +5389,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az19
+  name: cluster186
   namespace: default
 spec:
   cpucapacity: 8
@@ -5417,7 +5417,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az19
+  name: cluster187
   namespace: default
 spec:
   cpucapacity: 8
@@ -5445,7 +5445,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az19
+  name: cluster188
   namespace: default
 spec:
   cpucapacity: 8
@@ -5473,7 +5473,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az19
+  name: cluster189
   namespace: default
 spec:
   cpucapacity: 8
@@ -5501,7 +5501,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az20
+  name: cluster190
   namespace: default
 spec:
   cpucapacity: 8
@@ -5529,7 +5529,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az20
+  name: cluster191
   namespace: default
 spec:
   cpucapacity: 8
@@ -5557,7 +5557,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az20
+  name: cluster192
   namespace: default
 spec:
   cpucapacity: 8
@@ -5585,7 +5585,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az20
+  name: cluster193
   namespace: default
 spec:
   cpucapacity: 8
@@ -5613,7 +5613,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az20
+  name: cluster194
   namespace: default
 spec:
   cpucapacity: 8
@@ -5641,7 +5641,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az20
+  name: cluster195
   namespace: default
 spec:
   cpucapacity: 8
@@ -5669,7 +5669,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az20
+  name: cluster196
   namespace: default
 spec:
   cpucapacity: 8
@@ -5697,7 +5697,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az20
+  name: cluster197
   namespace: default
 spec:
   cpucapacity: 8
@@ -5725,7 +5725,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az20
+  name: cluster198
   namespace: default
 spec:
   cpucapacity: 8
@@ -5753,7 +5753,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az20
+  name: cluster199
   namespace: default
 spec:
   cpucapacity: 8
@@ -5781,7 +5781,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az21
+  name: cluster200
   namespace: default
 spec:
   cpucapacity: 8
@@ -5809,7 +5809,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az21
+  name: cluster201
   namespace: default
 spec:
   cpucapacity: 8
@@ -5837,7 +5837,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az21
+  name: cluster202
   namespace: default
 spec:
   cpucapacity: 8
@@ -5865,7 +5865,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az21
+  name: cluster203
   namespace: default
 spec:
   cpucapacity: 8
@@ -5893,7 +5893,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az21
+  name: cluster204
   namespace: default
 spec:
   cpucapacity: 8
@@ -5921,7 +5921,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az21
+  name: cluster205
   namespace: default
 spec:
   cpucapacity: 8
@@ -5949,7 +5949,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az21
+  name: cluster206
   namespace: default
 spec:
   cpucapacity: 8
@@ -5977,7 +5977,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az21
+  name: cluster207
   namespace: default
 spec:
   cpucapacity: 8
@@ -6005,7 +6005,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az21
+  name: cluster208
   namespace: default
 spec:
   cpucapacity: 8
@@ -6033,7 +6033,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az21
+  name: cluster209
   namespace: default
 spec:
   cpucapacity: 8
@@ -6061,7 +6061,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az22
+  name: cluster210
   namespace: default
 spec:
   cpucapacity: 8
@@ -6091,7 +6091,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az22
+  name: cluster211
   namespace: default
 spec:
   cpucapacity: 8
@@ -6121,7 +6121,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az22
+  name: cluster212
   namespace: default
 spec:
   cpucapacity: 8
@@ -6151,7 +6151,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az22
+  name: cluster213
   namespace: default
 spec:
   cpucapacity: 8
@@ -6181,7 +6181,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az22
+  name: cluster214
   namespace: default
 spec:
   cpucapacity: 8
@@ -6211,7 +6211,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az22
+  name: cluster215
   namespace: default
 spec:
   cpucapacity: 8
@@ -6241,7 +6241,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az22
+  name: cluster216
   namespace: default
 spec:
   cpucapacity: 8
@@ -6271,7 +6271,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az22
+  name: cluster217
   namespace: default
 spec:
   cpucapacity: 8
@@ -6301,7 +6301,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az22
+  name: cluster218
   namespace: default
 spec:
   cpucapacity: 8
@@ -6331,7 +6331,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az22
+  name: cluster219
   namespace: default
 spec:
   cpucapacity: 8
@@ -6361,7 +6361,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az23
+  name: cluster220
   namespace: default
 spec:
   cpucapacity: 8
@@ -6391,7 +6391,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az23
+  name: cluster221
   namespace: default
 spec:
   cpucapacity: 8
@@ -6421,7 +6421,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az23
+  name: cluster222
   namespace: default
 spec:
   cpucapacity: 8
@@ -6451,7 +6451,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az23
+  name: cluster223
   namespace: default
 spec:
   cpucapacity: 8
@@ -6481,7 +6481,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az23
+  name: cluster224
   namespace: default
 spec:
   cpucapacity: 8
@@ -6511,7 +6511,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az23
+  name: cluster225
   namespace: default
 spec:
   cpucapacity: 8
@@ -6541,7 +6541,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az23
+  name: cluster226
   namespace: default
 spec:
   cpucapacity: 8
@@ -6571,7 +6571,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az23
+  name: cluster227
   namespace: default
 spec:
   cpucapacity: 8
@@ -6601,7 +6601,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az23
+  name: cluster228
   namespace: default
 spec:
   cpucapacity: 8
@@ -6631,7 +6631,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az23
+  name: cluster229
   namespace: default
 spec:
   cpucapacity: 8
@@ -6661,7 +6661,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az24
+  name: cluster230
   namespace: default
 spec:
   cpucapacity: 8
@@ -6691,7 +6691,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az24
+  name: cluster231
   namespace: default
 spec:
   cpucapacity: 8
@@ -6721,7 +6721,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az24
+  name: cluster232
   namespace: default
 spec:
   cpucapacity: 8
@@ -6751,7 +6751,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az24
+  name: cluster233
   namespace: default
 spec:
   cpucapacity: 8
@@ -6781,7 +6781,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az24
+  name: cluster234
   namespace: default
 spec:
   cpucapacity: 8
@@ -6811,7 +6811,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az24
+  name: cluster235
   namespace: default
 spec:
   cpucapacity: 8
@@ -6841,7 +6841,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az24
+  name: cluster236
   namespace: default
 spec:
   cpucapacity: 8
@@ -6871,7 +6871,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az24
+  name: cluster237
   namespace: default
 spec:
   cpucapacity: 8
@@ -6901,7 +6901,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az24
+  name: cluster238
   namespace: default
 spec:
   cpucapacity: 8
@@ -6931,7 +6931,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az24
+  name: cluster239
   namespace: default
 spec:
   cpucapacity: 8
@@ -6961,7 +6961,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az25
+  name: cluster240
   namespace: default
 spec:
   cpucapacity: 8
@@ -6989,7 +6989,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az25
+  name: cluster241
   namespace: default
 spec:
   cpucapacity: 8
@@ -7017,7 +7017,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az25
+  name: cluster242
   namespace: default
 spec:
   cpucapacity: 8
@@ -7045,7 +7045,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az25
+  name: cluster243
   namespace: default
 spec:
   cpucapacity: 8
@@ -7073,7 +7073,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az25
+  name: cluster244
   namespace: default
 spec:
   cpucapacity: 8
@@ -7101,7 +7101,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az25
+  name: cluster245
   namespace: default
 spec:
   cpucapacity: 8
@@ -7129,7 +7129,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az25
+  name: cluster246
   namespace: default
 spec:
   cpucapacity: 8
@@ -7157,7 +7157,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az25
+  name: cluster247
   namespace: default
 spec:
   cpucapacity: 8
@@ -7185,7 +7185,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az25
+  name: cluster248
   namespace: default
 spec:
   cpucapacity: 8
@@ -7213,7 +7213,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az25
+  name: cluster249
   namespace: default
 spec:
   cpucapacity: 8
@@ -7241,7 +7241,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az26
+  name: cluster250
   namespace: default
 spec:
   cpucapacity: 8
@@ -7269,7 +7269,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az26
+  name: cluster251
   namespace: default
 spec:
   cpucapacity: 8
@@ -7297,7 +7297,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az26
+  name: cluster252
   namespace: default
 spec:
   cpucapacity: 8
@@ -7325,7 +7325,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az26
+  name: cluster253
   namespace: default
 spec:
   cpucapacity: 8
@@ -7353,7 +7353,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az26
+  name: cluster254
   namespace: default
 spec:
   cpucapacity: 8
@@ -7381,7 +7381,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az26
+  name: cluster255
   namespace: default
 spec:
   cpucapacity: 8
@@ -7409,7 +7409,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az26
+  name: cluster256
   namespace: default
 spec:
   cpucapacity: 8
@@ -7437,7 +7437,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az26
+  name: cluster257
   namespace: default
 spec:
   cpucapacity: 8
@@ -7465,7 +7465,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az26
+  name: cluster258
   namespace: default
 spec:
   cpucapacity: 8
@@ -7493,7 +7493,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az26
+  name: cluster259
   namespace: default
 spec:
   cpucapacity: 8
@@ -7521,7 +7521,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az27
+  name: cluster260
   namespace: default
 spec:
   cpucapacity: 8
@@ -7549,7 +7549,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az27
+  name: cluster261
   namespace: default
 spec:
   cpucapacity: 8
@@ -7577,7 +7577,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az27
+  name: cluster262
   namespace: default
 spec:
   cpucapacity: 8
@@ -7605,7 +7605,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az27
+  name: cluster263
   namespace: default
 spec:
   cpucapacity: 8
@@ -7633,7 +7633,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az27
+  name: cluster264
   namespace: default
 spec:
   cpucapacity: 8
@@ -7661,7 +7661,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az27
+  name: cluster265
   namespace: default
 spec:
   cpucapacity: 8
@@ -7689,7 +7689,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az27
+  name: cluster266
   namespace: default
 spec:
   cpucapacity: 8
@@ -7717,7 +7717,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az27
+  name: cluster267
   namespace: default
 spec:
   cpucapacity: 8
@@ -7745,7 +7745,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az27
+  name: cluster268
   namespace: default
 spec:
   cpucapacity: 8
@@ -7773,7 +7773,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az27
+  name: cluster269
   namespace: default
 spec:
   cpucapacity: 8
@@ -7801,7 +7801,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az28
+  name: cluster270
   namespace: default
 spec:
   cpucapacity: 8
@@ -7831,7 +7831,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az28
+  name: cluster271
   namespace: default
 spec:
   cpucapacity: 8
@@ -7861,7 +7861,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az28
+  name: cluster272
   namespace: default
 spec:
   cpucapacity: 8
@@ -7891,7 +7891,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az28
+  name: cluster273
   namespace: default
 spec:
   cpucapacity: 8
@@ -7921,7 +7921,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az28
+  name: cluster274
   namespace: default
 spec:
   cpucapacity: 8
@@ -7951,7 +7951,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az28
+  name: cluster275
   namespace: default
 spec:
   cpucapacity: 8
@@ -7981,7 +7981,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az28
+  name: cluster276
   namespace: default
 spec:
   cpucapacity: 8
@@ -8011,7 +8011,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az28
+  name: cluster277
   namespace: default
 spec:
   cpucapacity: 8
@@ -8041,7 +8041,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az28
+  name: cluster278
   namespace: default
 spec:
   cpucapacity: 8
@@ -8071,7 +8071,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az28
+  name: cluster279
   namespace: default
 spec:
   cpucapacity: 8
@@ -8101,7 +8101,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az29
+  name: cluster280
   namespace: default
 spec:
   cpucapacity: 8
@@ -8131,7 +8131,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az29
+  name: cluster281
   namespace: default
 spec:
   cpucapacity: 8
@@ -8161,7 +8161,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az29
+  name: cluster282
   namespace: default
 spec:
   cpucapacity: 8
@@ -8191,7 +8191,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az29
+  name: cluster283
   namespace: default
 spec:
   cpucapacity: 8
@@ -8221,7 +8221,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az29
+  name: cluster284
   namespace: default
 spec:
   cpucapacity: 8
@@ -8251,7 +8251,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az29
+  name: cluster285
   namespace: default
 spec:
   cpucapacity: 8
@@ -8281,7 +8281,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az29
+  name: cluster286
   namespace: default
 spec:
   cpucapacity: 8
@@ -8311,7 +8311,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az29
+  name: cluster287
   namespace: default
 spec:
   cpucapacity: 8
@@ -8341,7 +8341,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az29
+  name: cluster288
   namespace: default
 spec:
   cpucapacity: 8
@@ -8371,7 +8371,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az29
+  name: cluster289
   namespace: default
 spec:
   cpucapacity: 8
@@ -8401,7 +8401,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az30
+  name: cluster290
   namespace: default
 spec:
   cpucapacity: 8
@@ -8431,7 +8431,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az30
+  name: cluster291
   namespace: default
 spec:
   cpucapacity: 8
@@ -8461,7 +8461,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az30
+  name: cluster292
   namespace: default
 spec:
   cpucapacity: 8
@@ -8491,7 +8491,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az30
+  name: cluster293
   namespace: default
 spec:
   cpucapacity: 8
@@ -8521,7 +8521,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az30
+  name: cluster294
   namespace: default
 spec:
   cpucapacity: 8
@@ -8551,7 +8551,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az30
+  name: cluster295
   namespace: default
 spec:
   cpucapacity: 8
@@ -8581,7 +8581,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az30
+  name: cluster296
   namespace: default
 spec:
   cpucapacity: 8
@@ -8611,7 +8611,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az30
+  name: cluster297
   namespace: default
 spec:
   cpucapacity: 8
@@ -8641,7 +8641,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az30
+  name: cluster298
   namespace: default
 spec:
   cpucapacity: 8
@@ -8671,7 +8671,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az30
+  name: cluster299
   namespace: default
 spec:
   cpucapacity: 8
@@ -8701,7 +8701,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az31
+  name: cluster300
   namespace: default
 spec:
   cpucapacity: 8
@@ -8729,7 +8729,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az31
+  name: cluster301
   namespace: default
 spec:
   cpucapacity: 8
@@ -8757,7 +8757,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az31
+  name: cluster302
   namespace: default
 spec:
   cpucapacity: 8
@@ -8785,7 +8785,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az31
+  name: cluster303
   namespace: default
 spec:
   cpucapacity: 8
@@ -8813,7 +8813,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az31
+  name: cluster304
   namespace: default
 spec:
   cpucapacity: 8
@@ -8841,7 +8841,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az31
+  name: cluster305
   namespace: default
 spec:
   cpucapacity: 8
@@ -8869,7 +8869,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az31
+  name: cluster306
   namespace: default
 spec:
   cpucapacity: 8
@@ -8897,7 +8897,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az31
+  name: cluster307
   namespace: default
 spec:
   cpucapacity: 8
@@ -8925,7 +8925,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az31
+  name: cluster308
   namespace: default
 spec:
   cpucapacity: 8
@@ -8953,7 +8953,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az31
+  name: cluster309
   namespace: default
 spec:
   cpucapacity: 8
@@ -8981,7 +8981,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az32
+  name: cluster310
   namespace: default
 spec:
   cpucapacity: 8
@@ -9009,7 +9009,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az32
+  name: cluster311
   namespace: default
 spec:
   cpucapacity: 8
@@ -9037,7 +9037,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az32
+  name: cluster312
   namespace: default
 spec:
   cpucapacity: 8
@@ -9065,7 +9065,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az32
+  name: cluster313
   namespace: default
 spec:
   cpucapacity: 8
@@ -9093,7 +9093,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az32
+  name: cluster314
   namespace: default
 spec:
   cpucapacity: 8
@@ -9121,7 +9121,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az32
+  name: cluster315
   namespace: default
 spec:
   cpucapacity: 8
@@ -9149,7 +9149,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az32
+  name: cluster316
   namespace: default
 spec:
   cpucapacity: 8
@@ -9177,7 +9177,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az32
+  name: cluster317
   namespace: default
 spec:
   cpucapacity: 8
@@ -9205,7 +9205,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az32
+  name: cluster318
   namespace: default
 spec:
   cpucapacity: 8
@@ -9233,7 +9233,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az32
+  name: cluster319
   namespace: default
 spec:
   cpucapacity: 8
@@ -9261,7 +9261,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az33
+  name: cluster320
   namespace: default
 spec:
   cpucapacity: 8
@@ -9289,7 +9289,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az33
+  name: cluster321
   namespace: default
 spec:
   cpucapacity: 8
@@ -9317,7 +9317,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az33
+  name: cluster322
   namespace: default
 spec:
   cpucapacity: 8
@@ -9345,7 +9345,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az33
+  name: cluster323
   namespace: default
 spec:
   cpucapacity: 8
@@ -9373,7 +9373,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az33
+  name: cluster324
   namespace: default
 spec:
   cpucapacity: 8
@@ -9401,7 +9401,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az33
+  name: cluster325
   namespace: default
 spec:
   cpucapacity: 8
@@ -9429,7 +9429,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az33
+  name: cluster326
   namespace: default
 spec:
   cpucapacity: 8
@@ -9457,7 +9457,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az33
+  name: cluster327
   namespace: default
 spec:
   cpucapacity: 8
@@ -9485,7 +9485,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az33
+  name: cluster328
   namespace: default
 spec:
   cpucapacity: 8
@@ -9513,7 +9513,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az33
+  name: cluster329
   namespace: default
 spec:
   cpucapacity: 8
@@ -9541,7 +9541,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az34
+  name: cluster330
   namespace: default
 spec:
   cpucapacity: 8
@@ -9571,7 +9571,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az34
+  name: cluster331
   namespace: default
 spec:
   cpucapacity: 8
@@ -9601,7 +9601,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az34
+  name: cluster332
   namespace: default
 spec:
   cpucapacity: 8
@@ -9631,7 +9631,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az34
+  name: cluster333
   namespace: default
 spec:
   cpucapacity: 8
@@ -9661,7 +9661,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az34
+  name: cluster334
   namespace: default
 spec:
   cpucapacity: 8
@@ -9691,7 +9691,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az34
+  name: cluster335
   namespace: default
 spec:
   cpucapacity: 8
@@ -9721,7 +9721,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az34
+  name: cluster336
   namespace: default
 spec:
   cpucapacity: 8
@@ -9751,7 +9751,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az34
+  name: cluster337
   namespace: default
 spec:
   cpucapacity: 8
@@ -9781,7 +9781,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az34
+  name: cluster338
   namespace: default
 spec:
   cpucapacity: 8
@@ -9811,7 +9811,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az34
+  name: cluster339
   namespace: default
 spec:
   cpucapacity: 8
@@ -9841,7 +9841,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az35
+  name: cluster340
   namespace: default
 spec:
   cpucapacity: 8
@@ -9871,7 +9871,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az35
+  name: cluster341
   namespace: default
 spec:
   cpucapacity: 8
@@ -9901,7 +9901,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az35
+  name: cluster342
   namespace: default
 spec:
   cpucapacity: 8
@@ -9931,7 +9931,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az35
+  name: cluster343
   namespace: default
 spec:
   cpucapacity: 8
@@ -9961,7 +9961,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az35
+  name: cluster344
   namespace: default
 spec:
   cpucapacity: 8
@@ -9991,7 +9991,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az35
+  name: cluster345
   namespace: default
 spec:
   cpucapacity: 8
@@ -10021,7 +10021,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az35
+  name: cluster346
   namespace: default
 spec:
   cpucapacity: 8
@@ -10051,7 +10051,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az35
+  name: cluster347
   namespace: default
 spec:
   cpucapacity: 8
@@ -10081,7 +10081,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az35
+  name: cluster348
   namespace: default
 spec:
   cpucapacity: 8
@@ -10111,7 +10111,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az35
+  name: cluster349
   namespace: default
 spec:
   cpucapacity: 8
@@ -10141,7 +10141,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az36
+  name: cluster350
   namespace: default
 spec:
   cpucapacity: 8
@@ -10171,7 +10171,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az36
+  name: cluster351
   namespace: default
 spec:
   cpucapacity: 8
@@ -10201,7 +10201,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az36
+  name: cluster352
   namespace: default
 spec:
   cpucapacity: 8
@@ -10231,7 +10231,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az36
+  name: cluster353
   namespace: default
 spec:
   cpucapacity: 8
@@ -10261,7 +10261,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az36
+  name: cluster354
   namespace: default
 spec:
   cpucapacity: 8
@@ -10291,7 +10291,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az36
+  name: cluster355
   namespace: default
 spec:
   cpucapacity: 8
@@ -10321,7 +10321,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az36
+  name: cluster356
   namespace: default
 spec:
   cpucapacity: 8
@@ -10351,7 +10351,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az36
+  name: cluster357
   namespace: default
 spec:
   cpucapacity: 8
@@ -10381,7 +10381,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az36
+  name: cluster358
   namespace: default
 spec:
   cpucapacity: 8
@@ -10411,7 +10411,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az36
+  name: cluster359
   namespace: default
 spec:
   cpucapacity: 8
@@ -10441,7 +10441,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az37
+  name: cluster360
   namespace: default
 spec:
   cpucapacity: 8
@@ -10469,7 +10469,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az37
+  name: cluster361
   namespace: default
 spec:
   cpucapacity: 8
@@ -10497,7 +10497,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az37
+  name: cluster362
   namespace: default
 spec:
   cpucapacity: 8
@@ -10525,7 +10525,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az37
+  name: cluster363
   namespace: default
 spec:
   cpucapacity: 8
@@ -10553,7 +10553,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az37
+  name: cluster364
   namespace: default
 spec:
   cpucapacity: 8
@@ -10581,7 +10581,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az37
+  name: cluster365
   namespace: default
 spec:
   cpucapacity: 8
@@ -10609,7 +10609,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az37
+  name: cluster366
   namespace: default
 spec:
   cpucapacity: 8
@@ -10637,7 +10637,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az37
+  name: cluster367
   namespace: default
 spec:
   cpucapacity: 8
@@ -10665,7 +10665,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az37
+  name: cluster368
   namespace: default
 spec:
   cpucapacity: 8
@@ -10693,7 +10693,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az37
+  name: cluster369
   namespace: default
 spec:
   cpucapacity: 8
@@ -10721,7 +10721,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az38
+  name: cluster370
   namespace: default
 spec:
   cpucapacity: 8
@@ -10749,7 +10749,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az38
+  name: cluster371
   namespace: default
 spec:
   cpucapacity: 8
@@ -10777,7 +10777,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az38
+  name: cluster372
   namespace: default
 spec:
   cpucapacity: 8
@@ -10805,7 +10805,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az38
+  name: cluster373
   namespace: default
 spec:
   cpucapacity: 8
@@ -10833,7 +10833,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az38
+  name: cluster374
   namespace: default
 spec:
   cpucapacity: 8
@@ -10861,7 +10861,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az38
+  name: cluster375
   namespace: default
 spec:
   cpucapacity: 8
@@ -10889,7 +10889,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az38
+  name: cluster376
   namespace: default
 spec:
   cpucapacity: 8
@@ -10917,7 +10917,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az38
+  name: cluster377
   namespace: default
 spec:
   cpucapacity: 8
@@ -10945,7 +10945,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az38
+  name: cluster378
   namespace: default
 spec:
   cpucapacity: 8
@@ -10973,7 +10973,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az38
+  name: cluster379
   namespace: default
 spec:
   cpucapacity: 8
@@ -11001,7 +11001,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az39
+  name: cluster380
   namespace: default
 spec:
   cpucapacity: 8
@@ -11029,7 +11029,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az39
+  name: cluster381
   namespace: default
 spec:
   cpucapacity: 8
@@ -11057,7 +11057,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az39
+  name: cluster382
   namespace: default
 spec:
   cpucapacity: 8
@@ -11085,7 +11085,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az39
+  name: cluster383
   namespace: default
 spec:
   cpucapacity: 8
@@ -11113,7 +11113,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az39
+  name: cluster384
   namespace: default
 spec:
   cpucapacity: 8
@@ -11141,7 +11141,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az39
+  name: cluster385
   namespace: default
 spec:
   cpucapacity: 8
@@ -11169,7 +11169,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az39
+  name: cluster386
   namespace: default
 spec:
   cpucapacity: 8
@@ -11197,7 +11197,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az39
+  name: cluster387
   namespace: default
 spec:
   cpucapacity: 8
@@ -11225,7 +11225,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az39
+  name: cluster388
   namespace: default
 spec:
   cpucapacity: 8
@@ -11253,7 +11253,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az39
+  name: cluster389
   namespace: default
 spec:
   cpucapacity: 8
@@ -11281,7 +11281,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az40
+  name: cluster390
   namespace: default
 spec:
   cpucapacity: 8
@@ -11311,7 +11311,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az40
+  name: cluster391
   namespace: default
 spec:
   cpucapacity: 8
@@ -11341,7 +11341,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az40
+  name: cluster392
   namespace: default
 spec:
   cpucapacity: 8
@@ -11371,7 +11371,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az40
+  name: cluster393
   namespace: default
 spec:
   cpucapacity: 8
@@ -11401,7 +11401,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az40
+  name: cluster394
   namespace: default
 spec:
   cpucapacity: 8
@@ -11431,7 +11431,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az40
+  name: cluster395
   namespace: default
 spec:
   cpucapacity: 8
@@ -11461,7 +11461,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az40
+  name: cluster396
   namespace: default
 spec:
   cpucapacity: 8
@@ -11491,7 +11491,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az40
+  name: cluster397
   namespace: default
 spec:
   cpucapacity: 8
@@ -11521,7 +11521,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az40
+  name: cluster398
   namespace: default
 spec:
   cpucapacity: 8
@@ -11551,7 +11551,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az40
+  name: cluster399
   namespace: default
 spec:
   cpucapacity: 8
@@ -11581,7 +11581,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az41
+  name: cluster400
   namespace: default
 spec:
   cpucapacity: 8
@@ -11611,7 +11611,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az41
+  name: cluster401
   namespace: default
 spec:
   cpucapacity: 8
@@ -11641,7 +11641,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az41
+  name: cluster402
   namespace: default
 spec:
   cpucapacity: 8
@@ -11671,7 +11671,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az41
+  name: cluster403
   namespace: default
 spec:
   cpucapacity: 8
@@ -11701,7 +11701,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az41
+  name: cluster404
   namespace: default
 spec:
   cpucapacity: 8
@@ -11731,7 +11731,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az41
+  name: cluster405
   namespace: default
 spec:
   cpucapacity: 8
@@ -11761,7 +11761,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az41
+  name: cluster406
   namespace: default
 spec:
   cpucapacity: 8
@@ -11791,7 +11791,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az41
+  name: cluster407
   namespace: default
 spec:
   cpucapacity: 8
@@ -11821,7 +11821,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az41
+  name: cluster408
   namespace: default
 spec:
   cpucapacity: 8
@@ -11851,7 +11851,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az41
+  name: cluster409
   namespace: default
 spec:
   cpucapacity: 8
@@ -11881,7 +11881,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az42
+  name: cluster410
   namespace: default
 spec:
   cpucapacity: 8
@@ -11911,7 +11911,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az42
+  name: cluster411
   namespace: default
 spec:
   cpucapacity: 8
@@ -11941,7 +11941,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az42
+  name: cluster412
   namespace: default
 spec:
   cpucapacity: 8
@@ -11971,7 +11971,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az42
+  name: cluster413
   namespace: default
 spec:
   cpucapacity: 8
@@ -12001,7 +12001,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az42
+  name: cluster414
   namespace: default
 spec:
   cpucapacity: 8
@@ -12031,7 +12031,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az42
+  name: cluster415
   namespace: default
 spec:
   cpucapacity: 8
@@ -12061,7 +12061,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az42
+  name: cluster416
   namespace: default
 spec:
   cpucapacity: 8
@@ -12091,7 +12091,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az42
+  name: cluster417
   namespace: default
 spec:
   cpucapacity: 8
@@ -12121,7 +12121,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az42
+  name: cluster418
   namespace: default
 spec:
   cpucapacity: 8
@@ -12151,7 +12151,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az42
+  name: cluster419
   namespace: default
 spec:
   cpucapacity: 8
@@ -12181,7 +12181,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az43
+  name: cluster420
   namespace: default
 spec:
   cpucapacity: 8
@@ -12209,7 +12209,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az43
+  name: cluster421
   namespace: default
 spec:
   cpucapacity: 8
@@ -12237,7 +12237,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az43
+  name: cluster422
   namespace: default
 spec:
   cpucapacity: 8
@@ -12265,7 +12265,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az43
+  name: cluster423
   namespace: default
 spec:
   cpucapacity: 8
@@ -12293,7 +12293,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az43
+  name: cluster424
   namespace: default
 spec:
   cpucapacity: 8
@@ -12321,7 +12321,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az43
+  name: cluster425
   namespace: default
 spec:
   cpucapacity: 8
@@ -12349,7 +12349,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az43
+  name: cluster426
   namespace: default
 spec:
   cpucapacity: 8
@@ -12377,7 +12377,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az43
+  name: cluster427
   namespace: default
 spec:
   cpucapacity: 8
@@ -12405,7 +12405,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az43
+  name: cluster428
   namespace: default
 spec:
   cpucapacity: 8
@@ -12433,7 +12433,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az43
+  name: cluster429
   namespace: default
 spec:
   cpucapacity: 8
@@ -12461,7 +12461,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az44
+  name: cluster430
   namespace: default
 spec:
   cpucapacity: 8
@@ -12489,7 +12489,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az44
+  name: cluster431
   namespace: default
 spec:
   cpucapacity: 8
@@ -12517,7 +12517,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az44
+  name: cluster432
   namespace: default
 spec:
   cpucapacity: 8
@@ -12545,7 +12545,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az44
+  name: cluster433
   namespace: default
 spec:
   cpucapacity: 8
@@ -12573,7 +12573,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az44
+  name: cluster434
   namespace: default
 spec:
   cpucapacity: 8
@@ -12601,7 +12601,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az44
+  name: cluster435
   namespace: default
 spec:
   cpucapacity: 8
@@ -12629,7 +12629,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az44
+  name: cluster436
   namespace: default
 spec:
   cpucapacity: 8
@@ -12657,7 +12657,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az44
+  name: cluster437
   namespace: default
 spec:
   cpucapacity: 8
@@ -12685,7 +12685,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az44
+  name: cluster438
   namespace: default
 spec:
   cpucapacity: 8
@@ -12713,7 +12713,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az44
+  name: cluster439
   namespace: default
 spec:
   cpucapacity: 8
@@ -12741,7 +12741,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az45
+  name: cluster440
   namespace: default
 spec:
   cpucapacity: 8
@@ -12769,7 +12769,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az45
+  name: cluster441
   namespace: default
 spec:
   cpucapacity: 8
@@ -12797,7 +12797,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az45
+  name: cluster442
   namespace: default
 spec:
   cpucapacity: 8
@@ -12825,7 +12825,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az45
+  name: cluster443
   namespace: default
 spec:
   cpucapacity: 8
@@ -12853,7 +12853,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az45
+  name: cluster444
   namespace: default
 spec:
   cpucapacity: 8
@@ -12881,7 +12881,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az45
+  name: cluster445
   namespace: default
 spec:
   cpucapacity: 8
@@ -12909,7 +12909,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az45
+  name: cluster446
   namespace: default
 spec:
   cpucapacity: 8
@@ -12937,7 +12937,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az45
+  name: cluster447
   namespace: default
 spec:
   cpucapacity: 8
@@ -12965,7 +12965,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az45
+  name: cluster448
   namespace: default
 spec:
   cpucapacity: 8
@@ -12993,7 +12993,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az45
+  name: cluster449
   namespace: default
 spec:
   cpucapacity: 8
@@ -13021,7 +13021,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az46
+  name: cluster450
   namespace: default
 spec:
   cpucapacity: 8
@@ -13051,7 +13051,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az46
+  name: cluster451
   namespace: default
 spec:
   cpucapacity: 8
@@ -13081,7 +13081,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az46
+  name: cluster452
   namespace: default
 spec:
   cpucapacity: 8
@@ -13111,7 +13111,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az46
+  name: cluster453
   namespace: default
 spec:
   cpucapacity: 8
@@ -13141,7 +13141,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az46
+  name: cluster454
   namespace: default
 spec:
   cpucapacity: 8
@@ -13171,7 +13171,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az46
+  name: cluster455
   namespace: default
 spec:
   cpucapacity: 8
@@ -13201,7 +13201,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az46
+  name: cluster456
   namespace: default
 spec:
   cpucapacity: 8
@@ -13231,7 +13231,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az46
+  name: cluster457
   namespace: default
 spec:
   cpucapacity: 8
@@ -13261,7 +13261,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az46
+  name: cluster458
   namespace: default
 spec:
   cpucapacity: 8
@@ -13291,7 +13291,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az46
+  name: cluster459
   namespace: default
 spec:
   cpucapacity: 8
@@ -13321,7 +13321,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az47
+  name: cluster460
   namespace: default
 spec:
   cpucapacity: 8
@@ -13351,7 +13351,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az47
+  name: cluster461
   namespace: default
 spec:
   cpucapacity: 8
@@ -13381,7 +13381,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az47
+  name: cluster462
   namespace: default
 spec:
   cpucapacity: 8
@@ -13411,7 +13411,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az47
+  name: cluster463
   namespace: default
 spec:
   cpucapacity: 8
@@ -13441,7 +13441,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az47
+  name: cluster464
   namespace: default
 spec:
   cpucapacity: 8
@@ -13471,7 +13471,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az47
+  name: cluster465
   namespace: default
 spec:
   cpucapacity: 8
@@ -13501,7 +13501,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az47
+  name: cluster466
   namespace: default
 spec:
   cpucapacity: 8
@@ -13531,7 +13531,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az47
+  name: cluster467
   namespace: default
 spec:
   cpucapacity: 8
@@ -13561,7 +13561,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az47
+  name: cluster468
   namespace: default
 spec:
   cpucapacity: 8
@@ -13591,7 +13591,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az47
+  name: cluster469
   namespace: default
 spec:
   cpucapacity: 8
@@ -13621,7 +13621,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az48
+  name: cluster470
   namespace: default
 spec:
   cpucapacity: 8
@@ -13651,7 +13651,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az48
+  name: cluster471
   namespace: default
 spec:
   cpucapacity: 8
@@ -13681,7 +13681,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az48
+  name: cluster472
   namespace: default
 spec:
   cpucapacity: 8
@@ -13711,7 +13711,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az48
+  name: cluster473
   namespace: default
 spec:
   cpucapacity: 8
@@ -13741,7 +13741,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az48
+  name: cluster474
   namespace: default
 spec:
   cpucapacity: 8
@@ -13771,7 +13771,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az48
+  name: cluster475
   namespace: default
 spec:
   cpucapacity: 8
@@ -13801,7 +13801,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az48
+  name: cluster476
   namespace: default
 spec:
   cpucapacity: 8
@@ -13831,7 +13831,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az48
+  name: cluster477
   namespace: default
 spec:
   cpucapacity: 8
@@ -13861,7 +13861,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az48
+  name: cluster478
   namespace: default
 spec:
   cpucapacity: 8
@@ -13891,7 +13891,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az48
+  name: cluster479
   namespace: default
 spec:
   cpucapacity: 8
@@ -13921,7 +13921,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az49
+  name: cluster480
   namespace: default
 spec:
   cpucapacity: 8
@@ -13949,7 +13949,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az49
+  name: cluster481
   namespace: default
 spec:
   cpucapacity: 8
@@ -13977,7 +13977,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az49
+  name: cluster482
   namespace: default
 spec:
   cpucapacity: 8
@@ -14005,7 +14005,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az49
+  name: cluster483
   namespace: default
 spec:
   cpucapacity: 8
@@ -14033,7 +14033,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az49
+  name: cluster484
   namespace: default
 spec:
   cpucapacity: 8
@@ -14061,7 +14061,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az49
+  name: cluster485
   namespace: default
 spec:
   cpucapacity: 8
@@ -14089,7 +14089,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az49
+  name: cluster486
   namespace: default
 spec:
   cpucapacity: 8
@@ -14117,7 +14117,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az49
+  name: cluster487
   namespace: default
 spec:
   cpucapacity: 8
@@ -14145,7 +14145,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az49
+  name: cluster488
   namespace: default
 spec:
   cpucapacity: 8
@@ -14173,7 +14173,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az49
+  name: cluster489
   namespace: default
 spec:
   cpucapacity: 8
@@ -14201,7 +14201,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az50
+  name: cluster490
   namespace: default
 spec:
   cpucapacity: 8
@@ -14229,7 +14229,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az50
+  name: cluster491
   namespace: default
 spec:
   cpucapacity: 8
@@ -14257,7 +14257,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az50
+  name: cluster492
   namespace: default
 spec:
   cpucapacity: 8
@@ -14285,7 +14285,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az50
+  name: cluster493
   namespace: default
 spec:
   cpucapacity: 8
@@ -14313,7 +14313,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az50
+  name: cluster494
   namespace: default
 spec:
   cpucapacity: 8
@@ -14341,7 +14341,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az50
+  name: cluster495
   namespace: default
 spec:
   cpucapacity: 8
@@ -14369,7 +14369,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az50
+  name: cluster496
   namespace: default
 spec:
   cpucapacity: 8
@@ -14397,7 +14397,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az50
+  name: cluster497
   namespace: default
 spec:
   cpucapacity: 8
@@ -14425,7 +14425,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az50
+  name: cluster498
   namespace: default
 spec:
   cpucapacity: 8
@@ -14453,7 +14453,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az50
+  name: cluster499
   namespace: default
 spec:
   cpucapacity: 8
@@ -14481,7 +14481,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az51
+  name: cluster500
   namespace: default
 spec:
   cpucapacity: 8
@@ -14509,7 +14509,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az51
+  name: cluster501
   namespace: default
 spec:
   cpucapacity: 8
@@ -14537,7 +14537,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az51
+  name: cluster502
   namespace: default
 spec:
   cpucapacity: 8
@@ -14565,7 +14565,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az51
+  name: cluster503
   namespace: default
 spec:
   cpucapacity: 8
@@ -14593,7 +14593,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az51
+  name: cluster504
   namespace: default
 spec:
   cpucapacity: 8
@@ -14621,7 +14621,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az51
+  name: cluster505
   namespace: default
 spec:
   cpucapacity: 8
@@ -14649,7 +14649,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az51
+  name: cluster506
   namespace: default
 spec:
   cpucapacity: 8
@@ -14677,7 +14677,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az51
+  name: cluster507
   namespace: default
 spec:
   cpucapacity: 8
@@ -14705,7 +14705,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az51
+  name: cluster508
   namespace: default
 spec:
   cpucapacity: 8
@@ -14733,7 +14733,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az51
+  name: cluster509
   namespace: default
 spec:
   cpucapacity: 8
@@ -14761,7 +14761,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az52
+  name: cluster510
   namespace: default
 spec:
   cpucapacity: 8
@@ -14791,7 +14791,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az52
+  name: cluster511
   namespace: default
 spec:
   cpucapacity: 8
@@ -14821,7 +14821,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az52
+  name: cluster512
   namespace: default
 spec:
   cpucapacity: 8
@@ -14851,7 +14851,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az52
+  name: cluster513
   namespace: default
 spec:
   cpucapacity: 8
@@ -14881,7 +14881,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az52
+  name: cluster514
   namespace: default
 spec:
   cpucapacity: 8
@@ -14911,7 +14911,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az52
+  name: cluster515
   namespace: default
 spec:
   cpucapacity: 8
@@ -14941,7 +14941,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az52
+  name: cluster516
   namespace: default
 spec:
   cpucapacity: 8
@@ -14971,7 +14971,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az52
+  name: cluster517
   namespace: default
 spec:
   cpucapacity: 8
@@ -15001,7 +15001,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az52
+  name: cluster518
   namespace: default
 spec:
   cpucapacity: 8
@@ -15031,7 +15031,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az52
+  name: cluster519
   namespace: default
 spec:
   cpucapacity: 8
@@ -15061,7 +15061,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az53
+  name: cluster520
   namespace: default
 spec:
   cpucapacity: 8
@@ -15091,7 +15091,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az53
+  name: cluster521
   namespace: default
 spec:
   cpucapacity: 8
@@ -15121,7 +15121,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az53
+  name: cluster522
   namespace: default
 spec:
   cpucapacity: 8
@@ -15151,7 +15151,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az53
+  name: cluster523
   namespace: default
 spec:
   cpucapacity: 8
@@ -15181,7 +15181,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az53
+  name: cluster524
   namespace: default
 spec:
   cpucapacity: 8
@@ -15211,7 +15211,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az53
+  name: cluster525
   namespace: default
 spec:
   cpucapacity: 8
@@ -15241,7 +15241,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az53
+  name: cluster526
   namespace: default
 spec:
   cpucapacity: 8
@@ -15271,7 +15271,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az53
+  name: cluster527
   namespace: default
 spec:
   cpucapacity: 8
@@ -15301,7 +15301,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az53
+  name: cluster528
   namespace: default
 spec:
   cpucapacity: 8
@@ -15331,7 +15331,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az53
+  name: cluster529
   namespace: default
 spec:
   cpucapacity: 8
@@ -15361,7 +15361,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az54
+  name: cluster530
   namespace: default
 spec:
   cpucapacity: 8
@@ -15391,7 +15391,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az54
+  name: cluster531
   namespace: default
 spec:
   cpucapacity: 8
@@ -15421,7 +15421,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az54
+  name: cluster532
   namespace: default
 spec:
   cpucapacity: 8
@@ -15451,7 +15451,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az54
+  name: cluster533
   namespace: default
 spec:
   cpucapacity: 8
@@ -15481,7 +15481,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az54
+  name: cluster534
   namespace: default
 spec:
   cpucapacity: 8
@@ -15511,7 +15511,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az54
+  name: cluster535
   namespace: default
 spec:
   cpucapacity: 8
@@ -15541,7 +15541,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az54
+  name: cluster536
   namespace: default
 spec:
   cpucapacity: 8
@@ -15571,7 +15571,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az54
+  name: cluster537
   namespace: default
 spec:
   cpucapacity: 8
@@ -15601,7 +15601,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az54
+  name: cluster538
   namespace: default
 spec:
   cpucapacity: 8
@@ -15631,7 +15631,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az54
+  name: cluster539
   namespace: default
 spec:
   cpucapacity: 8
@@ -15661,7 +15661,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az55
+  name: cluster540
   namespace: default
 spec:
   cpucapacity: 8
@@ -15689,7 +15689,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az55
+  name: cluster541
   namespace: default
 spec:
   cpucapacity: 8
@@ -15717,7 +15717,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az55
+  name: cluster542
   namespace: default
 spec:
   cpucapacity: 8
@@ -15745,7 +15745,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az55
+  name: cluster543
   namespace: default
 spec:
   cpucapacity: 8
@@ -15773,7 +15773,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az55
+  name: cluster544
   namespace: default
 spec:
   cpucapacity: 8
@@ -15801,7 +15801,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az55
+  name: cluster545
   namespace: default
 spec:
   cpucapacity: 8
@@ -15829,7 +15829,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az55
+  name: cluster546
   namespace: default
 spec:
   cpucapacity: 8
@@ -15857,7 +15857,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az55
+  name: cluster547
   namespace: default
 spec:
   cpucapacity: 8
@@ -15885,7 +15885,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az55
+  name: cluster548
   namespace: default
 spec:
   cpucapacity: 8
@@ -15913,7 +15913,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az55
+  name: cluster549
   namespace: default
 spec:
   cpucapacity: 8
@@ -15941,7 +15941,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az56
+  name: cluster550
   namespace: default
 spec:
   cpucapacity: 8
@@ -15969,7 +15969,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az56
+  name: cluster551
   namespace: default
 spec:
   cpucapacity: 8
@@ -15997,7 +15997,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az56
+  name: cluster552
   namespace: default
 spec:
   cpucapacity: 8
@@ -16025,7 +16025,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az56
+  name: cluster553
   namespace: default
 spec:
   cpucapacity: 8
@@ -16053,7 +16053,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az56
+  name: cluster554
   namespace: default
 spec:
   cpucapacity: 8
@@ -16081,7 +16081,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az56
+  name: cluster555
   namespace: default
 spec:
   cpucapacity: 8
@@ -16109,7 +16109,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az56
+  name: cluster556
   namespace: default
 spec:
   cpucapacity: 8
@@ -16137,7 +16137,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az56
+  name: cluster557
   namespace: default
 spec:
   cpucapacity: 8
@@ -16165,7 +16165,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az56
+  name: cluster558
   namespace: default
 spec:
   cpucapacity: 8
@@ -16193,7 +16193,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az56
+  name: cluster559
   namespace: default
 spec:
   cpucapacity: 8
@@ -16221,7 +16221,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az57
+  name: cluster560
   namespace: default
 spec:
   cpucapacity: 8
@@ -16249,7 +16249,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az57
+  name: cluster561
   namespace: default
 spec:
   cpucapacity: 8
@@ -16277,7 +16277,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az57
+  name: cluster562
   namespace: default
 spec:
   cpucapacity: 8
@@ -16305,7 +16305,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az57
+  name: cluster563
   namespace: default
 spec:
   cpucapacity: 8
@@ -16333,7 +16333,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az57
+  name: cluster564
   namespace: default
 spec:
   cpucapacity: 8
@@ -16361,7 +16361,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az57
+  name: cluster565
   namespace: default
 spec:
   cpucapacity: 8
@@ -16389,7 +16389,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az57
+  name: cluster566
   namespace: default
 spec:
   cpucapacity: 8
@@ -16417,7 +16417,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az57
+  name: cluster567
   namespace: default
 spec:
   cpucapacity: 8
@@ -16445,7 +16445,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az57
+  name: cluster568
   namespace: default
 spec:
   cpucapacity: 8
@@ -16473,7 +16473,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az57
+  name: cluster569
   namespace: default
 spec:
   cpucapacity: 8
@@ -16501,7 +16501,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az58
+  name: cluster570
   namespace: default
 spec:
   cpucapacity: 8
@@ -16531,7 +16531,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az58
+  name: cluster571
   namespace: default
 spec:
   cpucapacity: 8
@@ -16561,7 +16561,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az58
+  name: cluster572
   namespace: default
 spec:
   cpucapacity: 8
@@ -16591,7 +16591,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az58
+  name: cluster573
   namespace: default
 spec:
   cpucapacity: 8
@@ -16621,7 +16621,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az58
+  name: cluster574
   namespace: default
 spec:
   cpucapacity: 8
@@ -16651,7 +16651,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az58
+  name: cluster575
   namespace: default
 spec:
   cpucapacity: 8
@@ -16681,7 +16681,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az58
+  name: cluster576
   namespace: default
 spec:
   cpucapacity: 8
@@ -16711,7 +16711,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az58
+  name: cluster577
   namespace: default
 spec:
   cpucapacity: 8
@@ -16741,7 +16741,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az58
+  name: cluster578
   namespace: default
 spec:
   cpucapacity: 8
@@ -16771,7 +16771,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az58
+  name: cluster579
   namespace: default
 spec:
   cpucapacity: 8
@@ -16801,7 +16801,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az59
+  name: cluster580
   namespace: default
 spec:
   cpucapacity: 8
@@ -16831,7 +16831,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az59
+  name: cluster581
   namespace: default
 spec:
   cpucapacity: 8
@@ -16861,7 +16861,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az59
+  name: cluster582
   namespace: default
 spec:
   cpucapacity: 8
@@ -16891,7 +16891,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az59
+  name: cluster583
   namespace: default
 spec:
   cpucapacity: 8
@@ -16921,7 +16921,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az59
+  name: cluster584
   namespace: default
 spec:
   cpucapacity: 8
@@ -16951,7 +16951,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az59
+  name: cluster585
   namespace: default
 spec:
   cpucapacity: 8
@@ -16981,7 +16981,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az59
+  name: cluster586
   namespace: default
 spec:
   cpucapacity: 8
@@ -17011,7 +17011,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az59
+  name: cluster587
   namespace: default
 spec:
   cpucapacity: 8
@@ -17041,7 +17041,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az59
+  name: cluster588
   namespace: default
 spec:
   cpucapacity: 8
@@ -17071,7 +17071,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az59
+  name: cluster589
   namespace: default
 spec:
   cpucapacity: 8
@@ -17101,7 +17101,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az60
+  name: cluster590
   namespace: default
 spec:
   cpucapacity: 8
@@ -17131,7 +17131,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az60
+  name: cluster591
   namespace: default
 spec:
   cpucapacity: 8
@@ -17161,7 +17161,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az60
+  name: cluster592
   namespace: default
 spec:
   cpucapacity: 8
@@ -17191,7 +17191,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az60
+  name: cluster593
   namespace: default
 spec:
   cpucapacity: 8
@@ -17221,7 +17221,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az60
+  name: cluster594
   namespace: default
 spec:
   cpucapacity: 8
@@ -17251,7 +17251,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az60
+  name: cluster595
   namespace: default
 spec:
   cpucapacity: 8
@@ -17281,7 +17281,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az60
+  name: cluster596
   namespace: default
 spec:
   cpucapacity: 8
@@ -17311,7 +17311,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az60
+  name: cluster597
   namespace: default
 spec:
   cpucapacity: 8
@@ -17341,7 +17341,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az60
+  name: cluster598
   namespace: default
 spec:
   cpucapacity: 8
@@ -17371,7 +17371,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az60
+  name: cluster599
   namespace: default
 spec:
   cpucapacity: 8
@@ -17401,7 +17401,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az61
+  name: cluster600
   namespace: default
 spec:
   cpucapacity: 8
@@ -17429,7 +17429,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az61
+  name: cluster601
   namespace: default
 spec:
   cpucapacity: 8
@@ -17457,7 +17457,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az61
+  name: cluster602
   namespace: default
 spec:
   cpucapacity: 8
@@ -17485,7 +17485,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az61
+  name: cluster603
   namespace: default
 spec:
   cpucapacity: 8
@@ -17513,7 +17513,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az61
+  name: cluster604
   namespace: default
 spec:
   cpucapacity: 8
@@ -17541,7 +17541,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az61
+  name: cluster605
   namespace: default
 spec:
   cpucapacity: 8
@@ -17569,7 +17569,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az61
+  name: cluster606
   namespace: default
 spec:
   cpucapacity: 8
@@ -17597,7 +17597,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az61
+  name: cluster607
   namespace: default
 spec:
   cpucapacity: 8
@@ -17625,7 +17625,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az61
+  name: cluster608
   namespace: default
 spec:
   cpucapacity: 8
@@ -17653,7 +17653,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az61
+  name: cluster609
   namespace: default
 spec:
   cpucapacity: 8
@@ -17681,7 +17681,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az62
+  name: cluster610
   namespace: default
 spec:
   cpucapacity: 8
@@ -17709,7 +17709,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az62
+  name: cluster611
   namespace: default
 spec:
   cpucapacity: 8
@@ -17737,7 +17737,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az62
+  name: cluster612
   namespace: default
 spec:
   cpucapacity: 8
@@ -17765,7 +17765,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az62
+  name: cluster613
   namespace: default
 spec:
   cpucapacity: 8
@@ -17793,7 +17793,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az62
+  name: cluster614
   namespace: default
 spec:
   cpucapacity: 8
@@ -17821,7 +17821,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az62
+  name: cluster615
   namespace: default
 spec:
   cpucapacity: 8
@@ -17849,7 +17849,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az62
+  name: cluster616
   namespace: default
 spec:
   cpucapacity: 8
@@ -17877,7 +17877,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az62
+  name: cluster617
   namespace: default
 spec:
   cpucapacity: 8
@@ -17905,7 +17905,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az62
+  name: cluster618
   namespace: default
 spec:
   cpucapacity: 8
@@ -17933,7 +17933,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az62
+  name: cluster619
   namespace: default
 spec:
   cpucapacity: 8
@@ -17961,7 +17961,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az63
+  name: cluster620
   namespace: default
 spec:
   cpucapacity: 8
@@ -17989,7 +17989,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az63
+  name: cluster621
   namespace: default
 spec:
   cpucapacity: 8
@@ -18017,7 +18017,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az63
+  name: cluster622
   namespace: default
 spec:
   cpucapacity: 8
@@ -18045,7 +18045,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az63
+  name: cluster623
   namespace: default
 spec:
   cpucapacity: 8
@@ -18073,7 +18073,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az63
+  name: cluster624
   namespace: default
 spec:
   cpucapacity: 8
@@ -18101,7 +18101,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az63
+  name: cluster625
   namespace: default
 spec:
   cpucapacity: 8
@@ -18129,7 +18129,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az63
+  name: cluster626
   namespace: default
 spec:
   cpucapacity: 8
@@ -18157,7 +18157,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az63
+  name: cluster627
   namespace: default
 spec:
   cpucapacity: 8
@@ -18185,7 +18185,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az63
+  name: cluster628
   namespace: default
 spec:
   cpucapacity: 8
@@ -18213,7 +18213,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az63
+  name: cluster629
   namespace: default
 spec:
   cpucapacity: 8
@@ -18241,7 +18241,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az64
+  name: cluster630
   namespace: default
 spec:
   cpucapacity: 8
@@ -18271,7 +18271,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az64
+  name: cluster631
   namespace: default
 spec:
   cpucapacity: 8
@@ -18301,7 +18301,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az64
+  name: cluster632
   namespace: default
 spec:
   cpucapacity: 8
@@ -18331,7 +18331,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az64
+  name: cluster633
   namespace: default
 spec:
   cpucapacity: 8
@@ -18361,7 +18361,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az64
+  name: cluster634
   namespace: default
 spec:
   cpucapacity: 8
@@ -18391,7 +18391,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az64
+  name: cluster635
   namespace: default
 spec:
   cpucapacity: 8
@@ -18421,7 +18421,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az64
+  name: cluster636
   namespace: default
 spec:
   cpucapacity: 8
@@ -18451,7 +18451,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az64
+  name: cluster637
   namespace: default
 spec:
   cpucapacity: 8
@@ -18481,7 +18481,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az64
+  name: cluster638
   namespace: default
 spec:
   cpucapacity: 8
@@ -18511,7 +18511,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az64
+  name: cluster639
   namespace: default
 spec:
   cpucapacity: 8
@@ -18541,7 +18541,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az65
+  name: cluster640
   namespace: default
 spec:
   cpucapacity: 8
@@ -18571,7 +18571,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az65
+  name: cluster641
   namespace: default
 spec:
   cpucapacity: 8
@@ -18601,7 +18601,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az65
+  name: cluster642
   namespace: default
 spec:
   cpucapacity: 8
@@ -18631,7 +18631,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az65
+  name: cluster643
   namespace: default
 spec:
   cpucapacity: 8
@@ -18661,7 +18661,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az65
+  name: cluster644
   namespace: default
 spec:
   cpucapacity: 8
@@ -18691,7 +18691,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az65
+  name: cluster645
   namespace: default
 spec:
   cpucapacity: 8
@@ -18721,7 +18721,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az65
+  name: cluster646
   namespace: default
 spec:
   cpucapacity: 8
@@ -18751,7 +18751,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az65
+  name: cluster647
   namespace: default
 spec:
   cpucapacity: 8
@@ -18781,7 +18781,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az65
+  name: cluster648
   namespace: default
 spec:
   cpucapacity: 8
@@ -18811,7 +18811,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az65
+  name: cluster649
   namespace: default
 spec:
   cpucapacity: 8
@@ -18841,7 +18841,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az66
+  name: cluster650
   namespace: default
 spec:
   cpucapacity: 8
@@ -18871,7 +18871,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az66
+  name: cluster651
   namespace: default
 spec:
   cpucapacity: 8
@@ -18901,7 +18901,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az66
+  name: cluster652
   namespace: default
 spec:
   cpucapacity: 8
@@ -18931,7 +18931,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az66
+  name: cluster653
   namespace: default
 spec:
   cpucapacity: 8
@@ -18961,7 +18961,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az66
+  name: cluster654
   namespace: default
 spec:
   cpucapacity: 8
@@ -18991,7 +18991,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az66
+  name: cluster655
   namespace: default
 spec:
   cpucapacity: 8
@@ -19021,7 +19021,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az66
+  name: cluster656
   namespace: default
 spec:
   cpucapacity: 8
@@ -19051,7 +19051,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az66
+  name: cluster657
   namespace: default
 spec:
   cpucapacity: 8
@@ -19081,7 +19081,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az66
+  name: cluster658
   namespace: default
 spec:
   cpucapacity: 8
@@ -19111,7 +19111,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az66
+  name: cluster659
   namespace: default
 spec:
   cpucapacity: 8
@@ -19141,7 +19141,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az67
+  name: cluster660
   namespace: default
 spec:
   cpucapacity: 8
@@ -19169,7 +19169,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az67
+  name: cluster661
   namespace: default
 spec:
   cpucapacity: 8
@@ -19197,7 +19197,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az67
+  name: cluster662
   namespace: default
 spec:
   cpucapacity: 8
@@ -19225,7 +19225,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az67
+  name: cluster663
   namespace: default
 spec:
   cpucapacity: 8
@@ -19253,7 +19253,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az67
+  name: cluster664
   namespace: default
 spec:
   cpucapacity: 8
@@ -19281,7 +19281,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az67
+  name: cluster665
   namespace: default
 spec:
   cpucapacity: 8
@@ -19309,7 +19309,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az67
+  name: cluster666
   namespace: default
 spec:
   cpucapacity: 8
@@ -19337,7 +19337,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az67
+  name: cluster667
   namespace: default
 spec:
   cpucapacity: 8
@@ -19365,7 +19365,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az67
+  name: cluster668
   namespace: default
 spec:
   cpucapacity: 8
@@ -19393,7 +19393,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az67
+  name: cluster669
   namespace: default
 spec:
   cpucapacity: 8
@@ -19421,7 +19421,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az68
+  name: cluster670
   namespace: default
 spec:
   cpucapacity: 8
@@ -19449,7 +19449,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az68
+  name: cluster671
   namespace: default
 spec:
   cpucapacity: 8
@@ -19477,7 +19477,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az68
+  name: cluster672
   namespace: default
 spec:
   cpucapacity: 8
@@ -19505,7 +19505,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az68
+  name: cluster673
   namespace: default
 spec:
   cpucapacity: 8
@@ -19533,7 +19533,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az68
+  name: cluster674
   namespace: default
 spec:
   cpucapacity: 8
@@ -19561,7 +19561,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az68
+  name: cluster675
   namespace: default
 spec:
   cpucapacity: 8
@@ -19589,7 +19589,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az68
+  name: cluster676
   namespace: default
 spec:
   cpucapacity: 8
@@ -19617,7 +19617,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az68
+  name: cluster677
   namespace: default
 spec:
   cpucapacity: 8
@@ -19645,7 +19645,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az68
+  name: cluster678
   namespace: default
 spec:
   cpucapacity: 8
@@ -19673,7 +19673,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az68
+  name: cluster679
   namespace: default
 spec:
   cpucapacity: 8
@@ -19701,7 +19701,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az69
+  name: cluster680
   namespace: default
 spec:
   cpucapacity: 8
@@ -19729,7 +19729,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az69
+  name: cluster681
   namespace: default
 spec:
   cpucapacity: 8
@@ -19757,7 +19757,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az69
+  name: cluster682
   namespace: default
 spec:
   cpucapacity: 8
@@ -19785,7 +19785,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az69
+  name: cluster683
   namespace: default
 spec:
   cpucapacity: 8
@@ -19813,7 +19813,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az69
+  name: cluster684
   namespace: default
 spec:
   cpucapacity: 8
@@ -19841,7 +19841,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az69
+  name: cluster685
   namespace: default
 spec:
   cpucapacity: 8
@@ -19869,7 +19869,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az69
+  name: cluster686
   namespace: default
 spec:
   cpucapacity: 8
@@ -19897,7 +19897,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az69
+  name: cluster687
   namespace: default
 spec:
   cpucapacity: 8
@@ -19925,7 +19925,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az69
+  name: cluster688
   namespace: default
 spec:
   cpucapacity: 8
@@ -19953,7 +19953,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az69
+  name: cluster689
   namespace: default
 spec:
   cpucapacity: 8
@@ -19981,7 +19981,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az70
+  name: cluster690
   namespace: default
 spec:
   cpucapacity: 8
@@ -20011,7 +20011,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az70
+  name: cluster691
   namespace: default
 spec:
   cpucapacity: 8
@@ -20041,7 +20041,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az70
+  name: cluster692
   namespace: default
 spec:
   cpucapacity: 8
@@ -20071,7 +20071,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az70
+  name: cluster693
   namespace: default
 spec:
   cpucapacity: 8
@@ -20101,7 +20101,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az70
+  name: cluster694
   namespace: default
 spec:
   cpucapacity: 8
@@ -20131,7 +20131,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az70
+  name: cluster695
   namespace: default
 spec:
   cpucapacity: 8
@@ -20161,7 +20161,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az70
+  name: cluster696
   namespace: default
 spec:
   cpucapacity: 8
@@ -20191,7 +20191,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az70
+  name: cluster697
   namespace: default
 spec:
   cpucapacity: 8
@@ -20221,7 +20221,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az70
+  name: cluster698
   namespace: default
 spec:
   cpucapacity: 8
@@ -20251,7 +20251,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az70
+  name: cluster699
   namespace: default
 spec:
   cpucapacity: 8
@@ -20281,7 +20281,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az71
+  name: cluster700
   namespace: default
 spec:
   cpucapacity: 8
@@ -20311,7 +20311,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az71
+  name: cluster701
   namespace: default
 spec:
   cpucapacity: 8
@@ -20341,7 +20341,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az71
+  name: cluster702
   namespace: default
 spec:
   cpucapacity: 8
@@ -20371,7 +20371,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az71
+  name: cluster703
   namespace: default
 spec:
   cpucapacity: 8
@@ -20401,7 +20401,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az71
+  name: cluster704
   namespace: default
 spec:
   cpucapacity: 8
@@ -20431,7 +20431,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az71
+  name: cluster705
   namespace: default
 spec:
   cpucapacity: 8
@@ -20461,7 +20461,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az71
+  name: cluster706
   namespace: default
 spec:
   cpucapacity: 8
@@ -20491,7 +20491,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az71
+  name: cluster707
   namespace: default
 spec:
   cpucapacity: 8
@@ -20521,7 +20521,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az71
+  name: cluster708
   namespace: default
 spec:
   cpucapacity: 8
@@ -20551,7 +20551,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az71
+  name: cluster709
   namespace: default
 spec:
   cpucapacity: 8
@@ -20581,7 +20581,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az72
+  name: cluster710
   namespace: default
 spec:
   cpucapacity: 8
@@ -20611,7 +20611,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az72
+  name: cluster711
   namespace: default
 spec:
   cpucapacity: 8
@@ -20641,7 +20641,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az72
+  name: cluster712
   namespace: default
 spec:
   cpucapacity: 8
@@ -20671,7 +20671,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az72
+  name: cluster713
   namespace: default
 spec:
   cpucapacity: 8
@@ -20701,7 +20701,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az72
+  name: cluster714
   namespace: default
 spec:
   cpucapacity: 8
@@ -20731,7 +20731,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az72
+  name: cluster715
   namespace: default
 spec:
   cpucapacity: 8
@@ -20761,7 +20761,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az72
+  name: cluster716
   namespace: default
 spec:
   cpucapacity: 8
@@ -20791,7 +20791,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az72
+  name: cluster717
   namespace: default
 spec:
   cpucapacity: 8
@@ -20821,7 +20821,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az72
+  name: cluster718
   namespace: default
 spec:
   cpucapacity: 8
@@ -20851,7 +20851,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az72
+  name: cluster719
   namespace: default
 spec:
   cpucapacity: 8
@@ -20881,7 +20881,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az73
+  name: cluster720
   namespace: default
 spec:
   cpucapacity: 8
@@ -20909,7 +20909,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az73
+  name: cluster721
   namespace: default
 spec:
   cpucapacity: 8
@@ -20937,7 +20937,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az73
+  name: cluster722
   namespace: default
 spec:
   cpucapacity: 8
@@ -20965,7 +20965,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az73
+  name: cluster723
   namespace: default
 spec:
   cpucapacity: 8
@@ -20993,7 +20993,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az73
+  name: cluster724
   namespace: default
 spec:
   cpucapacity: 8
@@ -21021,7 +21021,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az73
+  name: cluster725
   namespace: default
 spec:
   cpucapacity: 8
@@ -21049,7 +21049,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az73
+  name: cluster726
   namespace: default
 spec:
   cpucapacity: 8
@@ -21077,7 +21077,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az73
+  name: cluster727
   namespace: default
 spec:
   cpucapacity: 8
@@ -21105,7 +21105,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az73
+  name: cluster728
   namespace: default
 spec:
   cpucapacity: 8
@@ -21133,7 +21133,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az73
+  name: cluster729
   namespace: default
 spec:
   cpucapacity: 8
@@ -21161,7 +21161,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az74
+  name: cluster730
   namespace: default
 spec:
   cpucapacity: 8
@@ -21189,7 +21189,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az74
+  name: cluster731
   namespace: default
 spec:
   cpucapacity: 8
@@ -21217,7 +21217,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az74
+  name: cluster732
   namespace: default
 spec:
   cpucapacity: 8
@@ -21245,7 +21245,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az74
+  name: cluster733
   namespace: default
 spec:
   cpucapacity: 8
@@ -21273,7 +21273,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az74
+  name: cluster734
   namespace: default
 spec:
   cpucapacity: 8
@@ -21301,7 +21301,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az74
+  name: cluster735
   namespace: default
 spec:
   cpucapacity: 8
@@ -21329,7 +21329,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az74
+  name: cluster736
   namespace: default
 spec:
   cpucapacity: 8
@@ -21357,7 +21357,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az74
+  name: cluster737
   namespace: default
 spec:
   cpucapacity: 8
@@ -21385,7 +21385,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az74
+  name: cluster738
   namespace: default
 spec:
   cpucapacity: 8
@@ -21413,7 +21413,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az74
+  name: cluster739
   namespace: default
 spec:
   cpucapacity: 8
@@ -21441,7 +21441,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az75
+  name: cluster740
   namespace: default
 spec:
   cpucapacity: 8
@@ -21469,7 +21469,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az75
+  name: cluster741
   namespace: default
 spec:
   cpucapacity: 8
@@ -21497,7 +21497,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az75
+  name: cluster742
   namespace: default
 spec:
   cpucapacity: 8
@@ -21525,7 +21525,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az75
+  name: cluster743
   namespace: default
 spec:
   cpucapacity: 8
@@ -21553,7 +21553,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az75
+  name: cluster744
   namespace: default
 spec:
   cpucapacity: 8
@@ -21581,7 +21581,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az75
+  name: cluster745
   namespace: default
 spec:
   cpucapacity: 8
@@ -21609,7 +21609,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az75
+  name: cluster746
   namespace: default
 spec:
   cpucapacity: 8
@@ -21637,7 +21637,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az75
+  name: cluster747
   namespace: default
 spec:
   cpucapacity: 8
@@ -21665,7 +21665,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az75
+  name: cluster748
   namespace: default
 spec:
   cpucapacity: 8
@@ -21693,7 +21693,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az75
+  name: cluster749
   namespace: default
 spec:
   cpucapacity: 8
@@ -21721,7 +21721,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az76
+  name: cluster750
   namespace: default
 spec:
   cpucapacity: 8
@@ -21751,7 +21751,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az76
+  name: cluster751
   namespace: default
 spec:
   cpucapacity: 8
@@ -21781,7 +21781,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az76
+  name: cluster752
   namespace: default
 spec:
   cpucapacity: 8
@@ -21811,7 +21811,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az76
+  name: cluster753
   namespace: default
 spec:
   cpucapacity: 8
@@ -21841,7 +21841,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az76
+  name: cluster754
   namespace: default
 spec:
   cpucapacity: 8
@@ -21871,7 +21871,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az76
+  name: cluster755
   namespace: default
 spec:
   cpucapacity: 8
@@ -21901,7 +21901,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az76
+  name: cluster756
   namespace: default
 spec:
   cpucapacity: 8
@@ -21931,7 +21931,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az76
+  name: cluster757
   namespace: default
 spec:
   cpucapacity: 8
@@ -21961,7 +21961,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az76
+  name: cluster758
   namespace: default
 spec:
   cpucapacity: 8
@@ -21991,7 +21991,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az76
+  name: cluster759
   namespace: default
 spec:
   cpucapacity: 8
@@ -22021,7 +22021,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az77
+  name: cluster760
   namespace: default
 spec:
   cpucapacity: 8
@@ -22051,7 +22051,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az77
+  name: cluster761
   namespace: default
 spec:
   cpucapacity: 8
@@ -22081,7 +22081,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az77
+  name: cluster762
   namespace: default
 spec:
   cpucapacity: 8
@@ -22111,7 +22111,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az77
+  name: cluster763
   namespace: default
 spec:
   cpucapacity: 8
@@ -22141,7 +22141,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az77
+  name: cluster764
   namespace: default
 spec:
   cpucapacity: 8
@@ -22171,7 +22171,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az77
+  name: cluster765
   namespace: default
 spec:
   cpucapacity: 8
@@ -22201,7 +22201,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az77
+  name: cluster766
   namespace: default
 spec:
   cpucapacity: 8
@@ -22231,7 +22231,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az77
+  name: cluster767
   namespace: default
 spec:
   cpucapacity: 8
@@ -22261,7 +22261,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az77
+  name: cluster768
   namespace: default
 spec:
   cpucapacity: 8
@@ -22291,7 +22291,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az77
+  name: cluster769
   namespace: default
 spec:
   cpucapacity: 8
@@ -22321,7 +22321,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az78
+  name: cluster770
   namespace: default
 spec:
   cpucapacity: 8
@@ -22351,7 +22351,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az78
+  name: cluster771
   namespace: default
 spec:
   cpucapacity: 8
@@ -22381,7 +22381,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az78
+  name: cluster772
   namespace: default
 spec:
   cpucapacity: 8
@@ -22411,7 +22411,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az78
+  name: cluster773
   namespace: default
 spec:
   cpucapacity: 8
@@ -22441,7 +22441,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az78
+  name: cluster774
   namespace: default
 spec:
   cpucapacity: 8
@@ -22471,7 +22471,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az78
+  name: cluster775
   namespace: default
 spec:
   cpucapacity: 8
@@ -22501,7 +22501,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az78
+  name: cluster776
   namespace: default
 spec:
   cpucapacity: 8
@@ -22531,7 +22531,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az78
+  name: cluster777
   namespace: default
 spec:
   cpucapacity: 8
@@ -22561,7 +22561,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az78
+  name: cluster778
   namespace: default
 spec:
   cpucapacity: 8
@@ -22591,7 +22591,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az78
+  name: cluster779
   namespace: default
 spec:
   cpucapacity: 8
@@ -22621,7 +22621,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az79
+  name: cluster780
   namespace: default
 spec:
   cpucapacity: 8
@@ -22649,7 +22649,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az79
+  name: cluster781
   namespace: default
 spec:
   cpucapacity: 8
@@ -22677,7 +22677,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az79
+  name: cluster782
   namespace: default
 spec:
   cpucapacity: 8
@@ -22705,7 +22705,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az79
+  name: cluster783
   namespace: default
 spec:
   cpucapacity: 8
@@ -22733,7 +22733,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az79
+  name: cluster784
   namespace: default
 spec:
   cpucapacity: 8
@@ -22761,7 +22761,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az79
+  name: cluster785
   namespace: default
 spec:
   cpucapacity: 8
@@ -22789,7 +22789,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az79
+  name: cluster786
   namespace: default
 spec:
   cpucapacity: 8
@@ -22817,7 +22817,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az79
+  name: cluster787
   namespace: default
 spec:
   cpucapacity: 8
@@ -22845,7 +22845,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az79
+  name: cluster788
   namespace: default
 spec:
   cpucapacity: 8
@@ -22873,7 +22873,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az79
+  name: cluster789
   namespace: default
 spec:
   cpucapacity: 8
@@ -22901,7 +22901,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az80
+  name: cluster790
   namespace: default
 spec:
   cpucapacity: 8
@@ -22929,7 +22929,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az80
+  name: cluster791
   namespace: default
 spec:
   cpucapacity: 8
@@ -22957,7 +22957,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az80
+  name: cluster792
   namespace: default
 spec:
   cpucapacity: 8
@@ -22985,7 +22985,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az80
+  name: cluster793
   namespace: default
 spec:
   cpucapacity: 8
@@ -23013,7 +23013,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az80
+  name: cluster794
   namespace: default
 spec:
   cpucapacity: 8
@@ -23041,7 +23041,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az80
+  name: cluster795
   namespace: default
 spec:
   cpucapacity: 8
@@ -23069,7 +23069,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az80
+  name: cluster796
   namespace: default
 spec:
   cpucapacity: 8
@@ -23097,7 +23097,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az80
+  name: cluster797
   namespace: default
 spec:
   cpucapacity: 8
@@ -23125,7 +23125,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az80
+  name: cluster798
   namespace: default
 spec:
   cpucapacity: 8
@@ -23153,7 +23153,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az80
+  name: cluster799
   namespace: default
 spec:
   cpucapacity: 8
@@ -23181,7 +23181,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az81
+  name: cluster800
   namespace: default
 spec:
   cpucapacity: 8
@@ -23209,7 +23209,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az81
+  name: cluster801
   namespace: default
 spec:
   cpucapacity: 8
@@ -23237,7 +23237,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az81
+  name: cluster802
   namespace: default
 spec:
   cpucapacity: 8
@@ -23265,7 +23265,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az81
+  name: cluster803
   namespace: default
 spec:
   cpucapacity: 8
@@ -23293,7 +23293,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az81
+  name: cluster804
   namespace: default
 spec:
   cpucapacity: 8
@@ -23321,7 +23321,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az81
+  name: cluster805
   namespace: default
 spec:
   cpucapacity: 8
@@ -23349,7 +23349,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az81
+  name: cluster806
   namespace: default
 spec:
   cpucapacity: 8
@@ -23377,7 +23377,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az81
+  name: cluster807
   namespace: default
 spec:
   cpucapacity: 8
@@ -23405,7 +23405,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az81
+  name: cluster808
   namespace: default
 spec:
   cpucapacity: 8
@@ -23433,7 +23433,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az81
+  name: cluster809
   namespace: default
 spec:
   cpucapacity: 8
@@ -23461,7 +23461,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az82
+  name: cluster810
   namespace: default
 spec:
   cpucapacity: 8
@@ -23491,7 +23491,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az82
+  name: cluster811
   namespace: default
 spec:
   cpucapacity: 8
@@ -23521,7 +23521,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az82
+  name: cluster812
   namespace: default
 spec:
   cpucapacity: 8
@@ -23551,7 +23551,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az82
+  name: cluster813
   namespace: default
 spec:
   cpucapacity: 8
@@ -23581,7 +23581,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az82
+  name: cluster814
   namespace: default
 spec:
   cpucapacity: 8
@@ -23611,7 +23611,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az82
+  name: cluster815
   namespace: default
 spec:
   cpucapacity: 8
@@ -23641,7 +23641,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az82
+  name: cluster816
   namespace: default
 spec:
   cpucapacity: 8
@@ -23671,7 +23671,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az82
+  name: cluster817
   namespace: default
 spec:
   cpucapacity: 8
@@ -23701,7 +23701,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az82
+  name: cluster818
   namespace: default
 spec:
   cpucapacity: 8
@@ -23731,7 +23731,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az82
+  name: cluster819
   namespace: default
 spec:
   cpucapacity: 8
@@ -23761,7 +23761,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az83
+  name: cluster820
   namespace: default
 spec:
   cpucapacity: 8
@@ -23791,7 +23791,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az83
+  name: cluster821
   namespace: default
 spec:
   cpucapacity: 8
@@ -23821,7 +23821,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az83
+  name: cluster822
   namespace: default
 spec:
   cpucapacity: 8
@@ -23851,7 +23851,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az83
+  name: cluster823
   namespace: default
 spec:
   cpucapacity: 8
@@ -23881,7 +23881,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az83
+  name: cluster824
   namespace: default
 spec:
   cpucapacity: 8
@@ -23911,7 +23911,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az83
+  name: cluster825
   namespace: default
 spec:
   cpucapacity: 8
@@ -23941,7 +23941,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az83
+  name: cluster826
   namespace: default
 spec:
   cpucapacity: 8
@@ -23971,7 +23971,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az83
+  name: cluster827
   namespace: default
 spec:
   cpucapacity: 8
@@ -24001,7 +24001,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az83
+  name: cluster828
   namespace: default
 spec:
   cpucapacity: 8
@@ -24031,7 +24031,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az83
+  name: cluster829
   namespace: default
 spec:
   cpucapacity: 8
@@ -24061,7 +24061,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az84
+  name: cluster830
   namespace: default
 spec:
   cpucapacity: 8
@@ -24091,7 +24091,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az84
+  name: cluster831
   namespace: default
 spec:
   cpucapacity: 8
@@ -24121,7 +24121,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az84
+  name: cluster832
   namespace: default
 spec:
   cpucapacity: 8
@@ -24151,7 +24151,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az84
+  name: cluster833
   namespace: default
 spec:
   cpucapacity: 8
@@ -24181,7 +24181,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az84
+  name: cluster834
   namespace: default
 spec:
   cpucapacity: 8
@@ -24211,7 +24211,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az84
+  name: cluster835
   namespace: default
 spec:
   cpucapacity: 8
@@ -24241,7 +24241,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az84
+  name: cluster836
   namespace: default
 spec:
   cpucapacity: 8
@@ -24271,7 +24271,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az84
+  name: cluster837
   namespace: default
 spec:
   cpucapacity: 8
@@ -24301,7 +24301,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az84
+  name: cluster838
   namespace: default
 spec:
   cpucapacity: 8
@@ -24331,7 +24331,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az84
+  name: cluster839
   namespace: default
 spec:
   cpucapacity: 8
@@ -24361,7 +24361,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az85
+  name: cluster840
   namespace: default
 spec:
   cpucapacity: 8
@@ -24389,7 +24389,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az85
+  name: cluster841
   namespace: default
 spec:
   cpucapacity: 8
@@ -24417,7 +24417,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az85
+  name: cluster842
   namespace: default
 spec:
   cpucapacity: 8
@@ -24445,7 +24445,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az85
+  name: cluster843
   namespace: default
 spec:
   cpucapacity: 8
@@ -24473,7 +24473,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az85
+  name: cluster844
   namespace: default
 spec:
   cpucapacity: 8
@@ -24501,7 +24501,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az85
+  name: cluster845
   namespace: default
 spec:
   cpucapacity: 8
@@ -24529,7 +24529,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az85
+  name: cluster846
   namespace: default
 spec:
   cpucapacity: 8
@@ -24557,7 +24557,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az85
+  name: cluster847
   namespace: default
 spec:
   cpucapacity: 8
@@ -24585,7 +24585,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az85
+  name: cluster848
   namespace: default
 spec:
   cpucapacity: 8
@@ -24613,7 +24613,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az85
+  name: cluster849
   namespace: default
 spec:
   cpucapacity: 8
@@ -24641,7 +24641,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az86
+  name: cluster850
   namespace: default
 spec:
   cpucapacity: 8
@@ -24669,7 +24669,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az86
+  name: cluster851
   namespace: default
 spec:
   cpucapacity: 8
@@ -24697,7 +24697,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az86
+  name: cluster852
   namespace: default
 spec:
   cpucapacity: 8
@@ -24725,7 +24725,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az86
+  name: cluster853
   namespace: default
 spec:
   cpucapacity: 8
@@ -24753,7 +24753,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az86
+  name: cluster854
   namespace: default
 spec:
   cpucapacity: 8
@@ -24781,7 +24781,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az86
+  name: cluster855
   namespace: default
 spec:
   cpucapacity: 8
@@ -24809,7 +24809,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az86
+  name: cluster856
   namespace: default
 spec:
   cpucapacity: 8
@@ -24837,7 +24837,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az86
+  name: cluster857
   namespace: default
 spec:
   cpucapacity: 8
@@ -24865,7 +24865,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az86
+  name: cluster858
   namespace: default
 spec:
   cpucapacity: 8
@@ -24893,7 +24893,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az86
+  name: cluster859
   namespace: default
 spec:
   cpucapacity: 8
@@ -24921,7 +24921,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az87
+  name: cluster860
   namespace: default
 spec:
   cpucapacity: 8
@@ -24949,7 +24949,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az87
+  name: cluster861
   namespace: default
 spec:
   cpucapacity: 8
@@ -24977,7 +24977,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az87
+  name: cluster862
   namespace: default
 spec:
   cpucapacity: 8
@@ -25005,7 +25005,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az87
+  name: cluster863
   namespace: default
 spec:
   cpucapacity: 8
@@ -25033,7 +25033,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az87
+  name: cluster864
   namespace: default
 spec:
   cpucapacity: 8
@@ -25061,7 +25061,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az87
+  name: cluster865
   namespace: default
 spec:
   cpucapacity: 8
@@ -25089,7 +25089,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az87
+  name: cluster866
   namespace: default
 spec:
   cpucapacity: 8
@@ -25117,7 +25117,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az87
+  name: cluster867
   namespace: default
 spec:
   cpucapacity: 8
@@ -25145,7 +25145,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az87
+  name: cluster868
   namespace: default
 spec:
   cpucapacity: 8
@@ -25173,7 +25173,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az87
+  name: cluster869
   namespace: default
 spec:
   cpucapacity: 8
@@ -25201,7 +25201,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az88
+  name: cluster870
   namespace: default
 spec:
   cpucapacity: 8
@@ -25231,7 +25231,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az88
+  name: cluster871
   namespace: default
 spec:
   cpucapacity: 8
@@ -25261,7 +25261,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az88
+  name: cluster872
   namespace: default
 spec:
   cpucapacity: 8
@@ -25291,7 +25291,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az88
+  name: cluster873
   namespace: default
 spec:
   cpucapacity: 8
@@ -25321,7 +25321,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az88
+  name: cluster874
   namespace: default
 spec:
   cpucapacity: 8
@@ -25351,7 +25351,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az88
+  name: cluster875
   namespace: default
 spec:
   cpucapacity: 8
@@ -25381,7 +25381,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az88
+  name: cluster876
   namespace: default
 spec:
   cpucapacity: 8
@@ -25411,7 +25411,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az88
+  name: cluster877
   namespace: default
 spec:
   cpucapacity: 8
@@ -25441,7 +25441,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az88
+  name: cluster878
   namespace: default
 spec:
   cpucapacity: 8
@@ -25471,7 +25471,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az88
+  name: cluster879
   namespace: default
 spec:
   cpucapacity: 8
@@ -25501,7 +25501,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az89
+  name: cluster880
   namespace: default
 spec:
   cpucapacity: 8
@@ -25531,7 +25531,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az89
+  name: cluster881
   namespace: default
 spec:
   cpucapacity: 8
@@ -25561,7 +25561,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az89
+  name: cluster882
   namespace: default
 spec:
   cpucapacity: 8
@@ -25591,7 +25591,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az89
+  name: cluster883
   namespace: default
 spec:
   cpucapacity: 8
@@ -25621,7 +25621,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az89
+  name: cluster884
   namespace: default
 spec:
   cpucapacity: 8
@@ -25651,7 +25651,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az89
+  name: cluster885
   namespace: default
 spec:
   cpucapacity: 8
@@ -25681,7 +25681,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az89
+  name: cluster886
   namespace: default
 spec:
   cpucapacity: 8
@@ -25711,7 +25711,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az89
+  name: cluster887
   namespace: default
 spec:
   cpucapacity: 8
@@ -25741,7 +25741,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az89
+  name: cluster888
   namespace: default
 spec:
   cpucapacity: 8
@@ -25771,7 +25771,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az89
+  name: cluster889
   namespace: default
 spec:
   cpucapacity: 8
@@ -25801,7 +25801,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az90
+  name: cluster890
   namespace: default
 spec:
   cpucapacity: 8
@@ -25831,7 +25831,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az90
+  name: cluster891
   namespace: default
 spec:
   cpucapacity: 8
@@ -25861,7 +25861,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az90
+  name: cluster892
   namespace: default
 spec:
   cpucapacity: 8
@@ -25891,7 +25891,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az90
+  name: cluster893
   namespace: default
 spec:
   cpucapacity: 8
@@ -25921,7 +25921,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az90
+  name: cluster894
   namespace: default
 spec:
   cpucapacity: 8
@@ -25951,7 +25951,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az90
+  name: cluster895
   namespace: default
 spec:
   cpucapacity: 8
@@ -25981,7 +25981,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az90
+  name: cluster896
   namespace: default
 spec:
   cpucapacity: 8
@@ -26011,7 +26011,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az90
+  name: cluster897
   namespace: default
 spec:
   cpucapacity: 8
@@ -26041,7 +26041,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az90
+  name: cluster898
   namespace: default
 spec:
   cpucapacity: 8
@@ -26071,7 +26071,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az90
+  name: cluster899
   namespace: default
 spec:
   cpucapacity: 8
@@ -26101,7 +26101,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az91
+  name: cluster900
   namespace: default
 spec:
   cpucapacity: 8
@@ -26129,7 +26129,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az91
+  name: cluster901
   namespace: default
 spec:
   cpucapacity: 8
@@ -26157,7 +26157,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az91
+  name: cluster902
   namespace: default
 spec:
   cpucapacity: 8
@@ -26185,7 +26185,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az91
+  name: cluster903
   namespace: default
 spec:
   cpucapacity: 8
@@ -26213,7 +26213,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az91
+  name: cluster904
   namespace: default
 spec:
   cpucapacity: 8
@@ -26241,7 +26241,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az91
+  name: cluster905
   namespace: default
 spec:
   cpucapacity: 8
@@ -26269,7 +26269,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az91
+  name: cluster906
   namespace: default
 spec:
   cpucapacity: 8
@@ -26297,7 +26297,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az91
+  name: cluster907
   namespace: default
 spec:
   cpucapacity: 8
@@ -26325,7 +26325,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az91
+  name: cluster908
   namespace: default
 spec:
   cpucapacity: 8
@@ -26353,7 +26353,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az91
+  name: cluster909
   namespace: default
 spec:
   cpucapacity: 8
@@ -26381,7 +26381,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az92
+  name: cluster910
   namespace: default
 spec:
   cpucapacity: 8
@@ -26409,7 +26409,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az92
+  name: cluster911
   namespace: default
 spec:
   cpucapacity: 8
@@ -26437,7 +26437,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az92
+  name: cluster912
   namespace: default
 spec:
   cpucapacity: 8
@@ -26465,7 +26465,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az92
+  name: cluster913
   namespace: default
 spec:
   cpucapacity: 8
@@ -26493,7 +26493,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az92
+  name: cluster914
   namespace: default
 spec:
   cpucapacity: 8
@@ -26521,7 +26521,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az92
+  name: cluster915
   namespace: default
 spec:
   cpucapacity: 8
@@ -26549,7 +26549,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az92
+  name: cluster916
   namespace: default
 spec:
   cpucapacity: 8
@@ -26577,7 +26577,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az92
+  name: cluster917
   namespace: default
 spec:
   cpucapacity: 8
@@ -26605,7 +26605,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az92
+  name: cluster918
   namespace: default
 spec:
   cpucapacity: 8
@@ -26633,7 +26633,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az92
+  name: cluster919
   namespace: default
 spec:
   cpucapacity: 8
@@ -26661,7 +26661,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az93
+  name: cluster920
   namespace: default
 spec:
   cpucapacity: 8
@@ -26689,7 +26689,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az93
+  name: cluster921
   namespace: default
 spec:
   cpucapacity: 8
@@ -26717,7 +26717,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az93
+  name: cluster922
   namespace: default
 spec:
   cpucapacity: 8
@@ -26745,7 +26745,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az93
+  name: cluster923
   namespace: default
 spec:
   cpucapacity: 8
@@ -26773,7 +26773,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az93
+  name: cluster924
   namespace: default
 spec:
   cpucapacity: 8
@@ -26801,7 +26801,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az93
+  name: cluster925
   namespace: default
 spec:
   cpucapacity: 8
@@ -26829,7 +26829,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az93
+  name: cluster926
   namespace: default
 spec:
   cpucapacity: 8
@@ -26857,7 +26857,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az93
+  name: cluster927
   namespace: default
 spec:
   cpucapacity: 8
@@ -26885,7 +26885,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az93
+  name: cluster928
   namespace: default
 spec:
   cpucapacity: 8
@@ -26913,7 +26913,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az93
+  name: cluster929
   namespace: default
 spec:
   cpucapacity: 8
@@ -26941,7 +26941,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az94
+  name: cluster930
   namespace: default
 spec:
   cpucapacity: 8
@@ -26971,7 +26971,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az94
+  name: cluster931
   namespace: default
 spec:
   cpucapacity: 8
@@ -27001,7 +27001,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az94
+  name: cluster932
   namespace: default
 spec:
   cpucapacity: 8
@@ -27031,7 +27031,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az94
+  name: cluster933
   namespace: default
 spec:
   cpucapacity: 8
@@ -27061,7 +27061,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az94
+  name: cluster934
   namespace: default
 spec:
   cpucapacity: 8
@@ -27091,7 +27091,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az94
+  name: cluster935
   namespace: default
 spec:
   cpucapacity: 8
@@ -27121,7 +27121,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az94
+  name: cluster936
   namespace: default
 spec:
   cpucapacity: 8
@@ -27151,7 +27151,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az94
+  name: cluster937
   namespace: default
 spec:
   cpucapacity: 8
@@ -27181,7 +27181,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az94
+  name: cluster938
   namespace: default
 spec:
   cpucapacity: 8
@@ -27211,7 +27211,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az94
+  name: cluster939
   namespace: default
 spec:
   cpucapacity: 8
@@ -27241,7 +27241,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az95
+  name: cluster940
   namespace: default
 spec:
   cpucapacity: 8
@@ -27271,7 +27271,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az95
+  name: cluster941
   namespace: default
 spec:
   cpucapacity: 8
@@ -27301,7 +27301,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az95
+  name: cluster942
   namespace: default
 spec:
   cpucapacity: 8
@@ -27331,7 +27331,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az95
+  name: cluster943
   namespace: default
 spec:
   cpucapacity: 8
@@ -27361,7 +27361,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az95
+  name: cluster944
   namespace: default
 spec:
   cpucapacity: 8
@@ -27391,7 +27391,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az95
+  name: cluster945
   namespace: default
 spec:
   cpucapacity: 8
@@ -27421,7 +27421,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az95
+  name: cluster946
   namespace: default
 spec:
   cpucapacity: 8
@@ -27451,7 +27451,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az95
+  name: cluster947
   namespace: default
 spec:
   cpucapacity: 8
@@ -27481,7 +27481,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az95
+  name: cluster948
   namespace: default
 spec:
   cpucapacity: 8
@@ -27511,7 +27511,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az95
+  name: cluster949
   namespace: default
 spec:
   cpucapacity: 8
@@ -27541,7 +27541,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az96
+  name: cluster950
   namespace: default
 spec:
   cpucapacity: 8
@@ -27571,7 +27571,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az96
+  name: cluster951
   namespace: default
 spec:
   cpucapacity: 8
@@ -27601,7 +27601,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az96
+  name: cluster952
   namespace: default
 spec:
   cpucapacity: 8
@@ -27631,7 +27631,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az96
+  name: cluster953
   namespace: default
 spec:
   cpucapacity: 8
@@ -27661,7 +27661,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az96
+  name: cluster954
   namespace: default
 spec:
   cpucapacity: 8
@@ -27691,7 +27691,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az96
+  name: cluster955
   namespace: default
 spec:
   cpucapacity: 8
@@ -27721,7 +27721,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az96
+  name: cluster956
   namespace: default
 spec:
   cpucapacity: 8
@@ -27751,7 +27751,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az96
+  name: cluster957
   namespace: default
 spec:
   cpucapacity: 8
@@ -27781,7 +27781,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az96
+  name: cluster958
   namespace: default
 spec:
   cpucapacity: 8
@@ -27811,7 +27811,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az96
+  name: cluster959
   namespace: default
 spec:
   cpucapacity: 8
@@ -27841,7 +27841,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az97
+  name: cluster960
   namespace: default
 spec:
   cpucapacity: 8
@@ -27869,7 +27869,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az97
+  name: cluster961
   namespace: default
 spec:
   cpucapacity: 8
@@ -27897,7 +27897,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az97
+  name: cluster962
   namespace: default
 spec:
   cpucapacity: 8
@@ -27925,7 +27925,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az97
+  name: cluster963
   namespace: default
 spec:
   cpucapacity: 8
@@ -27953,7 +27953,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az97
+  name: cluster964
   namespace: default
 spec:
   cpucapacity: 8
@@ -27981,7 +27981,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az97
+  name: cluster965
   namespace: default
 spec:
   cpucapacity: 8
@@ -28009,7 +28009,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az97
+  name: cluster966
   namespace: default
 spec:
   cpucapacity: 8
@@ -28037,7 +28037,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az97
+  name: cluster967
   namespace: default
 spec:
   cpucapacity: 8
@@ -28065,7 +28065,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az97
+  name: cluster968
   namespace: default
 spec:
   cpucapacity: 8
@@ -28093,7 +28093,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az97
+  name: cluster969
   namespace: default
 spec:
   cpucapacity: 8
@@ -28121,7 +28121,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az98
+  name: cluster970
   namespace: default
 spec:
   cpucapacity: 8
@@ -28149,7 +28149,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az98
+  name: cluster971
   namespace: default
 spec:
   cpucapacity: 8
@@ -28177,7 +28177,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az98
+  name: cluster972
   namespace: default
 spec:
   cpucapacity: 8
@@ -28205,7 +28205,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az98
+  name: cluster973
   namespace: default
 spec:
   cpucapacity: 8
@@ -28233,7 +28233,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az98
+  name: cluster974
   namespace: default
 spec:
   cpucapacity: 8
@@ -28261,7 +28261,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az98
+  name: cluster975
   namespace: default
 spec:
   cpucapacity: 8
@@ -28289,7 +28289,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az98
+  name: cluster976
   namespace: default
 spec:
   cpucapacity: 8
@@ -28317,7 +28317,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az98
+  name: cluster977
   namespace: default
 spec:
   cpucapacity: 8
@@ -28345,7 +28345,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az98
+  name: cluster978
   namespace: default
 spec:
   cpucapacity: 8
@@ -28373,7 +28373,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az98
+  name: cluster979
   namespace: default
 spec:
   cpucapacity: 8
@@ -28401,7 +28401,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az99
+  name: cluster980
   namespace: default
 spec:
   cpucapacity: 8
@@ -28429,7 +28429,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az99
+  name: cluster981
   namespace: default
 spec:
   cpucapacity: 8
@@ -28457,7 +28457,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az99
+  name: cluster982
   namespace: default
 spec:
   cpucapacity: 8
@@ -28485,7 +28485,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az99
+  name: cluster983
   namespace: default
 spec:
   cpucapacity: 8
@@ -28513,7 +28513,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az99
+  name: cluster984
   namespace: default
 spec:
   cpucapacity: 8
@@ -28541,7 +28541,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az99
+  name: cluster985
   namespace: default
 spec:
   cpucapacity: 8
@@ -28569,7 +28569,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az99
+  name: cluster986
   namespace: default
 spec:
   cpucapacity: 8
@@ -28597,7 +28597,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az99
+  name: cluster987
   namespace: default
 spec:
   cpucapacity: 8
@@ -28625,7 +28625,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az99
+  name: cluster988
   namespace: default
 spec:
   cpucapacity: 8
@@ -28653,7 +28653,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az99
+  name: cluster989
   namespace: default
 spec:
   cpucapacity: 8
@@ -28681,7 +28681,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-1.az100
+  name: cluster990
   namespace: default
 spec:
   cpucapacity: 8
@@ -28711,7 +28711,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-1.az100
+  name: cluster991
   namespace: default
 spec:
   cpucapacity: 8
@@ -28741,7 +28741,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-1.az100
+  name: cluster992
   namespace: default
 spec:
   cpucapacity: 8
@@ -28771,7 +28771,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-1.az100
+  name: cluster993
   namespace: default
 spec:
   cpucapacity: 8
@@ -28801,7 +28801,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-1.az100
+  name: cluster994
   namespace: default
 spec:
   cpucapacity: 8
@@ -28831,7 +28831,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: ne-2.az100
+  name: cluster995
   namespace: default
 spec:
   cpucapacity: 8
@@ -28861,7 +28861,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: nw-2.az100
+  name: cluster996
   namespace: default
 spec:
   cpucapacity: 8
@@ -28891,7 +28891,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: se-2.az100
+  name: cluster997
   namespace: default
 spec:
   cpucapacity: 8
@@ -28921,7 +28921,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: sw-2.az100
+  name: cluster998
   namespace: default
 spec:
   cpucapacity: 8
@@ -28951,7 +28951,7 @@ spec:
 apiVersion: globalscheduler.com/v1
 kind: Cluster
 metadata:
-  name: central-2.az100
+  name: cluster999
   namespace: default
 spec:
   cpucapacity: 8
