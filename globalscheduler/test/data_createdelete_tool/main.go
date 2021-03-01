@@ -1,12 +1,9 @@
 /*
 Copyright 2020 Authors of Arktos.
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,14 +12,14 @@ limitations under the License.
 */
 
 //This functon creates cluster dataset up to 1000
-//usage example: go run main.go -file=test.yaml -max=100
+//usage example: go run main.go -file=test.yaml -max=1000
 package main
 
 import (
 	"flag"
 	"fmt"
 	"os"
-	//"strings"
+	"strings"
 )
 
 const (
@@ -62,149 +59,69 @@ func main() {
 	if *max > 9999 {
 		*max = 1000
 	}
-	var regions [20]Location
+	var regions [10]Location
 	var flavors [3]Flavor
 	var storages [3]Storage
 
-	regions[0].availabilityzone = "NE-1"
 	regions[0].region = "NE-1"
 	regions[0].area = "NE-1"
 	regions[0].city = "NewYork"
 	regions[0].country = "US"
 	regions[0].province = "NewYork"
 
-	regions[1].availabilityzone = "NW-1"
 	regions[1].region = "NW-1"
 	regions[1].area = "NW-1"
 	regions[1].city = "Bellevue"
 	regions[1].country = "US"
 	regions[1].province = "Washington"
 
-	regions[2].availabilityzone = "SE-1"
 	regions[2].region = "SE-1"
 	regions[2].area = "SE-1"
 	regions[2].city = "Orlando"
 	regions[2].country = "US"
 	regions[2].province = "Florida"
 
-	regions[3].availabilityzone = "SW-1"
 	regions[3].region = "SW-1"
 	regions[3].area = "SW-1"
 	regions[3].city = "Austin"
 	regions[3].country = "US"
 	regions[3].province = "Texas"
 
-	regions[4].availabilityzone = "Central-1"
 	regions[4].region = "Central-1"
 	regions[4].area = "Central-1"
 	regions[4].city = "Chicago"
 	regions[4].country = "US"
 	regions[4].province = "Illinois"
 
-	regions[5].availabilityzone = "NE-2"
 	regions[5].region = "NE-2"
 	regions[5].area = "NE-2"
 	regions[5].city = "Boston"
 	regions[5].country = "US"
 	regions[5].province = "Massachusettes"
 
-	regions[6].availabilityzone = "NW-2"
 	regions[6].region = "NW-2"
 	regions[6].area = "NW-2"
 	regions[6].city = "SanFrancisco"
 	regions[6].country = "US"
 	regions[6].province = "California"
 
-	regions[7].availabilityzone = "SE-2"
 	regions[7].region = "SE-2"
 	regions[7].area = "SE-2"
 	regions[7].city = "Atlanta"
 	regions[7].country = "US"
 	regions[7].province = "Georgia"
 
-	regions[8].availabilityzone = "SW-2"
 	regions[8].region = "SW-2"
 	regions[8].area = "SW-2"
 	regions[8].city = "LasVegas"
 	regions[8].country = "US"
 	regions[8].province = "Nevada"
 
-	regions[9].availabilityzone = "Central-2"
 	regions[9].region = "Central-2"
 	regions[9].area = "Central-2"
 	regions[9].city = "Omaha"
 	regions[9].country = "US"
 	regions[9].province = "Nebraska"
-
-	regions[10].availabilityzone = "NE-3"
-	regions[10].region = "NE-3"
-	regions[10].area = "NE-3"
-	regions[10].city = "Baltimore"
-	regions[10].country = "US"
-	regions[10].province = "Maryland"
-
-	regions[11].availabilityzone = "NW-3"
-	regions[11].region = "NW-3"
-	regions[11].area = "NW-3"
-	regions[11].city = "Seattle"
-	regions[11].country = "US"
-	regions[11].province = "Washington"
-
-	regions[12].availabilityzone = "SE-3"
-	regions[12].region = "SE-3"
-	regions[12].area = "SE-3"
-	regions[12].city = "Tampa"
-	regions[12].country = "US"
-	regions[12].province = "Florida"
-
-	regions[13].availabilityzone = "SW-3"
-	regions[13].region = "SW-3"
-	regions[13].area = "SW-3"
-	regions[13].city = "Dallas"
-	regions[13].country = "US"
-	regions[13].province = "Texas"
-
-	regions[14].availabilityzone = "Central-3"
-	regions[14].region = "Central-3"
-	regions[14].area = "Central-3"
-	regions[14].city = "TwinCity"
-	regions[14].country = "US"
-	regions[14].province = "Minnesota"
-
-	regions[15].availabilityzone = "NE-4"
-	regions[15].region = "NE-4"
-	regions[15].area = "NE-4"
-	regions[15].city = "Pittsburgh"
-	regions[15].country = "US"
-	regions[15].province = "Pennsylvania"
-
-	regions[16].availabilityzone = "NW-4"
-	regions[16].region = "NW-4"
-	regions[16].area = "NW-4"
-	regions[16].city = "LosAngeles"
-	regions[16].country = "US"
-	regions[16].province = "California"
-
-	regions[17].availabilityzone = "SE-4"
-	regions[17].region = "SE-4"
-	regions[17].area = "SE-4"
-	regions[17].city = "Columbia "
-	regions[17].country = "US"
-	regions[17].province = "SouthCarolina"
-
-	regions[18].availabilityzone = "SW-4"
-	regions[18].region = "SW-4"
-	regions[18].area = "SW-4"
-	regions[18].city = "Dallas"
-	regions[18].country = "US"
-	regions[18].province = "Texas"
-
-	regions[19].availabilityzone = "Central-4"
-	regions[19].region = "Central-4"
-	regions[19].area = "Central-4"
-	regions[19].city = "St.Louis"
-	regions[19].country = "US"
-	regions[19].province = "Missouri"
 
 	flavors[0].flavorid = "1"
 	flavors[0].totalcapacity = "1000"
@@ -237,9 +154,7 @@ func main() {
 				_, err := f.WriteString("apiVersion: globalscheduler.com/v1\n")
 				_, err = f.WriteString("kind: Cluster\n")
 				_, err = f.WriteString("metadata:\n")
-				s := fmt.Sprintf("  name: cluster%d\n", clusterNumber)
-				//_, err = f.WriteString(s)
-				//s := fmt.Sprintf("  name: %s.az%d\n", strings.ToLower(regions[k].region), azNumber)
+				s := fmt.Sprintf("  name: %s.az%d\n", strings.ToLower(regions[k].region), azNumber)
 				_, err = f.WriteString(s)
 				_, err = f.WriteString("  namespace: default\n")
 				_, err = f.WriteString("spec:\n")
@@ -294,7 +209,6 @@ func main() {
 				_, err = f.WriteString("  region:\n")
 				s = fmt.Sprintf("    availabilityzone: az%d\n", azNumber)
 				_, err = f.WriteString(s)
-				//_, err = f.WriteString("      availabilityzone: " + regions[k].availabilityzone + "\n")
 				_, err = f.WriteString("    region: " + regions[k].region + "\n")
 				_, err = f.WriteString("  serverprice: 10\n")
 				_, err = f.WriteString("  storage:\n")
