@@ -6,9 +6,9 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: openstack-pod-with-geo
-    image: "e756d63a-4c1d-4913-816d-6c9269ea6ff5"
+    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
     keyPairName: "demo-keypair"
-    securityGroupId: "5c37cea2-934b-428a-93f5-b7b598cf3424"
+    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
     flavors:
       - flavorID: "42"
     resourceCommonInfo:
@@ -24,4 +24,4 @@ spec:
            availablityZone:
            - "NW-1"
   nics:
-    - name: "80e76da3-91c6-4b70-8fdb-d1ca1c2836cd"
+    - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
