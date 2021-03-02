@@ -175,6 +175,7 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 			return
 		}
 		token, err := p.getToken(host)
+		err = nil
 		if err != nil {
 			klog.Warningf("Failed to get token from host %v", host)
 			return
