@@ -11,7 +11,6 @@ go_library(
     deps = [
         "//globalscheduler/grpc/cluster/proto:go_default_library",
         "//globalscheduler/pkg/scheduler/client/typed:go_default_library",
-        "//globalscheduler/pkg/scheduler/common/logger:go_default_library",
         "//resourcecollector/pkg/collector:go_default_library",
         "//resourcecollector/pkg/collector/common/config:go_default_library",
         "//vendor/google.golang.org/grpc:go_default_library",

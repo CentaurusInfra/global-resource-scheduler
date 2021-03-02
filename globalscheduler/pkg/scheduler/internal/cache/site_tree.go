@@ -19,8 +19,8 @@ package cache
 
 import (
 	"fmt"
+	"k8s.io/klog"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 )
@@ -46,7 +46,7 @@ type siteArray struct {
 
 func (na *siteArray) next() (siteID string, exhausted bool) {
 	if len(na.siteIDs) == 0 {
-		logger.Errorf("The siteArray is empty. It should have been deleted from SiteTree.")
+		klog.Errorf("The siteArray is empty. It should have been deleted from SiteTree.")
 		return "", false
 	}
 	if na.lastIndex >= len(na.siteIDs) {
@@ -83,7 +83,7 @@ func (nt *siteTree) addSite(site *types.Site) {
 		nt.zones = append(nt.zones, zone)
 		nt.tree[zone] = &siteArray{siteIDs: []string{site.SiteID}, lastIndex: 0}
 	}
-	logger.Infof("Added site %q in group %q to SiteTree", site.SiteID, zone)
+	klog.Infof("Added site %q in group %q to SiteTree", site.SiteID, zone)
 	nt.numSites++
 }
 
@@ -97,13 +97,13 @@ func (nt *siteTree) removeSite(n *types.Site) error {
 				if len(na.siteIDs) == 0 {
 					nt.removeZone(zone)
 				}
-				logger.Infof("Removed site %q in group %q from SiteTree", n.SiteID, zone)
+				klog.Infof("Removed site %q in group %q from SiteTree", n.SiteID, zone)
 				nt.numSites--
 				return nil
 			}
 		}
 	}
-	logger.Errorf("Site %q in group %q was not found", n.SiteID, zone)
+	klog.Errorf("Site %q in group %q was not found", n.SiteID, zone)
 	return fmt.Errorf("site %q in group %q was not found", n.SiteID, zone)
 }
 
@@ -133,7 +133,7 @@ func (nt *siteTree) updateSite(old, new *types.Site) {
 	}
 	err := nt.removeSite(old) // No error checking. We ignore whether the old site exists or not.
 	if err != nil {
-		logger.Errorf("removeSite failed! err: %s", err)
+		klog.Errorf("removeSite failed! err: %s", err)
 	}
 	nt.addSite(new)
 }

@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "go_default_library",
@@ -7,16 +7,10 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//globalscheduler/grpc/cluster/proto:go_default_library",
-        "//globalscheduler/pkg/scheduler/common/logger:go_default_library",
         "//resourcecollector/pkg/collector/common/config:go_default_library",
         "//vendor/google.golang.org/grpc:go_default_library",
+        "//vendor/k8s.io/klog:go_default_library",
     ],
-)
-
-go_test(
-    name = "go_default_test",
-    srcs = ["client_test.go"],
-    embed = [":go_default_library"],
 )
 
 filegroup(

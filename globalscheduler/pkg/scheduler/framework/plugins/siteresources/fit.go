@@ -19,9 +19,9 @@ package siteresources
 import (
 	"context"
 	"fmt"
+	"k8s.io/klog"
 	"strconv"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache"
 	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
@@ -93,12 +93,12 @@ func calculateStackResourceRequest(stack *types.Stack) []FlavorInfos {
 			}
 			flvObj, exist := cache.FlavorCache.GetFlavor(flv.FlavorID, "")
 			if !exist {
-				logger.Warnf("Flavor %v not found!", flv)
+				klog.Warningf("Flavor %v not found!", flv)
 				continue
 			}
 			vCPUInt, err := strconv.Atoi(flvObj.Vcpus)
 			if err != nil {
-				logger.Warnf("Convert flavor Vcpus (%s) string to int failed, err: %s", flvObj.Vcpus, err.Error())
+				klog.Warningf("Convert flavor Vcpus (%s) string to int failed, err: %s", flvObj.Vcpus, err.Error())
 				continue
 			}
 
@@ -190,7 +190,7 @@ func (f *Fit) Filter(ctx context.Context, cycleState *interfaces.CycleState, sta
 		if !isMatch {
 			msg := fmt.Sprintf("Site (%s-%s) do not support required flavor (%+v).",
 				siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().Region, flvs.Flavors)
-			logger.Info(ctx, msg)
+			klog.Info(ctx, msg)
 			return interfaces.NewStatus(interfaces.Unschedulable, msg)
 		}
 	}

@@ -18,12 +18,11 @@ package runtime
 
 import (
 	"fmt"
+	"k8s.io/klog"
 	"net/http"
 	"runtime"
 	"sync"
 	"time"
-
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 )
 
 var (
@@ -52,7 +51,7 @@ func HandleCrash(additionalHandlers ...func(interface{})) {
 		}
 		if ReallyCrash {
 			// Actually proceed to panic.
-			logger.Fatalf("HandleCrash")
+			klog.Fatalf("HandleCrash")
 		}
 	}
 }
@@ -73,9 +72,9 @@ func logPanic(r interface{}) {
 	stacktrace := make([]byte, size)
 	stacktrace = stacktrace[:runtime.Stack(stacktrace, false)]
 	if _, ok := r.(string); ok {
-		logger.Errorf("Observed a panic: %s\n%s", r, stacktrace)
+		klog.Errorf("Observed a panic: %s\n%s", r, stacktrace)
 	} else {
-		logger.Errorf("Observed a panic: %#v (%v)\n%s", r, r, stacktrace)
+		klog.Errorf("Observed a panic: %#v (%v)\n%s", r, r, stacktrace)
 	}
 }
 
@@ -111,7 +110,7 @@ func HandleError(err error) {
 
 // logError prints an error with the call stack of the location it was reported
 func logError(err error) {
-	logger.Errorf("%s", err)
+	klog.Errorf("%s", err)
 }
 
 type rudimentaryErrorBackoff struct {
