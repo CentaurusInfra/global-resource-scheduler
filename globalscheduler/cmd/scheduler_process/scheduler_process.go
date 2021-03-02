@@ -22,6 +22,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
+	"k8s.io/kubernetes/globalscheduler/cmd/conf"
 	clusterclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
 	"os"
 	"syscall"
@@ -55,6 +56,8 @@ func StartSchedulerController() {
 	if err != nil {
 		klog.Fatalf("Error building kubeconfig: %s", err.Error())
 	}
+
+	conf.AddQPSFlags(cfg)
 
 	// Create kubeClientset
 	kubeClientset, err := kubernetes.NewForConfig(cfg)
