@@ -55,7 +55,6 @@ func (s *ClusterProtocolServer) SendClusterProfile(ctx context.Context,
 		return getReturnMessageFromError(ns, name, &err), err
 	}
 	siteID := fmt.Sprintf("%s|%s", region, az)
-
 	col, err := collector.GetCollector()
 	if err != nil {
 		klog.Errorf("get new collector failed, err: %s", err.Error())
