@@ -22,7 +22,6 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	"k8s.io/klog"
-	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient"
 	"strconv"
 	"sync"
 	"time"
@@ -72,9 +71,9 @@ func NewFlavorInformer(client client.Interface, resyncPeriod time.Duration, name
 			regionFlavorMap := make(map[string]typed.RegionFlavor)
 			var wg sync.WaitGroup
 			for siteID, info := range siteInfoCache.SiteInfoMap {
-				cloudClient, err := cloudclient.NewClientSet(info.EipNetworkID)
+				cloudClient, err := collector.GetClientSet(info.EipNetworkID)
 				if err != nil {
-					klog.Warningf("FlavorInformer.NewClientSet[%s] err: %s", info.EipNetworkID, err.Error())
+					klog.Warningf("collector.GetClientSet[%s] err: %s", info.EipNetworkID, err.Error())
 					continue
 				}
 				client := cloudClient.ComputeV2()

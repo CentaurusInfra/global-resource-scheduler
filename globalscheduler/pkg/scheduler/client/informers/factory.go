@@ -18,7 +18,6 @@ limitations under the License.
 package informers
 
 import (
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/siteinfos"
 	"sync"
 	"time"
 
@@ -198,11 +197,6 @@ func (f *sharedInformerFactory) SiteResource(name, key string, period time.Durat
 func (f *sharedInformerFactory) VolumeType(name, key string, period time.Duration,
 	collector internalinterfaces.ResourceCollector) volumetype.InformerVolumeType {
 	return volumetype.New(f, name, key, period, collector)
-}
-
-//Sites new site informer
-func (f *sharedInformerFactory) SiteInfo(name, key string, period time.Duration) siteinfos.InformerSiteInfo {
-	return siteinfos.New(f, name, key, period)
 }
 
 //EipPools new eip pool informer

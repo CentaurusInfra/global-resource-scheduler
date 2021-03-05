@@ -98,10 +98,10 @@ func readConf() *Config {
 		OpenStackScopProjectName: DefaultString("OpenStackScopProjectName", "admin"),
 		OpenStackScopDomainID:    DefaultString("OpenStackScopDomainID", "default"),
 
-		FlavorInterval:       DefaultInt("FlavorInterval", 600),
+		FlavorInterval:       DefaultInt("FlavorInterval", 60),
 		SiteResourceInterval: DefaultInt("SiteResourceInterval", 60),
 		VolumePoolInterval:   DefaultInt("VolumePoolInterval", 60),
-		VolumeTypeInterval:   DefaultInt("VolumeTypeInterval", 600),
+		VolumeTypeInterval:   DefaultInt("VolumeTypeInterval", 60),
 		EipPoolInterval:      DefaultInt("EipPoolInterval", 60),
 
 		MaxUnreachableNum: DefaultInt("MaxUnreachableNum", 5),

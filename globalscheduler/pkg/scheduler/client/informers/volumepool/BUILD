@@ -11,7 +11,6 @@ go_library(
         "//globalscheduler/pkg/scheduler/client/informers/internalinterfaces:go_default_library",
         "//globalscheduler/pkg/scheduler/client/typed:go_default_library",
         "//globalscheduler/pkg/scheduler/types:go_default_library",
-        "//resourcecollector/pkg/collector/cloudclient:go_default_library",
         "//vendor/github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerstats:go_default_library",
         "//vendor/k8s.io/klog:go_default_library",
     ],
