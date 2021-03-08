@@ -22,6 +22,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	//"strings"
 )
 
 const (
@@ -159,13 +160,16 @@ func main() {
 	defer f.Close()
 
 	clusterNumber := 0
-	for i := 0; i < 7; i++ { //storage
+	azNumber := 1
+	for i := 0; i < 7; i++ { //storage, 7(all possible combination of storages) = 2**3(the # of types) -1
 		for j := 0; i < 7; j++ { //favor
 			for k := 0; k < len(regions); k++ {
 				_, err := f.WriteString("apiVersion: globalscheduler.com/v1\n")
 				_, err = f.WriteString("kind: Cluster\n")
 				_, err = f.WriteString("metadata:\n")
 				s := fmt.Sprintf("  name: cluster%d\n", clusterNumber)
+				//_, err = f.WriteString(s)
+				//s := fmt.Sprintf("  name: %s.az%d\n", strings.ToLower(regions[k].region), azNumber)
 				_, err = f.WriteString(s)
 				_, err = f.WriteString("  namespace: default\n")
 				_, err = f.WriteString("spec:\n")
@@ -207,7 +211,7 @@ func main() {
 				default:
 					_, err = f.WriteString("  - flavorid: \"" + flavors[0].flavorid + "\"\n")
 					_, err = f.WriteString("    totalcapacity: " + flavors[0].totalcapacity + "\n")
-				}
+				} //end of switch
 				_, err = f.WriteString("  geolocation:\n")
 				_, err = f.WriteString("    area: " + regions[k].area + "\n")
 				_, err = f.WriteString("    city: " + regions[k].city + "\n")
@@ -216,10 +220,12 @@ func main() {
 				_, err = f.WriteString("  ipaddress: " + OpenstackIP + "\n")
 				_, err = f.WriteString("  memcapacity: 256\n")
 				_, err = f.WriteString("  operator:\n")
-				_, err = f.WriteString("      operator: globalscheduler\n")
+				_, err = f.WriteString("    operator: globalscheduler\n")
 				_, err = f.WriteString("  region:\n")
-				_, err = f.WriteString("      availabilityzone: " + regions[k].availabilityzone + "\n")
-				_, err = f.WriteString("      region: " + regions[k].region + "\n")
+				s = fmt.Sprintf("    availabilityzone: az%d\n", azNumber)
+				_, err = f.WriteString(s)
+				//_, err = f.WriteString("      availabilityzone: " + regions[k].availabilityzone + "\n")
+				_, err = f.WriteString("    region: " + regions[k].region + "\n")
 				_, err = f.WriteString("  serverprice: 10\n")
 				_, err = f.WriteString("  storage:\n")
 				switch ii := i % 6; ii {
@@ -257,9 +263,7 @@ func main() {
 				default:
 					_, err = f.WriteString("  - storagecapacity: " + storages[0].storagecapacity + "\n")
 					_, err = f.WriteString("    typeid: " + storages[0].typeid + "\n")
-				}
-				_, err = f.WriteString("  homescheduler: scheduler0\n")
-				_, err = f.WriteString("  homedispatcher: dispatcher0\n")
+				} //end of switch
 				if clusterNumber < *max-1 {
 					_, err = f.WriteString("---\n")
 				}
@@ -268,13 +272,14 @@ func main() {
 				if clusterNumber >= *max {
 					break
 				}
-			}
+			} //end of for k
 			if clusterNumber >= *max {
 				break
 			}
-		}
+			azNumber++
+		} //end of for j
 		if clusterNumber >= *max {
 			break
 		}
-	}
+	} //end of for i
 }

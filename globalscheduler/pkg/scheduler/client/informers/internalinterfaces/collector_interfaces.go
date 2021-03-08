@@ -17,11 +17,13 @@ limitations under the License.
 
 package internalinterfaces
 
-import "k8s.io/kubernetes/resourcecollector/pkg/collector/siteinfo"
+import (
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/siteinfo"
+)
 
 // ResourceCollector a small interface to allow for adding an informer without an import cycle
 type ResourceCollector interface {
 	StartInformersAndRun(stopCh <-chan struct{})
 	GetSiteInfos() *siteinfo.SiteInfoCache
-	RecordSiteUnreacheable(siteID string)
+	RecordSiteUnreacheable(siteID, clusterNamespace, clusterName string)
 }

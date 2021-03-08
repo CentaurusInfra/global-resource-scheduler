@@ -2,15 +2,10 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "go_default_library",
-    srcs = ["client.go"],
-    importpath = "k8s.io/kubernetes/resourcecollector/pkg/collector/rpcclient",
+    srcs = ["config_utils.go"],
+    importpath = "k8s.io/kubernetes/globalscheduler/cmd/conf",
     visibility = ["//visibility:public"],
-    deps = [
-        "//globalscheduler/grpc/cluster/proto:go_default_library",
-        "//resourcecollector/pkg/collector/common/config:go_default_library",
-        "//vendor/google.golang.org/grpc:go_default_library",
-        "//vendor/k8s.io/klog:go_default_library",
-    ],
+    deps = ["//staging/src/k8s.io/client-go/rest:go_default_library"],
 )
 
 filegroup(

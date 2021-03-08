@@ -129,37 +129,38 @@ func (sched *Scheduler) Cache() internalcache.Cache {
 
 // scheduleOne does the entire scheduling workflow for a single pod.
 func (sched *Scheduler) scheduleOne() {
+	// 1.pop queue and generate allocation from stack
 	stack := sched.NextStack()
-	logTime("done pop queue", stack.CreateTime)
-	// generate allocation from stack
 	allocation, err := sched.generateAllocationFromStack(stack)
+	start := stack.CreateTime
+	end := time.Now().UnixNano()
+	klog.Infof("=== done pop queue, time consumption: %vms ===", (end-start)/int64(time.Millisecond))
 
-	// do scheduling process
+	// 2.do scheduling process
+	start = end
 	tmpContext := context.Background()
-	result, err := sched.Schedule2(tmpContext, allocation)
+	result, err := sched.Schedule(tmpContext, allocation)
 	if err != nil {
 		klog.Errorf("Schedule failed, err: %s", err)
 		sched.setPodScheduleErr(stack)
 		return
 	}
-	logTime("done Schedule2", stack.CreateTime)
+	end = time.Now().UnixNano()
+	klog.Infof("=== done Scheduling pipline, time consumption: %vms ===", (end-start)/int64(time.Millisecond))
 	klog.Infof("Scheduler result: %v", result)
 
-	// bind scheduler result to pod
+	// 3.bind scheduler result to pod
+	start = end
 	klog.Infof("Try to bind to site, stacks:%v", result.Stacks)
 	sched.bindStacks(result.Stacks)
-	logTime("done bind pod to cluster", stack.CreateTime)
+	end = time.Now().UnixNano()
+	klog.Infof("=== done bind pod to cluster, time consumption: %vms ===", (end-start)/int64(time.Millisecond))
 
 	// log the elapsed time for the entire schedule
 	if stack.CreateTime != 0 {
 		spendTime := time.Now().UnixNano() - stack.CreateTime
-		klog.Infof("===Finished Schedule %s, time consumption: %vms===", stack.PodName, spendTime/int64(time.Millisecond))
+		klog.Infof("@@@ Finished Schedule, time consumption: %vms @@@", spendTime/int64(time.Millisecond))
 	}
-}
-
-func logTime(timePoint string, stackCreateTime int64) {
-	spendTime := time.Now().UnixNano() - stackCreateTime
-	klog.Infof("==%s, time consumption: %vms==", timePoint, spendTime/int64(time.Millisecond))
 }
 
 // generateAllocationFromStack generate a new allocation obj from one single stack
@@ -400,13 +401,14 @@ func (sched *Scheduler) bind(ctx context.Context, stack *types.Stack, targetSite
 
 // Schedule Run begins watching and scheduling. It waits for cache to be synced ,
 // then starts scheduling and blocked until the context is done.
-func (sched *Scheduler) Schedule2(ctx context.Context, allocation *types.Allocation) (result ScheduleResult, err error) {
+func (sched *Scheduler) Schedule(ctx context.Context, allocation *types.Allocation) (result ScheduleResult, err error) {
 	klog.Infof("Attempting to schedule allocation: %v", allocation.ID)
 
 	state := interfaces.NewCycleState()
 	schedulingCycleCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
+	// 1. Snapshot site resource cache
 	start := time.Now()
 	klog.Infof("[START] snapshot site...")
 	err = sched.updateSnapshot()
@@ -414,21 +416,19 @@ func (sched *Scheduler) Schedule2(ctx context.Context, allocation *types.Allocat
 		klog.Errorf("sched snapshot failed! err : %s", err)
 		return result, err
 	}
-	end := time.Now()
-	klog.Infof("[DONE] snapshot site, use_time: %d us", end.Sub(start))
+	klog.Infof("[DONE] snapshot site, use_time: %s", time.Since(start).String())
 
-	start = end
+	// 2. Run "prefilter" plugins.
+	start = time.Now()
 	klog.Infof("[START] Running prefilter plugins...")
-	// Run "prefilter" plugins.
 	preFilterStatus := sched.SchedFrame.RunPreFilterPlugins(schedulingCycleCtx, state, &allocation.Stack)
 	if !preFilterStatus.IsSuccess() {
 		return result, preFilterStatus.AsError()
 	}
+	klog.Infof("[DONE] Running prefilter plugins, use_time: %s", time.Since(start).String())
 
-	end = time.Now()
-	klog.Infof("[DONE] Running prefilter plugins, use_time: %d us", end.Sub(start))
-	start = end
-
+	// 3. Run "filter" plugins.
+	start = time.Now()
 	klog.Infof("[START] Running filter plugins...")
 	filteredSitesStatuses := make(interfaces.SiteToStatusMap)
 	allocation.Stack.Selector = allocation.Selector
@@ -437,9 +437,7 @@ func (sched *Scheduler) Schedule2(ctx context.Context, allocation *types.Allocat
 		klog.Errorf("findSitesThatPassFilters failed! err: %s", err)
 		return result, err
 	}
-	end = time.Now()
-	klog.Infof("[DONE] Running filter plugins, use_time: %d us", end.Sub(start))
-	start = end
+	klog.Infof("[DONE] Running filter plugins, use_time: %s", time.Since(start).String())
 
 	klog.Infof("filteredSitesStatuses = %v", filteredSitesStatuses.ToString())
 	if len(filteredSites) <= 0 {
@@ -448,40 +446,40 @@ func (sched *Scheduler) Schedule2(ctx context.Context, allocation *types.Allocat
 		return result, err
 	}
 
+	// 4. Run "prescore" plugins.
+	start = time.Now()
 	klog.Infof("[START] Running preScore plugins...")
-	// Run "prescore" plugins.
 	prescoreStatus := sched.SchedFrame.RunPreScorePlugins(ctx, state, &allocation.Stack, filteredSites)
 	if !prescoreStatus.IsSuccess() {
 		return result, prescoreStatus.AsError()
 	}
+	klog.Infof("[DONE] Running preScore plugins, use_time: %s", time.Since(start).String())
 
-	end = time.Now()
-	klog.Infof("[DONE] Running preScore plugins, use_time: %d us", end.Sub(start))
-	start = end
-
+	// 5. Run "prioritizeSites" plugins.
+	start = time.Now()
 	klog.Infof("[START] Running prioritizeSites plugins...")
 	priorityList, err := sched.prioritizeSites(ctx, state, &allocation.Stack, filteredSites)
 	if err != nil {
 		klog.Errorf("prioritizeSites failed! err: %s", err)
 		return result, err
 	}
-	end = time.Now()
-	klog.Infof("[DONE] Running prioritizeSites plugins, use_time: %d us", end.Sub(start))
-	start = end
+	klog.Infof("[DONE] Running prioritizeSites plugins, use_time: %s", time.Since(start).String())
 
-	klog.Infof("[START] Running StrategyPlugins plugins...")
+	// 6. Run "strategy" plugins.
+	start = time.Now()
+	klog.Infof("[START] Running strategy plugins...")
 	siteCount, strategyStatus := sched.SchedFrame.RunStrategyPlugins(ctx, state, allocation, priorityList)
 	if !strategyStatus.IsSuccess() {
 		klog.Errorf("RunStrategyPlugins failed! err: %s", err)
 		return result, err
 	}
-	end = time.Now()
-	klog.Infof("[DONE] Running StrategyPlugins plugins, use_time: %d us", end.Sub(start))
+	klog.Infof("[DONE] Running StrategyPlugins plugins, use_time: %s", time.Since(start).String())
+
 	klog.Infof("selected Hosts : %#v", siteCount)
-	start = end
 
+	// 7. reserve resource
+	start = time.Now()
 	var count = 0
-
 	for _, value := range siteCount {
 		for i := 0; i < value.StackCount; i++ {
 			newStack := allocation.Stack
@@ -502,80 +500,13 @@ func (sched *Scheduler) Schedule2(ctx context.Context, allocation *types.Allocat
 			break
 		}
 	}
-
 	if count < allocation.Replicas {
 		klog.Errorf("not find suit host")
 		return result, fmt.Errorf("not find suit host")
 	}
 
-	end = time.Now()
-	klog.Infof("allocation(%s) success, use_time: %d us", allocation.ID, end.Sub(start))
-
+	klog.Infof("reserve resource(%s) success, use_time: %s", allocation.ID, time.Since(start).String())
 	return
-}
-
-// Schedule Run begins watching and scheduling. It waits for cache to be synced,
-// then starts scheduling and blocked until the context is done.
-func (sched *Scheduler) Schedule(ctx context.Context, stack *types.Stack) (result ScheduleResult, err error) {
-	klog.Info(ctx, "Attempting to schedule stack: %v/%v", stack.PodName, stack.UID)
-
-	state := interfaces.NewCycleState()
-	schedulingCycleCtx, cancel := context.WithCancel(ctx)
-	defer cancel()
-	err = sched.snapshot()
-	if err != nil {
-		klog.Errorf("sched snapshot failed! err : %s", err)
-		return result, err
-	}
-
-	klog.Info(ctx, "Snapshotting scheduler cache and site infos done")
-	klog.Info(ctx, "Running prefilter plugins...")
-	// Run "prefilter" plugins.
-	preFilterStatus := sched.SchedFrame.RunPreFilterPlugins(schedulingCycleCtx, state, stack)
-	if !preFilterStatus.IsSuccess() {
-		return result, preFilterStatus.AsError()
-	}
-	klog.Info(ctx, "Running prefilter plugins done")
-
-	filteredSitesStatuses := make(interfaces.SiteToStatusMap)
-	filteredSites, err := sched.findSitesThatPassFilters(ctx, state, stack, filteredSitesStatuses)
-	if err != nil {
-		klog.Errorf("findSitesThatPassFilters failed! err: %s", err)
-		return result, err
-	}
-	klog.Infof("Computing predicates done, filteredSitesStatuses = %v", filteredSitesStatuses.ToString())
-	if len(filteredSites) <= 0 {
-		klog.Infof("filter none site. resultStatus: %s", filteredSitesStatuses.ToString())
-		return result, nil
-	}
-
-	// Run "prescore" plugins.
-	prescoreStatus := sched.SchedFrame.RunPreScorePlugins(ctx, state, stack, filteredSites)
-	if !prescoreStatus.IsSuccess() {
-		return result, prescoreStatus.AsError()
-	}
-	klog.Info(ctx, "Running prescore plugins done")
-
-	priorityList, err := sched.prioritizeSites(ctx, state, stack, filteredSites)
-	if err != nil {
-		klog.Errorf("prioritizeSites failed! err: %s", err)
-		return result, err
-	}
-	host, err := sched.selectHost(priorityList)
-	klog.Info(ctx, "selectHost is %s", host)
-
-	// bind
-	err = sched.bind(ctx, stack, host, state)
-	if err != nil {
-		klog.Errorf("bind host(%s) failed! err: %s", host, err)
-		return result, err
-	}
-
-	return ScheduleResult{
-		SuggestedHost:  host,
-		EvaluatedSites: len(filteredSites) + len(filteredSitesStatuses),
-		FeasibleSites:  len(filteredSites),
-	}, err
 }
 
 func (sched *Scheduler) buildFramework() error {

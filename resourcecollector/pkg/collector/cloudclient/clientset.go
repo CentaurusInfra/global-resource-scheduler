@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
+	"k8s.io/klog"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient/openstack/client"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/common/config"
 	"regexp"
@@ -51,26 +51,26 @@ func NewClientSet(siteEndpoint string) (*ClientSet, error) {
 	// 2. provider
 	provider, err := openstack.AuthenticatedClient(authOpts)
 	if err != nil {
-		logger.Errorf("AuthenticatedClient wrong: %s", err.Error())
+		klog.Errorf("AuthenticatedClient wrong: %s", err.Error())
 		return nil, err
 	}
 
 	// 3. init client
 	cs.computeV2, err = client.NewComputeV2Client(provider)
 	if err != nil {
-		logger.Errorf("NewComputeV2Client wrong: %s", err.Error())
+		klog.Errorf("NewComputeV2Client wrong: %s", err.Error())
 		return nil, err
 	}
 	cs.volumeV3, err = client.NewVolumeV3Client(provider)
 	if err != nil {
-		logger.Errorf("NewVolumeV3Client wrong: %s", err.Error())
+		klog.Errorf("NewVolumeV3Client wrong: %s", err.Error())
 		return nil, err
 	}
 
 	//===edit===
 	re, err := regexp.Compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
 	if err != nil {
-		logger.Errorf("some wrong: %s", err.Error())
+		klog.Errorf("some wrong: %s", err.Error())
 		return nil, err
 	}
 	intranetIP := string(re.Find([]byte(cs.computeV2.Endpoint)))

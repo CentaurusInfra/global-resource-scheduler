@@ -18,10 +18,10 @@ package locationandoperator
 
 import (
 	"context"
+	"k8s.io/klog"
 	"math"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
@@ -93,7 +93,7 @@ func (pl *LocationAndOperator) Strategy(ctx context.Context, state *interfaces.C
 	for _, siteScore := range siteScoreList {
 		selectorInfo, err := interfaces.GetSiteSelectorState(state, siteScore.SiteID)
 		if err != nil {
-			logger.Error(ctx, "GetSiteSelectorState %s failed! err: %s", siteScore.SiteID, err)
+			klog.Errorf("GetSiteSelectorState %s failed! err: %s", siteScore.SiteID, err)
 			continue
 		}
 
@@ -101,7 +101,7 @@ func (pl *LocationAndOperator) Strategy(ctx context.Context, state *interfaces.C
 	}
 
 	if count > totalCount {
-		logger.Error(ctx, "total stack count :%d, request stack count: %d, not support!", totalCount, count)
+		klog.Errorf("total stack count :%d, request stack count: %d, not support!", totalCount, count)
 		return nil, interfaces.NewStatus(interfaces.Unschedulable, "not find host")
 	}
 
@@ -109,7 +109,7 @@ func (pl *LocationAndOperator) Strategy(ctx context.Context, state *interfaces.C
 		for _, siteScore := range siteScoreList {
 			selectorInfo, err := interfaces.GetSiteSelectorState(state, siteScore.SiteID)
 			if err != nil {
-				logger.Error(ctx, "GetSiteSelectorState %s failed! err: %s", siteScore.SiteID, err)
+				klog.Errorf("GetSiteSelectorState %s failed! err: %s", siteScore.SiteID, err)
 				continue
 			}
 
@@ -125,7 +125,7 @@ func (pl *LocationAndOperator) Strategy(ctx context.Context, state *interfaces.C
 		for _, siteScore := range siteScoreList {
 			selectorInfo, err := interfaces.GetSiteSelectorState(state, siteScore.SiteID)
 			if err != nil {
-				logger.Error(ctx, "GetSiteSelectorState %s failed! err: %s", siteScore.SiteID, err)
+				klog.Errorf("GetSiteSelectorState %s failed! err: %s", siteScore.SiteID, err)
 				continue
 			}
 

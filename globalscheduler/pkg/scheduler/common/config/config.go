@@ -20,11 +20,11 @@ package config
 import (
 	"fmt"
 	"io/ioutil"
+	"k8s.io/klog"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 
@@ -107,7 +107,7 @@ func ArrayMapString(key string) []map[string]string {
 			}
 			m = append(m, mapStringItem)
 		default:
-			logger.Errorf("unable to cast %#v of type %T to yaml.MapItem", v, v)
+			klog.Errorf("unable to cast %#v of type %T to yaml.MapItem", v, v)
 		}
 	}
 	return m

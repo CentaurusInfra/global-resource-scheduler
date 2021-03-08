@@ -8,7 +8,7 @@ go_library(
     deps = [
         "//globalscheduler/pkg/scheduler:go_default_library",
         "//globalscheduler/pkg/scheduler/common/config:go_default_library",
-        "//globalscheduler/pkg/scheduler/common/logger:go_default_library",
+        "//vendor/k8s.io/klog:go_default_library",
     ],
 )
 
