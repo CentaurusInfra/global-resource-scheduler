@@ -75,20 +75,20 @@ func NewCollector(stopCh <-chan struct{}) (*Collector, error) {
 	return c, nil
 }
 
-func (c *Collector) RecordSiteUnreacheable(siteID string) {
+func (c *Collector) RecordSiteUnreacheable(siteID, clusterNamespace, clusterName string) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	c.unreachableNum[siteID]++
 	klog.Infof("RecordSiteUnreacheable site[%s] unreachableNum[%d]", siteID, c.unreachableNum[siteID])
 	if c.unreachableNum[siteID] == config.GlobalConf.MaxUnreachableNum {
 		delete(c.unreachableNum, siteID)
-		go c.notifySiteUnreachable(siteID)
+		go c.notifySiteUnreachable(siteID, clusterNamespace, clusterName)
 	}
 }
 
-func (c *Collector) notifySiteUnreachable(siteID string) {
-	klog.Infof("site[%s] is unreachable, send grpc to cluster-controller")
-	err := rpcclient.GrpcUpdateClusterStatus(siteID, rpcclient.StateUnreachable)
+func (c *Collector) notifySiteUnreachable(siteID, clusterNamespace, clusterName string) {
+	klog.Infof("site[%s] is unreachable, send grpc to cluster-controller", siteID)
+	err := rpcclient.GrpcUpdateClusterStatus(clusterNamespace, clusterName, rpcclient.StateUnreachable)
 	if err != nil {
 		klog.Errorf("send grpc to cluster-controller err: %s", err.Error())
 		return
@@ -247,7 +247,7 @@ func addSitesToCache(objs []interface{}) {
 		}
 
 		if !isFind {
-			klog.Warning("siteResource.SiteID[%s] is not in siteInfo, Not add to the cache", siteResource.SiteID)
+			klog.Warningf("siteResource.SiteID[%s] is not in siteInfo, Not add to the cache", siteResource.SiteID)
 		}
 	}
 

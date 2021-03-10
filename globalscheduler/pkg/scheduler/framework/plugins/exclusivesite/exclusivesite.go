@@ -18,10 +18,10 @@ package exclusivesite
 
 import (
 	"context"
+	"k8s.io/klog"
 	"strings"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
@@ -55,7 +55,7 @@ func (pl *ExclusiveSite) Filter(ctx context.Context, cycleState *interfaces.Cycl
 			allowDomains := strings.Split(whiteList, ",")
 			allowDomainsSet := sets.NewString(allowDomains...)
 			if allowDomainsSet.Has(domainID) {
-				logger.Debug(ctx, "Site(%s-%s) belong to domianID(%s)", siteCacheInfo.GetSite().SiteID,
+				klog.Infof("Site(%s-%s) belong to domianID(%s)", siteCacheInfo.GetSite().SiteID,
 					siteCacheInfo.GetSite().Region, domainID)
 				return interfaces.NewStatus(interfaces.Unschedulable, "site is exclusive site.")
 			}

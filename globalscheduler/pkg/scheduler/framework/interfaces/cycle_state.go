@@ -20,9 +20,9 @@ package interfaces
 import (
 	"errors"
 	"fmt"
+	"k8s.io/klog"
 	"sync"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 )
 
@@ -203,7 +203,7 @@ func UpdateSiteSelectorState(cycleState *CycleState, SiteID string, updateInfo m
 				selectInfo.StackMaxCount = count
 			}
 		default:
-			logger.Warnf("key = %s not support!", key)
+			klog.Warningf("key = %s not support!", key)
 		}
 	}
 

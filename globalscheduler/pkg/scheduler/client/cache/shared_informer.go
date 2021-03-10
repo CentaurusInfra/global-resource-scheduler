@@ -18,10 +18,10 @@ limitations under the License.
 package cache
 
 import (
+	"k8s.io/klog"
 	"reflect"
 	"time"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/wait"
 
 	"github.com/deckarep/golang-set"
@@ -103,7 +103,7 @@ func NewSharedInformer(lw ListerInterface, period time.Duration, name string, ke
 
 func (s *sharedInformer) Run(stopCh <-chan struct{}) {
 
-	logger.Infof("Run %s Informer", s.name)
+	klog.Infof("Run %s Informer", s.name)
 
 	if s.period <= 0 {
 		s.period = 30 * time.Second
@@ -133,7 +133,7 @@ func (s *sharedInformer) GetStore() ThreadSafeStore {
 func (s *sharedInformer) SyncOnce() {
 	listObj, err := s.lister.List(s.listOpts)
 	if err != nil {
-		logger.Errorf("sharedInformer(%s) list failed! err: %s", s.name, err.Error())
+		klog.Errorf("sharedInformer(%s) list failed! err: %s", s.name, err.Error())
 		return
 	}
 

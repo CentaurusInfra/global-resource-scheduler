@@ -11,7 +11,6 @@ go_library(
     importpath = "k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces",
     visibility = ["//visibility:public"],
     deps = [
-        "//globalscheduler/pkg/scheduler/common/logger:go_default_library",
         "//globalscheduler/pkg/scheduler/internal/cache:go_default_library",
         "//globalscheduler/pkg/scheduler/listers:go_default_library",
         "//globalscheduler/pkg/scheduler/sitecacheinfo:go_default_library",

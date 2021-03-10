@@ -18,7 +18,7 @@ package app
 
 import (
 	genericapiserver "k8s.io/apiserver/pkg/server"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
+	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/options"
 	utilflag "k8s.io/kubernetes/pkg/util/flag"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector"
@@ -60,13 +60,13 @@ func NewResourceCollectorCommand() *cobra.Command {
 }
 
 func Run(stopCh <-chan struct{}) error {
-	logger.Infof("Resource Collector Running...")
+	klog.Infof("Resource Collector Running...")
 
 	// init collector
 	collector.InitCollector(stopCh)
 	col, err := collector.GetCollector()
 	if err != nil {
-		logger.Errorf("get new collector failed, err: %s", err.Error())
+		klog.Errorf("get new collector failed, err: %s", err.Error())
 		return err
 	}
 
@@ -96,7 +96,7 @@ func startHttpServer(stopCh <-chan struct{}) error {
 	router.Register()
 	hs, err := apiserver.NewHTTPServer()
 	if err != nil {
-		logger.Errorf("new http server failed!, err: %s", err.Error())
+		klog.Errorf("new http server failed!, err: %s", err.Error())
 		return err
 	}
 

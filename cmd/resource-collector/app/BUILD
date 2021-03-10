@@ -9,7 +9,6 @@ go_library(
     importpath = "k8s.io/kubernetes/cmd/resource-collector/app",
     visibility = ["//visibility:public"],
     deps = [
-        "//globalscheduler/pkg/scheduler/common/logger:go_default_library",
         "//globalscheduler/pkg/scheduler/options:go_default_library",
         "//pkg/util/flag:go_default_library",
         "//resourcecollector/pkg/collector:go_default_library",
@@ -18,6 +17,7 @@ go_library(
         "//resourcecollector/pkg/collector/rpcserver:go_default_library",
         "//staging/src/k8s.io/apiserver/pkg/server:go_default_library",
         "//vendor/github.com/spf13/cobra:go_default_library",
+        "//vendor/k8s.io/klog:go_default_library",
     ],
 )
 

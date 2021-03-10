@@ -9,6 +9,7 @@ filegroup(
     name = "all-srcs",
     srcs = [
         ":package-srcs",
+        "//globalscheduler/cmd/conf:all-srcs",
         "//globalscheduler/cmd/dispatcher_process:all-srcs",
         "//globalscheduler/cmd/distributor_process:all-srcs",
         "//globalscheduler/cmd/grpc-server:all-srcs",

@@ -20,6 +20,7 @@ package sitecacheinfo
 import (
 	"errors"
 	"fmt"
+	"k8s.io/klog"
 	"regexp"
 	"strconv"
 	"strings"
@@ -29,7 +30,6 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/logger"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 )
@@ -351,7 +351,7 @@ func (n *SiteCacheInfo) SetSite(site *types.Site) error {
 		if no.CPUAllocationRatio != "" {
 			allocationRatio, err = strconv.ParseFloat(no.CPUAllocationRatio, 32)
 			if err != nil {
-				logger.Warnf("Format CPUAllocationRatio from string to integer failed!Error: %s.", err.Error())
+				klog.Warningf("Format CPUAllocationRatio from string to integer failed!Error: %s.", err.Error())
 			}
 		}
 
@@ -461,20 +461,20 @@ func (n *SiteCacheInfo) UpdateSiteWithRatio(ratios []types.AllocationRatio) erro
 		totalRes := n.getTotalResourceByResType(resType)
 
 		if totalRes.VCPU <= 0 || totalRes.Memory <= 0 {
-			logger.Warnf("region: %s, az: %s, resType:%s has invalid totalCpu(%d) or totalMem(%d)",
+			klog.Warningf("region: %s, az: %s, resType:%s has invalid totalCpu(%d) or totalMem(%d)",
 				n.GetSite().Region, n.GetSite().AvailabilityZone, resType, totalRes.VCPU, totalRes.Memory)
 			continue
 		}
 
 		cpuRatio, err := strconv.ParseFloat(value.AllocationRatioByType.CoreAllocationRatio, 64)
 		if err != nil {
-			logger.Warnf("region: %s, az: %s, resType:%s has invalid cpuRatio(%s)",
+			klog.Warningf("region: %s, az: %s, resType:%s has invalid cpuRatio(%s)",
 				n.GetSite().Region, n.GetSite().AvailabilityZone, resType, value.AllocationRatioByType.CoreAllocationRatio)
 			continue
 		}
 		memRatio, err := strconv.ParseFloat(value.AllocationRatioByType.MemAllocationRatio, 64)
 		if err != nil {
-			logger.Warnf("region: %s, az: %s, resType:%s has invalid memRatio(%s)",
+			klog.Warningf("region: %s, az: %s, resType:%s has invalid memRatio(%s)",
 				n.GetSite().Region, n.GetSite().AvailabilityZone, resType, value.AllocationRatioByType.MemAllocationRatio)
 			continue
 		}
