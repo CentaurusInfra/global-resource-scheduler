@@ -68,7 +68,7 @@ func NewFlavorInformer(client client.Interface, resyncPeriod time.Duration, name
 			}
 
 			// Use map to deduplicate the same RegionFlavor
-			regionFlavorMap := make(map[string]typed.RegionFlavor)
+			regionFlavorMap := sync.Map{}
 			var wg sync.WaitGroup
 			for siteID, info := range siteInfoCache.SiteInfoMap {
 				cloudClient, err := collector.GetClientSet(info.EipNetworkID)
@@ -91,7 +91,7 @@ func NewFlavorInformer(client client.Interface, resyncPeriod time.Duration, name
 						return
 					}
 					for _, rf := range regionFlavors {
-						regionFlavorMap[rf.RegionFlavorID] = rf
+						regionFlavorMap.LoadOrStore(rf.RegionFlavorID, rf)
 					}
 				}(siteID, info.Region, client)
 			}
@@ -99,9 +99,10 @@ func NewFlavorInformer(client client.Interface, resyncPeriod time.Duration, name
 
 			// result set, []typed.RegionFlavor
 			var interfaceSlice []interface{}
-			for _, rf := range regionFlavorMap {
-				interfaceSlice = append(interfaceSlice, rf)
-			}
+			regionFlavorMap.Range(func(key, value interface{}) bool {
+				interfaceSlice = append(interfaceSlice, value)
+				return true
+			})
 			return interfaceSlice, nil
 		}}, resyncPeriod, name, key, typed.ListOpts{})
 }

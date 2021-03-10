@@ -41,17 +41,20 @@ func (s *ClusterProtocolServer) SendClusterProfile(ctx context.Context,
 	name := in.ClusterName
 	if in.ClusterSpec == nil || in.ClusterSpec.GeoLocation == nil || in.ClusterSpec.Region == nil {
 		err := errors.New("clusterSpec information is incomplete")
+		klog.Info("clusterSpec information is incomplete")
 		return getReturnMessageFromError(ns, name, &err), err
 	}
 	ip := in.ClusterSpec.ClusterIpAddress
 	if ip == "" {
 		err := errors.New("cluster ip is not set")
+		klog.Info("cluster ip is not set")
 		return getReturnMessageFromError(ns, name, &err), err
 	}
 	region := in.ClusterSpec.Region.Region
 	az := in.ClusterSpec.Region.AvailabilityZone
 	if region == "" || az == "" {
 		err := errors.New("cluster region or az is invalid")
+		klog.Info("cluster region or az is invalid")
 		return getReturnMessageFromError(ns, name, &err), err
 	}
 	siteID := fmt.Sprintf("%s|%s", region, az)
