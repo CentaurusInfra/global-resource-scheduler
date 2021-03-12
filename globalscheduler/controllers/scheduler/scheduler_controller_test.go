@@ -132,7 +132,7 @@ func (f *fixture) newController() (*SchedulerController, schedulerinformers.Shar
 	si := schedulerinformers.NewSharedInformerFactory(f.schedulerClient, noResyncPeriodFunc())
 	ci := clusterinformers.NewSharedInformerFactory(f.clusterClient, noResyncPeriodFunc())
 
-	p := NewSchedulerController(f.kubeclient, f.apiextensionsclient, f.schedulerClient, f.clusterClient, si.Globalscheduler().V1().Schedulers(), ci.Globalscheduler().V1().Clusters())
+	p := NewSchedulerController(f.kubeclient, f.apiextensionsclient, f.schedulerClient, f.clusterClient, si.Globalscheduler().V1().Schedulers(), ci.Globalscheduler().V1().Clusters(), "")
 	p.schedulerSynced = alwaysReady
 
 	for _, f := range f.schedulerLister {

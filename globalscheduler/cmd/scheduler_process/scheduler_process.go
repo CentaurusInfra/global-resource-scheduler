@@ -46,6 +46,7 @@ var (
 const defaultNamespace = "default"
 
 func StartSchedulerController() {
+	configFile := flag.String("configfile", "", "The config file path")
 	flag.Parse()
 
 	//stopCh := setupSignalHandler()
@@ -57,7 +58,7 @@ func StartSchedulerController() {
 		klog.Fatalf("Error building kubeconfig: %s", err.Error())
 	}
 
-	conf.AddQPSFlags(cfg)
+	conf.AddQPSFlags(cfg, *configFile)
 
 	// Create kubeClientset
 	kubeClientset, err := kubernetes.NewForConfig(cfg)
@@ -88,7 +89,7 @@ func StartSchedulerController() {
 	clusterInformerFactory := clusterinformers.NewSharedInformerFactory(clusterClientset, time.Second*30)
 	clusterInformer := clusterInformerFactory.Globalscheduler().V1().Clusters()
 
-	schedulerController := scheduler.NewSchedulerController(kubeClientset, apiextensionsClient, schedulerClientset, clusterClientset, schedulerInformer, clusterInformer)
+	schedulerController := scheduler.NewSchedulerController(kubeClientset, apiextensionsClient, schedulerClientset, clusterClientset, schedulerInformer, clusterInformer, *configFile)
 	err = schedulerController.CreateSchedulerCRD()
 	if err != nil {
 		klog.Fatalf("error - register scheduler crd: %s", err.Error())

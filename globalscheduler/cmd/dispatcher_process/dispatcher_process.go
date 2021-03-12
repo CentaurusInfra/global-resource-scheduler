@@ -31,7 +31,7 @@ func main() {
 	name := flag.String("n", "", "The name of the dispatcher process")
 	logFile := flag.String("logfile", "/tmp/gs_dispatcher_process.log", "The log file of the dispatcher process")
 	logLevel := flag.String("loglevel", "3", "The log level of the dispatcher process")
-
+	configFilePath := flag.String("configfile", "", "The config file path")
 	flag.Parse()
 	util.InitKlog(*namespace, *name, *logFile, *logLevel)
 	defer util.FlushKlog()
@@ -40,7 +40,7 @@ func main() {
 		klog.Fatal("Failed to load config %v with errors %v", *configFile, err)
 	}
 
-	conf.AddQPSFlags(config)
+	conf.AddQPSFlags(config, *configFilePath)
 
 	quit := make(chan struct{})
 	defer close(quit)

@@ -16,19 +16,8 @@ limitations under the License.
 
 package conf
 
-import (
-	"flag"
-	restclient "k8s.io/client-go/rest"
-)
-
-func AddQPSFlags(config *restclient.Config) {
-	qps := flag.Int("qps", 20, "The maximum QPS to the master from this client (default 1e+06)")
-	burst := flag.Int("burst", 40, "The maximum burst for throttle (default 1000000)")
-	contentType := flag.String("content_type", "application/vnd.kubernetes.protobuf", "The content type")
-	kubeConfigs := config.GetAllConfigs()
-	for _, kubeConfig := range kubeConfigs {
-		kubeConfig.ContentType = *contentType
-		kubeConfig.QPS = float32(*qps)
-		kubeConfig.Burst = int(*burst)
-	}
+type QpsConfig struct {
+	Qps         float32
+	Burst       int
+	ContentType string
 }

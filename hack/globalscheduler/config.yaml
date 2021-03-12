@@ -1,0 +1,4 @@
+qps:
+  qps: 50
+  burst: 100
+  contentType: application/vnd.kubernetes.protobuf
