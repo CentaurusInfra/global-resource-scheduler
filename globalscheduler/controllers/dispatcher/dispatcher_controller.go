@@ -207,7 +207,6 @@ func (dc *DispatcherController) balance() error {
 
 	if len(dc.clusters) > 0 {
 		ranges := util.EvenlyDivide(len(dc.dispatchers), int64(len(dc.clusters)-1))
-		klog.V(2).Infof("The balance range is %v", ranges)
 		for idx, dispatcher := range dc.dispatchers {
 			if idx < len(ranges) {
 				dispatcher.Spec.ClusterRange = dispatchercrdv1.DispatcherRange{Start: dc.clusters[ranges[idx][0]], End: dc.clusters[ranges[idx][1]]}

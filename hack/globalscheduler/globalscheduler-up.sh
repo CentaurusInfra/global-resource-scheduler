@@ -107,7 +107,7 @@ do
 done
 
 if [ "x${GO_OUT}" == "x" ]; then
-    make -C "${KUBE_ROOT}" WHAT="cmd/kubectl cmd/hyperkube cmd/kube-apiserver cmd/kubelet cmd/kube-proxy cmd/kube-controller-manager globalscheduler/cmd/gs-controllers globalscheduler/cmd/dispatcher_process  globalscheduler/cmd/distributor_process globalscheduler/cmd/scheduler_process globalscheduler/cmd/grpc-server cmd/gs-scheduler cmd/resource-collector"
+    make -C "${KUBE_ROOT}" WHAT="cmd/kubectl cmd/hyperkube cmd/kube-apiserver cmd/kubelet cmd/kube-proxy cmd/kube-controller-manager globalscheduler/cmd/gs-controllers globalscheduler/cmd/dispatcher_process  globalscheduler/cmd/distributor_process globalscheduler/cmd/grpc-server cmd/gs-scheduler cmd/resource-collector"
 else
     echo "skipped the build."
 fi
