@@ -31,6 +31,9 @@ type ServerRunOptions struct {
 
 	// Resource Collector API URL
 	ResourceCollectorApiUrl string
+
+	// Config file path
+	ConfigFilePath string
 }
 
 // NewServerRunOptions constructs a new ServerRunOptions if existed.
@@ -44,6 +47,8 @@ func (s *ServerRunOptions) Flags() (fss cliflag.NamedFlagSets) {
 	fs.StringVar(&s.KubeConfig, "kubeconfig", s.KubeConfig, "Path to kubeconfig files, specifying how to connect to  API servers. Providing --kubeconfig enables API server mode, omitting --kubeconfig enables standalone mode.")
 	fs.StringVar(&s.SchedulerName, "schedulername", s.SchedulerName, "Scheduler name of the gs-scheduler, specifying the name of the scheduler.")
 	fs.StringVar(&s.ResourceCollectorApiUrl, "resourcecollectorapiurl", s.ResourceCollectorApiUrl, "Api url of the resource collector, specifying the api of the resource collector.")
+	fs.StringVar(&s.ConfigFilePath, "configfilepath", s.ConfigFilePath, "The config file path.")
+
 	return fss
 }
 
@@ -54,7 +59,7 @@ func (s *ServerRunOptions) Config() *types.GSSchedulerConfiguration {
 	if config.ResourceCollectorApiUrl == "" {
 		config.ResourceCollectorApiUrl = constants.DefaultResourceCollectorAPIURL
 	}
-
+	config.ConfigFilePath = s.ConfigFilePath
 	return config
 }
 
