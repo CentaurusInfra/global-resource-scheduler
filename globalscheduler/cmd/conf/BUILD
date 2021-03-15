@@ -2,10 +2,17 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "go_default_library",
-    srcs = ["config_utils.go"],
+    srcs = [
+        "config.go",
+        "qps.go",
+    ],
     importpath = "k8s.io/kubernetes/globalscheduler/cmd/conf",
     visibility = ["//visibility:public"],
-    deps = ["//staging/src/k8s.io/client-go/rest:go_default_library"],
+    deps = [
+        "//staging/src/k8s.io/client-go/rest:go_default_library",
+        "//vendor/github.com/spf13/viper:go_default_library",
+        "//vendor/k8s.io/klog:go_default_library",
+    ],
 )
 
 filegroup(

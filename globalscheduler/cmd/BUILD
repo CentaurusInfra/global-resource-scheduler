@@ -14,7 +14,7 @@ filegroup(
         "//globalscheduler/cmd/distributor_process:all-srcs",
         "//globalscheduler/cmd/grpc-server:all-srcs",
         "//globalscheduler/cmd/gs-controllers:all-srcs",
-        "//globalscheduler/cmd/scheduler_process:all-srcs",
+        "//globalscheduler/cmd/scheduler_process/mock_scheduler:all-srcs",
     ],
     tags = ["automanaged"],
     visibility = ["//visibility:public"],

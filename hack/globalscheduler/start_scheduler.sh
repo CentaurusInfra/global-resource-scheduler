@@ -70,7 +70,8 @@ function start_scheduler {
 
   tag=$(($1))
   schedulerid=$2
-  kube::common::start_gs_scheduler $tag $schedulerid
+  configfilepath=$3
+  kube::common::start_gs_scheduler $tag $schedulerid $configfilepath
   
   echo "Done Starting Scheduler $tag"
 }

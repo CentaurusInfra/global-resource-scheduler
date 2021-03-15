@@ -407,4 +407,7 @@ type GSSchedulerConfiguration struct {
 
 	// Api url of the resource collector
 	ResourceCollectorApiUrl string
+
+	// Config file path
+	ConfigFilePath string
 }
