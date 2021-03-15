@@ -75,8 +75,7 @@ type SchedulerController struct {
 	// Create a tree of all the geolocations and their union information
 	countryNode *ClusterInfoNode
 	// sccheduler list
-	schedulers     []*schedulercrdv1.Scheduler
-	configfilepath string
+	schedulers []*schedulercrdv1.Scheduler
 }
 
 // NewSchedulerController returns a new scheduler controller
@@ -86,8 +85,7 @@ func NewSchedulerController(
 	schedulerclient schedulerclientset.Interface,
 	clusterclient clusterclientset.Interface,
 	schedulerInformer schedulerinformers.SchedulerInformer,
-	clusterInformer clusterinformers.ClusterInformer,
-	configfilepath string) *SchedulerController {
+	clusterInformer clusterinformers.ClusterInformer) *SchedulerController {
 
 	// Create event broadcaster
 	// Add sample-controller types to the default Kubernetes Scheme so Events can be
@@ -105,7 +103,6 @@ func NewSchedulerController(
 		workqueue:              workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Scheduler"),
 		countryNode:            NewClusterInfoNode(),
 		schedulers:             make([]*schedulercrdv1.Scheduler, 0),
-		configfilepath:         configfilepath,
 	}
 
 	klog.Info("Setting up scheduler event handlers")
@@ -246,7 +243,7 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		//}
 
 		// Start Scheduler Process
-		command := "./hack/globalscheduler/start_scheduler.sh " + schedulerCopy.Spec.Tag + " " + schedulerCopy.Name + " " + sc.configfilepath
+		command := "./hack/globalscheduler/start_scheduler.sh " + schedulerCopy.Spec.Tag + " " + schedulerCopy.Name
 		err = runCommand(command)
 		if err != nil {
 			return fmt.Errorf("start scheduler process failed")
@@ -318,6 +315,7 @@ func (sc *SchedulerController) addScheduler(schedulerObj interface{}) {
 			klog.V(2).Infof("The scheduler %s has been balanced\n", scheduler.GetName())
 			sc.enqueue(schedulerObj, EventTypeCreateScheduler)
 		}
+
 	} else {
 		klog.Warningf("Failed to convert the added object %v to a scheduler", schedulerObj)
 	}

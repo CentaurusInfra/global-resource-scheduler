@@ -581,7 +581,7 @@ func (sched *Scheduler) initPodInformers(stopCh <-chan struct{}) error {
 	if err != nil {
 		return err
 	}
-	conf.AddQPSFlags(cfg, sched.ConfigFilePath)
+	conf.AddQPSFlags(cfg, conf.GetInstance().Scheduler)
 
 	client, err := clientset.NewForConfig(cfg)
 	if err != nil {

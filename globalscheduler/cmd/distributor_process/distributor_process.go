@@ -32,7 +32,6 @@ func main() {
 	name := flag.String("n", "", "The name of the distributor process")
 	logFile := flag.String("logfile", "/tmp/gs_distributor_process.log", "The log file of the distributor process")
 	logLevel := flag.String("loglevel", "2", "The log level of the distributor process")
-	configFilePath := flag.String("configfile", "", "The config file path")
 
 	flag.Parse()
 	util.InitKlog(*namespace, *name, *logFile, *logLevel)
@@ -43,7 +42,7 @@ func main() {
 		klog.Fatal("Failed to load config %v with errors %v", *configFile, err)
 	}
 
-	conf.AddQPSFlags(config, *configFilePath)
+	conf.AddQPSFlags(config, conf.GetInstance().Distributor)
 
 	quit := make(chan struct{})
 	defer close(quit)
