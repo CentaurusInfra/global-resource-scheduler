@@ -81,10 +81,16 @@ func NewCollector(stopCh <-chan struct{}) (*Collector, error) {
 	return c, nil
 }
 
-func (c *Collector) RefreshClientSetCache() {
-	for range time.Tick(time.Minute * 30) {
-		endpoints := c.SiteInfoCache.GetAllSiteEndpoints()
-		c.clientSetCache.RefreshClientSets(endpoints)
+func (c *Collector) RefreshClientSetCache(stopCh <-chan struct{}) {
+	for {
+		select {
+		case <-time.Tick(time.Minute * time.Duration(config.GlobalConf.RefreshOpenStackTokenInterval)):
+			endpoints := c.SiteInfoCache.GetAllSiteEndpoints()
+			c.clientSetCache.RefreshClientSets(endpoints)
+		case <-stopCh:
+			klog.Info("stop Refresh ClientSet")
+			break
+		}
 	}
 }
 
