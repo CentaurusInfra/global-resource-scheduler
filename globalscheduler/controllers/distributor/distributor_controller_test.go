@@ -86,7 +86,7 @@ func (f *fixture) newController() (*DistributorController, informers.SharedInfor
 	f.apiextensionsClient = fakeapiextensionsv1beta1.NewSimpleClientset(f.apiextensionobjects...)
 	i := informers.NewSharedInformerFactory(f.client, noResyncPeriodFunc())
 	k8sI := kubeinformers.NewSharedInformerFactory(f.kubeclient, noResyncPeriodFunc())
-	c := NewController("", f.kubeclient, f.apiextensionsClient, f.client, i.Globalscheduler().V1().Distributors(), "")
+	c := NewController("", f.kubeclient, f.apiextensionsClient, f.client, i.Globalscheduler().V1().Distributors())
 	c.synced = alwaysReady
 	c.recorder = &record.FakeRecorder{}
 

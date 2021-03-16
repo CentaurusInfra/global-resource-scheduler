@@ -20,30 +20,33 @@ import (
 	"github.com/spf13/viper"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/klog"
-	"sync"
 )
 
-var lock = &sync.Mutex{}
 var configInstance *Config
 
 type Config struct {
-	Qps QpsConfig
+	Scheduler   QpsConfig
+	Distributor QpsConfig
+	Dispatcher  QpsConfig
 }
 
-func New(configFile string) *Config {
-	lock.Lock()
-	defer lock.Unlock()
+func init() {
+	configInstance = newInstance()
+}
+
+func newInstance() *Config {
+	configFile := "/var/run/kubernetes/config.yaml"
 	if configInstance == nil {
 		viper.SetConfigFile(configFile)
 		var conf Config
 
 		if err := viper.ReadInConfig(); err != nil {
-			klog.Fatalf("Failed to read config file %s with the error %v", configFile, err)
+			klog.Warningf("Failed to read config file %s with the error %v", configFile, err)
 			return nil
 		}
 		err := viper.Unmarshal(&conf)
 		if err != nil {
-			klog.Fatalf("Failed to read config file %s with the error %v", configFile, err)
+			klog.Warningf("Failed to read config file %s with the error %v", configFile, err)
 			return nil
 		}
 		configInstance = &conf
@@ -51,12 +54,15 @@ func New(configFile string) *Config {
 	return configInstance
 }
 
-func AddQPSFlags(config *restclient.Config, configFile string) {
-	New(configFile)
+func GetInstance() *Config {
+	return configInstance
+}
+
+func AddQPSFlags(config *restclient.Config, qpsConfig QpsConfig) {
 	kubeConfigs := config.GetAllConfigs()
 	for _, kubeConfig := range kubeConfigs {
-		kubeConfig.ContentType = configInstance.Qps.ContentType
-		kubeConfig.QPS = configInstance.Qps.Qps
-		kubeConfig.Burst = configInstance.Qps.Burst
+		kubeConfig.ContentType = qpsConfig.ContentType
+		kubeConfig.QPS = qpsConfig.Qps
+		kubeConfig.Burst = qpsConfig.Burst
 	}
 }

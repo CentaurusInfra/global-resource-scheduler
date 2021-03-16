@@ -60,8 +60,7 @@ type DispatcherController struct {
 	// cluster mapping
 	clusters []string
 	// dispatcher list
-	dispatchers    []*dispatchercrdv1.Dispatcher
-	configfilepath string
+	dispatchers []*dispatchercrdv1.Dispatcher
 }
 
 // NewDispatcherController returns a new dispatcher controller
@@ -72,8 +71,7 @@ func NewDispatcherController(
 	dispatcherclient dispatcherclientset.Interface,
 	clusterclient clusterclientset.Interface,
 	dispatcherInformer dispatcherinformers.DispatcherInformer,
-	clusterInformer clusterinformers.ClusterInformer,
-	configfilepath string) *DispatcherController {
+	clusterInformer clusterinformers.ClusterInformer) *DispatcherController {
 
 	// Create event broadcaster
 	// Add sample-controller types to the default Kubernetes Scheme so Events can be
@@ -90,7 +88,6 @@ func NewDispatcherController(
 		clusterInformer:        clusterInformer.Informer(),
 		clusters:               make([]string, 0),
 		dispatchers:            make([]*dispatchercrdv1.Dispatcher, 0),
-		configfilepath:         configfilepath,
 	}
 
 	return controller
@@ -105,7 +102,7 @@ func (dc *DispatcherController) addDispatcher(obj interface{}) {
 			klog.Fatalf("Failed to balance the clusters among dispatchers with error %v", err)
 		} else {
 			go func() {
-				args := strings.Split(fmt.Sprintf("-config %s -ns %s -n %s -configfile %s", dc.kubeconfigfile, dispatcher.Namespace, dispatcher.Name, dc.configfilepath), " ")
+				args := strings.Split(fmt.Sprintf("-config %s -ns %s -n %s", dc.kubeconfigfile, dispatcher.Namespace, dispatcher.Name), " ")
 
 				//	Format the command
 				dir, err := filepath.Abs(filepath.Dir(os.Args[0]))

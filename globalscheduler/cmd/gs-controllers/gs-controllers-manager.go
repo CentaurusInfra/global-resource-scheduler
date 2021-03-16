@@ -56,7 +56,6 @@ func main() {
 	masterURL := flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	workers := flag.Int("concurrent-workers", 0, "The number of workers that are allowed to process concurrently.")
 	grpcHost := flag.String("grpchost", "127.0.0.1", "IP address of resource collector.")
-	configfile := flag.String("configfile", "", "The config path")
 	flag.Parse()
 	if *workers <= 0 {
 		*workers = defaultWorkers
@@ -100,7 +99,7 @@ func main() {
 	}
 	distributorFactory := distributorinformer.NewSharedInformerFactory(distributorClientset, 0)
 	distributorInformer := distributorFactory.Globalscheduler().V1().Distributors()
-	distributorController := distributor.NewController(*kubeconfig, kubeClientset, apiextensionsClient, distributorClientset, distributorInformer, *configfile)
+	distributorController := distributor.NewController(*kubeconfig, kubeClientset, apiextensionsClient, distributorClientset, distributorInformer)
 	err = distributorController.EnsureCustomResourceDefinitionCreation()
 	if err != nil {
 		klog.Fatalf("Error registering distributor: %v", err)
@@ -128,7 +127,7 @@ func main() {
 	}
 	dispatcherInformerFactory := dispatcherinformer.NewSharedInformerFactory(dispatcherClientset, time.Second*30)
 	dispatcherInformer := dispatcherInformerFactory.Globalscheduler().V1().Dispatchers()
-	dispatcherController := dispatcher.NewDispatcherController(*kubeconfig, kubeClientset, apiextensionsClient, dispatcherClientset, clusterClientset, dispatcherInformer, clusterInformer, *configfile)
+	dispatcherController := dispatcher.NewDispatcherController(*kubeconfig, kubeClientset, apiextensionsClient, dispatcherClientset, clusterClientset, dispatcherInformer, clusterInformer)
 	err = dispatcherController.CreateDispatcherCRD()
 	if err != nil {
 		klog.Fatalf("error - register dispatcher crd: %s", err.Error())
@@ -142,7 +141,7 @@ func main() {
 	}
 	schedulerInformerFactory := schedulerinformer.NewSharedInformerFactory(schedulerClientset, time.Second*30)
 	schedulerInformer := schedulerInformerFactory.Globalscheduler().V1().Schedulers()
-	schedulerController := scheduler.NewSchedulerController(kubeClientset, apiextensionsClient, schedulerClientset, clusterClientset, schedulerInformer, clusterInformer, *configfile)
+	schedulerController := scheduler.NewSchedulerController(kubeClientset, apiextensionsClient, schedulerClientset, clusterClientset, schedulerInformer, clusterInformer)
 	if err = schedulerController.CreateSchedulerCRD(); err != nil {
 		klog.Fatalf("error - register scheduler crd: %s", err.Error())
 	}

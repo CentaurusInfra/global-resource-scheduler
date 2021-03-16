@@ -80,7 +80,6 @@ type DistributorController struct {
 	// recorder is an event recorder for recording Event resources to the
 	// Kubernetes API.
 	recorder       record.EventRecorder
-	configfilepath string
 }
 
 // NewController returns a new  controller
@@ -89,8 +88,7 @@ func NewController(
 	kubeclientset kubernetes.Interface,
 	apiextensionsclientset apiextensionsclientset.Interface,
 	clientset distributorclientset.Interface,
-	distributorInformer distributorinformers.DistributorInformer,
-	configfilepath string) *DistributorController {
+	distributorInformer distributorinformers.DistributorInformer) *DistributorController {
 
 	utilruntime.Must(distributorscheme.AddToScheme(scheme.Scheme))
 	eventBroadcaster := record.NewBroadcaster()
@@ -108,7 +106,6 @@ func NewController(
 		synced:                 distributorInformer.Informer().HasSynced,
 		queue:                  que,
 		recorder:               recorder,
-		configfilepath:         configfilepath,
 	}
 
 	distributorInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -204,7 +201,7 @@ func (c *DistributorController) syncHandlerAndUpdate(key string) error {
 	if err != nil {
 		klog.Fatalf("Failed to rebalance the pod hashkey range in namespace %vs", namespace)
 	}
-	args := strings.Split(fmt.Sprintf("-config %s -ns %s -n %s -configfile %s", c.kubeconfigfile, namespace, distributorName, c.configfilepath), " ")
+	args := strings.Split(fmt.Sprintf("-config %s -ns %s -n %s", c.kubeconfigfile, namespace, distributorName), " ")
 	//	Format the command
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
