@@ -1,13 +1,13 @@
 Dispatcher:
   qps: 20
   burst: 40
-  contentTiype: application/vnd.kubernetes.protobuf
+  contentType: application/vnd.kubernetes.protobuf
 Distributor:
   qps: 20
   burst: 40
-  contentTiype: application/vnd.kubernetes.protobuf
+  contentType: application/vnd.kubernetes.protobuf
 Scheduler:
   qps: 20
   burst: 40
-  contentTiype: application/vnd.kubernetes.protobuf
+  contentType: application/vnd.kubernetes.protobuf
 
