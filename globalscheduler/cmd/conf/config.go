@@ -41,12 +41,12 @@ func newInstance() *Config {
 		var conf Config
 
 		if err := viper.ReadInConfig(); err != nil {
-			klog.Fatalf("Failed to read config file %s with the error %v", configFile, err)
+			klog.Warningf("Failed to read config file %s with the error %v", configFile, err)
 			return nil
 		}
 		err := viper.Unmarshal(&conf)
 		if err != nil {
-			klog.Fatalf("Failed to read config file %s with the error %v", configFile, err)
+			klog.Warningf("Failed to read config file %s with the error %v", configFile, err)
 			return nil
 		}
 		configInstance = &conf
