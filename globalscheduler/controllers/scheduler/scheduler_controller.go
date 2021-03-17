@@ -315,6 +315,7 @@ func (sc *SchedulerController) addScheduler(schedulerObj interface{}) {
 			klog.V(2).Infof("The scheduler %s has been balanced\n", scheduler.GetName())
 			sc.enqueue(schedulerObj, EventTypeCreateScheduler)
 		}
+
 	} else {
 		klog.Warningf("Failed to convert the added object %v to a scheduler", schedulerObj)
 	}

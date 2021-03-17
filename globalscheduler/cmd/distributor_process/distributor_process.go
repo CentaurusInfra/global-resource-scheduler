@@ -42,7 +42,7 @@ func main() {
 		klog.Fatal("Failed to load config %v with errors %v", *configFile, err)
 	}
 
-	conf.AddQPSFlags(config)
+	conf.AddQPSFlags(config, conf.GetInstance().Distributor)
 
 	quit := make(chan struct{})
 	defer close(quit)

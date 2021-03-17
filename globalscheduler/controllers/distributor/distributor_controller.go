@@ -49,6 +49,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -63,7 +64,7 @@ const (
 
 // Controller is the controller implementation for Foo resources
 type DistributorController struct {
-	configfile             string
+	kubeconfigfile         string
 	kubeclientset          kubernetes.Interface
 	apiextensionsclientset apiextensionsclientset.Interface
 	clientset              distributorclientset.Interface
@@ -78,12 +79,12 @@ type DistributorController struct {
 	queue workqueue.RateLimitingInterface
 	// recorder is an event recorder for recording Event resources to the
 	// Kubernetes API.
-	recorder record.EventRecorder
+	recorder       record.EventRecorder
 }
 
 // NewController returns a new  controller
 func NewController(
-	configfile string,
+	kubeconfigfile string,
 	kubeclientset kubernetes.Interface,
 	apiextensionsclientset apiextensionsclientset.Interface,
 	clientset distributorclientset.Interface,
@@ -97,7 +98,7 @@ func NewController(
 	que := workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Distributor")
 
 	distributorController := &DistributorController{
-		configfile:             configfile,
+		kubeconfigfile:         kubeconfigfile,
 		kubeclientset:          kubeclientset,
 		clientset:              clientset,
 		apiextensionsclientset: apiextensionsclientset,
@@ -200,8 +201,7 @@ func (c *DistributorController) syncHandlerAndUpdate(key string) error {
 	if err != nil {
 		klog.Fatalf("Failed to rebalance the pod hashkey range in namespace %vs", namespace)
 	}
-	args := strings.Split(fmt.Sprintf("-config %s -ns %s -n %s", c.configfile, namespace, distributorName), " ")
-
+	args := strings.Split(fmt.Sprintf("-config %s -ns %s -n %s", c.kubeconfigfile, namespace, distributorName), " ")
 	//	Format the command
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
@@ -209,6 +209,7 @@ func (c *DistributorController) syncHandlerAndUpdate(key string) error {
 	}
 
 	cmd := exec.Command(path.Join(dir, "distributor_process"), args...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 	cmd.Stdout = &out
