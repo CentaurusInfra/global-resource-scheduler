@@ -28,8 +28,40 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog"
+	//informers "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/informers/externalversions/cluster/v1"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	statusutil "k8s.io/kubernetes/pkg/util/pod"
+
+	//cluster
+	clusterv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
+	"k8s.io/kubernetes/pkg/controller"
+)
+
+const (
+	SuccessSynched         = "Synched"
+	MessageResourceSynched = "Cluster synced successfully"
+	ClusterKind            = "Cluster"
+	ClusterStatusCreated   = "Created"
+	ClusterStatusUpdated   = "Updated"
+	ClusterStatusDeleted   = "Deleted"
+)
+
+type EventType int
+
+const (
+	EventType_Create EventType = 0
+	EventType_Update EventType = 1
+	EventType_Delete EventType = 2
+)
+
+type KeyWithEventType struct {
+	EventType EventType
+	Key       string
+}
+
+const (
+	ClusterUpdateNo  int = 1
+	ClusterUpdateYes int = 2
 )
 
 // AddAllEventHandlers is a helper function used in tests and in Scheduler
@@ -85,6 +117,11 @@ func AddAllEventHandlers(sched *Scheduler) {
 			},
 		},
 	)
+	sched.ClusterInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc:    sched.addCluster,
+		UpdateFunc: sched.updateCluster,
+		DeleteFunc: sched.deleteCluster,
+	})
 }
 
 // needToSchedule selects pods that need to be scheduled
@@ -414,4 +451,95 @@ func (sched *Scheduler) bindToSite(clusterName string, assumedStack *types.Stack
 	//
 	//klog.Infof("Update pod status from %v to %v success", pod.Status, newStatus)
 	return nil
+}
+
+func (sched *Scheduler) addCluster(object interface{}) {
+	resource := object.(*clusterv1.Cluster)
+	clusterCopy := resource.DeepCopy()
+	if sched.verifyClusterInfo(clusterCopy) == false {
+		klog.Infof(" Cluster data is not correct: %v", clusterCopy)
+	}
+	key, err := controller.KeyFunc(object)
+	if err != nil {
+		utilruntime.HandleError(fmt.Errorf("couldn't get key for object: %v, error: %v", object, err))
+		return
+	}
+	sched.Enqueue(key, EventType_Create)
+	klog.Infof("Enqueue Create cluster: %v", key)
+}
+
+func (sched *Scheduler) updateCluster(oldObject, newObject interface{}) {
+	oldResource := oldObject.(*clusterv1.Cluster)
+	newResource := newObject.(*clusterv1.Cluster)
+	oldClusterCopy := oldResource.DeepCopy()
+	newClusterCopy := newResource.DeepCopy()
+	if sched.verifyClusterInfo(newClusterCopy) {
+		klog.Infof(" Cluster data is not correct: %v", newResource)
+	}
+	key1, err1 := controller.KeyFunc(oldObject)
+	key2, err2 := controller.KeyFunc(newObject)
+	if key1 == "" || key2 == "" || err1 != nil || err2 != nil {
+		klog.Errorf("Unexpected string in queue, discarding: %v", key2)
+		return
+	}
+
+	eventType, err := sched.determineEventType(oldClusterCopy, newClusterCopy)
+	if err != nil {
+		klog.Errorf("Unexpected string in queue, discarding: %v", key2)
+		return
+	}
+	switch eventType {
+	case ClusterUpdateNo:
+		{
+			klog.Infof("No actual change in clusters, discarding: %v", newClusterCopy.Name)
+			break
+		}
+	case ClusterUpdateYes:
+		{
+			sched.Enqueue(key2, EventType_Update)
+			klog.Infof("Enqueue Update Cluster: %v", key2)
+			break
+		}
+	default:
+		{
+			klog.Errorf("Unexpected cluster update event, discarding: %v", key2)
+			return
+		}
+	}
+}
+
+func (sched *Scheduler) deleteCluster(object interface{}) {
+	resource := object.(*clusterv1.Cluster)
+	clusterCopy := resource.DeepCopy()
+	if sched.verifyClusterInfo(clusterCopy) == false {
+		klog.Infof(" Cluster data is not correct: %v", clusterCopy)
+		return
+	}
+	key, err := controller.KeyFunc(object)
+	if err != nil {
+		utilruntime.HandleError(fmt.Errorf("couldn't get key for object: %v, error: %v", object, err))
+		return
+	}
+	sched.Enqueue(key, EventType_Delete)
+	klog.Infof("Enqueue Delete Cluster: %v", key)
+}
+
+// Enqueue puts key of the cluster object in the work queue
+// EventType: Create=0, Update=1, Delete=2
+func (sched *Scheduler) Enqueue(key string, eventType EventType) {
+	sched.ClusterQueue.Add(KeyWithEventType{Key: key, EventType: eventType})
+}
+
+func (sched *Scheduler) verifyClusterInfo(cluster *clusterv1.Cluster) (verified bool) {
+	verified = false
+	ipAddress := cluster.Spec.IpAddress
+	region := cluster.Spec.Region.Region
+	az := cluster.Spec.Region.AvailabilityZone
+	clusterName := cluster.Name
+	if ipAddress == "" || region == "" || az == "" || clusterName == "" {
+		klog.Infof("cluster ipAddress:%s, region:%s, az:%s, or custer name:%s is null", ipAddress, region, az, clusterName)
+		return verified
+	}
+	verified = true
+	return verified
 }

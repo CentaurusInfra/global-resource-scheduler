@@ -161,7 +161,7 @@ func main() {
 	//cluster
 	klog.Infof("Start cluster controller")
 	wg.Add(1)
-	clusterInformerFactory.Start(stopCh)
+	clusterInformerFactory.Start(stopCh) //perform go informer.Run(stopCh) internally
 	go clusterController.RunController(*workers, stopCh, &wg)
 	fmt.Println("cluster controller started")
 

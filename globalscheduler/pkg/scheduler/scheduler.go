@@ -25,6 +25,7 @@ import (
 	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/cmd/conf"
 	"math/rand"
+	"reflect"
 	"sort"
 	"sync"
 	"sync/atomic"
@@ -35,9 +36,9 @@ import (
 	clientset "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/algorithmprovider"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
+	//"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache"
+	//"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
+	//"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/factory"
@@ -50,29 +51,52 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/wait"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/workqueue"
+
+	//Cluster
+	//corev1 "k8s.io/api/core/v1"
+	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	///"k8s.io/apimachinery/pkg/util/wait"
+	//typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	clustercache "k8s.io/client-go/tools/cache"
+	//"k8s.io/client-go/tools/record"
+	clusterworkqueue "k8s.io/client-go/util/workqueue"
+	//grpc "k8s.io/kubernetes/globalscheduler/grpc/cluster"
+	clusterclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
+	clusterscheme "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned/scheme"
+	clusterinformers "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/informers/externalversions/cluster/v1"
+	clusterlisters "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/listers/cluster/v1"
+	clusterv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
+	//"k8s.io/kubernetes/pkg/controller"
+	externalinformers "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/informers/externalversions"
 )
 
-// single scheduler instance
-var scheduler *Scheduler
-var once sync.Once
+/*const (
+	SuccessSynched         = "Synched"
+	MessageResourceSynched = "Cluster synced successfully"
+	ClusterKind            = "Cluster"
+	ClusterStatusCreated   = "Created"
+	ClusterStatusUpdated   = "Updated"
+	ClusterStatusDeleted   = "Deleted"
+)
 
-// InitScheduler
-func InitScheduler(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}) error {
-	var err error
-	scheduler, err = NewScheduler(config, stopCh)
-	return err
+type EventType int
+
+const (
+	EventType_Create EventType = 0
+	EventType_Update EventType = 1
+	EventType_Delete EventType = 2
+)
+
+type KeyWithEventType struct {
+	EventType EventType
+	Key       string
 }
 
-// GetScheduler gets single scheduler instance. New Scheduler will only run once,
-// if it runs failed, nil will be return.
-func GetScheduler() *Scheduler {
-	if scheduler == nil {
-		klog.Errorf("Scheduler need to be init correctly")
-		return scheduler
-	}
-
-	return scheduler
-}
+const (
+	ClusterUpdateNo  int = 1
+	ClusterUpdateYes int = 2
+)*/
 
 // ScheduleResult represents the result of one pod scheduled. It will contain
 // the final selected Site, along with the selected intermediate information.
@@ -89,28 +113,21 @@ type ScheduleResult struct {
 // Scheduler watches for new unscheduled pods. It attempts to find
 // site that they fit on and writes bindings back to the api server.
 type Scheduler struct {
-	// Name of the current scheduler
-	SchedulerName string
+	SchedulerName           string                  // Name of the current scheduler
+	ResourceCollectorApiUrl string                  // Resource Collector API URL
+	SchedulerCache          internalcache.Cache     // Scheduler's internal cache such as SiteTree or SiteList
+	siteCacheInfoSnapshot   *internalcache.Snapshot // Sites' updated resource info cache
+	ConfigFilePath          string                  // scheduling plugins list config
 
-	// Resource Collector API URL
-	ResourceCollectorApiUrl string
+	StopEverything <-chan struct{} // Close this to shut down the scheduler.
 
-	// It is expected that changes made via SchedulerCache will be observed
-	// by NodeLister and Algorithm.
-	SchedulerCache internalcache.Cache
+	Plugins    *types.Plugins
+	SchedFrame interfaces.Framework // policy are the scheduling policy.
 
-	siteCacheInfoSnapshot *internalcache.Snapshot
-
-	// Close this to shut down the scheduler.
-	StopEverything <-chan struct{}
-
-	Plugins *types.Plugins
-	// policy are the scheduling policy.
-	SchedFrame interfaces.Framework
-
-	// queue for stacks that need scheduling
-	StackQueue      internalqueue.SchedulingQueue
-	PodInformer     coreinformers.PodInformer
+	StackQueue  internalqueue.SchedulingQueue // queue for stacks that need scheduling
+	PodInformer coreinformers.PodInformer
+	//PodSynced   cache.InformerSynced
+	//	PodQueue          	workqueue.RateLimitingInterface
 	Client          clientset.Interface
 	InformerFactory internalinformers.SharedInformerFactory
 
@@ -122,7 +139,122 @@ type Scheduler struct {
 
 	mu sync.RWMutex
 
-	ConfigFilePath string
+	//Cluster
+	KubeClientset          clientset.Interface //kubernetes.Interface
+	ApiextensionsClientset apiextensionsclientset.Interface
+	ClusterClientset       clusterclientset.Interface
+	ClusterInformerFactory externalinformers.SharedInformerFactory
+	ClusterInformer        clusterinformers.ClusterInformer
+	ClusterLister          clusterlisters.ClusterLister
+	ClusterSynced          clustercache.InformerSynced
+	ClusterQueue           clusterworkqueue.RateLimitingInterface
+}
+
+// single scheduler instance
+var scheduler *Scheduler
+var once sync.Once
+
+func NewScheduler(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}) (*Scheduler, error) {
+	stopEverything := stopCh
+	if stopEverything == nil {
+		stopEverything = wait.NeverStop
+	}
+
+	sched := &Scheduler{
+		SchedulerName:           config.SchedulerName,
+		ResourceCollectorApiUrl: config.ResourceCollectorApiUrl,
+		SchedulerCache:          internalcache.New(30*time.Second, stopEverything),
+		siteCacheInfoSnapshot:   internalcache.NewEmptySnapshot(),
+		ConfigFilePath:          config.ConfigFilePath,
+	}
+
+	err := sched.buildFramework()
+	if err != nil {
+		return nil, fmt.Errorf("buildFramework by %s failed! err: %v", types.SchedulerDefaultProviderName, err)
+	}
+
+	// init pod informers & cluster informers for scheduler
+	err = sched.initPodClusterInformers(stopEverything)
+	if err != nil {
+		return nil, err
+	}
+
+	// add event handler
+	AddAllEventHandlers(sched)
+	return sched, nil
+}
+
+// InitScheduler
+func InitScheduler(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}) error {
+	var err error
+	scheduler, err = NewScheduler(config, stopCh)
+	return err
+}
+
+// GetScheduler gets single scheduler instance. New Scheduler will only run once,
+// if it runs failed, nil will be return.
+func GetScheduler() *Scheduler {
+	if scheduler == nil {
+		klog.Errorf("Scheduler need to be init correctly")
+		return scheduler
+	}
+	return scheduler
+}
+
+// start Scheduler - server.go calls this function to start Scheduler
+func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
+	// start cluster informers
+	if sched.ClusterInformer != nil && sched.ClusterInformerFactory != nil {
+		//perform go informer.Run(stopCh) internally
+		sched.ClusterInformerFactory.Start(stopCh) //perform go informer.Run(stopCh) internally
+		// Wait for all caches to sync before scheduling.
+		sched.ClusterInformerFactory.WaitForCacheSync(stopCh)
+	}
+	// start pod informers
+	if sched.PodInformer != nil && sched.InformerFactory != nil {
+		//go sched.PodInformer.Informer().Run(stopCh2)
+		sched.InformerFactory.Start(stopCh) //perform go informer.Run(stopCh) internally
+		// Wait for all caches to sync before scheduling.
+		sched.InformerFactory.WaitForCacheSync(stopCh)
+	}
+	// Do scheduling
+	sched.Run(1, 1)
+}
+
+// Run begins watching and scheduling. It waits for cache to be synced, then starts scheduling
+// and blocked until the context is done.
+func (sched *Scheduler) Run(clusterWorkers int, podWorkers int) {
+	klog.Infof("Starting scheduler %s", sched.SchedulerName)
+	defer utilruntime.HandleCrash()
+
+	//cluster
+	defer sched.ClusterQueue.ShutDown()
+	klog.Infof("Waiting informer caches to sync")
+	if ok := clustercache.WaitForCacheSync(sched.StopEverything, sched.ClusterSynced); !ok {
+		klog.Errorf("failed to wait for caches to sync")
+	}
+	klog.Info("Starting cluster workers...")
+	//perform runworker function until stopCh is closed
+	for i := 0; i < clusterWorkers; i++ {
+		go wait.Until(sched.runClusterWorker, time.Second, sched.StopEverything)
+	}
+
+	//pod
+	//defer sched.StackQueue.ShutDown()
+	/*klog.Infof("Waiting informer caches to sync")
+	if ok := cache.WaitForCacheSync(sched.StopEverything, sched.PodSynced); !ok {
+		klog.Errorf("failed to wait for caches to sync")
+	}*/
+	klog.Info("Starting pod workers...")
+	//perform runworker function until stopCh is closed
+	for i := 0; i < podWorkers; i++ {
+		go wait.Until(sched.scheduleOne, time.Second, sched.StopEverything)
+	}
+	//go wait.Until(sched.scheduleOne, 0, sched.StopEverything)
+	klog.Info("Started cluster & pod workers")
+	<-sched.StopEverything
+	klog.Infof("Shutting down scheduler %s", sched.SchedulerName)
+	//return nil
 }
 
 // Cache returns the cache in scheduler for test to check the data in scheduler.
@@ -176,12 +308,6 @@ func (sched *Scheduler) generateAllocationFromStack(stack *types.Stack) (*types.
 	}
 
 	return allocation, nil
-}
-
-// Run begins watching and scheduling. It waits for cache to be synced, then starts scheduling
-// and blocked until the context is done.
-func (sched *Scheduler) Run() {
-	go wait.Until(sched.scheduleOne, 0, sched.StopEverything)
 }
 
 func (sched *Scheduler) GetResourceSnapshot(resourceCollectorApiUrl string) (internalcache.Snapshot, error) {
@@ -514,7 +640,6 @@ func (sched *Scheduler) Schedule(ctx context.Context, allocation *types.Allocati
 
 func (sched *Scheduler) buildFramework() error {
 	registry := frameworkplugins.NewRegistry()
-
 	policyFile := config.String(constants.ConfPolicyFile)
 	if policyFile == "" {
 		klog.Errorf("policyFile(%s) not set!", constants.ConfPolicyFile)
@@ -540,64 +665,51 @@ func (sched *Scheduler) buildFramework() error {
 	return nil
 }
 
-func NewScheduler(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}) (*Scheduler, error) {
-	stopEverything := stopCh
-	if stopEverything == nil {
-		stopEverything = wait.NeverStop
-	}
-
-	sched := &Scheduler{
-		SchedulerCache:          internalcache.New(30*time.Second, stopEverything),
-		siteCacheInfoSnapshot:   internalcache.NewEmptySnapshot(),
-		SchedulerName:           config.SchedulerName,
-		ResourceCollectorApiUrl: config.ResourceCollectorApiUrl,
-		ConfigFilePath:          config.ConfigFilePath,
-	}
-
-	err := sched.buildFramework()
-	if err != nil {
-		return nil, fmt.Errorf("buildFramework by %s failed! err: %v", types.SchedulerDefaultProviderName, err)
-	}
-
-	// init pod informers for scheduler
-	err = sched.initPodInformers(stopEverything)
-	if err != nil {
-		return nil, err
-	}
-
-	// add event handler
-	AddAllEventHandlers(sched)
-
-	return sched, nil
-}
-
 // initPodInformers init scheduler with podInformer
-func (sched *Scheduler) initPodInformers(stopCh <-chan struct{}) error {
+func (sched *Scheduler) initPodClusterInformers(stopCh <-chan struct{}) error {
 	masterURL := config.DefaultString("master", "127.0.0.1:8080")
 	kubeconfig := config.DefaultString("kubeconfig", "/var/run/kubernetes/admin.kubeconfig")
 
-	// init client
+	// init kubeclient
 	cfg, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
 	if err != nil {
 		return err
 	}
 	conf.AddQPSFlags(cfg, conf.GetInstance().Scheduler)
-
-	client, err := clientset.NewForConfig(cfg)
+	client, err := clientset.NewForConfig(cfg) //kubeclientset
 	if err != nil {
 		return err
 	}
 
+	//pod
 	sched.StackQueue = internalqueue.NewSchedulingQueue(stopCh, sched.SchedFrame)
 	sched.InformerFactory = internalinformers.NewSharedInformerFactory(client, 0)
 	sched.PodInformer = factory.NewPodInformer(sched.SchedulerName, client, 0)
 	sched.NextStack = internalqueue.MakeNextStackFunc(sched.StackQueue)
 	sched.Client = client
+
+	//cluster
+	// apiextensions clientset to create crd programmatically
+	apiextensionsClientset, err := apiextensionsclientset.NewForConfig(cfg)
+	if err != nil {
+		klog.Fatalf("error - building global scheduler apiextensions client: %s", err.Error())
+	}
+	clusterClientset, err := clusterclientset.NewForConfig(cfg)
+	if err != nil {
+		klog.Fatalf("Error building clusterclientset: %s", err.Error())
+	}
+	utilruntime.Must(clusterscheme.AddToScheme(clusterscheme.Scheme))
+	sched.ClusterInformerFactory = externalinformers.NewSharedInformerFactory(clusterClientset, 0)
+	sched.ClusterInformer = sched.ClusterInformerFactory.Globalscheduler().V1().Clusters()
+	sched.ApiextensionsClientset = apiextensionsClientset
+	sched.ClusterClientset = clusterClientset
+	sched.ClusterLister = sched.ClusterInformer.Lister()
+	sched.ClusterSynced = sched.ClusterInformer.Informer().HasSynced
+	sched.ClusterQueue = clusterworkqueue.NewNamedRateLimitingQueue(clusterworkqueue.DefaultControllerRateLimiter(), "Cluster")
 	return nil
 }
 
-// start Scheduler
-func (sched *Scheduler) StartPodInformerAndRun(stopCh <-chan struct{}) {
+/*func (sched *Scheduler) StartPodInformerAndRun(stopCh <-chan struct{}) {
 	go func(stopCh2 <-chan struct{}) {
 		// start pod informers
 		if sched.PodInformer != nil && sched.InformerFactory != nil {
@@ -612,10 +724,10 @@ func (sched *Scheduler) StartPodInformerAndRun(stopCh <-chan struct{}) {
 		}
 
 	}(stopCh)
-}
+}*/
 
 // start resource cache informer and run
-func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
+/*func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
 	go func(stopCh2 <-chan struct{}) {
 		// init informer
 		informers.InformerFac = informers.NewSharedInformerFactory(nil, 60*time.Second)
@@ -690,10 +802,10 @@ func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
 		}
 
 	}(stopCh)
-}
+}*/
 
 // update EipPools with sched cache
-func updateEipPools(obj []interface{}) {
+/*func updateEipPools(obj []interface{}) {
 	if obj == nil {
 		return
 	}
@@ -710,10 +822,10 @@ func updateEipPools(obj []interface{}) {
 			klog.Infof("UpdateEipPool failed! err: %s", err)
 		}
 	}
-}
+}*/
 
 // update VolumePools with sched cache
-func updateVolumePools(obj []interface{}) {
+/*func updateVolumePools(obj []interface{}) {
 	if obj == nil {
 		return
 	}
@@ -730,10 +842,10 @@ func updateVolumePools(obj []interface{}) {
 			klog.Infof("updateVolumePools failed! err: %s", err)
 		}
 	}
-}
+}*/
 
 // add site to cache
-func addSitesToCache(obj []interface{}) {
+/*func addSitesToCache(obj []interface{}) {
 	if obj == nil {
 		return
 	}
@@ -785,9 +897,9 @@ func addSitesToCache(obj []interface{}) {
 	}
 
 	scheduler.Cache().PrintString()
-}
+}*/
 
-func convertToSite(site typed.SiteInfo, siteResource typed.SiteResource) *types.Site {
+/*func convertToSite(site typed.SiteInfo, siteResource typed.SiteResource) *types.Site {
 	result := &types.Site{
 		SiteID:           site.SiteID,
 		ClusterName:      site.ClusterName,
@@ -810,4 +922,172 @@ func convertToSite(site typed.SiteInfo, siteResource typed.SiteResource) *types.
 
 	result.Hosts = append(result.Hosts, siteResource.Hosts...)
 	return result
+}*/
+
+// Run starts an asynchronous loop that detects events of cluster clusters.
+/*func (sched *Scheduler) ClusterRun(workers int, stopCh <-chan struct{}) error {
+	defer utilruntime.HandleCrash()
+	defer c.workqueue.ShutDown()
+	klog.Infof("Starting scheduler %s", SchedulerName)
+	klog.Infof("Waiting informer caches to synce")
+	if ok := cache.WaitForCacheSync(stopCh, sched.clusterSynced); !ok {
+		return fmt.Errorf("failed to wait for caches to sync")
+	}
+
+	klog.Info("Starting workers...")
+	//perform runworker function until stopCh is closed
+	for i := 0; i < workers; i++ {
+		go wait.Until(c.runWorker, time.Second, stopCh)
+	}
+	klog.Info("Started workers")
+	<-stopCh
+	klog.Infof("Shutting down cluster controller")
+	return nil
+} */
+
+func (sched *Scheduler) runClusterWorker() {
+	klog.Info("Starting a worker")
+	for sched.processNextClusterItem() {
+	}
+}
+
+func (sched *Scheduler) processNextClusterItem() bool {
+	workItem, shutdown := sched.ClusterQueue.Get()
+	if shutdown {
+		return false
+	}
+	klog.Infof("Process an item in work queue %v ", workItem)
+	eventKey := workItem.(KeyWithEventType)
+	key := eventKey.Key
+	defer sched.ClusterQueue.Done(key)
+	if err := sched.clusterSyncHandler(eventKey); err != nil {
+		sched.ClusterQueue.AddRateLimited(eventKey)
+		utilruntime.HandleError(fmt.Errorf("Handle %v of key %v failed with %v", "serivce", key, err))
+	}
+	sched.ClusterQueue.Forget(key)
+	klog.Infof("Successfully synced %s", key)
+	return true
+}
+
+func (sched *Scheduler) clusterSyncHandler(keyWithEventType KeyWithEventType) error {
+	if keyWithEventType.EventType < 0 {
+		err := fmt.Errorf("cluster event is not create, update, or delete")
+		return err
+	}
+	key := keyWithEventType.Key
+	klog.Infof("sync cache for key %v", key)
+	startTime := time.Now()
+	defer func() {
+		klog.V(4).Infof("Finished syncing  %q (%v)", key, time.Since(startTime))
+	}()
+	nameSpace, clusterName, err := clustercache.SplitMetaNamespaceKey(key)
+
+	//This performs controller logic such as gRPC handling
+	klog.Infof("gRPC processing - event: %v, cluster name: %v", keyWithEventType.EventType, clusterName)
+	result, err := sched.updateStaticSiteResourceInfo(key, keyWithEventType.EventType, nameSpace, clusterName)
+	if !result {
+		klog.Errorf("Failed a cluster processing - event: %v, key: %v, error: %v", keyWithEventType, key, err)
+		sched.ClusterQueue.AddRateLimited(keyWithEventType)
+	} else {
+		klog.Infof(" Processed a cluster: %v", key)
+		sched.ClusterQueue.Forget(key)
+	}
+	klog.Infof("Cluster was handled by ClusterController - event: %v, cluster name: %v", keyWithEventType.EventType, clusterName)
+	if keyWithEventType.EventType != EventType_Delete {
+		cluster, err := sched.ClusterLister.Clusters(nameSpace).Get(clusterName)
+		clusterCopy := cluster.DeepCopy()
+		clusterCopy.Status = "HandledByClusterController"
+		if err != nil || cluster == nil {
+			klog.Errorf("Failed to retrieve cluster in local cache by cluster name: %s", clusterName)
+			return err
+		}
+		//c.recorder.Event(clusterCopy, corev1.EventTypeNormal, SuccessSynched, MessageResourceSynched)
+	}
+	return nil
+}
+
+//This function determines if there is any actual change in cluster
+//to improve performance by avoiding unnecessary update
+func (sched *Scheduler) determineEventType(cluster1, cluster2 *clusterv1.Cluster) (event int, err error) {
+	clusterName1, clusterSpec1, clusterStatus1, err1 := sched.getclusterInfo(cluster1)
+	clusterName2, clusterSpec2, clusterStatus2, err2 := sched.getclusterInfo(cluster2)
+	if cluster1 == nil || cluster2 == nil || err1 != nil || err2 != nil {
+		err = fmt.Errorf("It cannot determine null clusters event type - cluster1: %v, cluster2:%v", cluster1, cluster2)
+		return
+	}
+	event = ClusterUpdateYes
+	if clusterName1 == clusterName2 && clusterStatus1 == clusterStatus2 && reflect.DeepEqual(clusterSpec1, clusterSpec2) == true {
+		event = ClusterUpdateNo
+	}
+	return
+}
+
+// Retrieve cluster info
+func (sched *Scheduler) getclusterInfo(cluster *clusterv1.Cluster) (clusterName string, clusterSpec clusterv1.ClusterSpec, clusterStatus string, err error) {
+	if cluster == nil {
+		err = fmt.Errorf("cluster is null")
+		return
+	}
+	clusterName = cluster.ObjectMeta.Name
+	if clusterName == "" {
+		err = fmt.Errorf("cluster name is not valid - %s", clusterName)
+		return
+	}
+	clusterSpec = cluster.Spec
+	clusterStatus = cluster.Status
+	return
+}
+
+//This is gRPC client, and performs controller logic including gRPC handling
+func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType, clusterNameSpace string, clusterName string) (response bool, err error) {
+	switch event {
+	case EventType_Create:
+		cluster, err := sched.ClusterLister.Clusters(clusterNameSpace).Get(clusterName)
+		clusterCopy := cluster.DeepCopy()
+		if err != nil || clusterCopy == nil {
+			klog.Errorf("Failed to retrieve cluster in local cache by cluster name: %s", clusterName)
+			return false, err
+		}
+		/*if c.grpcHost != "" {
+			klog.Infof("gRPC request - create a cluster, host: %v, cluster profile: %v", c.grpcHost, clusterCopy)
+			clusterCopy.Status = ClusterStatusCreated
+			response := grpc.GrpcSendClusterProfile(c.grpcHost, clusterCopy)
+			klog.Infof("gRPC response - create a cluster, response: %v", response)
+		}*/
+		break
+	case EventType_Update:
+		cluster, err := sched.ClusterLister.Clusters(clusterNameSpace).Get(clusterName)
+		clusterCopy := cluster.DeepCopy()
+		if err != nil || clusterCopy == nil {
+			klog.Errorf("Failed to retrieve cluster in local cache by cluster name - %s", clusterName)
+			return false, err
+		}
+		/*if c.grpcHost != "" {
+			clusterCopy.Status = ClusterStatusUpdated
+		}*/
+	case EventType_Delete:
+		//When deleting a cluster, API Server deletes the cluster before cluster controller watches the event.
+		//so, ClusterController cannot get the deleted cluster's info from etcd.
+		//To solve this issue, ClusterController stores/retrieve deleted cluster objects in a map named deletedClusters
+		//cluster := sched.deletedClusters[key]
+		cluster, err := sched.ClusterLister.Clusters(clusterNameSpace).Get(clusterName)
+		clusterCopy := cluster.DeepCopy()
+		if clusterCopy == nil {
+			klog.Errorf("Failed to retrieve cluster in map by cluster name - %s", clusterName)
+			return false, err
+		}
+		/*if c.grpcHost != "" {
+			klog.Infof("gRPC request - delete a cluster, host: %v, cluster profile: %v ", c.grpcHost, clusterCopy)
+			clusterCopy.Status = ClusterStatusDeleted
+			response := grpc.GrpcSendClusterProfile(c.grpcHost, clusterCopy)
+			delete(c.deletedClusters, key)
+			klog.Infof("gRPC response - delete a cluster, response: %v", response)
+		}*/
+		break
+	default:
+		klog.Infof("cluster event %v is not correct", event)
+		err = fmt.Errorf("cluster event %v is not correct", event)
+		return false, err
+	}
+	return true, nil
 }

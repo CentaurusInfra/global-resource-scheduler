@@ -78,8 +78,8 @@ func Run(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}) error {
 	}
 
 	// start scheduler pod informer and run
-	//sched.StartInformersAndRun(stopCh)
-	sched.StartPodInformerAndRun(stopCh)
+	sched.StartInformersAndRun(stopCh)
+	//sched.StartPodInformersAndRun(stopCh)
 
 	// start allocation API here
 	// StartAPI(stopCh)
