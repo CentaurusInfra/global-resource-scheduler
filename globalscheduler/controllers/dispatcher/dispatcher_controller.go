@@ -44,7 +44,7 @@ import (
 )
 
 type DispatcherController struct {
-	configfile string
+	kubeconfigfile string
 	// kubeclientset is a standard kubernetes clientset
 	kubeclientset          kubernetes.Interface
 	apiextensionsclientset apiextensionsclientset.Interface
@@ -65,7 +65,7 @@ type DispatcherController struct {
 
 // NewDispatcherController returns a new dispatcher controller
 func NewDispatcherController(
-	configfile string,
+	kubeconfigfile string,
 	kubeclientset kubernetes.Interface,
 	apiextensionsclientset apiextensionsclientset.Interface,
 	dispatcherclient dispatcherclientset.Interface,
@@ -79,7 +79,7 @@ func NewDispatcherController(
 	utilruntime.Must(dispatcherscheme.AddToScheme(scheme.Scheme))
 
 	controller := &DispatcherController{
-		configfile:             configfile,
+		kubeconfigfile:         kubeconfigfile,
 		kubeclientset:          kubeclientset,
 		apiextensionsclientset: apiextensionsclientset,
 		dispatcherclient:       dispatcherclient,
@@ -102,7 +102,7 @@ func (dc *DispatcherController) addDispatcher(obj interface{}) {
 			klog.Fatalf("Failed to balance the clusters among dispatchers with error %v", err)
 		} else {
 			go func() {
-				args := strings.Split(fmt.Sprintf("-config %s -ns %s -n %s", dc.configfile, dispatcher.Namespace, dispatcher.Name), " ")
+				args := strings.Split(fmt.Sprintf("-config %s -ns %s -n %s", dc.kubeconfigfile, dispatcher.Namespace, dispatcher.Name), " ")
 
 				//	Format the command
 				dir, err := filepath.Abs(filepath.Dir(os.Args[0]))

@@ -54,7 +54,6 @@ func (s *ServerRunOptions) Config() *types.GSSchedulerConfiguration {
 	if config.ResourceCollectorApiUrl == "" {
 		config.ResourceCollectorApiUrl = constants.DefaultResourceCollectorAPIURL
 	}
-
 	return config
 }
 

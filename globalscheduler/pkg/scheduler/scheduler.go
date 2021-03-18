@@ -23,6 +23,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"io/ioutil"
 	"k8s.io/klog"
+	"k8s.io/kubernetes/globalscheduler/cmd/conf"
 	"math/rand"
 	"sort"
 	"sync"
@@ -117,6 +118,8 @@ type Scheduler struct {
 	NextStack func() *types.Stack
 
 	mu sync.RWMutex
+
+	ConfigFilePath string
 }
 
 // Cache returns the cache in scheduler for test to check the data in scheduler.
@@ -545,6 +548,7 @@ func NewScheduler(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}
 		siteCacheInfoSnapshot:   internalcache.NewEmptySnapshot(),
 		SchedulerName:           config.SchedulerName,
 		ResourceCollectorApiUrl: config.ResourceCollectorApiUrl,
+		ConfigFilePath:          config.ConfigFilePath,
 	}
 
 	err := sched.buildFramework()
@@ -574,6 +578,7 @@ func (sched *Scheduler) initPodInformers(stopCh <-chan struct{}) error {
 	if err != nil {
 		return err
 	}
+	conf.AddQPSFlags(cfg, conf.GetInstance().Scheduler)
 
 	client, err := clientset.NewForConfig(cfg)
 	if err != nil {

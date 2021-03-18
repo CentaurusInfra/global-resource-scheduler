@@ -71,8 +71,6 @@ import (
 	utilflag "k8s.io/kubernetes/pkg/util/flag"
 	"k8s.io/kubernetes/pkg/version"
 	"k8s.io/kubernetes/pkg/version/verflag"
-
-	sc "k8s.io/kubernetes/globalscheduler/cmd/scheduler_process"
 )
 
 const (
@@ -517,8 +515,6 @@ func StartControllers(ctx ControllerContext, startSATokenController InitFunc, co
 		}
 		klog.Infof("Started %q", controllerName)
 	}
-
-	go sc.StartSchedulerController()
 
 	return nil
 }
