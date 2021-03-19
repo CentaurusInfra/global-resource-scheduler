@@ -193,17 +193,17 @@ type SpotResource struct {
 
 // Site struct
 type Site struct {
-	SiteID           string `json:"site_id"`
-	ClusterName      string `json:"cluster_name"`
-	ClusterNamespace string `json:"cluster_namespace"`
-	GeoLocation
-	RegionAzMap
-	Operator      string                  `json:"operator"`
-	Status        string                  `json:"status"`
-	SiteAttribute []*typed.SiteAttribute  `json:"site_attributes"`
-	EipTypeName   string                  `json:"eiptype_name"`
-	SpotResources map[string]SpotResource `json:"spot_resources"`
-	Hosts         []*typed.Host           `json:"-"`
+	SiteID           	string `json:"site_id"`
+	ClusterName      	string `json:"cluster_name"`
+	ClusterNamespace 	string `json:"cluster_namespace"`
+	GeoLocation			GeoLocation
+	RegionAzMap			RegionAzMap
+	Operator      		string                  `json:"operator"`
+	Status        		string                  `json:"status"`
+	SiteAttribute 		[]*typed.SiteAttribute  `json:"site_attributes"`
+	EipTypeName   		string                  `json:"eiptype_name"`
+	//SpotResources map[string]SpotResource `json:"spot_resources"`
+	//Hosts         []*typed.Host           `json:"-"`
 }
 
 func (sn *Site) Clone() *Site {
@@ -218,7 +218,7 @@ func (sn *Site) Clone() *Site {
 		EipTypeName:      sn.EipTypeName,
 	}
 
-	ret.Hosts = append(ret.Hosts, sn.Hosts...)
+	//ret.Hosts = append(ret.Hosts, sn.Hosts...)
 	return ret
 }
 
