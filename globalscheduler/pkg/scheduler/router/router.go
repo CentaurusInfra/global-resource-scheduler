@@ -65,4 +65,10 @@ var routes = Routes{
 		"/globalscheduler/v1/regionresources/{regionname}",
 		service.PushSnapshot,
 	},
+	Route{
+		"PushUpdatedResources",
+		strings.ToUpper("Post"),
+		"/regionresources",
+		service.PushRegionResources,
+	},
 }

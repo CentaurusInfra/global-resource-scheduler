@@ -24,13 +24,13 @@ metadata:
   labels:
     app: test
 spec:
-  ipaddress: "34.218.224.247"
+  ipaddress: "34.220.41.107"
   geolocation:
     city: "Renton"
     country: "USA"
   region:
     region: "NW"
-    availabilityzone: "az"
+    availabilityzone: "non-production-az"
   operator:
     operator: "None"
   flavors:

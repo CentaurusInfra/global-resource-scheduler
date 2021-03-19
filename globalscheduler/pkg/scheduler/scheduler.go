@@ -882,14 +882,3 @@ func (sched *Scheduler) UpdateRegionFlavor(region string, flavorId string) (err 
 	err = nil
 	return
 }
-
-//This function updates sites' dynamic resource informaton
-/*func (sched *Scheduler) UpdateSiteDynamicResource_Temp(region string, az string) (result string, err error) {
-	siteID := region + "--" + az
-	sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID].TotalResources[siteID] = &types.CPUAndMemory{VCPU: 3, Memory: 512}
-	sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID].TotalStorage["sas"] = 4086
-	sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID].TotalStorage["ssd"] = 4086
-	result = "ok"
-	err = nil
-	return
-}*/
