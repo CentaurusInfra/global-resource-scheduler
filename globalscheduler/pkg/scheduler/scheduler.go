@@ -78,33 +78,6 @@ import (
 	externalinformers "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/informers/externalversions"
 )
 
-/*const (
-	SuccessSynched         = "Synched"
-	MessageResourceSynched = "Cluster synced successfully"
-	ClusterKind            = "Cluster"
-	ClusterStatusCreated   = "Created"
-	ClusterStatusUpdated   = "Updated"
-	ClusterStatusDeleted   = "Deleted"
-)
-
-type EventType int
-
-const (
-	EventType_Create EventType = 0
-	EventType_Update EventType = 1
-	EventType_Delete EventType = 2
-)
-
-type KeyWithEventType struct {
-	EventType EventType
-	Key       string
-}
-
-const (
-	ClusterUpdateNo  int = 1
-	ClusterUpdateYes int = 2
-)*/
-
 // ScheduleResult represents the result of one pod scheduled. It will contain
 // the final selected Site, along with the selected intermediate information.
 type ScheduleResult struct {
@@ -1093,7 +1066,7 @@ func (sched *Scheduler) getclusterInfo(cluster *clusterv1.Cluster) (clusterName 
 	return
 }
 
-//This is gRPC client, and performs controller logic including gRPC handling
+//This function updates sites' static resource informaton
 func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType, clusterNameSpace string, clusterName string) (response bool, err error) {
 	switch event {
 	case EventType_Create:
@@ -1140,4 +1113,10 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 		return false, err
 	}
 	return true, nil
+}
+
+//This function updates sites' dynamic resource informaton
+func (sched *Scheduler) UpdateSiteDynamicResource(region, *resource) (result string, err error) {
+
+	return ("ok", nil)
 }

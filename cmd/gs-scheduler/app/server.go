@@ -81,6 +81,12 @@ func Run(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}) error {
 	sched.StartInformersAndRun(stopCh)
 	//sched.StartPodInformersAndRun(stopCh)
 
+	// start http server to provide resource information to the Scheduler
+	err = StartAPI(stopCh)
+	if err != nil {
+		return err
+	}
+
 	// start allocation API here
 	// StartAPI(stopCh)
 	select {

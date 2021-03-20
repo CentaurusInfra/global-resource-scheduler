@@ -34,6 +34,7 @@ import (
 )
 
 var conf archaius.ConfigurationFactory
+var GlobalConf *Config	//http server
 
 func Init() {
 	err := archaius.Init()
@@ -57,6 +58,9 @@ func Init() {
 		fmt.Printf("failed to AddFile %s, error: %+v\n", regionFilePath, err.Error())
 		os.Exit(1)
 	}
+
+	//http server
+	GlobalConf = readConf()
 }
 
 // String convert key to string
@@ -181,3 +185,20 @@ func InitPolicyFromFile(policyFile string, policy *types.Policy) error {
 	}
 	return nil
 }
+
+//http server
+type Config struct {
+	// HTTP Server
+	HttpAddr   string
+	HttpPort   int
+	APIVersion string
+}
+
+func readConf() *Config {
+	return &Config{
+		HttpAddr:   DefaultString("HttpAddr", "0.0.0.0"),
+		HttpPort:   DefaultInt("HttpPort", 8663),
+		APIVersion: DefaultString("APIVersion", "v1"), 
+	}
+}
+

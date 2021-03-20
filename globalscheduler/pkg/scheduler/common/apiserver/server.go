@@ -42,13 +42,15 @@ type HTTPServer struct {
 }
 
 func getServerAddress() string {
-	hostIP := config.DefaultString("address", "0.0.0.0")
+	//hostIP := config.DefaultString("address", "0.0.0.0")
+	hostIP := config.GlobalConf.HttpAddr
 	if hostIP == "" {
 		klog.Errorf("server IP address not configured.")
 		os.Exit(1)
 	}
 
-	port := config.DefaultInt("port", 8443)
+	//port := config.DefaultInt("port", 8443)
+	port := config.GlobalConf.HttpPort
 
 	return fmt.Sprintf("%s:%d", hostIP, port)
 }

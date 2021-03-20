@@ -411,3 +411,30 @@ type GSSchedulerConfiguration struct {
 	// Config file path
 	ConfigFilePath string
 }
+
+//Push site resources
+type AzCpuMem struct {
+	AvailabilityZone 	string	`json:"availabilityzone,omitempty"`
+	CpuCapacity 		string	`json:"cpucapacity,omitempty"`
+	MemCapacity 		string	`json:"memcapacity,omitempty"`
+}
+
+type Volume struct {
+	TypeId 				string	`json:"typeid,omitempty"`
+	StorageCapacity 	string	`json:"storagecapacity,omitempty"`
+}
+
+type SiteResource struct {
+	CPUMemResources    []AzCpuMem	`json:"cpumemresources,omitempty"`
+	VolumeResources	   []Volume		`json:"volumeresources,omitempty"`
+}
+
+// AllocationReq allocation request object
+type SiteResourceReq struct {
+	SiteResource SiteResource `json:"siteresource" required:"true"`
+}
+
+// AllocationReq allocation request object
+type SiteResourceRes struct {
+	Result string `json:"result",omitempty"`
+}
