@@ -415,13 +415,13 @@ type GSSchedulerConfiguration struct {
 //Push site resources
 type AzCpuMem struct {
 	AvailabilityZone 	string	`json:"availabilityzone,omitempty"`
-	CpuCapacity 		string	`json:"cpucapacity,omitempty"`
-	MemCapacity 		string	`json:"memcapacity,omitempty"`
+	CpuCapacity 		int64	`json:"cpucapacity,omitempty"`
+	MemCapacity 		int64	`json:"memcapacity,omitempty"`
 }
 
 type Volume struct {
 	TypeId 				string	`json:"typeid,omitempty"`
-	StorageCapacity 	string	`json:"storagecapacity,omitempty"`
+	StorageCapacity 	float64	`json:"storagecapacity,omitempty"`
 }
 
 type SiteResource struct {

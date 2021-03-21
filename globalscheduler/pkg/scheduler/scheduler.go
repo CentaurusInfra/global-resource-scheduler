@@ -1079,7 +1079,7 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 		klog.Infof("create a site static info, cluster profile: %v", clusterCopy)
 		clusterCopy.Status = ClusterStatusCreated
 		site := convertClusterToSite(clusterCopy)
-		sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID] = site		
+		sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].Site = site		
 		klog.Infof("created a site, site id: %v", site.SiteID)
 		break
 	case EventType_Update:
@@ -1117,6 +1117,17 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 
 //This function updates sites' dynamic resource informaton
 func (sched *Scheduler) UpdateSiteDynamicResource(region, *resource) (result string, err error) {
-
+	siteID := region+"--"+
+	for _, site := range *resource.CPUMemResources {
+		if ( site != nil) {
+			siteID = siteID+site.AvailabilityZone
+			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].TotalResources[types.ResourceCPU] = site.CpuCapacity
+			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].TotalResources[types.ResourceMemory] = site.MemCapacity
+			for _, storage := range *resource.VolumeResources {
+			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].TotalStorage[storage.TypeId] = storage.StorageCapacity 
+		}
+		siteCacheInfo := siteIDToInfo[site.SiteID]
+		siteCacheInfo.SetSite(site)
+	}
 	return ("ok", nil)
 }
