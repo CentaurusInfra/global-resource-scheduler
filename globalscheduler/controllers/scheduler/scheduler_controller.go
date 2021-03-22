@@ -18,6 +18,7 @@ package scheduler
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -27,6 +28,8 @@ import (
 	"k8s.io/kubernetes/globalscheduler/controllers/util"
 	clusterclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
 	schedulerclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 	"os/exec"
 	"sync"
 	"time"
@@ -248,6 +251,16 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		if err != nil {
 			return fmt.Errorf("start scheduler process failed")
 		}
+
+		// call resource collector API to send scheduler IP and Port
+		finalData, _ := json.Marshal(schedulerCopy)
+		schedulerEndpoint := "http://" + constants.DefaultResourceCollectorAPIURL + constants.SchedulerRegisterURL
+		resp, err := utils.SendHTTPRequest("Post", schedulerEndpoint, nil, bytes.NewBuffer(finalData), false)
+		if err != nil {
+			return err
+		}
+
+		defer resp.Body.Close()
 
 		//args := strings.Split(fmt.Sprintf("-n %s", name), " ")
 		//

@@ -410,4 +410,10 @@ type GSSchedulerConfiguration struct {
 
 	// Config file path
 	ConfigFilePath string
+
+	// Scheduler IpAddress
+	IpAddress string
+
+	// Scheduler PortNumber
+	PortNumber string
 }
