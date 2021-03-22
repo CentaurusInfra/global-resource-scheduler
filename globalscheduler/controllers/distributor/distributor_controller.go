@@ -79,7 +79,7 @@ type DistributorController struct {
 	queue workqueue.RateLimitingInterface
 	// recorder is an event recorder for recording Event resources to the
 	// Kubernetes API.
-	recorder       record.EventRecorder
+	recorder record.EventRecorder
 }
 
 // NewController returns a new  controller

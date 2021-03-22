@@ -22,6 +22,7 @@ import (
 	"sync"
 	"time"
 
+	schedulercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
@@ -30,7 +31,6 @@ import (
 	internalcache "k8s.io/kubernetes/resourcecollector/pkg/collector/internal/cache"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/rpcclient"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/siteinfo"
-	schedulercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
 )
 
 var collector *Collector
