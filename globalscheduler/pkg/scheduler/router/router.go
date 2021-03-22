@@ -89,8 +89,9 @@ var routes = Routes{
 	},
 	Route{
 		"PushSnapshot",
-		http.MethodPatch,
+		strings.ToUpper("Patch"),
+		//http.MethodPatch,
 		"/globalsheduler/v1/regionresources/regionname",
-		httpserver.PushSnapshot,
+		service.PushSnapshot,
 	},
 }

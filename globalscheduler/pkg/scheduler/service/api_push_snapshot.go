@@ -11,7 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package httpserver
+package service
 
 import (
 	"k8s.io/klog"
@@ -19,13 +19,13 @@ import (
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
-
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"github.com/emicklei/go-restful"
 )
 
 // Schedule get snapshot
 func PushSnapshot(req *restful.Request, resp *restful.Response) {
-	ctx := req.Request.Context()
+	//ctx := req.Request.Context()
 	resourceReq := new(types.SiteResourceReq)
 
 	region := req.PathParameter("regionname")
@@ -37,7 +37,7 @@ func PushSnapshot(req *restful.Request, resp *restful.Response) {
 	}
 	klog.Infof("SiteResourceReq : %s", utils.GetJSONString(resourceReq))
 	resource := resourceReq.SiteResource
-	result := types.ResourceResult{Result: "OK"}
+	//result := types.SiteResourceRes{Result: "OK"}
 	sched := scheduler.GetScheduler()
 	if sched == nil {
 		klog.Errorf("Scheduler is not init, please wait...")
@@ -51,6 +51,6 @@ func PushSnapshot(req *restful.Request, resp *restful.Response) {
 		return
 	}
 
-	resourceResp := types.SiteResourceRes{SiteResourceRes: result}
+	resourceResp := types.SiteResourceRes{Result: result}
 	resp.WriteHeaderAndEntity(http.StatusCreated, resourceResp)
 }

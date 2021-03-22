@@ -197,7 +197,7 @@ type Config struct {
 func readConf() *Config {
 	return &Config{
 		HttpAddr:   DefaultString("HttpAddr", "0.0.0.0"),
-		HttpPort:   DefaultInt("HttpPort", 8663),
+		HttpPort:   DefaultInt("HttpPort", 8661),
 		APIVersion: DefaultString("APIVersion", "v1"),
 	}
 }
