@@ -37,8 +37,8 @@ import (
 	//corev1 "k8s.io/api/core/v1"
 	internalinformers "k8s.io/client-go/informers"
 	coreinformers "k8s.io/client-go/informers/core/v1"
-	corelisters "k8s.io/client-go/listers/core/v1"
 	clientset "k8s.io/client-go/kubernetes"
+	corelisters "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/algorithmprovider"
 	//"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache"
@@ -104,11 +104,11 @@ type Scheduler struct {
 	Plugins    *types.Plugins
 	SchedFrame interfaces.Framework // policy are the scheduling policy.
 
-	StackQueue  internalqueue.SchedulingQueue // queue for stacks that need scheduling
+	StackQueue internalqueue.SchedulingQueue // queue for stacks that need scheduling
 	//PodInformer cache.PodInformer
 	PodInformer coreinformers.PodInformer
-	PodLister          corelisters.PodLister
-	PodSynced          cache.InformerSynced
+	PodLister   corelisters.PodLister
+	PodSynced   cache.InformerSynced
 	//PodSynced   cache.InformerSynced
 	//	PodQueue          	workqueue.RateLimitingInterface
 	Client          clientset.Interface
@@ -150,7 +150,7 @@ func NewScheduler(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}
 		SchedulerCache:          internalcache.New(30*time.Second, stopEverything),
 		siteCacheInfoSnapshot:   internalcache.NewEmptySnapshot(),
 		ConfigFilePath:          config.ConfigFilePath,
-		deletedClusters:		 make(map[string]string),
+		deletedClusters:         make(map[string]string),
 	}
 
 	err := sched.buildFramework()
@@ -214,7 +214,7 @@ func (sched *Scheduler) Run(clusterWorkers int, podWorkers int) {
 	defer utilruntime.HandleCrash()
 
 	//cluster
-	if (clusterWorkers > 0) {
+	if clusterWorkers > 0 {
 		defer sched.ClusterQueue.ShutDown()
 		klog.Infof("Waiting informer caches to sync")
 		if ok := cache.WaitForCacheSync(sched.StopEverything, sched.ClusterSynced); !ok {
@@ -225,7 +225,7 @@ func (sched *Scheduler) Run(clusterWorkers int, podWorkers int) {
 		for i := 0; i < clusterWorkers; i++ {
 			go wait.Until(sched.runClusterWorker, time.Second, sched.StopEverything)
 		}
-	}	
+	}
 
 	//pod
 	//defer sched.StackQueue.ShutDown()
@@ -472,7 +472,7 @@ func (sched *Scheduler) prioritizeSites(
 	result := make(interfaces.SiteScoreList, 0, len(sites))
 
 	for i := range sites {
-		result = append(result, interfaces.SiteScore{SiteID: sites[i].SiteID, AZ: sites[i].AvailabilityZone, Score: 0, Region: sites[i].Region})
+		result = append(result, interfaces.SiteScore{SiteID: sites[i].SiteID, AZ: sites[i].RegionAzMap.AvailabilityZone, Score: 0, Region: sites[i].RegionAzMap.Region})
 		for j := range scoresMap {
 			result[i].Score += scoresMap[j][i].Score
 		}
@@ -684,7 +684,7 @@ func (sched *Scheduler) initPodClusterInformers(stopCh <-chan struct{}) error {
 	sched.StackQueue = internalqueue.NewSchedulingQueue(stopCh, sched.SchedFrame)
 	sched.InformerFactory = internalinformers.NewSharedInformerFactory(client, 0)
 	//sched.PodInformer = factory.NewPodInformer(sched.SchedulerName, client, 0)
-//	sched.InformerFactory.InformerFor(&corev1.Pod{}, (sched.PodInformer).(*internalinformers.NewInformerFunc))
+	//	sched.InformerFactory.InformerFor(&corev1.Pod{}, (sched.PodInformer).(*internalinformers.NewInformerFunc))
 	//sched.InformerFactory.informers[v1.ResourcePods] = sched.PodInformer
 	//sched.InformerFactory.InformerFor(&corev1.Pod{}, sched.PodInformer)
 	//sched.PodInformer = sched.InformerFactory.NewPodInformer(sched.SchedulerName, client, 0)
@@ -699,10 +699,9 @@ func (sched *Scheduler) initPodClusterInformers(stopCh <-chan struct{}) error {
 
 	/*factory := informers.NewFilteredSharedInformerFactory(clientset, 0, "", func(o *metaV1.ListOptions) {
 		o.LabelSelector := "node-role.kubernetes.io/master="
-	})	
-	nodeInformer := factory.Core().V1().Nodes().Informer()	
+	})
+	nodeInformer := factory.Core().V1().Nodes().Informer()
 	i.lister = factory.Core().V1().Nodes().Lister()*/
-
 
 	/*func NewPodInformer(schedulerName string, client clientset.Interface,
 		resyncPeriod time.Duration) coreinformers.PodInformer {
@@ -733,7 +732,7 @@ func (sched *Scheduler) initPodClusterInformers(stopCh <-chan struct{}) error {
 	sched.ClusterLister = sched.ClusterInformer.Lister()
 	sched.ClusterSynced = sched.ClusterInformer.Informer().HasSynced
 	sched.ClusterQueue = clusterworkqueue.NewNamedRateLimitingQueue(clusterworkqueue.DefaultControllerRateLimiter(), "Cluster")
-	
+
 	return nil
 }
 
@@ -929,7 +928,7 @@ func (sched *Scheduler) initPodClusterInformers(stopCh <-chan struct{}) error {
 
 func convertClusterToSite(cluster *clusterv1.Cluster) *types.Site {
 	result := &types.Site{
-		SiteID:           cluster.Spec.Region.Region+"--"+cluster.Spec.Region.AvailabilityZone,
+		SiteID:           cluster.Spec.Region.Region + "--" + cluster.Spec.Region.AvailabilityZone,
 		ClusterName:      cluster.ObjectMeta.Name,
 		ClusterNamespace: cluster.ObjectMeta.Namespace,
 		GeoLocation: types.GeoLocation{
@@ -938,12 +937,14 @@ func convertClusterToSite(cluster *clusterv1.Cluster) *types.Site {
 			Area:     cluster.Spec.GeoLocation.Area,
 			Country:  cluster.Spec.GeoLocation.Country,
 		},
+		//Region:           cluster.Spec.Region.Region,
+		//AvailabilityZone: cluster.Spec.Region.AvailabilityZone,
 		RegionAzMap: types.RegionAzMap{
 			Region:           cluster.Spec.Region.Region,
 			AvailabilityZone: cluster.Spec.Region.AvailabilityZone,
 		},
-		Operator:      cluster.Spec.Operator.Operator,
-		EipTypeName:   cluster.Spec.EipCapacity,
+		Operator: cluster.Spec.Operator.Operator,
+		//EipTypeName:   cluster.Spec.EipCapacity,
 		Status:        cluster.Status,
 		SiteAttribute: nil,
 	}
@@ -1075,11 +1076,16 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 		if err != nil || clusterCopy == nil {
 			klog.Errorf("Failed to retrieve cluster in local cache by cluster name: %s", clusterName)
 			return false, err
-		}		
+		}
 		klog.Infof("create a site static info, cluster profile: %v", clusterCopy)
 		clusterCopy.Status = ClusterStatusCreated
 		site := convertClusterToSite(clusterCopy)
-		sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].Site = site		
+		siteCacheInfo := schedulersitecacheinfo.NewSiteCacheInfo()
+		siteCacheInfo.SetSite(site)
+		sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID] = siteCacheInfo
+		for _, flavor := range clusterCopy.Spec.Flavors {
+			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].AllocatableFlavor[flavor.FlavorID] = flavor.TotalCapacity
+		}
 		klog.Infof("created a site, site id: %v", site.SiteID)
 		break
 	case EventType_Update:
@@ -1092,7 +1098,12 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 		klog.Infof("update a site static info, cluster profile: %v", clusterCopy)
 		clusterCopy.Status = ClusterStatusUpdated
 		site := convertClusterToSite(clusterCopy)
-		sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID] = site		
+		siteCacheInfo := schedulersitecacheinfo.NewSiteCacheInfo()
+		siteCacheInfo.SetSite(site)
+		sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID] = siteCacheInfo
+		for _, flavor := range clusterCopy.Spec.Flavors {
+			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].AllocatableFlavor[flavor.FlavorID] = flavor.TotalCapacity
+		}
 		klog.Infof("created a site, site id: %v", site.SiteID)
 		break
 	case EventType_Delete:
@@ -1102,10 +1113,10 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 			klog.Errorf("Failed to retrieve cluster in map by cluster name - %s", clusterName)
 			return false, err
 		}
-		siteID := deletedClusters[key]		
-		delete(sched.siteCacheInfoSnapshot.SiteCacheInfoMap, siteID)	
-		delete(sched.deletedClusters, key)	
-		klog.Infof("created a site, site id: %v", site.SiteID)
+		siteID := sched.deletedClusters[key]
+		delete(sched.siteCacheInfoSnapshot.SiteCacheInfoMap, siteID)
+		delete(sched.deletedClusters, key)
+		klog.Infof("created a site, site id: %v", siteID)
 		break
 	default:
 		klog.Infof("cluster event %v is not correct", event)
@@ -1116,18 +1127,16 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 }
 
 //This function updates sites' dynamic resource informaton
-func (sched *Scheduler) UpdateSiteDynamicResource(region, *resource) (result string, err error) {
-	siteID := region+"--"+
-	for _, site := range *resource.CPUMemResources {
-		if ( site != nil) {
-			siteID = siteID+site.AvailabilityZone
-			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].TotalResources[types.ResourceCPU] = site.CpuCapacity
-			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].TotalResources[types.ResourceMemory] = site.MemCapacity
-			for _, storage := range *resource.VolumeResources {
-			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].TotalStorage[storage.TypeId] = storage.StorageCapacity 
+func (sched *Scheduler) UpdateSiteDynamicResource(region string, resource *types.SiteResource) (result string, err error) {
+	siteID := region + "--"
+	for _, site := range resource.CPUMemResources {
+		siteID = siteID + site.AvailabilityZone
+		sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID].TotalResources[siteID] = &types.CPUAndMemory{VCPU: site.CpuCapacity, Memory: site.MemCapacity}
+		for _, storage := range resource.VolumeResources {
+			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID].TotalStorage[storage.TypeId] = storage.StorageCapacity
 		}
-		siteCacheInfo := siteIDToInfo[site.SiteID]
-		siteCacheInfo.SetSite(site)
 	}
-	return ("ok", nil)
+	result = "ok"
+	err = nil
+	return
 }

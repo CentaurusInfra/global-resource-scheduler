@@ -88,10 +88,10 @@ func calculateStackStorageRequest(stack *types.Stack) map[string]int64 {
 }
 
 func getResourceType(flavorID string, siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) string {
-	flavor, ok := cache.FlavorCache.GetFlavor(flavorID, siteCacheInfo.GetSite().Region)
+	flavor, ok := cache.FlavorCache.GetFlavor(flavorID, siteCacheInfo.GetSite().RegionAzMap.Region)
 	if !ok {
 		for _, host := range siteCacheInfo.GetSite().Hosts {
-			if siteCacheInfo.GetSite().Region != flavor.Region {
+			if siteCacheInfo.GetSite().RegionAzMap.Region != flavor.Region {
 				continue
 			}
 			flavorExtraSpecs := flavor.OsExtraSpecs

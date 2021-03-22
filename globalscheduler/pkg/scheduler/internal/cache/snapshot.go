@@ -19,7 +19,7 @@ package cache
 
 import (
 	"fmt"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
+	//"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 
 	schedulerlisters "k8s.io/kubernetes/globalscheduler/pkg/scheduler/listers"
 	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
@@ -52,7 +52,7 @@ func NewEmptySnapshot() *Snapshot {
 }
 
 // NewSnapshot initializes a Snapshot struct and returns it.
-func NewSnapshot(stacks []*types.Stack, sites []*types.Site) *Snapshot {
+/*func NewSnapshot(stacks []*types.Stack, sites []*types.Site) *Snapshot {
 	siteCacheInfoMap := createSiteInfoCacheMap(stacks, sites)
 	siteCacheInfoList := make([]*schedulersitecacheinfo.SiteCacheInfo, 0, len(siteCacheInfoMap))
 	havePodsWithAffinitySiteCacheInfoList := make([]*schedulersitecacheinfo.SiteCacheInfo, 0, len(siteCacheInfoMap))
@@ -69,7 +69,7 @@ func NewSnapshot(stacks []*types.Stack, sites []*types.Site) *Snapshot {
 	s.HavePodsWithAffinitySiteCacheInfoList = havePodsWithAffinitySiteCacheInfoList
 
 	return s
-}
+}*/
 
 // createSiteInfoCacheMap obtains a list of pods and pivots that list into a map
 // where the keys are site names and the values are the aggregated information

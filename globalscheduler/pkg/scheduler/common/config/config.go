@@ -34,7 +34,7 @@ import (
 )
 
 var conf archaius.ConfigurationFactory
-var GlobalConf *Config	//http server
+var GlobalConf *Config //http server
 
 func Init() {
 	err := archaius.Init()
@@ -198,7 +198,6 @@ func readConf() *Config {
 	return &Config{
 		HttpAddr:   DefaultString("HttpAddr", "0.0.0.0"),
 		HttpPort:   DefaultInt("HttpPort", 8663),
-		APIVersion: DefaultString("APIVersion", "v1"), 
+		APIVersion: DefaultString("APIVersion", "v1"),
 	}
 }
-

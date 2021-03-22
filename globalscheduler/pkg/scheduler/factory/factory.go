@@ -66,4 +66,3 @@ func NewPodInformer(schedulerName string, client clientset.Interface,
 			cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}),
 	}
 }*/
-

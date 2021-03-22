@@ -190,13 +190,13 @@ func isComFlavorMatch(flavorMap map[string]int, siteCacheInfo *sitecacheinfo.Sit
 		totalCount, ok := siteCacheInfo.AllocatableFlavor[flavorID]
 		if !ok {
 			klog.Infof("Site (%s-%s) do not support required flavor (%s).",
-				siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().Region, flavorID)
+				siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().RegionAzMap.Region, flavorID)
 			return false, 0
 		}
 
 		if totalCount < int64(count) {
 			klog.Infof("Site (%s-%s) flavor (%s) support Count(%d), required Count(%d).",
-				siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().Region, flavorID, totalCount, count)
+				siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().RegionAzMap.Region, flavorID, totalCount, count)
 			return false, 0
 		}
 
@@ -217,7 +217,7 @@ func isSpotFlavorMatch(spotFlavorMap map[string]*spotHours, siteCacheInfo *sitec
 		spotFlv, ok := siteCacheInfo.AllocatableSpotFlavor[flavorID]
 		if !ok {
 			klog.Infof("Site (%s-%s) do not support required spot flavor (%s).",
-				siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().Region, flavorID)
+				siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().RegionAzMap.Region, flavorID)
 			return false, 0
 		}
 
@@ -235,14 +235,14 @@ func isSpotFlavorMatch(spotFlavorMap map[string]*spotHours, siteCacheInfo *sitec
 				cpuHourValue, ok := cpuResource.Finite[key]
 				if !ok {
 					klog.Infof("Site (%s-%s),flavor(%s), spot hours key(%s) not exist.",
-						siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().Region, flavorID, key)
+						siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().RegionAzMap.Region, flavorID, key)
 					return false, 0
 				}
 
 				if cpuHourValue < float32(value) {
 					klog.Infof("Site (%s-%s),flavor(%s), spot hours key(%s), "+
 						"totalCount: %f, requestCount: %d.",
-						siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().Region, flavorID, key, cpuHourValue, value)
+						siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().RegionAzMap.Region, flavorID, key, cpuHourValue, value)
 					return false, 0
 				}
 
@@ -251,14 +251,14 @@ func isSpotFlavorMatch(spotFlavorMap map[string]*spotHours, siteCacheInfo *sitec
 				memHourValue, ok := memResource.Finite[key]
 				if !ok {
 					klog.Infof("Site (%s-%s),flavor(%s), spot hours key(%s) not exist.",
-						siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().Region, flavorID, key)
+						siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().RegionAzMap.Region, flavorID, key)
 					return false, 0
 				}
 
 				if memHourValue < float32(value) {
 					klog.Infof("Site (%s-%s),flavor(%s), spot hours key(%s), "+
 						"totalCount: %f, requestCount: %d.",
-						siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().Region, flavorID, key, memHourValue, value)
+						siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().RegionAzMap.Region, flavorID, key, memHourValue, value)
 					return false, 0
 				}
 
@@ -276,14 +276,14 @@ func isSpotFlavorMatch(spotFlavorMap map[string]*spotHours, siteCacheInfo *sitec
 			}
 			if float32(requestSpot.Infinite) < cpuResource.Infinite {
 				klog.Infof("Site (%s-%s),flavor(%s), totalCount: %f, requestCount: %d.",
-					siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().Region, flavorID, cpuResource.Infinite, requestSpot.Infinite)
+					siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().RegionAzMap.Region, flavorID, cpuResource.Infinite, requestSpot.Infinite)
 				return false, 0
 			}
 			maxCount = math.Min(maxCount, float64(float32(requestSpot.Infinite)/cpuResource.Infinite))
 
 			if float32(requestSpot.Infinite) < memResource.Infinite {
 				klog.Infof("Site (%s-%s),flavor(%s), totalCount: %f, requestCount: %d.",
-					siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().Region, flavorID, memResource.Infinite, requestSpot.Infinite)
+					siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().RegionAzMap.Region, flavorID, memResource.Infinite, requestSpot.Infinite)
 				return false, 0
 			}
 
@@ -312,7 +312,7 @@ func (f *Flavor) Filter(ctx context.Context, cycleState *interfaces.CycleState, 
 	}
 
 	msg := fmt.Sprintf("Site (%s-%s) do not support required flavor (%+v).",
-		siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().Region, s.Aggregates)
+		siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().RegionAzMap.Region, s.Aggregates)
 	klog.Info(ctx, msg)
 	return interfaces.NewStatus(interfaces.Unschedulable, msg)
 }

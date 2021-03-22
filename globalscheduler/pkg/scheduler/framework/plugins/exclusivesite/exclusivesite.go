@@ -56,7 +56,7 @@ func (pl *ExclusiveSite) Filter(ctx context.Context, cycleState *interfaces.Cycl
 			allowDomainsSet := sets.NewString(allowDomains...)
 			if allowDomainsSet.Has(domainID) {
 				klog.Infof("Site(%s-%s) belong to domianID(%s)", siteCacheInfo.GetSite().SiteID,
-					siteCacheInfo.GetSite().Region, domainID)
+					siteCacheInfo.GetSite().RegionAzMap.Region, domainID)
 				return interfaces.NewStatus(interfaces.Unschedulable, "site is exclusive site.")
 			}
 

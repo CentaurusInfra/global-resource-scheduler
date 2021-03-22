@@ -51,13 +51,13 @@ func (b DefaultBinder) Name() string {
 // Bind binds pods to site using the k8s client.
 func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, stack *types.Stack,
 	siteCacheInfo *sitecacheinfo.SiteCacheInfo) *interfaces.Status {
-	region := siteCacheInfo.GetSite().Region
+	region := siteCacheInfo.GetSite().RegionAzMap.Region
 	resInfo := types.AllResInfo{CpuAndMem: map[string]types.CPUAndMemory{}, Storage: map[string]float64{}}
 	siteID := siteCacheInfo.Site.SiteID
 
 	stack.Selected.SiteID = siteID
 	stack.Selected.Region = region
-	stack.Selected.AvailabilityZone = siteCacheInfo.GetSite().AvailabilityZone
+	stack.Selected.AvailabilityZone = siteCacheInfo.GetSite().RegionAzMap.AvailabilityZone
 	stack.Selected.ClusterName = siteCacheInfo.Site.ClusterName
 	stack.Selected.ClusterNamespace = siteCacheInfo.Site.ClusterNamespace
 

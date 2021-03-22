@@ -54,13 +54,13 @@ func (pl *RegionAndAz) regionEqual(region types.CloudRegion, siteCacheInfo *site
 		return false
 	}
 
-	if region.Region != "" && region.Region != siteCacheInfo.GetSite().Region {
+	if region.Region != "" && region.Region != siteCacheInfo.GetSite().RegionAzMap.Region {
 		return false
 	}
 
 	if region.AvailabilityZone != nil && len(region.AvailabilityZone) > 0 {
 		azSets := sets.NewString(region.AvailabilityZone...)
-		if !azSets.Has(siteCacheInfo.GetSite().AvailabilityZone) {
+		if !azSets.Has(siteCacheInfo.GetSite().RegionAzMap.AvailabilityZone) {
 			return false
 		}
 	}
@@ -113,14 +113,14 @@ func (pl *RegionAndAz) Strategy(ctx context.Context, state *interfaces.CycleStat
 			continue
 		}
 
-		if _, ok := regionMap[siteCacheInfo.GetSite().Region]; !ok {
-			regionMap[siteCacheInfo.GetSite().Region] = RegionMap{count: 0, siteScoreList: interfaces.SiteScoreList{}}
+		if _, ok := regionMap[siteCacheInfo.GetSite().RegionAzMap.Region]; !ok {
+			regionMap[siteCacheInfo.GetSite().RegionAzMap.Region] = RegionMap{count: 0, siteScoreList: interfaces.SiteScoreList{}}
 		}
 
-		tempRegion := regionMap[siteCacheInfo.GetSite().Region]
+		tempRegion := regionMap[siteCacheInfo.GetSite().RegionAzMap.Region]
 		tempRegion.count += selectorInfo.StackMaxCount
 		tempRegion.siteScoreList = append(tempRegion.siteScoreList, siteScore)
-		regionMap[siteCacheInfo.GetSite().Region] = tempRegion
+		regionMap[siteCacheInfo.GetSite().RegionAzMap.Region] = tempRegion
 	}
 
 	var finalRegion string

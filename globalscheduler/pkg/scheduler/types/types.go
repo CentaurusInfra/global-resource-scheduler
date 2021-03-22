@@ -193,17 +193,17 @@ type SpotResource struct {
 
 // Site struct
 type Site struct {
-	SiteID           	string `json:"site_id"`
-	ClusterName      	string `json:"cluster_name"`
-	ClusterNamespace 	string `json:"cluster_namespace"`
-	GeoLocation			GeoLocation
-	RegionAzMap			RegionAzMap
-	Operator      		string                  `json:"operator"`
-	Status        		string                  `json:"status"`
-	SiteAttribute 		[]*typed.SiteAttribute  `json:"site_attributes"`
-	EipTypeName   		string                  `json:"eiptype_name"`
-	//SpotResources map[string]SpotResource `json:"spot_resources"`
-	//Hosts         []*typed.Host           `json:"-"`
+	SiteID           string `json:"site_id"`
+	ClusterName      string `json:"cluster_name"`
+	ClusterNamespace string `json:"cluster_namespace"`
+	GeoLocation      GeoLocation
+	RegionAzMap      RegionAzMap
+	Operator         string                  `json:"operator"`
+	Status           string                  `json:"status"`
+	SiteAttribute    []*typed.SiteAttribute  `json:"site_attributes"`
+	EipTypeName      string                  `json:"eiptype_name"`
+	SpotResources    map[string]SpotResource `json:"spot_resources"`
+	Hosts            []*typed.Host           `json:"-"`
 }
 
 func (sn *Site) Clone() *Site {
@@ -414,19 +414,19 @@ type GSSchedulerConfiguration struct {
 
 //Push site resources
 type AzCpuMem struct {
-	AvailabilityZone 	string	`json:"availabilityzone,omitempty"`
-	CpuCapacity 		int64	`json:"cpucapacity,omitempty"`
-	MemCapacity 		int64	`json:"memcapacity,omitempty"`
+	AvailabilityZone string `json:"availabilityzone,omitempty"`
+	CpuCapacity      int64  `json:"cpucapacity,omitempty"`
+	MemCapacity      int64  `json:"memcapacity,omitempty"`
 }
 
 type Volume struct {
-	TypeId 				string	`json:"typeid,omitempty"`
-	StorageCapacity 	float64	`json:"storagecapacity,omitempty"`
+	TypeId          string  `json:"typeid,omitempty"`
+	StorageCapacity float64 `json:"storagecapacity,omitempty"`
 }
 
 type SiteResource struct {
-	CPUMemResources    []AzCpuMem	`json:"cpumemresources,omitempty"`
-	VolumeResources	   []Volume		`json:"volumeresources,omitempty"`
+	CPUMemResources []AzCpuMem `json:"cpumemresources,omitempty"`
+	VolumeResources []Volume   `json:"volumeresources,omitempty"`
 }
 
 // AllocationReq allocation request object

@@ -90,7 +90,7 @@ var routes = Routes{
 	Route{
 		"PushSnapshot",
 		http.MethodPatch,
-		"/globalsheduler/v1/regionresources/{regionname}",
+		"/globalsheduler/v1/regionresources/regionname",
 		httpserver.PushSnapshot,
 	},
 }

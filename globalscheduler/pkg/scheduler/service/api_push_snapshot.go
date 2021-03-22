@@ -17,8 +17,8 @@ import (
 	"k8s.io/klog"
 	"net/http"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 
 	"github.com/emicklei/go-restful"
 )
@@ -29,7 +29,7 @@ func PushSnapshot(req *restful.Request, resp *restful.Response) {
 	resourceReq := new(types.SiteResourceReq)
 
 	region := req.PathParameter("regionname")
-	err := req.ReadEntity(&resourceReq) 
+	err := req.ReadEntity(&resourceReq)
 	if err != nil {
 		klog.Errorf("Failed to unmarshall allocation from request body, err: %s", err)
 		utils.WriteFailedJSONResponse(resp, http.StatusBadRequest, utils.RequestBodyParamInvalid(err.Error()))

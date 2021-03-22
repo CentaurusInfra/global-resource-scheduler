@@ -70,9 +70,9 @@ func AddAllEventHandlers(sched *Scheduler) {
 	// scheduled pod cache
 	sched.PodInformer.Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
-				AddFunc:    sched.addPodToCache,
-				UpdateFunc: sched.updatePodInCache,
-				DeleteFunc: sched.deletePodFromCache,
+			AddFunc:    sched.addPodToCache,
+			UpdateFunc: sched.updatePodInCache,
+			DeleteFunc: sched.deletePodFromCache,
 		})
 	/*sched.PodInformer.Informer().AddEventHandler(
 		cache.FilteringResourceEventHandler{
@@ -532,7 +532,7 @@ func (sched *Scheduler) deleteCluster(object interface{}) {
 		return
 	}
 	sched.Enqueue(key, EventType_Delete)
-	siteID := clusterCopy.Spec.Region.Region+"--"+clusterCopy.Spec.Region.AvailabilityZone,
+	siteID := clusterCopy.Spec.Region.Region + "--" + clusterCopy.Spec.Region.AvailabilityZone
 	sched.deletedClusters[key] = siteID
 	klog.Infof("Enqueue Delete Cluster: %v", key)
 }
