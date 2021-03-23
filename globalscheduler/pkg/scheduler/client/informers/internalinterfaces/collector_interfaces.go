@@ -18,6 +18,7 @@ limitations under the License.
 package internalinterfaces
 
 import (
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/siteinfo"
 )
 
@@ -26,4 +27,5 @@ type ResourceCollector interface {
 	StartInformersAndRun(stopCh <-chan struct{})
 	GetSiteInfos() *siteinfo.SiteInfoCache
 	RecordSiteUnreacheable(siteID, clusterNamespace, clusterName string)
+	GetClientSet(siteEndpoint string) (*cloudclient.ClientSet, error)
 }

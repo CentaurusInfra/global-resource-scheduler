@@ -2,7 +2,10 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "go_default_library",
-    srcs = ["clientset.go"],
+    srcs = [
+        "clientset.go",
+        "clientsetcache.go",
+    ],
     importpath = "k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient",
     visibility = ["//visibility:public"],
     deps = [

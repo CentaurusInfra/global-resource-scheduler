@@ -35,9 +35,6 @@ import (
 	clientset "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/algorithmprovider"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/factory"
@@ -614,6 +611,8 @@ func (sched *Scheduler) StartPodInformerAndRun(stopCh <-chan struct{}) {
 	}(stopCh)
 }
 
+// The following code is handled by ResourceCollector
+/*
 // start resource cache informer and run
 func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
 	go func(stopCh2 <-chan struct{}) {
@@ -624,11 +623,6 @@ func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
 		volumetypeInterval := config.DefaultInt(constants.ConfVolumeTypeInterval, 600)
 		informers.InformerFac.VolumeType(informers.VOLUMETYPE, "ID",
 			time.Duration(volumetypeInterval)*time.Second, nil).Informer()
-
-		// init site informer
-		//siteInfoInterval := config.DefaultInt(constants.ConfSiteInfoInterval, 600)
-		//informers.InformerFac.SiteInfo(informers.SITEINFOS, "SITEID",
-		//	time.Duration(siteInfoInterval)*time.Second).Informer()
 
 		// init flavor informer
 		flavorInterval := config.DefaultInt(constants.ConfFlavorInterval, 600)
@@ -811,3 +805,4 @@ func convertToSite(site typed.SiteInfo, siteResource typed.SiteResource) *types.
 	result.Hosts = append(result.Hosts, siteResource.Hosts...)
 	return result
 }
+*/

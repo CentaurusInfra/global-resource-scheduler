@@ -44,3 +44,15 @@ func (c *SiteInfoCache) RemoveSite(siteID string) {
 	delete(c.SiteInfoMap, siteID)
 	c.mutex.Unlock()
 }
+
+func (c *SiteInfoCache) GetAllSiteEndpoints() []string {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	ret := make([]string, 0, len(c.SiteInfoMap))
+	for _, siteInfo := range c.SiteInfoMap {
+		ret = append(ret, siteInfo.EipNetworkID)
+	}
+
+	return ret
+}

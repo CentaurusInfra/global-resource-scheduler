@@ -11,6 +11,7 @@ go_library(
     deps = [
         "//globalscheduler/pkg/scheduler/client:go_default_library",
         "//globalscheduler/pkg/scheduler/client/cache:go_default_library",
+        "//resourcecollector/pkg/collector/cloudclient:go_default_library",
         "//resourcecollector/pkg/collector/siteinfo:go_default_library",
     ],
 )
