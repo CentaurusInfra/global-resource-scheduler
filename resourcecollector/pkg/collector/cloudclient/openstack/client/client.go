@@ -17,9 +17,10 @@ limitations under the License.
 package client
 
 import (
+	"k8s.io/klog"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
-	"k8s.io/klog"
 )
 
 func NewComputeV2Client(provider *gophercloud.ProviderClient) (*gophercloud.ServiceClient, error) {

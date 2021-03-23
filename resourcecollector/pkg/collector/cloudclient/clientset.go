@@ -18,13 +18,16 @@ package cloudclient
 
 import (
 	"fmt"
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack"
-	"k8s.io/klog"
-	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient/openstack/client"
-	"k8s.io/kubernetes/resourcecollector/pkg/collector/common/config"
 	"regexp"
 	"strings"
+
+	"k8s.io/klog"
+
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack"
+
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient/openstack/client"
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/common/config"
 )
 
 type ClientSet struct {

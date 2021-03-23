@@ -22,13 +22,11 @@ import (
 	"k8s.io/klog"
 	"time"
 
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumetypes"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/internalinterfaces"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
-	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient"
-
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumetypes"
 )
 
 // InformerVolumeType provides access to a shared informer and lister for VolumeType.
@@ -69,7 +67,7 @@ func NewVolumeTypeInformer(client client.Interface, resyncPeriod time.Duration, 
 			var interfaceSlice []interface{}
 			// todo MultiExec
 			for _, info := range siteInfoCache.SiteInfoMap {
-				cloudClient, err := cloudclient.NewClientSet(info.EipNetworkID)
+				cloudClient, err := collector.GetClientSet(info.EipNetworkID)
 				if err != nil {
 					klog.Warningf("VolumeType.NewClientSet[%s] err: %s", info.EipNetworkID, err.Error())
 					continue
