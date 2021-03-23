@@ -29,7 +29,7 @@ import (
 	clusterclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
 	schedulerclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
+	"net/http"
 	"os/exec"
 	"sync"
 	"time"
@@ -255,11 +255,14 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		// call resource collector API to send scheduler IP and Port
 		finalData, _ := json.Marshal(schedulerCopy)
 		schedulerEndpoint := "http://" + constants.DefaultResourceCollectorAPIURL + constants.SchedulerRegisterURL
-		resp, err := utils.SendHTTPRequest("Post", schedulerEndpoint, nil, bytes.NewBuffer(finalData), false)
+		req, _ := http.NewRequest("POST", schedulerEndpoint, bytes.NewBuffer(finalData))
+		req.Header.Set("Content-Type", "application/json")
+		client := &http.Client{}
+		resp, err := client.Do(req)
 		if err != nil {
+			klog.V(3).Infof("HTTP Post Instance Request Failed: %v", err)
 			return err
 		}
-
 		defer resp.Body.Close()
 
 		//args := strings.Split(fmt.Sprintf("-n %s", name), " ")
