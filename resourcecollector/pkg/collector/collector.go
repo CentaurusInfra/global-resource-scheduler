@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"k8s.io/klog"
+	schedulercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
@@ -59,6 +60,7 @@ type Collector struct {
 	ResourceCache         internalcache.Cache
 	siteCacheInfoSnapshot *internalcache.Snapshot
 	SiteInfoCache         *siteinfo.SiteInfoCache
+	SchedulerInfoCache    []*schedulercrdv1.Scheduler
 
 	clientSetCache *cloudclient.ClientSetCache
 
@@ -72,6 +74,7 @@ func NewCollector(stopCh <-chan struct{}) (*Collector, error) {
 		ResourceCache:         internalcache.New(30*time.Second, stopCh),
 		siteCacheInfoSnapshot: internalcache.NewEmptySnapshot(),
 		SiteInfoCache:         siteinfo.NewSiteInfoCache(),
+		SchedulerInfoCache:    make([]*schedulercrdv1.Scheduler, 0),
 
 		clientSetCache: cloudclient.NewClientSetCache(),
 
@@ -141,6 +144,10 @@ func (c *Collector) GetSnapshot() (*internalcache.Snapshot, error) {
 		return nil, err
 	}
 	return c.siteCacheInfoSnapshot, nil
+}
+
+func (c *Collector) GetSchedulerInfoCache() []*schedulercrdv1.Scheduler {
+	return c.SchedulerInfoCache
 }
 
 // start resource cache informer and run

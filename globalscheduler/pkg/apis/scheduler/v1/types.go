@@ -51,6 +51,10 @@ type SchedulerSpec struct {
 	Cluster []string `json:"cluster"`
 
 	Union ClusterUnion `json:"union"`
+
+	IpAddress string `json:"ipAddress"`
+
+	PortNumber string `json:"portNumber"`
 }
 
 type GeolocationInfo struct {

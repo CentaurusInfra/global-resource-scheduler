@@ -18,6 +18,7 @@ package scheduler
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -27,6 +28,8 @@ import (
 	"k8s.io/kubernetes/globalscheduler/controllers/util"
 	clusterclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
 	schedulerclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
+	"net/http"
 	"os/exec"
 	"sync"
 	"time"
@@ -243,11 +246,24 @@ func (sc *SchedulerController) syncHandler(key *KeyWithEventType) error {
 		//}
 
 		// Start Scheduler Process
-		command := "./hack/globalscheduler/start_scheduler.sh " + schedulerCopy.Spec.Tag + " " + schedulerCopy.Name
+		command := "./hack/globalscheduler/start_scheduler.sh " + schedulerCopy.Spec.Tag + " " + schedulerCopy.Name + " " + schedulerCopy.Spec.IpAddress + " " + schedulerCopy.Spec.PortNumber
 		err = runCommand(command)
 		if err != nil {
 			return fmt.Errorf("start scheduler process failed")
 		}
+
+		// call resource collector API to send scheduler IP and Port
+		finalData, _ := json.Marshal(schedulerCopy)
+		schedulerEndpoint := "http://" + constants.DefaultResourceCollectorAPIURL + constants.SchedulerRegisterURL
+		req, _ := http.NewRequest("POST", schedulerEndpoint, bytes.NewBuffer(finalData))
+		req.Header.Set("Content-Type", "application/json")
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			klog.V(3).Infof("HTTP Post Instance Request Failed: %v", err)
+			return err
+		}
+		defer resp.Body.Close()
 
 		//args := strings.Split(fmt.Sprintf("-n %s", name), " ")
 		//

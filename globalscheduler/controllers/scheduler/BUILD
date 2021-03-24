@@ -22,6 +22,7 @@ go_library(
         "//globalscheduler/pkg/apis/scheduler/client/informers/externalversions/scheduler/v1:go_default_library",
         "//globalscheduler/pkg/apis/scheduler/client/listers/scheduler/v1:go_default_library",
         "//globalscheduler/pkg/apis/scheduler/v1:go_default_library",
+        "//globalscheduler/pkg/scheduler/common/constants:go_default_library",
         "//staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1:go_default_library",
         "//staging/src/k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset:go_default_library",
         "//staging/src/k8s.io/apimachinery/pkg/api/errors:go_default_library",
