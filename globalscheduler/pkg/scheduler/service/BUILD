@@ -4,6 +4,7 @@ go_library(
     name = "go_default_library",
     srcs = [
         "api_allocation.go",
+        "api_push_snapshot.go",
         "checkUtils.go",
     ],
     importpath = "k8s.io/kubernetes/globalscheduler/pkg/scheduler/service",

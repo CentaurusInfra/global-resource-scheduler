@@ -132,7 +132,7 @@ func getRegionFlavors(region string, client *gophercloud.ServiceClient) ([]typed
 			},
 		}
 		regionFlv := typed.RegionFlavor{
-			RegionFlavorID: region + "|" + flavor.Name,
+			RegionFlavorID: region + "--" + flavor.Name,
 			Region:         region,
 			Flavor:         flv,
 		}

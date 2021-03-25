@@ -34,7 +34,6 @@ import (
 	//metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	//corev1 "k8s.io/api/core/v1"
-	//corev1 "k8s.io/api/core/v1"
 	internalinformers "k8s.io/client-go/informers"
 	coreinformers "k8s.io/client-go/informers/core/v1"
 	clientset "k8s.io/client-go/kubernetes"
@@ -43,10 +42,11 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/algorithmprovider"
 	//"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache"
 	//"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
-	//"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
 	//"k8s.io/kubernetes/globalscheduler/pkg/scheduler/factory"
+	cache "k8s.io/client-go/tools/cache"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	frameworkplugins "k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins"
 	internalcache "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache"
@@ -56,9 +56,6 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/wait"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/workqueue"
-
-	//
-	cache "k8s.io/client-go/tools/cache"
 	//Cluster
 
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -109,7 +106,6 @@ type Scheduler struct {
 	PodInformer coreinformers.PodInformer
 	PodLister   corelisters.PodLister
 	PodSynced   cache.InformerSynced
-	//PodSynced   cache.InformerSynced
 	//	PodQueue          	workqueue.RateLimitingInterface
 	Client          clientset.Interface
 	InformerFactory internalinformers.SharedInformerFactory
@@ -158,6 +154,7 @@ func NewScheduler(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}
 		return nil, fmt.Errorf("buildFramework by %s failed! err: %v", types.SchedulerDefaultProviderName, err)
 	}
 
+	sched.UpdateFlavor()
 	// init pod informers & cluster informers for scheduler
 	err = sched.initPodClusterInformers(stopEverything)
 	if err != nil {
@@ -331,14 +328,16 @@ func (sched *Scheduler) GetResourceSnapshot(resourceCollectorApiUrl string) (int
 	}
 
 	// update flavor map
+	//internalcache.FlavorCache.UpdateFlavorMap(snapshot.RegionFlavorMap, snapshot.FlavorMap)
 	internalcache.FlavorCache.UpdateFlavorMap(snapshot.RegionFlavorMap, snapshot.FlavorMap)
-
+	///sched.siteCacheInfoSnapshot
 	klog.Infof("snapshot : %v", snapshot)
 	return snapshot, nil
 }
 
 func (sched *Scheduler) updateSnapshot() error {
 	snapshot, err := sched.GetResourceSnapshot(sched.ResourceCollectorApiUrl)
+
 	if err != nil {
 		return err
 	}
@@ -387,15 +386,22 @@ func (sched *Scheduler) stackPassesFiltersOnSite(
 // findSitesThatPassFilters finds the site that fit the filter plugins.
 func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *interfaces.CycleState,
 	stack *types.Stack, statuses interfaces.SiteToStatusMap) ([]*types.Site, error) {
-	allSiteCacheInfos, err := sched.siteCacheInfoSnapshot.SiteCacheInfos().List()
-	if err != nil {
-		return nil, err
+	///allSiteCacheInfos, err := sched.siteCacheInfoSnapshot.SiteCacheInfos().List()
+	siteID := stack.Selector.SiteID
+	var allSiteCacheInfos [1]*schedulersitecacheinfo.SiteCacheInfo
+	klog.Infof("sched.siteCacheInfoSnapshot.SiteCacheInfoMap ==> %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
+	if sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID] == nil {
+		return nil, nil
 	}
+	klog.Infof("siteID ==> %v", siteID)
+	allSiteCacheInfos[0] = sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID]
+	/*(if allSiteCacheInfos == nil {
+		return nil, err
+	}*/
 
 	// Create filtered list with enough space to avoid growing it
 	// and allow assigning.
 	filtered := make([]*types.Site, len(allSiteCacheInfos))
-
 	if !sched.SchedFrame.HasFilterPlugins() {
 		for i := range filtered {
 			filtered[i] = allSiteCacheInfos[i].GetSite()
@@ -539,12 +545,15 @@ func (sched *Scheduler) Schedule(ctx context.Context, allocation *types.Allocati
 	// 1. Snapshot site resource cache
 	start := time.Now()
 	klog.Infof("[START] snapshot site...")
-	err = sched.updateSnapshot()
+
+	internalcache.FlavorCache.UpdateFlavorMap(sched.siteCacheInfoSnapshot.RegionFlavorMap, sched.siteCacheInfoSnapshot.FlavorMap)
+
+	/*err = sched.updateSnapshot()
 	if err != nil {
 		klog.Errorf("sched snapshot failed! err : %s", err)
 		return result, err
-	}
-	klog.Infof("[DONE] snapshot site, use_time: %s", time.Since(start).String())
+	}*/
+	//klog.Infof("[DONE] snapshot site, use_time: %s", time.Since(start).String())
 
 	// 2. Run "prefilter" plugins.
 	start = time.Now()
@@ -1030,7 +1039,6 @@ func (sched *Scheduler) clusterSyncHandler(keyWithEventType KeyWithEventType) er
 			klog.Errorf("Failed to retrieve cluster in local cache by cluster name: %s", clusterName)
 			return err
 		}
-		//c.recorder.Event(clusterCopy, corev1.EventTypeNormal, SuccessSynched, MessageResourceSynched)
 	}
 	return nil
 }
@@ -1081,12 +1089,16 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 		clusterCopy.Status = ClusterStatusCreated
 		site := convertClusterToSite(clusterCopy)
 		siteCacheInfo := schedulersitecacheinfo.NewSiteCacheInfo()
-		siteCacheInfo.SetSite(site)
+		//siteCacheInfo.SetSite(site)
+		siteCacheInfo.Site = site
 		sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID] = siteCacheInfo
 		for _, flavor := range clusterCopy.Spec.Flavors {
 			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].AllocatableFlavor[flavor.FlavorID] = flavor.TotalCapacity
+			sched.UpdateRegionFlavor(clusterCopy.Spec.Region.Region, flavor.FlavorID)
 		}
-		klog.Infof("created a site, site id: %v", site.SiteID)
+		//klog.Infof("created a site, site id - site: %v", site.SiteID)
+		klog.Infof("created a site, site id - site: %v", *(sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].Site))
+		klog.Infof("created a site, site id - map: %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID])
 		break
 	case EventType_Update:
 		cluster, err := sched.ClusterLister.Clusters(clusterNameSpace).Get(clusterName)
@@ -1099,10 +1111,12 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 		clusterCopy.Status = ClusterStatusUpdated
 		site := convertClusterToSite(clusterCopy)
 		siteCacheInfo := schedulersitecacheinfo.NewSiteCacheInfo()
-		siteCacheInfo.SetSite(site)
+		//siteCacheInfo.SetSite(site)
+		siteCacheInfo.Site = site
 		sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID] = siteCacheInfo
 		for _, flavor := range clusterCopy.Spec.Flavors {
 			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].AllocatableFlavor[flavor.FlavorID] = flavor.TotalCapacity
+			sched.UpdateRegionFlavor(clusterCopy.Spec.Region.Region, flavor.FlavorID)
 		}
 		klog.Infof("created a site, site id: %v", site.SiteID)
 		break
@@ -1137,6 +1151,123 @@ func (sched *Scheduler) UpdateSiteDynamicResource(region string, resource *types
 		}
 	}
 	result = "ok"
+	err = nil
+	return
+}
+
+//This function updates sites' flavor
+func (sched *Scheduler) UpdateFlavor() (err error) {
+	if sched.siteCacheInfoSnapshot.FlavorMap == nil {
+		sched.siteCacheInfoSnapshot.FlavorMap = make(map[string]*typed.RegionFlavor)
+	}
+	flavor42 := &typed.RegionFlavor{
+		RegionFlavorID: "42",
+		Region: "",
+		Flavor: typed.Flavor{
+			ID: "42",
+
+			// Specifies the name of the ECS specifications.
+			Name: "42",
+
+			// Specifies the number of CPU cores in the ECS specifications.
+			Vcpus: "1",
+
+			// Specifies the memory size (MB) in the ECS specifications.
+			Ram: 128,
+
+			// Specifies the system disk size in the ECS specifications.
+			// The value 0 indicates that the disk size is not limited.
+			Disk: "0",
+
+			/*// Specifies shortcut links for ECS flavors.
+			Links []Link `json:"links"`
+
+			// Specifies extended ECS specifications.
+			OsExtraSpecs OsExtraSpecs `json:"os_extra_specs"`
+
+			// Reserved
+			Swap string `json:"swap"`
+
+			// Reserved
+			FlvEphemeral int64 `json:"OS-FLV-EXT-DATA:ephemeral"`
+
+			// Reserved
+			FlvDisabled bool `json:"OS-FLV-DISABLED:disabled"`
+
+			// Reserved
+			RxtxFactor int64 `json:"rxtx_factor"`
+
+			// Reserved
+			RxtxQuota string `json:"rxtx_quota"`
+
+			// Reserved
+			RxtxCap string `json:"rxtx_cap"`
+
+			// Reserved
+			AccessIsPublic bool `json:"os-flavor-access:is_public"`*/
+		},
+	}
+	flavor1 := &typed.RegionFlavor{
+		RegionFlavorID: "1",
+		Region: "",
+		Flavor: typed.Flavor{
+			ID: "1",
+
+			// Specifies the name of the ECS specifications.
+			Name: "1",
+
+			// Specifies the number of CPU cores in the ECS specifications.
+			Vcpus: "1",
+
+			// Specifies the memory size (MB) in the ECS specifications.
+			Ram: 512,
+
+			// Specifies the system disk size in the ECS specifications.
+			// The value 0 indicates that the disk size is not limited.
+			Disk: "0",
+
+			/*// Specifies shortcut links for ECS flavors.
+			Links []Link `json:"links"`
+
+			// Specifies extended ECS specifications.
+			OsExtraSpecs OsExtraSpecs `json:"os_extra_specs"`
+
+			// Reserved
+			Swap string `json:"swap"`
+
+			// Reserved
+			FlvEphemeral int64 `json:"OS-FLV-EXT-DATA:ephemeral"`
+
+			// Reserved
+			FlvDisabled bool `json:"OS-FLV-DISABLED:disabled"`
+
+			// Reserved
+			RxtxFactor int64 `json:"rxtx_factor"`
+
+			// Reserved
+			RxtxQuota string `json:"rxtx_quota"`
+
+			// Reserved
+			RxtxCap string `json:"rxtx_cap"`
+
+			// Reserved
+			AccessIsPublic bool `json:"os-flavor-access:is_public"`*/
+		},
+	}
+	sched.siteCacheInfoSnapshot.FlavorMap["42"] = flavor42
+	sched.siteCacheInfoSnapshot.FlavorMap["1"] = flavor1
+	err = nil
+	return
+}
+
+//This function updates sites' flavor
+func (sched *Scheduler) UpdateRegionFlavor(region string, flavorId string) (err error) {
+	regionFlavorId := region + "--" + flavorId
+	flavor := sched.siteCacheInfoSnapshot.FlavorMap[flavorId]
+	if sched.siteCacheInfoSnapshot.RegionFlavorMap == nil {
+		sched.siteCacheInfoSnapshot.RegionFlavorMap = make(map[string]*typed.RegionFlavor)
+	}
+	sched.siteCacheInfoSnapshot.RegionFlavorMap[regionFlavorId] = flavor
 	err = nil
 	return
 }

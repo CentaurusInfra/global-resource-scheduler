@@ -325,7 +325,6 @@ func (n *SiteCacheInfo) updateFlavor() {
 
 		n.AllocatableFlavor[flv.ID] += count
 	}
-
 }
 
 // SetSite sets the overall Site information.

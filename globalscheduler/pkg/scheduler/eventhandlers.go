@@ -68,13 +68,13 @@ const (
 // to add event handlers for various informers.
 func AddAllEventHandlers(sched *Scheduler) {
 	// scheduled pod cache
-	sched.PodInformer.Informer().AddEventHandler(
-		cache.ResourceEventHandlerFuncs{
-			AddFunc:    sched.addPodToCache,
-			UpdateFunc: sched.updatePodInCache,
-			DeleteFunc: sched.deletePodFromCache,
-		})
 	/*sched.PodInformer.Informer().AddEventHandler(
+	cache.ResourceEventHandlerFuncs{
+		AddFunc:    sched.addPodToCache,
+		UpdateFunc: sched.updatePodInCache,
+		DeleteFunc: sched.deletePodFromCache,
+	})*/
+	sched.PodInformer.Informer().AddEventHandler(
 		cache.FilteringResourceEventHandler{
 			FilterFunc: func(obj interface{}) bool {
 				switch t := obj.(type) {
@@ -121,7 +121,7 @@ func AddAllEventHandlers(sched *Scheduler) {
 				DeleteFunc: sched.deletePodFromSchedulingQueue,
 			},
 		},
-	)*/
+	)
 	sched.ClusterInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    sched.addCluster,
 		UpdateFunc: sched.updateCluster,
@@ -255,12 +255,14 @@ func getStackResources(pod *v1.Pod) []*types.Resource {
 // getStackSelector change vm selector to stack selector
 func getStackSelector(selector *v1.ResourceSelector) types.Selector {
 	// depress empty slice warning
+	var siteID string
 	newRegions := make([]types.CloudRegion, 0)
 	for _, value := range selector.Regions {
 		newRegions = append(newRegions, types.CloudRegion{
 			Region:           value.Region,
 			AvailabilityZone: value.AvailablityZone,
 		})
+		siteID = value.Region + "--" + value.AvailablityZone[0]
 	}
 
 	newSelector := types.Selector{
@@ -272,6 +274,7 @@ func getStackSelector(selector *v1.ResourceSelector) types.Selector {
 		},
 		Regions:  newRegions,
 		Operator: selector.Operator,
+		SiteID:   siteID,
 		Strategy: types.Strategy{
 			LocationStrategy: selector.Strategy.LocalStrategy,
 		},

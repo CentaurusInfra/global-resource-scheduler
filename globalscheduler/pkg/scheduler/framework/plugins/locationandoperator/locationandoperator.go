@@ -52,6 +52,8 @@ func (pl *LocationAndOperator) locationEqual(stack *types.Stack, siteCacheInfo *
 
 	area := stack.Selector.GeoLocation.Area
 	if area != "" && area != siteCacheInfo.GetSite().GeoLocation.Area {
+		klog.Infof("STACK AREA1: %v", area)
+		klog.Infof("AREA2: %v", siteCacheInfo.GetSite().GeoLocation.Area)
 		return false, interfaces.NewStatus(interfaces.Unschedulable, "stack area not equal site area.")
 	}
 	province := stack.Selector.GeoLocation.Province
@@ -66,6 +68,35 @@ func (pl *LocationAndOperator) locationEqual(stack *types.Stack, siteCacheInfo *
 
 	return true, nil
 }
+
+/*func (pl *LocationAndOperator) locationEqual(stack *types.Stack, siteCacheInfo *sitecacheinfo.SiteCacheInfo) (bool, *interfaces.Status) {
+	if stack == nil || siteCacheInfo == nil {
+		return false, interfaces.NewStatus(interfaces.Unschedulable, "locationEqual has invalid args.")
+	}
+
+	country := stack.Selector.GeoLocation.Country
+	if country != "" && country != siteCacheInfo.GetSite().GeoLocation.Country {
+		return false, interfaces.NewStatus(interfaces.Unschedulable, "stack country not equal site county.")
+	}
+
+	area := stack.Selector.GeoLocation.Area
+	if area != "" && area != siteCacheInfo.GetSite().GeoLocation.Area {
+		klog.Infof("STACK AREA1: %v", area)
+		klog.Infof("AREA2: %v", siteCacheInfo.GetSite().GeoLocation.Area)
+		return false, interfaces.NewStatus(interfaces.Unschedulable, "stack area not equal site area.")
+	}
+	province := stack.Selector.GeoLocation.Province
+	if province != "" && province != siteCacheInfo.GetSite().GeoLocation.Province {
+		return false, interfaces.NewStatus(interfaces.Unschedulable, "stack province not equal site province.")
+	}
+
+	city := stack.Selector.GeoLocation.City
+	if city != "" && city != siteCacheInfo.GetSite().GeoLocation.City {
+		return false, interfaces.NewStatus(interfaces.Unschedulable, "stack city not equal site city.")
+	}
+
+	return true, nil
+}*/
 
 // Filter invoked at the filter extension point.
 func (pl *LocationAndOperator) Filter(ctx context.Context, cycleState *interfaces.CycleState, stack *types.Stack,

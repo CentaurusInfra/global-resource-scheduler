@@ -17,10 +17,10 @@ import (
 	"k8s.io/klog"
 	"net/http"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"github.com/emicklei/go-restful"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 )
 
 // Schedule get snapshot

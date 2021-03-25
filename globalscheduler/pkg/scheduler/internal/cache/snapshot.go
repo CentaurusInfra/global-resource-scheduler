@@ -47,7 +47,10 @@ var _ schedulerlisters.SharedLister = &Snapshot{}
 // NewEmptySnapshot initializes a Snapshot struct and returns it.
 func NewEmptySnapshot() *Snapshot {
 	return &Snapshot{
-		SiteCacheInfoMap: make(map[string]*schedulersitecacheinfo.SiteCacheInfo),
+		SiteCacheInfoMap:  make(map[string]*schedulersitecacheinfo.SiteCacheInfo),
+		//SiteCacheInfoList: make([]*schedulersitecacheinfo.SiteCacheInfo, 0, len(SiteCacheInfoMap)),
+		RegionFlavorMap:   make(map[string]*typed.RegionFlavor),
+		FlavorMap:         make(map[string]*typed.RegionFlavor),
 	}
 }
 
@@ -105,9 +108,10 @@ func (s *Snapshot) SiteCacheInfos() schedulerlisters.SiteCacheInfoLister {
 }
 
 // NumSites returns the number of siteIDs in the snapshot.
-func (s *Snapshot) NumSites() int {
-	return len(s.SiteCacheInfoList)
-}
+/*func (s *Snapshot) NumSites() int {
+	//return len(s.SiteCacheInfoList)
+	return len(s.SiteCacheInfoMap)
+}*/
 
 type stackLister []*schedulersitecacheinfo.SiteCacheInfo
 
