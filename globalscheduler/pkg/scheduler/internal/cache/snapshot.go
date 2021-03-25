@@ -47,10 +47,10 @@ var _ schedulerlisters.SharedLister = &Snapshot{}
 // NewEmptySnapshot initializes a Snapshot struct and returns it.
 func NewEmptySnapshot() *Snapshot {
 	return &Snapshot{
-		SiteCacheInfoMap:  make(map[string]*schedulersitecacheinfo.SiteCacheInfo),
+		SiteCacheInfoMap: make(map[string]*schedulersitecacheinfo.SiteCacheInfo),
 		//SiteCacheInfoList: make([]*schedulersitecacheinfo.SiteCacheInfo, 0, len(SiteCacheInfoMap)),
-		RegionFlavorMap:   make(map[string]*typed.RegionFlavor),
-		FlavorMap:         make(map[string]*typed.RegionFlavor),
+		RegionFlavorMap: make(map[string]*typed.RegionFlavor),
+		FlavorMap:       make(map[string]*typed.RegionFlavor),
 	}
 }
 

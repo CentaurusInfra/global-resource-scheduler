@@ -1162,7 +1162,7 @@ func (sched *Scheduler) UpdateFlavor() (err error) {
 	}
 	flavor42 := &typed.RegionFlavor{
 		RegionFlavorID: "42",
-		Region: "",
+		Region:         "",
 		Flavor: typed.Flavor{
 			ID: "42",
 
@@ -1209,7 +1209,7 @@ func (sched *Scheduler) UpdateFlavor() (err error) {
 	}
 	flavor1 := &typed.RegionFlavor{
 		RegionFlavorID: "1",
-		Region: "",
+		Region:         "",
 		Flavor: typed.Flavor{
 			ID: "1",
 
