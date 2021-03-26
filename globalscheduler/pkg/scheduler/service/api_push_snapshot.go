@@ -14,6 +14,7 @@ limitations under the License.
 package service
 
 import (
+	"io"
 	"k8s.io/klog"
 	"net/http"
 
@@ -53,4 +54,8 @@ func PushSnapshot(req *restful.Request, resp *restful.Response) {
 
 	resourceResp := types.SiteResourceRes{Result: result}
 	resp.WriteHeaderAndEntity(http.StatusCreated, resourceResp)
+}
+
+func Hello(req *restful.Request, resp *restful.Response) {
+	io.WriteString(resp, "world")
 }

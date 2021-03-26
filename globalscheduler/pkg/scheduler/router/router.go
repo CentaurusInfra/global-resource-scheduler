@@ -91,7 +91,13 @@ var routes = Routes{
 		"PushSnapshot",
 		strings.ToUpper("Patch"),
 		//http.MethodPatch,
-		"/globalsheduler/v1/regionresources/regionname",
+		"/globalscheduler/v1/regionresources/regionname",
 		service.PushSnapshot,
+	},
+	Route{
+		"Test",
+		strings.ToUpper("Get"),
+		"/globalscheduler/v1/test",
+		service.Hello,
 	},
 }

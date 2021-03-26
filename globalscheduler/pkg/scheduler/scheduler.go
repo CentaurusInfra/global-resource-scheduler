@@ -29,16 +29,18 @@ import (
 	"sync/atomic"
 	"time"
 
+	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	internalinformers "k8s.io/client-go/informers"
 	coreinformers "k8s.io/client-go/informers/core/v1"
 	clientset "k8s.io/client-go/kubernetes"
 	corelisters "k8s.io/client-go/listers/core/v1"
+	cache "k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/algorithmprovider"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
-	cache "k8s.io/client-go/tools/cache"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
 	frameworkplugins "k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/plugins"
 	internalcache "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache"
@@ -48,25 +50,23 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/wait"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/workqueue"
-	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	//cluster
 	clusterworkqueue "k8s.io/client-go/util/workqueue"
 	clusterclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
 	clusterscheme "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned/scheme"
+	externalinformers "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/informers/externalversions"
 	clusterinformers "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/informers/externalversions/cluster/v1"
 	clusterlisters "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/listers/cluster/v1"
 	clusterv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
-	externalinformers "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/informers/externalversions"
 )
 
 // ScheduleResult represents the result of one pod scheduled. It will contain
 // the final selected Site, along with the selected intermediate information.
 type ScheduleResult struct {
-	SuggestedHost string		// Name of the scheduler suggest host
-	Stacks        []types.Stack	
-	EvaluatedSites int			// Number of site scheduler evaluated on one stack scheduled
-	FeasibleSites int			// Number of feasible site on one stack scheduled
+	SuggestedHost  string // Name of the scheduler suggest host
+	Stacks         []types.Stack
+	EvaluatedSites int // Number of site scheduler evaluated on one stack scheduled
+	FeasibleSites  int // Number of feasible site on one stack scheduled
 }
 
 // Scheduler watches for new unscheduled pods. It attempts to find
@@ -83,10 +83,10 @@ type Scheduler struct {
 	Plugins    *types.Plugins
 	SchedFrame interfaces.Framework // policy are the scheduling policy.
 
-	StackQueue internalqueue.SchedulingQueue // queue for stacks that need scheduling
-	PodInformer coreinformers.PodInformer
-	PodLister   corelisters.PodLister
-	PodSynced   cache.InformerSynced
+	StackQueue      internalqueue.SchedulingQueue // queue for stacks that need scheduling
+	PodInformer     coreinformers.PodInformer
+	PodLister       corelisters.PodLister
+	PodSynced       cache.InformerSynced
 	Client          clientset.Interface
 	InformerFactory internalinformers.SharedInformerFactory
 
@@ -114,18 +114,18 @@ type Scheduler struct {
 var scheduler *Scheduler
 var once sync.Once
 
-func NewScheduler(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}) (*Scheduler, error) {
+func NewScheduler(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct{}) (*Scheduler, error) {
 	stopEverything := stopCh
 	if stopEverything == nil {
 		stopEverything = wait.NeverStop
 	}
 
 	sched := &Scheduler{
-		SchedulerName:           config.SchedulerName,
-		ResourceCollectorApiUrl: config.ResourceCollectorApiUrl,
+		SchedulerName:           gsconfig.SchedulerName,
+		ResourceCollectorApiUrl: gsconfig.ResourceCollectorApiUrl,
 		SchedulerCache:          internalcache.New(30*time.Second, stopEverything),
 		siteCacheInfoSnapshot:   internalcache.NewEmptySnapshot(),
-		ConfigFilePath:          config.ConfigFilePath,
+		ConfigFilePath:          gsconfig.ConfigFilePath,
 		deletedClusters:         make(map[string]string),
 	}
 
@@ -135,8 +135,9 @@ func NewScheduler(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}
 	}
 
 	//build entire FlavorMap map<flovorid, flavorinfo>
-	sched.UpdateFlavor()
-
+	//sched.UpdateFlavor()
+	sched.siteCacheInfoSnapshot.FlavorMap = config.ReadFlavorConf()
+	klog.Infof("*** FlavorMap: %v", sched.siteCacheInfoSnapshot.FlavorMap)
 	// init pod informers & cluster informers for scheduler
 	err = sched.initPodClusterInformers(stopEverything)
 	if err != nil {
@@ -673,7 +674,7 @@ func convertClusterToSite(cluster *clusterv1.Cluster) *types.Site {
 			Region:           cluster.Spec.Region.Region,
 			AvailabilityZone: cluster.Spec.Region.AvailabilityZone,
 		},
-		Operator: cluster.Spec.Operator.Operator,
+		Operator:      cluster.Spec.Operator.Operator,
 		Status:        cluster.Status,
 		SiteAttribute: nil,
 	}
@@ -856,109 +857,10 @@ func (sched *Scheduler) UpdateSiteDynamicResource(region string, resource *types
 }
 
 //This function updates sites' flavor
-func (sched *Scheduler) UpdateFlavor() (err error) {
-	if sched.siteCacheInfoSnapshot.FlavorMap == nil {
-		sched.siteCacheInfoSnapshot.FlavorMap = make(map[string]*typed.RegionFlavor)
-	}
-	flavor42 := &typed.RegionFlavor{
-		RegionFlavorID: "42",
-		Region:         "",
-		Flavor: typed.Flavor{
-			ID: "42",
-
-			// Specifies the name of the ECS specifications.
-			Name: "42",
-
-			// Specifies the number of CPU cores in the ECS specifications.
-			Vcpus: "1",
-
-			// Specifies the memory size (MB) in the ECS specifications.
-			Ram: 128,
-
-			// Specifies the system disk size in the ECS specifications.
-			// The value 0 indicates that the disk size is not limited.
-			Disk: "0",
-
-			/*// Specifies shortcut links for ECS flavors.
-			Links []Link `json:"links"`
-
-			// Specifies extended ECS specifications.
-			OsExtraSpecs OsExtraSpecs `json:"os_extra_specs"`
-
-			// Reserved
-			Swap string `json:"swap"`
-
-			// Reserved
-			FlvEphemeral int64 `json:"OS-FLV-EXT-DATA:ephemeral"`
-
-			// Reserved
-			FlvDisabled bool `json:"OS-FLV-DISABLED:disabled"`
-
-			// Reserved
-			RxtxFactor int64 `json:"rxtx_factor"`
-
-			// Reserved
-			RxtxQuota string `json:"rxtx_quota"`
-
-			// Reserved
-			RxtxCap string `json:"rxtx_cap"`
-
-			// Reserved
-			AccessIsPublic bool `json:"os-flavor-access:is_public"`*/
-		},
-	}
-	flavor1 := &typed.RegionFlavor{
-		RegionFlavorID: "1",
-		Region:         "",
-		Flavor: typed.Flavor{
-			ID: "1",
-
-			// Specifies the name of the ECS specifications.
-			Name: "1",
-
-			// Specifies the number of CPU cores in the ECS specifications.
-			Vcpus: "1",
-
-			// Specifies the memory size (MB) in the ECS specifications.
-			Ram: 512,
-
-			// Specifies the system disk size in the ECS specifications.
-			// The value 0 indicates that the disk size is not limited.
-			Disk: "0",
-
-			/*// Specifies shortcut links for ECS flavors.
-			Links []Link `json:"links"`
-
-			// Specifies extended ECS specifications.
-			OsExtraSpecs OsExtraSpecs `json:"os_extra_specs"`
-
-			// Reserved
-			Swap string `json:"swap"`
-
-			// Reserved
-			FlvEphemeral int64 `json:"OS-FLV-EXT-DATA:ephemeral"`
-
-			// Reserved
-			FlvDisabled bool `json:"OS-FLV-DISABLED:disabled"`
-
-			// Reserved
-			RxtxFactor int64 `json:"rxtx_factor"`
-
-			// Reserved
-			RxtxQuota string `json:"rxtx_quota"`
-
-			// Reserved
-			RxtxCap string `json:"rxtx_cap"`
-
-			// Reserved
-			AccessIsPublic bool `json:"os-flavor-access:is_public"`*/
-		},
-	}
-	sched.siteCacheInfoSnapshot.FlavorMap["42"] = flavor42
-	sched.siteCacheInfoSnapshot.FlavorMap["1"] = flavor1
-	err = nil
-	return
-}
+/*func (sched *Scheduler) UpdateFlavor() (error) {
+	sched.siteCacheInfoSnapshot.FlavorMap = config.ReadFlavorConf()
+	return nil
+}*/
 
 //This function updates sites' flavor
 func (sched *Scheduler) UpdateRegionFlavor(region string, flavorId string) (err error) {

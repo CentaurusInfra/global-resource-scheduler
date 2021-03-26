@@ -28,7 +28,7 @@ import (
 	"time"
 
 	_ "k8s.io/kubernetes/globalscheduler/pkg/scheduler"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
+	_ "k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
 )
 
 const (
@@ -41,25 +41,13 @@ type HTTPServer struct {
 	listener   net.Listener
 }
 
-func getServerAddress() string {
-	//hostIP := config.DefaultString("address", "0.0.0.0")
-	hostIP := config.GlobalConf.HttpAddr
-	if hostIP == "" {
-		klog.Errorf("server IP address not configured.")
-		os.Exit(1)
-	}
-
-	//port := config.DefaultInt("port", 8443)
-	port := config.GlobalConf.HttpPort
-
-	return fmt.Sprintf("%s:%d", hostIP, port)
-}
-
 // NewHTTPServer construct a new http server with ssl certificate
-func NewHTTPServer() (*HTTPServer, error) {
+func NewHTTPServer(ip string, port string) (*HTTPServer, error) {
 	hs := &HTTPServer{}
 
-	httpAddr := getServerAddress()
+	//httpAddr := getServerAddress()
+	httpAddr := fmt.Sprintf("%s:%s", "0.0.0.0", port)
+	klog.Infof("http(https) listen: %s", httpAddr)
 	l, err := net.Listen("tcp", httpAddr)
 	if err != nil {
 		klog.Errorf("failed to http(https) listen: %s err: %s", httpAddr, err.Error())
