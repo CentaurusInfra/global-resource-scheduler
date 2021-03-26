@@ -94,6 +94,7 @@ func nextIndex(ix []int, lens func(i int) int) {
 	}
 }
 
+//calculate FlavorAggregate (needed flavors of a stack)
 func calculateFlavorAggregate(stack *types.Stack) *FlavorAggregates {
 	var ret = &FlavorAggregates{}
 
@@ -144,6 +145,7 @@ type spotHours struct {
 	PreemptibleResourceFinite map[string]int
 }
 
+//return <flavor_id, count>
 func getFlavorToCount(flvAg FlavorAggregate) (map[string]int, map[string]*spotHours) {
 	var flavorMap = map[string]int{}
 	var spotFlavorMap = map[string]*spotHours{}
@@ -182,6 +184,7 @@ func getFlavorToCount(flvAg FlavorAggregate) (map[string]int, map[string]*spotHo
 	return flavorMap, spotFlavorMap
 }
 
+//check if totalCount (allocatable) < count (needed)
 func isComFlavorMatch(flavorMap map[string]int, siteCacheInfo *sitecacheinfo.SiteCacheInfo) (bool, int) {
 
 	var maxCount = math.MaxFloat64
@@ -307,6 +310,7 @@ func (f *Flavor) Filter(ctx context.Context, cycleState *interfaces.CycleState, 
 		var isCommonMatch, _ = isComFlavorMatch(flavorMap, siteCacheInfo)
 		var isSpotMatch, _ = isSpotFlavorMatch(spotFlavorMap, siteCacheInfo)
 		if isCommonMatch && isSpotMatch {
+			klog.Infof("*** isCommonMatch:%v, isSpotMatch:%v ", isCommonMatch, isSpotMatch)
 			return nil
 		}
 	}

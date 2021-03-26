@@ -73,6 +73,9 @@ func Run(stopCh <-chan struct{}) error {
 	// start scheduler resource cache informer and run
 	col.StartInformersAndRun(stopCh)
 
+	// update the openstack token regularly
+	go col.RefreshClientSetCache(stopCh)
+
 	// start the gRPC service to get cluster static info from ClusterController
 	go rpcserver.NewRpcServer()
 

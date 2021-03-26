@@ -383,7 +383,9 @@ func (sched *Scheduler) skipStackUpdate(stack *types.Stack) bool {
 }
 
 func (sched *Scheduler) bindStacks(assumedStacks []types.Stack) {
+	klog.V(3).Infof("*** assumedStacks: %v", assumedStacks)
 	for _, newStack := range assumedStacks {
+		klog.V(3).Infof("*** newStack: %v", newStack)
 		clusterName := newStack.Selected.ClusterName
 		//ns := newStack.Selected.ClusterNamespace
 		sched.bindToSite(clusterName, &newStack)
@@ -429,6 +431,7 @@ func (sched *Scheduler) bindToSite(clusterName string, assumedStack *types.Stack
 		},
 	}
 
+	klog.V(3).Infof("*** binding: %v", binding)
 	// do api server update here
 	klog.Infof("Attempting to bind %v to %v", binding.Name, binding.Target.Name)
 	err := sched.Client.CoreV1().PodsWithMultiTenancy(binding.Namespace, binding.Tenant).Bind(binding)

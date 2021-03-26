@@ -18,10 +18,10 @@ package scheduler
 
 import (
 	"context"
-	"encoding/json"
+	//"encoding/json"
 	"fmt"
 	uuid "github.com/satori/go.uuid"
-	"io/ioutil"
+	//"io/ioutil"
 	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/cmd/conf"
 	"math/rand"
@@ -154,7 +154,9 @@ func NewScheduler(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}
 		return nil, fmt.Errorf("buildFramework by %s failed! err: %v", types.SchedulerDefaultProviderName, err)
 	}
 
+	//build entire FlavorMap map<flovorid, flavorinfo>
 	sched.UpdateFlavor()
+
 	// init pod informers & cluster informers for scheduler
 	err = sched.initPodClusterInformers(stopEverything)
 	if err != nil {
@@ -255,10 +257,13 @@ func (sched *Scheduler) runPodWorker() {
 
 // scheduleOne does the entire scheduling workflow for a single pod.
 func (sched *Scheduler) scheduleOne() bool {
-	// 1.pop queue and generate allocation from stack
+	// 1.pop queue and generate allocation from scheduler.StackQueue
 	stack := sched.NextStack()
+	klog.Infof("*** 1. Stack: %v stack selector: %v***", stack.Selector)
+
 	//stack := sched.NextStack()
 	allocation, err := sched.generateAllocationFromStack(stack)
+	klog.Infof("*** 2. Allocation: %v , allocation selector: %v***", allocation.Selector)
 	if err != nil {
 		return false
 	}
@@ -277,7 +282,8 @@ func (sched *Scheduler) scheduleOne() bool {
 	}
 	end = time.Now().UnixNano()
 	klog.Infof("=== done Scheduling pipline, time consumption: %vms ===", (end-start)/int64(time.Millisecond))
-	klog.Infof("Scheduler result: %v", result)
+	klog.Infof("Scheduler result: %v", result) //result is assumed stacks
+	klog.Infof("*** 3. Assumed Stacks: %v", result)
 
 	// 3.bind scheduler result to pod
 	start = end
@@ -306,7 +312,7 @@ func (sched *Scheduler) generateAllocationFromStack(stack *types.Stack) (*types.
 	return allocation, nil
 }
 
-func (sched *Scheduler) GetResourceSnapshot(resourceCollectorApiUrl string) (internalcache.Snapshot, error) {
+/*func (sched *Scheduler) GetResourceSnapshot(resourceCollectorApiUrl string) (internalcache.Snapshot, error) {
 	snapshotEndpoint := "http://" + resourceCollectorApiUrl + constants.ResourceCollecotrSnapshotURL
 	resp, err := utils.SendHTTPRequest("GET", snapshotEndpoint, nil, nil, false)
 	if err != nil {
@@ -333,9 +339,9 @@ func (sched *Scheduler) GetResourceSnapshot(resourceCollectorApiUrl string) (int
 	///sched.siteCacheInfoSnapshot
 	klog.Infof("snapshot : %v", snapshot)
 	return snapshot, nil
-}
+}*/
 
-func (sched *Scheduler) updateSnapshot() error {
+/*func (sched *Scheduler) updateSnapshot() error {
 	snapshot, err := sched.GetResourceSnapshot(sched.ResourceCollectorApiUrl)
 
 	if err != nil {
@@ -347,7 +353,7 @@ func (sched *Scheduler) updateSnapshot() error {
 	sched.mu.Unlock()
 	sched.siteCacheInfoSnapshot = &snapshot
 	return nil
-}
+}*/
 
 // snapshot snapshots scheduler cache and site cache infos for all fit and priority
 // functions.
@@ -546,6 +552,10 @@ func (sched *Scheduler) Schedule(ctx context.Context, allocation *types.Allocati
 	start := time.Now()
 	klog.Infof("[START] snapshot site...")
 
+	///UpdateFlavorMap updates FlavorCache.RegionFlavorMap, FlavorCache.FlavorMap)
+	///FlavorMap is updated when scheduler starts, RegionFlavorMap is updated
+	///when cluster is added/updated.
+	///AllocatableFlavor is computed when
 	internalcache.FlavorCache.UpdateFlavorMap(sched.siteCacheInfoSnapshot.RegionFlavorMap, sched.siteCacheInfoSnapshot.FlavorMap)
 
 	/*err = sched.updateSnapshot()
@@ -762,6 +772,8 @@ func (sched *Scheduler) initPodClusterInformers(stopCh <-chan struct{}) error {
 	}(stopCh)
 }*/
 
+// The following code is handled by ResourceCollector
+/*
 // start resource cache informer and run
 /*func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
 	go func(stopCh2 <-chan struct{}) {
@@ -772,11 +784,6 @@ func (sched *Scheduler) initPodClusterInformers(stopCh <-chan struct{}) error {
 		volumetypeInterval := config.DefaultInt(constants.ConfVolumeTypeInterval, 600)
 		informers.InformerFac.VolumeType(informers.VOLUMETYPE, "ID",
 			time.Duration(volumetypeInterval)*time.Second, nil).Informer()
-
-		// init site informer
-		//siteInfoInterval := config.DefaultInt(constants.ConfSiteInfoInterval, 600)
-		//informers.InformerFac.SiteInfo(informers.SITEINFOS, "SITEID",
-		//	time.Duration(siteInfoInterval)*time.Second).Informer()
 
 		// init flavor informer
 		flavorInterval := config.DefaultInt(constants.ConfFlavorInterval, 600)
@@ -1096,7 +1103,8 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].AllocatableFlavor[flavor.FlavorID] = flavor.TotalCapacity
 			sched.UpdateRegionFlavor(clusterCopy.Spec.Region.Region, flavor.FlavorID)
 		}
-		//klog.Infof("created a site, site id - site: %v", site.SiteID)
+		sched.UpdateSiteDynamicResource_Temp(clusterCopy.Spec.Region.Region, clusterCopy.Spec.Region.AvailabilityZone)
+		//klog.Infof("created a site, site , id - site: %v", site.SiteID)
 		klog.Infof("created a site, site id - site: %v", *(sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].Site))
 		klog.Infof("created a site, site id - map: %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID])
 		break
@@ -1118,6 +1126,7 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].AllocatableFlavor[flavor.FlavorID] = flavor.TotalCapacity
 			sched.UpdateRegionFlavor(clusterCopy.Spec.Region.Region, flavor.FlavorID)
 		}
+		sched.UpdateSiteDynamicResource_Temp(clusterCopy.Spec.Region.Region, clusterCopy.Spec.Region.AvailabilityZone)
 		klog.Infof("created a site, site id: %v", site.SiteID)
 		break
 	case EventType_Delete:
@@ -1268,6 +1277,17 @@ func (sched *Scheduler) UpdateRegionFlavor(region string, flavorId string) (err 
 		sched.siteCacheInfoSnapshot.RegionFlavorMap = make(map[string]*typed.RegionFlavor)
 	}
 	sched.siteCacheInfoSnapshot.RegionFlavorMap[regionFlavorId] = flavor
+	err = nil
+	return
+}
+
+//This function updates sites' dynamic resource informaton
+func (sched *Scheduler) UpdateSiteDynamicResource_Temp(region string, az string) (result string, err error) {
+	siteID := region + "--" + az
+	sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID].TotalResources[siteID] = &types.CPUAndMemory{VCPU: 3, Memory: 512}
+	sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID].TotalStorage["sas"] = 4086
+	sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID].TotalStorage["ssd"] = 4086
+	result = "ok"
 	err = nil
 	return
 }

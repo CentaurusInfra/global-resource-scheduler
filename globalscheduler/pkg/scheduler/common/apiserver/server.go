@@ -27,7 +27,7 @@ import (
 	"os"
 	"time"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler"
+	_ "k8s.io/kubernetes/globalscheduler/pkg/scheduler"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
 )
 

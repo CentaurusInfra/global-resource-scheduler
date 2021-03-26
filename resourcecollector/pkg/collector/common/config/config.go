@@ -79,6 +79,9 @@ type Config struct {
 	// When the maximum number of unreachable requests is reached,
 	// send the node unreachable status to the ClusterController
 	MaxUnreachableNum int
+
+	// Refresh OpenStack token interval, unit: minutes
+	RefreshOpenStackTokenInterval int
 }
 
 func readConf() *Config {
@@ -98,13 +101,15 @@ func readConf() *Config {
 		OpenStackScopProjectName: DefaultString("OpenStackScopProjectName", "admin"),
 		OpenStackScopDomainID:    DefaultString("OpenStackScopDomainID", "default"),
 
-		FlavorInterval:       DefaultInt("FlavorInterval", 600),
+		FlavorInterval:       DefaultInt("FlavorInterval", 60),
 		SiteResourceInterval: DefaultInt("SiteResourceInterval", 60),
 		VolumePoolInterval:   DefaultInt("VolumePoolInterval", 60),
-		VolumeTypeInterval:   DefaultInt("VolumeTypeInterval", 600),
+		VolumeTypeInterval:   DefaultInt("VolumeTypeInterval", 60),
 		EipPoolInterval:      DefaultInt("EipPoolInterval", 60),
 
 		MaxUnreachableNum: DefaultInt("MaxUnreachableNum", 5),
+
+		RefreshOpenStackTokenInterval: DefaultInt("RefreshOpenStackTokenInterval", 30),
 	}
 }
 

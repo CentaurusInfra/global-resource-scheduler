@@ -4,6 +4,8 @@ metadata:
   name: scheduler1
 spec:
   tag: "1"
+  ipaddress: "34.220.41.107"
+  portnumber: "9090"
 ---
 apiVersion: globalscheduler.com/v1
 kind: Scheduler
@@ -11,3 +13,5 @@ metadata:
   name: scheduler2
 spec:
   tag: "2"
+  ipaddress: "34.220.41.107"
+  portnumber: "9091"

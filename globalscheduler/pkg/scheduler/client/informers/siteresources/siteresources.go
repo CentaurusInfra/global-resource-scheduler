@@ -23,7 +23,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/hypervisors"
 	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
-	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient"
 	"sync"
 	"time"
 
@@ -67,13 +66,12 @@ func NewSiteResourcesInformer(client client.Interface, reSyncPeriod time.Duratio
 				return nil, errors.New("get site info failed")
 			}
 
-			// result set, []typed.SiteResource
 			var interfaceSlice []interface{}
 			var wg sync.WaitGroup
 			for _, info := range siteInfoCache.SiteInfoMap {
-				cloudClient, err := cloudclient.NewClientSet(info.EipNetworkID)
+				cloudClient, err := collector.GetClientSet(info.EipNetworkID)
 				if err != nil {
-					klog.Warningf("SiteResourcesInformer.NewClientSet[%s] err: %s", info.EipNetworkID, err.Error())
+					klog.Warningf("collector.GetClientSet[%s] err: %s", info.EipNetworkID, err.Error())
 					collector.RecordSiteUnreacheable(info.SiteID, info.ClusterNamespace, info.ClusterName)
 					continue
 				}
@@ -89,6 +87,7 @@ func NewSiteResourcesInformer(client client.Interface, reSyncPeriod time.Duratio
 					ret, err := getSiteResource(siteID, region, az, client)
 					if err != nil {
 						klog.Errorf("site[%s] list failed! err: %s", siteID, err.Error())
+						collector.RecordSiteUnreacheable(info.SiteID, info.ClusterNamespace, info.ClusterName)
 						return
 					}
 					interfaceSlice = append(interfaceSlice, ret)

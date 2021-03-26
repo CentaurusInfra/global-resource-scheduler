@@ -60,4 +60,10 @@ var routes = Routes{
 		"/snapshot",
 		httpserver.GetSnapshot,
 	},
+	Route{
+		"RegisterScheduler",
+		http.MethodPost,
+		"/scheduler",
+		httpserver.PostSchedulerIpAndPort,
+	},
 }

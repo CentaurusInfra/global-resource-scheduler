@@ -22,7 +22,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerstats"
 	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
-	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient"
 	"time"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client"
@@ -69,7 +68,7 @@ func NewVolumePoolInformer(client client.Interface, resyncPeriod time.Duration, 
 			var interfaceSlice []interface{}
 			// todo MultiExec
 			for _, info := range siteInfoCache.SiteInfoMap {
-				cloudClient, err := cloudclient.NewClientSet(info.EipNetworkID)
+				cloudClient, err := collector.GetClientSet(info.EipNetworkID)
 				if err != nil {
 					klog.Warningf("VolumePool.NewClientSet[%s] err: %s", info.EipNetworkID, err.Error())
 					continue

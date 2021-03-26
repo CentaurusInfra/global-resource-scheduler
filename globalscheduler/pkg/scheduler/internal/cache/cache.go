@@ -401,7 +401,7 @@ func (cache *schedulerCache) removeStack(stack *types.Stack) error {
 
 //AddStack add stack
 func (cache *schedulerCache) AddStack(stack *types.Stack) error {
-
+	//get stack's uid
 	key, err := schedulersitecacheinfo.GetStackKey(stack)
 	if err != nil {
 		return err

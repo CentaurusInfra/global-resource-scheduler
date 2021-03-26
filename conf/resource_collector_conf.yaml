@@ -27,3 +27,6 @@ EipPoolInterval: 60
 # When the maximum number of unreachable requests is reached,
 # send the node unreachable status to the ClusterController
 MaxUnreachableNum: 5
+
+# Refresh OpenStack token interval, unit: minutes
+RefreshOpenStackTokenInterval: 30

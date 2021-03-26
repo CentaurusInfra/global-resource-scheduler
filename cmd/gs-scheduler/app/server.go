@@ -78,17 +78,11 @@ func Run(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}) error {
 	}
 
 	// start scheduler pod informer and run
+	klog.Infof("Global Scheduler starts informers...")
 	sched.StartInformersAndRun(stopCh)
-	//sched.StartPodInformersAndRun(stopCh)
 
-	// start http server to provide resource information to the Scheduler
-	err := StartAPI(stopCh)
-	if err != nil {
-		return err
-	}
-
-	// start allocation API here
-	// StartAPI(stopCh)
+	klog.Infof("Global Scheduler starts http server...")
+	StartAPI(stopCh)
 	select {
 	case <-stopCh:
 		break

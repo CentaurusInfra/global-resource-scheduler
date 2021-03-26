@@ -18,14 +18,17 @@ package collector
 
 import (
 	"errors"
-	"k8s.io/klog"
 	"sync"
 	"time"
+
+	"k8s.io/klog"
+	schedulercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/common/config"
 	internalcache "k8s.io/kubernetes/resourcecollector/pkg/collector/internal/cache"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/rpcclient"
@@ -57,6 +60,9 @@ type Collector struct {
 	ResourceCache         internalcache.Cache
 	siteCacheInfoSnapshot *internalcache.Snapshot
 	SiteInfoCache         *siteinfo.SiteInfoCache
+	SchedulerInfoCache    []*schedulercrdv1.Scheduler
+
+	clientSetCache *cloudclient.ClientSetCache
 
 	mutex           sync.Mutex
 	unreachableNum  map[string]int
@@ -68,11 +74,27 @@ func NewCollector(stopCh <-chan struct{}) (*Collector, error) {
 		ResourceCache:         internalcache.New(30*time.Second, stopCh),
 		siteCacheInfoSnapshot: internalcache.NewEmptySnapshot(),
 		SiteInfoCache:         siteinfo.NewSiteInfoCache(),
+		SchedulerInfoCache:    make([]*schedulercrdv1.Scheduler, 0),
+
+		clientSetCache: cloudclient.NewClientSetCache(),
 
 		unreachableNum:  make(map[string]int),
 		unreachableChan: make(chan string, 3),
 	}
 	return c, nil
+}
+
+func (c *Collector) RefreshClientSetCache(stopCh <-chan struct{}) {
+	for {
+		select {
+		case <-time.Tick(time.Minute * time.Duration(config.GlobalConf.RefreshOpenStackTokenInterval)):
+			endpoints := c.SiteInfoCache.GetAllSiteEndpoints()
+			c.clientSetCache.RefreshClientSets(endpoints)
+		case <-stopCh:
+			klog.Info("stop Refresh ClientSet")
+			break
+		}
+	}
 }
 
 func (c *Collector) RecordSiteUnreacheable(siteID, clusterNamespace, clusterName string) {
@@ -112,12 +134,20 @@ func (c *Collector) GetSiteInfos() *siteinfo.SiteInfoCache {
 	return c.SiteInfoCache
 }
 
+func (c *Collector) GetClientSet(siteEndpoint string) (*cloudclient.ClientSet, error) {
+	return c.clientSetCache.GetClientSet(siteEndpoint)
+}
+
 func (c *Collector) GetSnapshot() (*internalcache.Snapshot, error) {
 	err := c.snapshot()
 	if err != nil {
 		return nil, err
 	}
 	return c.siteCacheInfoSnapshot, nil
+}
+
+func (c *Collector) GetSchedulerInfoCache() []*schedulercrdv1.Scheduler {
+	return c.SchedulerInfoCache
 }
 
 // start resource cache informer and run
@@ -154,7 +184,7 @@ func (c *Collector) StartInformersAndRun(stopCh <-chan struct{}) {
 		informers.InformerFac.VolumeType(informers.VOLUMETYPE, "ID",
 			time.Duration(volumeTypeInterval)*time.Second, c).Informer()
 
-		// init eip pool informer
+		// todo init eip pool informer
 		//eipPoolInterval := config.GlobalConf.EipPoolInterval
 		//eipPoolInformer := informers.InformerFac.EipPools(informers.EIPPOOLS, "Region",
 		//	time.Duration(eipPoolInterval)*time.Second).Informer()
