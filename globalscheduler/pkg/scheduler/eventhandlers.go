@@ -28,11 +28,8 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog"
-	//informers "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/informers/externalversions/cluster/v1"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	statusutil "k8s.io/kubernetes/pkg/util/pod"
-
-	//cluster
 	clusterv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 	"k8s.io/kubernetes/pkg/controller"
 )
@@ -67,13 +64,6 @@ const (
 // AddAllEventHandlers is a helper function used in tests and in Scheduler
 // to add event handlers for various informers.
 func AddAllEventHandlers(sched *Scheduler) {
-	// scheduled pod cache
-	/*sched.PodInformer.Informer().AddEventHandler(
-	cache.ResourceEventHandlerFuncs{
-		AddFunc:    sched.addPodToCache,
-		UpdateFunc: sched.updatePodInCache,
-		DeleteFunc: sched.deletePodFromCache,
-	})*/
 	sched.PodInformer.Informer().AddEventHandler(
 		cache.FilteringResourceEventHandler{
 			FilterFunc: func(obj interface{}) bool {
@@ -444,29 +434,6 @@ func (sched *Scheduler) bindToSite(clusterName string, assumedStack *types.Stack
 
 		return err
 	}
-	// The following codes are commented since the Bind method has already update the pod status phase to Bound
-	//// get pod first
-	//pod, err := sched.Client.CoreV1().PodsWithMultiTenancy(assumedStack.PodNamespace, assumedStack.Tenant).Get(assumedStack.PodName, metav1.GetOptions{})
-	//if err != nil {
-	//	klog.Warningf("Failed to get status for pod %q: %v", assumedStack.PodName+"/"+assumedStack.PodNamespace+"/"+
-	//		assumedStack.Tenant+"/"+assumedStack.UID, err)
-	//	return err
-	//}
-	//
-	//newStatus := v1.PodStatus{
-	//	Phase: v1.PodBound,
-	//}
-	//
-	//// update pod status to Bound
-	//klog.Infof("Attempting to update pod status from %v to %v", pod.Status, newStatus)
-	//_, _, err = statusutil.PatchPodStatus(sched.Client, assumedStack.Tenant, assumedStack.PodNamespace, assumedStack.PodName, pod.Status, newStatus)
-	//if err != nil {
-	//	klog.Warningf("PatchPodStatus for pod %q: %v", assumedStack.PodName+"/"+assumedStack.PodNamespace+"/"+
-	//		assumedStack.Tenant+"/"+assumedStack.UID, err)
-	//	return err
-	//}
-	//
-	//klog.Infof("Update pod status from %v to %v success", pod.Status, newStatus)
 	return nil
 }
 
