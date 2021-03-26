@@ -25,12 +25,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"github.com/go-chassis/go-archaius"
 	"github.com/spf13/cast"
 	"gopkg.in/yaml.v2"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 )
 
 var conf archaius.ConfigurationFactory
