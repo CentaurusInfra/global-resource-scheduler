@@ -842,18 +842,27 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 }
 
 //This function updates sites' dynamic resource informaton
-func (sched *Scheduler) UpdateSiteDynamicResource(region string, resource *types.SiteResource) (result string, err error) {
-	siteID := region + "--"
-	for _, site := range resource.CPUMemResources {
-		siteID = siteID + site.AvailabilityZone
-		sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID].TotalResources[siteID] = &types.CPUAndMemory{VCPU: site.CpuCapacity, Memory: site.MemCapacity}
+func (sched *Scheduler) UpdateSiteDynamicResource(region string, resource *types.SiteResource) (err error) {
+	klog.Infof("UpdateSiteDynamicResource1 region: %s, resource:%v", region, resource)
+	var siteID string
+	for _, siteresource := range resource.CPUMemResources {
+		siteID = region + "--" + siteresource.AvailabilityZone
+		klog.Infof("UpdateSiteDynamicResource2 siteID: %s", siteID)
+		klog.Infof("UpdateSiteDynamicResource3 site: %v", siteresource)
+		siteCacheInfo := sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID]
+		if siteCacheInfo == nil {
+			siteCacheInfo = schedulersitecacheinfo.NewSiteCacheInfo()
+			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID] = siteCacheInfo
+		}
+		sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID].TotalResources[siteID] = &types.CPUAndMemory{VCPU: siteresource.CpuCapacity, Memory: siteresource.MemCapacity}
 		for _, storage := range resource.VolumeResources {
+			klog.Infof("UpdateSiteDynamicResource4 storage: %v", storage)
 			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID].TotalStorage[storage.TypeId] = storage.StorageCapacity
+			klog.Infof("UpdateSiteDynamicResource5 storage: %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID].TotalStorage[storage.TypeId])
+			klog.Infof("UpdateSiteDynamicResource6 site: %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
 		}
 	}
-	result = "ok"
-	err = nil
-	return
+	return nil
 }
 
 //This function updates sites' flavor

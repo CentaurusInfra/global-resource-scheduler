@@ -17,13 +17,14 @@ limitations under the License.
 package router
 
 import (
-	"net"
+	//"net"
 	"strings"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
+	_ "k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/service"
 
 	"github.com/emicklei/go-restful"
+	_ "k8s.io/klog"
 )
 
 // Route define four basic info of the northbound interface
@@ -37,15 +38,16 @@ type Route struct {
 
 // Register routes
 func Register() {
-	apiVersion := "/" + config.DefaultString("component_version", "v1")
-
+	//apiVersion := "/" + config.DefaultString("component_version", "v1")
 	ws := new(restful.WebService)
-	ws.Path(apiVersion).Consumes(restful.MIME_JSON, restful.MIME_XML).Produces(restful.MIME_JSON, restful.MIME_XML)
+//	ws.Path(apiVersion).Consumes(restful.MIME_JSON, restful.MIME_XML).Produces(restful.MIME_JSON, restful.MIME_XML)
+	ws.Path("/").Consumes("*/*").Produces("*/*")
 	registerRoute(ws)
 	restful.Add(ws)
+//	klog.Infof("*** HTTP apiVersion ==> %v, path ==> %v", apiVersion, ws.Path(apiVersion))
 }
 
-func getRealIP(req *restful.Request) string {
+/*func getRealIP(req *restful.Request) string {
 	xRealIP := req.Request.Header.Get("X-Real-ID")
 	xForwardedFor := req.Request.Header.Get("X-Forwarded-For")
 
@@ -69,7 +71,7 @@ func getRealIP(req *restful.Request) string {
 	}
 
 	return "-"
-}
+} */
 
 func registerRoute(ws *restful.WebService) {
 	for _, route := range routes {
@@ -91,7 +93,8 @@ var routes = Routes{
 		"PushSnapshot",
 		strings.ToUpper("Patch"),
 		//http.MethodPatch,
-		"/globalscheduler/v1/regionresources/regionname",
+		//"/globalscheduler/v1/regionresources/regionname",
+		"/globalscheduler/v1/regionresources/{regionname}",
 		service.PushSnapshot,
 	},
 	Route{

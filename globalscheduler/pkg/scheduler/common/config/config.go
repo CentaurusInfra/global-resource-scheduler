@@ -34,7 +34,7 @@ import (
 )
 
 var conf archaius.ConfigurationFactory
-var GlobalConf *Config //http server
+//var GlobalConf *Config //http server
 
 func Init() {
 	err := archaius.Init()
@@ -60,7 +60,7 @@ func Init() {
 	}
 
 	//http server
-	GlobalConf = readConf()
+	//GlobalConf = readConf()
 }
 
 // String convert key to string
@@ -187,7 +187,7 @@ func InitPolicyFromFile(policyFile string, policy *types.Policy) error {
 }
 
 //http server
-type Config struct {
+/*type Config struct {
 	// HTTP Server
 	HttpAddr   string
 	HttpPort   int
@@ -200,7 +200,7 @@ func readConf() *Config {
 		HttpPort:   DefaultInt("HttpPort", 8661),
 		APIVersion: DefaultString("APIVersion", "v1"),
 	}
-}
+} */
 
 func ReadFlavorConf() map[string]*typed.RegionFlavor {
 	FlavorMap := make(map[string]*typed.RegionFlavor)
