@@ -45,11 +45,11 @@ type HTTPServer struct {
 func NewHTTPServer(ip string, port string) (*HTTPServer, error) {
 	hs := &HTTPServer{}
 
-	httpAddr := fmt.Sprintf("%s:%s", "", port)
-	klog.Infof("http(https) listen: %s", httpAddr)
+	addr := fmt.Sprintf("%s:%s", "", port)
+	klog.Infof("listen: %s", addr)
 	l, err := net.Listen("tcp", httpAddr)
 	if err != nil {
-		klog.Errorf("failed to http(https) listen: %s err: %s", httpAddr, err.Error())
+		klog.Errorf("failed to http(https) listen: %s err: %s", addr, err.Error())
 		return nil, err
 	}
 	hs.listener = l
