@@ -14,7 +14,6 @@ limitations under the License.
 package service
 
 import (
-	"io"
 	"k8s.io/klog"
 	"net/http"
 
