@@ -9,6 +9,7 @@ go_library(
         "//globalscheduler/pkg/scheduler/common/config:go_default_library",
         "//globalscheduler/pkg/scheduler/service:go_default_library",
         "//vendor/github.com/emicklei/go-restful:go_default_library",
+        "//vendor/k8s.io/klog:go_default_library",
     ],
 )
 

@@ -34,6 +34,7 @@ import (
 )
 
 var conf archaius.ConfigurationFactory
+
 //var GlobalConf *Config //http server
 
 func Init() {

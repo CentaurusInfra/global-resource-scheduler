@@ -866,7 +866,7 @@ func (sched *Scheduler) UpdateSiteDynamicResource(region string, resource *types
 }
 
 //This function updates sites' flavor
-func (sched *Scheduler) UpdateFlavor() (error) {
+func (sched *Scheduler) UpdateFlavor() error {
 	sched.siteCacheInfoSnapshot.FlavorMap = config.ReadFlavorConf()
 	return nil
 }

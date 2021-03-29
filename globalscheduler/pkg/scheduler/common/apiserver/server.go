@@ -121,7 +121,7 @@ func RunServer(
 		listener = tls.NewListener(listener, server.TLSConfig)
 		klog.Infof("server.TLSConfig: %v", listener)
 	}
-	
+
 	err := server.Serve(listener)
 	if err != nil {
 		klog.Errorf("Server runs failed, err: %s.", err.Error())
