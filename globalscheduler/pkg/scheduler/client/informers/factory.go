@@ -163,7 +163,7 @@ func (f *sharedInformerFactory) InformerFor(name string, key string, newFunc int
 //GetFlavor get flavor
 func (f *sharedInformerFactory) GetFlavor(flavorID string, region string) (typed.Flavor, bool) {
 	if region != "" {
-		flvInter, exist := f.GetInformer(FLAVOR).GetStore().Get(region + "|" + flavorID)
+		flvInter, exist := f.GetInformer(FLAVOR).GetStore().Get(region + "--" + flavorID)
 		var ret = typed.Flavor{}
 		if exist {
 			ret = flvInter.(typed.RegionFlavor).Flavor

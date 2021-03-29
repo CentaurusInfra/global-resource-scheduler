@@ -51,13 +51,66 @@ func (b DefaultBinder) Name() string {
 // Bind binds pods to site using the k8s client.
 func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, stack *types.Stack,
 	siteCacheInfo *sitecacheinfo.SiteCacheInfo) *interfaces.Status {
-	region := siteCacheInfo.GetSite().Region
+	region := siteCacheInfo.GetSite().RegionAzMap.Region
 	resInfo := types.AllResInfo{CpuAndMem: map[string]types.CPUAndMemory{}, Storage: map[string]float64{}}
 	siteID := siteCacheInfo.Site.SiteID
 
 	stack.Selected.SiteID = siteID
 	stack.Selected.Region = region
-	stack.Selected.AvailabilityZone = siteCacheInfo.GetSite().AvailabilityZone
+	stack.Selected.AvailabilityZone = siteCacheInfo.GetSite().RegionAzMap.AvailabilityZone
+	stack.Selected.ClusterName = siteCacheInfo.Site.ClusterName
+	stack.Selected.ClusterNamespace = siteCacheInfo.Site.ClusterNamespace
+
+	siteSelectedInfo, err := interfaces.GetSiteSelectorState(state, siteID)
+	if err != nil {
+		klog.Errorf("GetSiteSelectorState failed! err: %s", err)
+		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %q info failed: %v", siteID, err))
+	}
+	klog.Errorf("GetSiteSelectorState ===> %v", siteSelectedInfo)
+	if len(stack.Resources) != len(siteSelectedInfo.Flavors) {
+		klog.Errorf("flavor count not equal to server count! err: %s", err)
+		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("siteID(%s) flavor count not equal to "+
+			"server count!", siteID))
+	}
+
+	for i := 0; i < len(stack.Resources); i++ {
+		flavorID := siteSelectedInfo.Flavors[i].FlavorID
+		stack.Resources[i].FlavorIDSelected = flavorID
+		flv, ok := cache.FlavorCache.GetFlavor(flavorID, region)
+		if !ok {
+			klog.Warningf("flavor %s not found in region(%s)", flavorID, region)
+			continue
+		}
+		vCPUInt, err := strconv.ParseInt(flv.Vcpus, 10, 64)
+		if err != nil || vCPUInt <= 0 {
+			klog.Warningf("flavor %s is invalid in region(%s)", flavorID, region)
+			continue
+		}
+
+		reqRes, ok := resInfo.CpuAndMem[flv.OsExtraSpecs.ResourceType]
+		if !ok {
+			reqRes = types.CPUAndMemory{VCPU: 0, Memory: 0}
+		}
+		reqRes.VCPU += vCPUInt * int64(stack.Resources[i].Count)
+		reqRes.Memory += flv.Ram * int64(stack.Resources[i].Count)
+		resInfo.CpuAndMem[flv.OsExtraSpecs.ResourceType] = reqRes
+	}
+
+	b.handle.Cache().UpdateSiteWithResInfo(siteID, resInfo)
+
+	return nil
+}
+
+// Bind binds pods to site using the k8s client.
+/*func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, stack *types.Stack,
+	siteCacheInfo *sitecacheinfo.SiteCacheInfo) *interfaces.Status {
+	region := siteCacheInfo.GetSite().RegionAzMap.Region
+	resInfo := types.AllResInfo{CpuAndMem: map[string]types.CPUAndMemory{}, Storage: map[string]float64{}}
+	siteID := siteCacheInfo.Site.SiteID
+
+	stack.Selected.SiteID = siteID
+	stack.Selected.Region = region
+	stack.Selected.AvailabilityZone = siteCacheInfo.GetSite().RegionAzMap.AvailabilityZone
 	stack.Selected.ClusterName = siteCacheInfo.Site.ClusterName
 	stack.Selected.ClusterNamespace = siteCacheInfo.Site.ClusterNamespace
 
@@ -99,4 +152,4 @@ func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, s
 	b.handle.Cache().UpdateSiteWithResInfo(siteID, resInfo)
 
 	return nil
-}
+}*/

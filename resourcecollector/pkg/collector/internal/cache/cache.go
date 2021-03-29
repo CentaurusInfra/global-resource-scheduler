@@ -572,19 +572,19 @@ func (cache *collectorCache) RemoveSite(siteID string) error {
 }
 
 func (cache *collectorCache) updateRegionToSite(site *types.Site) {
-	_, ok := cache.regionToSite[site.Region]
+	_, ok := cache.regionToSite[site.RegionAzMap.Region]
 	if !ok {
-		cache.regionToSite[site.Region] = sets.NewString()
+		cache.regionToSite[site.RegionAzMap.Region] = sets.NewString()
 	}
-	cache.regionToSite[site.Region].Insert(site.SiteID)
+	cache.regionToSite[site.RegionAzMap.Region].Insert(site.SiteID)
 }
 
 func (cache *collectorCache) deleteRegionToSite(site *types.Site) {
-	_, ok := cache.regionToSite[site.Region]
+	_, ok := cache.regionToSite[site.RegionAzMap.Region]
 	if !ok {
 		return
 	}
-	cache.regionToSite[site.Region].Delete(site.SiteID)
+	cache.regionToSite[site.RegionAzMap.Region].Delete(site.SiteID)
 }
 
 //UpdateSiteWithEipPool update eip pool
@@ -712,7 +712,7 @@ func (cache *collectorCache) UpdateSiteWithRatio(region string, az string, ratio
 	defer cache.mu.Unlock()
 
 	for _, siteCacheInfo := range cache.siteCacheInfos {
-		if siteCacheInfo.info.GetSite().Region == region && siteCacheInfo.info.GetSite().AvailabilityZone == az {
+		if siteCacheInfo.info.GetSite().RegionAzMap.Region == region && siteCacheInfo.info.GetSite().RegionAzMap.AvailabilityZone == az {
 			err := siteCacheInfo.info.UpdateSiteWithRatio(ratios)
 			if err != nil {
 				klog.Errorf("UpdateSiteWithRatio failed! err: %s", err)
@@ -733,7 +733,7 @@ func (cache *collectorCache) UpdateSpotResources(region string, az string, spotR
 	defer cache.mu.Unlock()
 
 	for _, siteCacheInfo := range cache.siteCacheInfos {
-		if siteCacheInfo.info.GetSite().Region == region && siteCacheInfo.info.GetSite().AvailabilityZone == az {
+		if siteCacheInfo.info.GetSite().RegionAzMap.Region == region && siteCacheInfo.info.GetSite().RegionAzMap.AvailabilityZone == az {
 			err := siteCacheInfo.info.UpdateSpotResources(spotRes)
 			if err != nil {
 				klog.Errorf("UpdateSiteWithRatio failed! err: %s", err)
@@ -755,12 +755,12 @@ func (cache *collectorCache) GetRegions() map[string]types.CloudRegion {
 
 	ret := map[string]types.CloudRegion{}
 	for _, siteInfoCache := range cache.siteCacheInfos {
-		region := siteInfoCache.info.GetSite().Region
+		region := siteInfoCache.info.GetSite().RegionAzMap.Region
 		cr, ok := ret[region]
 		if !ok {
 			cr = types.CloudRegion{Region: region, AvailabilityZone: []string{}}
 		}
-		cr.AvailabilityZone = append(cr.AvailabilityZone, siteInfoCache.info.GetSite().AvailabilityZone)
+		cr.AvailabilityZone = append(cr.AvailabilityZone, siteInfoCache.info.GetSite().RegionAzMap.AvailabilityZone)
 		ret[region] = cr
 	}
 

@@ -189,7 +189,7 @@ func (f *Fit) Filter(ctx context.Context, cycleState *interfaces.CycleState, sta
 		}
 		if !isMatch {
 			msg := fmt.Sprintf("Site (%s-%s) do not support required flavor (%+v).",
-				siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().Region, flvs.Flavors)
+				siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().RegionAzMap.Region, flvs.Flavors)
 			klog.Info(ctx, msg)
 			return interfaces.NewStatus(interfaces.Unschedulable, msg)
 		}

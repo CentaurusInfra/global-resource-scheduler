@@ -28,14 +28,42 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog"
+	clusterv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
+	"k8s.io/kubernetes/pkg/controller"
 	statusutil "k8s.io/kubernetes/pkg/util/pod"
+)
+
+const (
+	SuccessSynched         = "Synched"
+	MessageResourceSynched = "Cluster synced successfully"
+	ClusterKind            = "Cluster"
+	ClusterStatusCreated   = "Created"
+	ClusterStatusUpdated   = "Updated"
+	ClusterStatusDeleted   = "Deleted"
+)
+
+type EventType int
+
+const (
+	EventType_Create EventType = 0
+	EventType_Update EventType = 1
+	EventType_Delete EventType = 2
+)
+
+type KeyWithEventType struct {
+	EventType EventType
+	Key       string
+}
+
+const (
+	ClusterUpdateNo  int = 1
+	ClusterUpdateYes int = 2
 )
 
 // AddAllEventHandlers is a helper function used in tests and in Scheduler
 // to add event handlers for various informers.
 func AddAllEventHandlers(sched *Scheduler) {
-	// scheduled pod cache
 	sched.PodInformer.Informer().AddEventHandler(
 		cache.FilteringResourceEventHandler{
 			FilterFunc: func(obj interface{}) bool {
@@ -52,7 +80,6 @@ func AddAllEventHandlers(sched *Scheduler) {
 					utilruntime.HandleError(fmt.Errorf("unable to handle object in %T: %T", sched, obj))
 					return false
 				}
-
 			},
 			Handler: cache.ResourceEventHandlerFuncs{
 				AddFunc:    sched.addPodToCache,
@@ -85,6 +112,11 @@ func AddAllEventHandlers(sched *Scheduler) {
 			},
 		},
 	)
+	sched.ClusterInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc:    sched.addCluster,
+		UpdateFunc: sched.updateCluster,
+		DeleteFunc: sched.deleteCluster,
+	})
 }
 
 // needToSchedule selects pods that need to be scheduled
@@ -105,6 +137,7 @@ func responsibleForPod(pod *v1.Pod, schedulerName string) bool {
 // addPodToCache add pod to the stack cache of the scheduler
 func (sched *Scheduler) addPodToCache(obj interface{}) {
 	pod, ok := obj.(*v1.Pod)
+	klog.Infof("Add a pod: %v", pod)
 	if !ok {
 		klog.Errorf("cannot convert to *v1.Pod: %v", obj)
 		return
@@ -126,6 +159,7 @@ func (sched *Scheduler) updatePodInCache(oldObj, newObj interface{}) {
 		return
 	}
 	newPod, ok := newObj.(*v1.Pod)
+	klog.Infof("Update a pod: %v", newPod)
 	if !ok {
 		klog.Errorf("cannot convert newObj to *v1.Pod: %v", newObj)
 		return
@@ -143,6 +177,7 @@ func (sched *Scheduler) deletePodFromCache(obj interface{}) {
 	switch t := obj.(type) {
 	case *v1.Pod:
 		pod = t
+		klog.Infof("Delete a pod: %v", pod)
 	case cache.DeletedFinalStateUnknown:
 		var ok bool
 		pod, ok = t.Obj.(*v1.Pod)
@@ -210,12 +245,14 @@ func getStackResources(pod *v1.Pod) []*types.Resource {
 // getStackSelector change vm selector to stack selector
 func getStackSelector(selector *v1.ResourceSelector) types.Selector {
 	// depress empty slice warning
+	var siteID string
 	newRegions := make([]types.CloudRegion, 0)
 	for _, value := range selector.Regions {
 		newRegions = append(newRegions, types.CloudRegion{
 			Region:           value.Region,
 			AvailabilityZone: value.AvailablityZone,
 		})
+		siteID = value.Region + "--" + value.AvailablityZone[0]
 	}
 
 	newSelector := types.Selector{
@@ -227,6 +264,7 @@ func getStackSelector(selector *v1.ResourceSelector) types.Selector {
 		},
 		Regions:  newRegions,
 		Operator: selector.Operator,
+		SiteID:   siteID,
 		Strategy: types.Strategy{
 			LocationStrategy: selector.Strategy.LocalStrategy,
 		},
@@ -258,6 +296,7 @@ func (sched *Scheduler) updatePodInSchedulingQueue(oldObj, newObj interface{}) {
 		return
 	}
 	newPod, ok := newObj.(*v1.Pod)
+	klog.Infof("addPodToSchedulingQueue : %v", newPod)
 	if !ok {
 		klog.Errorf("cannot convert newObj to *v1.Pod: %v", newObj)
 		return
@@ -279,6 +318,7 @@ func (sched *Scheduler) deletePodFromSchedulingQueue(obj interface{}) {
 	switch t := obj.(type) {
 	case *v1.Pod:
 		pod = obj.(*v1.Pod)
+		klog.Infof("addPodToSchedulingQueue : %v", pod)
 	case cache.DeletedFinalStateUnknown:
 		var ok bool
 		pod, ok = t.Obj.(*v1.Pod)
@@ -332,9 +372,10 @@ func (sched *Scheduler) skipStackUpdate(stack *types.Stack) bool {
 }
 
 func (sched *Scheduler) bindStacks(assumedStacks []types.Stack) {
+	klog.Infof("assumedStacks: %v", assumedStacks)
 	for _, newStack := range assumedStacks {
+		klog.Infof("newStack: %v", newStack)
 		clusterName := newStack.Selected.ClusterName
-		//ns := newStack.Selected.ClusterNamespace
 		sched.bindToSite(clusterName, &newStack)
 	}
 }
@@ -378,6 +419,7 @@ func (sched *Scheduler) bindToSite(clusterName string, assumedStack *types.Stack
 		},
 	}
 
+	klog.V(3).Infof("binding: %v", binding)
 	// do api server update here
 	klog.Infof("Attempting to bind %v to %v", binding.Name, binding.Target.Name)
 	err := sched.Client.CoreV1().PodsWithMultiTenancy(binding.Namespace, binding.Tenant).Bind(binding)
@@ -390,28 +432,98 @@ func (sched *Scheduler) bindToSite(clusterName string, assumedStack *types.Stack
 
 		return err
 	}
-	// The following codes are commented since the Bind method has already update the pod status phase to Bound
-	//// get pod first
-	//pod, err := sched.Client.CoreV1().PodsWithMultiTenancy(assumedStack.PodNamespace, assumedStack.Tenant).Get(assumedStack.PodName, metav1.GetOptions{})
-	//if err != nil {
-	//	klog.Warningf("Failed to get status for pod %q: %v", assumedStack.PodName+"/"+assumedStack.PodNamespace+"/"+
-	//		assumedStack.Tenant+"/"+assumedStack.UID, err)
-	//	return err
-	//}
-	//
-	//newStatus := v1.PodStatus{
-	//	Phase: v1.PodBound,
-	//}
-	//
-	//// update pod status to Bound
-	//klog.Infof("Attempting to update pod status from %v to %v", pod.Status, newStatus)
-	//_, _, err = statusutil.PatchPodStatus(sched.Client, assumedStack.Tenant, assumedStack.PodNamespace, assumedStack.PodName, pod.Status, newStatus)
-	//if err != nil {
-	//	klog.Warningf("PatchPodStatus for pod %q: %v", assumedStack.PodName+"/"+assumedStack.PodNamespace+"/"+
-	//		assumedStack.Tenant+"/"+assumedStack.UID, err)
-	//	return err
-	//}
-	//
-	//klog.Infof("Update pod status from %v to %v success", pod.Status, newStatus)
 	return nil
+}
+
+func (sched *Scheduler) addCluster(object interface{}) {
+	resource := object.(*clusterv1.Cluster)
+	clusterCopy := resource.DeepCopy()
+	if sched.verifyClusterInfo(clusterCopy) == false {
+		klog.Infof(" Cluster data is not correct: %v", clusterCopy)
+	}
+	key, err := controller.KeyFunc(object)
+	if err != nil {
+		utilruntime.HandleError(fmt.Errorf("couldn't get key for object: %v, error: %v", object, err))
+		return
+	}
+	sched.Enqueue(key, EventType_Create)
+	klog.Infof("Enqueue Create cluster: %v", key)
+}
+
+func (sched *Scheduler) updateCluster(oldObject, newObject interface{}) {
+	oldResource := oldObject.(*clusterv1.Cluster)
+	newResource := newObject.(*clusterv1.Cluster)
+	oldClusterCopy := oldResource.DeepCopy()
+	newClusterCopy := newResource.DeepCopy()
+	if sched.verifyClusterInfo(newClusterCopy) {
+		klog.Infof(" Cluster data is not correct: %v", newResource)
+	}
+	key1, err1 := controller.KeyFunc(oldObject)
+	key2, err2 := controller.KeyFunc(newObject)
+	if key1 == "" || key2 == "" || err1 != nil || err2 != nil {
+		klog.Errorf("Unexpected string in queue, discarding: %v", key2)
+		return
+	}
+
+	eventType, err := sched.determineEventType(oldClusterCopy, newClusterCopy)
+	if err != nil {
+		klog.Errorf("Unexpected string in queue, discarding: %v", key2)
+		return
+	}
+	switch eventType {
+	case ClusterUpdateNo:
+		{
+			klog.Infof("No actual change in clusters, discarding: %v", newClusterCopy.Name)
+			break
+		}
+	case ClusterUpdateYes:
+		{
+			sched.Enqueue(key2, EventType_Update)
+			klog.Infof("Enqueue Update Cluster: %v", key2)
+			break
+		}
+	default:
+		{
+			klog.Errorf("Unexpected cluster update event, discarding: %v", key2)
+			return
+		}
+	}
+}
+
+func (sched *Scheduler) deleteCluster(object interface{}) {
+	resource := object.(*clusterv1.Cluster)
+	clusterCopy := resource.DeepCopy()
+	if sched.verifyClusterInfo(clusterCopy) == false {
+		klog.Infof(" Cluster data is not correct: %v", clusterCopy)
+		return
+	}
+	key, err := controller.KeyFunc(object)
+	if err != nil {
+		utilruntime.HandleError(fmt.Errorf("couldn't get key for object: %v, error: %v", object, err))
+		return
+	}
+	sched.Enqueue(key, EventType_Delete)
+	siteID := clusterCopy.Spec.Region.Region + "--" + clusterCopy.Spec.Region.AvailabilityZone
+	sched.deletedClusters[key] = siteID
+	klog.Infof("Enqueue Delete Cluster: %v", key)
+}
+
+// Enqueue puts key of the cluster object in the work queue
+// EventType: Create=0, Update=1, Delete=2
+func (sched *Scheduler) Enqueue(key string, eventType EventType) {
+	sched.ClusterQueue.Add(KeyWithEventType{Key: key, EventType: eventType})
+}
+
+func (sched *Scheduler) verifyClusterInfo(cluster *clusterv1.Cluster) (verified bool) {
+	verified = false
+	ipAddress := cluster.Spec.IpAddress
+	region := cluster.Spec.Region.Region
+	az := cluster.Spec.Region.AvailabilityZone
+	clusterName := cluster.Name
+	if ipAddress == "" || region == "" || az == "" || clusterName == "" {
+		klog.Infof("cluster ipAddress:%s, region:%s, az:%s, or custer name:%s is null", ipAddress, region, az, clusterName)
+		return verified
+	}
+	verified = true
+	return verified
 }

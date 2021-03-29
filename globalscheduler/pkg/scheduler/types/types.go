@@ -196,14 +196,14 @@ type Site struct {
 	SiteID           string `json:"site_id"`
 	ClusterName      string `json:"cluster_name"`
 	ClusterNamespace string `json:"cluster_namespace"`
-	GeoLocation
-	RegionAzMap
-	Operator      string                  `json:"operator"`
-	Status        string                  `json:"status"`
-	SiteAttribute []*typed.SiteAttribute  `json:"site_attributes"`
-	EipTypeName   string                  `json:"eiptype_name"`
-	SpotResources map[string]SpotResource `json:"spot_resources"`
-	Hosts         []*typed.Host           `json:"-"`
+	GeoLocation      GeoLocation
+	RegionAzMap      RegionAzMap
+	Operator         string                  `json:"operator"`
+	Status           string                  `json:"status"`
+	SiteAttribute    []*typed.SiteAttribute  `json:"site_attributes"`
+	EipTypeName      string                  `json:"eiptype_name"`
+	SpotResources    map[string]SpotResource `json:"spot_resources"`
+	Hosts            []*typed.Host           `json:"-"`
 }
 
 func (sn *Site) Clone() *Site {
@@ -218,7 +218,7 @@ func (sn *Site) Clone() *Site {
 		EipTypeName:      sn.EipTypeName,
 	}
 
-	ret.Hosts = append(ret.Hosts, sn.Hosts...)
+	//ret.Hosts = append(ret.Hosts, sn.Hosts...)
 	return ret
 }
 
@@ -416,4 +416,31 @@ type GSSchedulerConfiguration struct {
 
 	// Scheduler PortNumber
 	PortNumber string
+}
+
+//Push site resources
+type AzCpuMem struct {
+	AvailabilityZone string `json:"availabilityzone,omitempty"`
+	CpuCapacity      int64  `json:"cpucapacity,omitempty"`
+	MemCapacity      int64  `json:"memcapacity,omitempty"`
+}
+
+type Volume struct {
+	TypeId          string  `json:"typeid,omitempty"`
+	StorageCapacity float64 `json:"storagecapacity,omitempty"`
+}
+
+type SiteResource struct {
+	CPUMemResources []AzCpuMem `json:"cpumemresources,omitempty"`
+	VolumeResources []Volume   `json:"volumeresources,omitempty"`
+}
+
+// AllocationReq allocation request object
+type SiteResourceReq struct {
+	SiteResource SiteResource `json:"siteresource" required:"true"`
+}
+
+// AllocationReq allocation request object
+type SiteResourceRes struct {
+	Result string `json:"result",omitempty"`
 }

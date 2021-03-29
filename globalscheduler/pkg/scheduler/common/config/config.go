@@ -25,15 +25,17 @@ import (
 	"path/filepath"
 	"strings"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
-
 	"github.com/go-chassis/go-archaius"
 	"github.com/spf13/cast"
 	"gopkg.in/yaml.v2"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 )
 
 var conf archaius.ConfigurationFactory
+
+//var GlobalConf *Config //http server
 
 func Init() {
 	err := archaius.Init()
@@ -57,6 +59,9 @@ func Init() {
 		fmt.Printf("failed to AddFile %s, error: %+v\n", regionFilePath, err.Error())
 		os.Exit(1)
 	}
+
+	//http server
+	//GlobalConf = readConf()
 }
 
 // String convert key to string
@@ -180,4 +185,169 @@ func InitPolicyFromFile(policyFile string, policy *types.Policy) error {
 		return fmt.Errorf("invalid policy: %v", err)
 	}
 	return nil
+}
+
+//http server
+/*type Config struct {
+	// HTTP Server
+	HttpAddr   string
+	HttpPort   int
+	APIVersion string
+}
+
+func readConf() *Config {
+	return &Config{
+		HttpAddr:   DefaultString("HttpAddr", "0.0.0.0"),
+		HttpPort:   DefaultInt("HttpPort", 8661),
+		APIVersion: DefaultString("APIVersion", "v1"),
+	}
+} */
+
+func ReadFlavorConf() map[string]*typed.RegionFlavor {
+	FlavorMap := make(map[string]*typed.RegionFlavor)
+	flavor42 := &typed.RegionFlavor{
+		RegionFlavorID: "42",
+		Region:         "",
+		Flavor: typed.Flavor{
+			ID: "42",
+
+			// Specifies the name of the ECS specifications.
+			Name: "42",
+
+			// Specifies the number of CPU cores in the ECS specifications.
+			Vcpus: "1",
+
+			// Specifies the memory size (MB) in the ECS specifications.
+			Ram: 128,
+
+			// Specifies the system disk size in the ECS specifications.
+			// The value 0 indicates that the disk size is not limited.
+			Disk: "0",
+
+			/*// Specifies shortcut links for ECS flavors.
+			Links []Link `json:"links"`
+
+			// Specifies extended ECS specifications.
+			OsExtraSpecs OsExtraSpecs `json:"os_extra_specs"`
+
+			// Reserved
+			Swap string `json:"swap"`
+
+			// Reserved
+			FlvEphemeral int64 `json:"OS-FLV-EXT-DATA:ephemeral"`
+
+			// Reserved
+			FlvDisabled bool `json:"OS-FLV-DISABLED:disabled"`
+
+			// Reserved
+			RxtxFactor int64 `json:"rxtx_factor"`
+
+			// Reserved
+			RxtxQuota string `json:"rxtx_quota"`
+
+			// Reserved
+			RxtxCap string `json:"rxtx_cap"`
+
+			// Reserved
+			AccessIsPublic bool `json:"os-flavor-access:is_public"`*/
+		},
+	}
+	flavor1 := &typed.RegionFlavor{
+		RegionFlavorID: "1",
+		Region:         "",
+		Flavor: typed.Flavor{
+			ID: "1",
+
+			// Specifies the name of the ECS specifications.
+			Name: "m1.tiny",
+
+			// Specifies the number of CPU cores in the ECS specifications.
+			Vcpus: "1",
+
+			// Specifies the memory size (MB) in the ECS specifications.
+			Ram: 512,
+
+			// Specifies the system disk size in the ECS specifications.
+			// The value 0 indicates that the disk size is not limited.
+			Disk: "1",
+
+			/*// Specifies shortcut links for ECS flavors.
+			Links []Link `json:"links"`
+
+			// Specifies extended ECS specifications.
+			OsExtraSpecs OsExtraSpecs `json:"os_extra_specs"`
+
+			// Reserved
+			Swap string `json:"swap"`
+
+			// Reserved
+			FlvEphemeral int64 `json:"OS-FLV-EXT-DATA:ephemeral"`
+
+			// Reserved
+			FlvDisabled bool `json:"OS-FLV-DISABLED:disabled"`
+
+			// Reserved
+			RxtxFactor int64 `json:"rxtx_factor"`
+
+			// Reserved
+			RxtxQuota string `json:"rxtx_quota"`
+
+			// Reserved
+			RxtxCap string `json:"rxtx_cap"`
+
+			// Reserved
+			AccessIsPublic bool `json:"os-flavor-access:is_public"`*/
+		},
+	}
+	flavor2 := &typed.RegionFlavor{
+		RegionFlavorID: "2",
+		Region:         "",
+		Flavor: typed.Flavor{
+			ID: "2",
+
+			// Specifies the name of the ECS specifications.
+			Name: "m1.small",
+
+			// Specifies the number of CPU cores in the ECS specifications.
+			Vcpus: "1",
+
+			// Specifies the memory size (MB) in the ECS specifications.
+			Ram: 2048,
+
+			// Specifies the system disk size in the ECS specifications.
+			// The value 0 indicates that the disk size is not limited.
+			Disk: "20",
+
+			/*// Specifies shortcut links for ECS flavors.
+			Links []Link `json:"links"`
+
+			// Specifies extended ECS specifications.
+			OsExtraSpecs OsExtraSpecs `json:"os_extra_specs"`
+
+			// Reserved
+			Swap string `json:"swap"`
+
+			// Reserved
+			FlvEphemeral int64 `json:"OS-FLV-EXT-DATA:ephemeral"`
+
+			// Reserved
+			FlvDisabled bool `json:"OS-FLV-DISABLED:disabled"`
+
+			// Reserved
+			RxtxFactor int64 `json:"rxtx_factor"`
+
+			// Reserved
+			RxtxQuota string `json:"rxtx_quota"`
+
+			// Reserved
+			RxtxCap string `json:"rxtx_cap"`
+
+			// Reserved
+			AccessIsPublic bool `json:"os-flavor-access:is_public"`*/
+		},
+	}
+	FlavorMap["42"] = flavor42
+	FlavorMap["1"] = flavor1
+	FlavorMap["2"] = flavor2
+	return FlavorMap
 }

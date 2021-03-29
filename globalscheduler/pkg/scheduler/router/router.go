@@ -17,13 +17,13 @@ limitations under the License.
 package router
 
 import (
-	"net"
 	"strings"
 
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
+	_ "k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/service"
 
 	"github.com/emicklei/go-restful"
+	_ "k8s.io/klog"
 )
 
 // Route define four basic info of the northbound interface
@@ -37,38 +37,10 @@ type Route struct {
 
 // Register routes
 func Register() {
-	apiVersion := "/" + config.DefaultString("component_version", "v1")
-
 	ws := new(restful.WebService)
-	ws.Path(apiVersion).Consumes(restful.MIME_JSON, restful.MIME_XML).Produces(restful.MIME_JSON, restful.MIME_XML)
+	ws.Path("/").Consumes("*/*").Produces("*/*")
 	registerRoute(ws)
 	restful.Add(ws)
-}
-
-func getRealIP(req *restful.Request) string {
-	xRealIP := req.Request.Header.Get("X-Real-ID")
-	xForwardedFor := req.Request.Header.Get("X-Forwarded-For")
-
-	for _, address := range strings.Split(xForwardedFor, ",") {
-		address = strings.TrimSpace(address)
-		if address != "" {
-			return address
-		}
-	}
-
-	if xRealIP != "" {
-		return xRealIP
-	}
-
-	ip, _, err := net.SplitHostPort(req.Request.RemoteAddr)
-	if err != nil {
-		ip = req.Request.RemoteAddr
-	}
-	if ip != "127.0.0.1" {
-		return ip
-	}
-
-	return "-"
 }
 
 func registerRoute(ws *restful.WebService) {
@@ -86,5 +58,11 @@ var routes = Routes{
 		strings.ToUpper("Post"),
 		"/allocations",
 		service.Allocations,
+	},
+	Route{
+		"PushSnapshot",
+		strings.ToUpper("Patch"),
+		"/globalscheduler/v1/regionresources/{regionname}",
+		service.PushSnapshot,
 	},
 }

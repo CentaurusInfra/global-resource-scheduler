@@ -1,0 +1,23 @@
+{
+	"siteresource": {
+		"cpumemresources": [{
+				"availabilityzone": "NE-1",
+				"cpucapacity": 3,
+				"memcapacity": 512
+			}
+		],
+		"volumeresources": [{
+				"typeid": "sata",
+				"storagecapacity": 4096
+			},
+			{
+				"typeid": "sas",
+				"storagecapacity": 4096
+			},
+			{
+				"typeid": "ssd",
+				"storagecapacity": 4096
+			}
+		]
+	}
+}

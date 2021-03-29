@@ -20,7 +20,6 @@ package cache
 import (
 	"fmt"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
-
 	schedulerlisters "k8s.io/kubernetes/globalscheduler/pkg/scheduler/listers"
 	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
@@ -48,27 +47,10 @@ var _ schedulerlisters.SharedLister = &Snapshot{}
 func NewEmptySnapshot() *Snapshot {
 	return &Snapshot{
 		SiteCacheInfoMap: make(map[string]*schedulersitecacheinfo.SiteCacheInfo),
+		//SiteCacheInfoList: make([]*schedulersitecacheinfo.SiteCacheInfo, 0, len(SiteCacheInfoMap)),
+		RegionFlavorMap: make(map[string]*typed.RegionFlavor),
+		FlavorMap:       make(map[string]*typed.RegionFlavor),
 	}
-}
-
-// NewSnapshot initializes a Snapshot struct and returns it.
-func NewSnapshot(stacks []*types.Stack, sites []*types.Site) *Snapshot {
-	siteCacheInfoMap := createSiteInfoCacheMap(stacks, sites)
-	siteCacheInfoList := make([]*schedulersitecacheinfo.SiteCacheInfo, 0, len(siteCacheInfoMap))
-	havePodsWithAffinitySiteCacheInfoList := make([]*schedulersitecacheinfo.SiteCacheInfo, 0, len(siteCacheInfoMap))
-	for _, v := range siteCacheInfoMap {
-		siteCacheInfoList = append(siteCacheInfoList, v)
-		if len(v.StackWithAffinity()) > 0 {
-			havePodsWithAffinitySiteCacheInfoList = append(havePodsWithAffinitySiteCacheInfoList, v)
-		}
-	}
-
-	s := NewEmptySnapshot()
-	s.SiteCacheInfoMap = siteCacheInfoMap
-	s.SiteCacheInfoList = siteCacheInfoList
-	s.HavePodsWithAffinitySiteCacheInfoList = havePodsWithAffinitySiteCacheInfoList
-
-	return s
 }
 
 // createSiteInfoCacheMap obtains a list of pods and pivots that list into a map
@@ -102,11 +84,6 @@ func (s *Snapshot) Stacks() schedulerlisters.StackLister {
 // SiteCacheInfos returns a SiteCacheInfoLister.
 func (s *Snapshot) SiteCacheInfos() schedulerlisters.SiteCacheInfoLister {
 	return s
-}
-
-// NumSites returns the number of siteIDs in the snapshot.
-func (s *Snapshot) NumSites() int {
-	return len(s.SiteCacheInfoList)
 }
 
 type stackLister []*schedulersitecacheinfo.SiteCacheInfo

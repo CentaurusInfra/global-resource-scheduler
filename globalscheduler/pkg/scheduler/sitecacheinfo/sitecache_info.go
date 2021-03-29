@@ -225,7 +225,7 @@ func (n *SiteCacheInfo) getSupportFlavorsBySite() []typed.Flavor {
 		}
 
 		for _, host := range n.GetSite().Hosts {
-			if n.GetSite().Region != regionFlv.Region {
+			if n.GetSite().RegionAzMap.Region != regionFlv.Region {
 				continue
 			}
 			flavorExtraSpecs := regionFlv.OsExtraSpecs
@@ -234,13 +234,13 @@ func (n *SiteCacheInfo) getSupportFlavorsBySite() []typed.Flavor {
 				flavorStatus := flavorExtraSpecs.CondOperationStatus
 				azMaps := n.getCondOperationAz(flavorExtraSpecs.CondOperationAz)
 				if flavorStatus == "abandon" {
-					if flag, ok := azMaps[n.GetSite().AvailabilityZone]; ok {
+					if flag, ok := azMaps[n.GetSite().RegionAzMap.AvailabilityZone]; ok {
 						if flag != "sellout" && flag != "abandon" {
 							addFlavrFunc(regionFlv.Flavor)
 						}
 					}
 				} else {
-					if flag, ok := azMaps[n.GetSite().AvailabilityZone]; ok {
+					if flag, ok := azMaps[n.GetSite().RegionAzMap.AvailabilityZone]; ok {
 						if flag != "sellout" && flag != "abandon" {
 							addFlavrFunc(regionFlv.Flavor)
 						}
@@ -325,7 +325,6 @@ func (n *SiteCacheInfo) updateFlavor() {
 
 		n.AllocatableFlavor[flv.ID] += count
 	}
-
 }
 
 // SetSite sets the overall Site information.
@@ -380,7 +379,7 @@ func (n *SiteCacheInfo) UpdateSiteWithVolumePool(volumePool *typed.RegionVolumeP
 	var allocatableStorage = map[string]float64{}
 	var requestedStorage = map[string]float64{}
 	for _, storage := range volumePool.StoragePools {
-		if n.GetSite().AvailabilityZone == storage.AvailabilityZone {
+		if n.GetSite().RegionAzMap.AvailabilityZone == storage.AvailabilityZone {
 			var voType = storage.Capabilities.VolumeType
 			if _, ok := allocatableStorage[voType]; !ok {
 				allocatableStorage[voType] = 0
@@ -450,7 +449,7 @@ func (n *SiteCacheInfo) UpdateQos(netMetricData *types.NetMetricDatas) error {
 func (n *SiteCacheInfo) UpdateSiteWithRatio(ratios []types.AllocationRatio) error {
 	var resTypeMapRatio = map[string]types.AllocationRatio{}
 	for _, resAllo := range ratios {
-		flavorInfo, find := informers.InformerFac.GetFlavor(resAllo.Flavor, n.GetSite().Region)
+		flavorInfo, find := informers.InformerFac.GetFlavor(resAllo.Flavor, n.GetSite().RegionAzMap.Region)
 		if !find {
 			continue
 		}
@@ -462,20 +461,20 @@ func (n *SiteCacheInfo) UpdateSiteWithRatio(ratios []types.AllocationRatio) erro
 
 		if totalRes.VCPU <= 0 || totalRes.Memory <= 0 {
 			klog.Warningf("region: %s, az: %s, resType:%s has invalid totalCpu(%d) or totalMem(%d)",
-				n.GetSite().Region, n.GetSite().AvailabilityZone, resType, totalRes.VCPU, totalRes.Memory)
+				n.GetSite().RegionAzMap.Region, n.GetSite().RegionAzMap.AvailabilityZone, resType, totalRes.VCPU, totalRes.Memory)
 			continue
 		}
 
 		cpuRatio, err := strconv.ParseFloat(value.AllocationRatioByType.CoreAllocationRatio, 64)
 		if err != nil {
 			klog.Warningf("region: %s, az: %s, resType:%s has invalid cpuRatio(%s)",
-				n.GetSite().Region, n.GetSite().AvailabilityZone, resType, value.AllocationRatioByType.CoreAllocationRatio)
+				n.GetSite().RegionAzMap.Region, n.GetSite().RegionAzMap.AvailabilityZone, resType, value.AllocationRatioByType.CoreAllocationRatio)
 			continue
 		}
 		memRatio, err := strconv.ParseFloat(value.AllocationRatioByType.MemAllocationRatio, 64)
 		if err != nil {
 			klog.Warningf("region: %s, az: %s, resType:%s has invalid memRatio(%s)",
-				n.GetSite().Region, n.GetSite().AvailabilityZone, resType, value.AllocationRatioByType.MemAllocationRatio)
+				n.GetSite().RegionAzMap.Region, n.GetSite().RegionAzMap.AvailabilityZone, resType, value.AllocationRatioByType.MemAllocationRatio)
 			continue
 		}
 		var usedCpu = int64(float64(totalRes.VCPU) * cpuRatio)

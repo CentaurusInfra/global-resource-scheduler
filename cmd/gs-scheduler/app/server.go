@@ -76,12 +76,13 @@ func Run(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}) error {
 	if sched == nil {
 		return fmt.Errorf("get new scheduler failed")
 	}
+	klog.Infof("Global Scheduler starts http server...ip: %v, port:%v", config.IpAddress, config.PortNumber)
+	go StartAPI(stopCh, config.IpAddress, config.PortNumber)
 
 	// start scheduler pod informer and run
-	sched.StartPodInformerAndRun(stopCh)
+	klog.Infof("Global Scheduler starts informers...")
+	sched.StartInformersAndRun(stopCh)
 
-	// start allocation API here
-	// StartAPI(stopCh)
 	select {
 	case <-stopCh:
 		break
@@ -91,9 +92,9 @@ func Run(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}) error {
 }
 
 // Start allocation API for gs-scheduler
-func StartAPI(stopCh <-chan struct{}) error {
+func StartAPI(stopCh <-chan struct{}, ip string, port string) error {
 	router.Register()
-	hs, err := apiserver.NewHTTPServer()
+	hs, err := apiserver.NewHTTPServer(ip, port)
 	if err != nil {
 		klog.Errorf("new http server failed!, err: %s", err.Error())
 		return err

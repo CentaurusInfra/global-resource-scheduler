@@ -28,7 +28,7 @@ import (
 	"time"
 
 	_ "k8s.io/kubernetes/globalscheduler/pkg/scheduler"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
+	_ "k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
 )
 
 const (
@@ -41,26 +41,15 @@ type HTTPServer struct {
 	listener   net.Listener
 }
 
-func getServerAddress() string {
-	hostIP := config.DefaultString("address", "0.0.0.0")
-	if hostIP == "" {
-		klog.Errorf("server IP address not configured.")
-		os.Exit(1)
-	}
-
-	port := config.DefaultInt("port", 8443)
-
-	return fmt.Sprintf("%s:%d", hostIP, port)
-}
-
 // NewHTTPServer construct a new http server with ssl certificate
-func NewHTTPServer() (*HTTPServer, error) {
+func NewHTTPServer(ip string, port string) (*HTTPServer, error) {
 	hs := &HTTPServer{}
 
-	httpAddr := getServerAddress()
-	l, err := net.Listen("tcp", httpAddr)
+	addr := fmt.Sprintf("%s:%s", "", port)
+	klog.Infof("listen: %s", addr)
+	l, err := net.Listen("tcp", addr)
 	if err != nil {
-		klog.Errorf("failed to http(https) listen: %s err: %s", httpAddr, err.Error())
+		klog.Errorf("failed to http(https) listen: %s err: %s", addr, err.Error())
 		return nil, err
 	}
 	hs.listener = l
@@ -130,12 +119,14 @@ func RunServer(
 
 	if server.TLSConfig != nil {
 		listener = tls.NewListener(listener, server.TLSConfig)
+		klog.Infof("server.TLSConfig: %v", listener)
 	}
 
 	err := server.Serve(listener)
 	if err != nil {
 		klog.Errorf("Server runs failed, err: %s.", err.Error())
 	}
+	klog.Infof("Server served: %v", server)
 
 	msg := fmt.Sprintf("Stopped listening on %s", ln.Addr().String())
 	select {
@@ -143,10 +134,10 @@ func RunServer(
 		if !ok {
 			return nil
 		}
-		fmt.Println("continue")
+		klog.Infof("server continue: %v", msg)
 	default:
 		errMsg := fmt.Sprintf("%s due to error: %v", msg, err.Error())
-		fmt.Println(errMsg)
+		klog.Errorf("http server error: %v", errMsg)
 		os.Exit(1)
 	}
 

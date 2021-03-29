@@ -59,7 +59,7 @@ func (fc *flavorCache) GetFlavor(flavorID string, region string) (*typed.RegionF
 	}
 
 	// region != ""
-	value := fc.RegionFlavorMap[region+"|"+flavorID]
+	value := fc.RegionFlavorMap[region+"--"+flavorID]
 	if value == nil {
 		return value, false
 	}
@@ -401,7 +401,7 @@ func (cache *schedulerCache) removeStack(stack *types.Stack) error {
 
 //AddStack add stack
 func (cache *schedulerCache) AddStack(stack *types.Stack) error {
-
+	//get stack's uid
 	key, err := schedulersitecacheinfo.GetStackKey(stack)
 	if err != nil {
 		return err
@@ -593,19 +593,19 @@ func (cache *schedulerCache) RemoveSite(site *types.Site) error {
 }
 
 func (cache *schedulerCache) updateRegionToSite(site *types.Site) {
-	_, ok := cache.regionToSite[site.Region]
+	_, ok := cache.regionToSite[site.RegionAzMap.Region]
 	if !ok {
-		cache.regionToSite[site.Region] = sets.NewString()
+		cache.regionToSite[site.RegionAzMap.Region] = sets.NewString()
 	}
-	cache.regionToSite[site.Region].Insert(site.SiteID)
+	cache.regionToSite[site.RegionAzMap.Region].Insert(site.SiteID)
 }
 
 func (cache *schedulerCache) deleteRegionToSite(site *types.Site) {
-	_, ok := cache.regionToSite[site.Region]
+	_, ok := cache.regionToSite[site.RegionAzMap.Region]
 	if !ok {
 		return
 	}
-	cache.regionToSite[site.Region].Delete(site.SiteID)
+	cache.regionToSite[site.RegionAzMap.Region].Delete(site.SiteID)
 }
 
 //UpdateSiteWithEipPool update eip pool
@@ -733,7 +733,7 @@ func (cache *schedulerCache) UpdateSiteWithRatio(region string, az string, ratio
 	defer cache.mu.Unlock()
 
 	for _, siteCacheInfo := range cache.siteCacheInfos {
-		if siteCacheInfo.info.GetSite().Region == region && siteCacheInfo.info.GetSite().AvailabilityZone == az {
+		if siteCacheInfo.info.GetSite().RegionAzMap.Region == region && siteCacheInfo.info.GetSite().RegionAzMap.AvailabilityZone == az {
 			err := siteCacheInfo.info.UpdateSiteWithRatio(ratios)
 			if err != nil {
 				klog.Errorf("UpdateSiteWithRatio failed! err: %s", err)
@@ -754,7 +754,7 @@ func (cache *schedulerCache) UpdateSpotResources(region string, az string, spotR
 	defer cache.mu.Unlock()
 
 	for _, siteCacheInfo := range cache.siteCacheInfos {
-		if siteCacheInfo.info.GetSite().Region == region && siteCacheInfo.info.GetSite().AvailabilityZone == az {
+		if siteCacheInfo.info.GetSite().RegionAzMap.Region == region && siteCacheInfo.info.GetSite().RegionAzMap.AvailabilityZone == az {
 			err := siteCacheInfo.info.UpdateSpotResources(spotRes)
 			if err != nil {
 				klog.Errorf("UpdateSiteWithRatio failed! err: %s", err)
@@ -776,12 +776,12 @@ func (cache *schedulerCache) GetRegions() map[string]types.CloudRegion {
 
 	ret := map[string]types.CloudRegion{}
 	for _, siteInfoCache := range cache.siteCacheInfos {
-		region := siteInfoCache.info.GetSite().Region
+		region := siteInfoCache.info.GetSite().RegionAzMap.Region
 		cr, ok := ret[region]
 		if !ok {
 			cr = types.CloudRegion{Region: region, AvailabilityZone: []string{}}
 		}
-		cr.AvailabilityZone = append(cr.AvailabilityZone, siteInfoCache.info.GetSite().AvailabilityZone)
+		cr.AvailabilityZone = append(cr.AvailabilityZone, siteInfoCache.info.GetSite().RegionAzMap.AvailabilityZone)
 		ret[region] = cr
 	}
 

@@ -142,8 +142,7 @@ func MergeMap(args ...map[string]interface{}) map[string]interface{} {
 }
 
 func GetZoneKey(site *types.Site) string {
-
-	region := site.Region
+	/*region := site.Region
 	zone := site.AvailabilityZone
 
 	if region == "" && zone == "" {
@@ -153,7 +152,8 @@ func GetZoneKey(site *types.Site) string {
 	// We include the null character just in case region or failureDomain has a colon
 	// (We do assume there's no null characters in a region or failureDomain)
 	// As a nice side-benefit, the null character is not printed by fmt.Print or glog
-	return region + ":\x00:" + zone
+	return region + ":\x00:" + zone*/
+	return site.SiteID
 }
 
 func IsContain(allStr []string, dst string) bool {
