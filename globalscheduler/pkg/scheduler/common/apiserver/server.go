@@ -47,7 +47,7 @@ func NewHTTPServer(ip string, port string) (*HTTPServer, error) {
 
 	addr := fmt.Sprintf("%s:%s", "", port)
 	klog.Infof("listen: %s", addr)
-	l, err := net.Listen("tcp", httpAddr)
+	l, err := net.Listen("tcp", addr)
 	if err != nil {
 		klog.Errorf("failed to http(https) listen: %s err: %s", addr, err.Error())
 		return nil, err
