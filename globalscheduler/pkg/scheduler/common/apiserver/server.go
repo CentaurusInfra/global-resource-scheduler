@@ -45,7 +45,6 @@ type HTTPServer struct {
 func NewHTTPServer(ip string, port string) (*HTTPServer, error) {
 	hs := &HTTPServer{}
 
-	//httpAddr := getServerAddress()
 	httpAddr := fmt.Sprintf("%s:%s", "", port)
 	klog.Infof("http(https) listen: %s", httpAddr)
 	l, err := net.Listen("tcp", httpAddr)
@@ -120,14 +119,14 @@ func RunServer(
 
 	if server.TLSConfig != nil {
 		listener = tls.NewListener(listener, server.TLSConfig)
-		klog.Infof("***server.TLSConfig: %v", listener)
+		klog.Infof("server.TLSConfig: %v", listener)
 	}
 	
 	err := server.Serve(listener)
 	if err != nil {
 		klog.Errorf("Server runs failed, err: %s.", err.Error())
 	}
-	klog.Infof("***Server served: %v", server)
+	klog.Infof("Server served: %v", server)
 
 	msg := fmt.Sprintf("Stopped listening on %s", ln.Addr().String())
 	select {
@@ -135,12 +134,10 @@ func RunServer(
 		if !ok {
 			return nil
 		}
-		fmt.Println("continue")
-		klog.Infof("***server continue: %v", msg)
+		klog.Infof("server continue: %v", msg)
 	default:
 		errMsg := fmt.Sprintf("%s due to error: %v", msg, err.Error())
-		fmt.Println(errMsg)
-		klog.Infof("***http server error: %v", errMsg)
+		klog.Errorf("http server error: %v", errMsg)
 		os.Exit(1)
 	}
 

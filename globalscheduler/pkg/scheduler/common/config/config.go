@@ -258,7 +258,7 @@ func ReadFlavorConf() map[string]*typed.RegionFlavor {
 			ID: "1",
 
 			// Specifies the name of the ECS specifications.
-			Name: "1",
+			Name: "m1.tiny",
 
 			// Specifies the number of CPU cores in the ECS specifications.
 			Vcpus: "1",
@@ -268,7 +268,54 @@ func ReadFlavorConf() map[string]*typed.RegionFlavor {
 
 			// Specifies the system disk size in the ECS specifications.
 			// The value 0 indicates that the disk size is not limited.
-			Disk: "0",
+			Disk: "1",
+
+			/*// Specifies shortcut links for ECS flavors.
+			Links []Link `json:"links"`
+
+			// Specifies extended ECS specifications.
+			OsExtraSpecs OsExtraSpecs `json:"os_extra_specs"`
+
+			// Reserved
+			Swap string `json:"swap"`
+
+			// Reserved
+			FlvEphemeral int64 `json:"OS-FLV-EXT-DATA:ephemeral"`
+
+			// Reserved
+			FlvDisabled bool `json:"OS-FLV-DISABLED:disabled"`
+
+			// Reserved
+			RxtxFactor int64 `json:"rxtx_factor"`
+
+			// Reserved
+			RxtxQuota string `json:"rxtx_quota"`
+
+			// Reserved
+			RxtxCap string `json:"rxtx_cap"`
+
+			// Reserved
+			AccessIsPublic bool `json:"os-flavor-access:is_public"`*/
+		},
+	}
+	flavor2 := &typed.RegionFlavor{
+		RegionFlavorID: "2",
+		Region:         "",
+		Flavor: typed.Flavor{
+			ID: "2",
+
+			// Specifies the name of the ECS specifications.
+			Name: "m1.small",
+
+			// Specifies the number of CPU cores in the ECS specifications.
+			Vcpus: "1",
+
+			// Specifies the memory size (MB) in the ECS specifications.
+			Ram: 2048,
+
+			// Specifies the system disk size in the ECS specifications.
+			// The value 0 indicates that the disk size is not limited.
+			Disk: "20",
 
 			/*// Specifies shortcut links for ECS flavors.
 			Links []Link `json:"links"`
@@ -300,5 +347,6 @@ func ReadFlavorConf() map[string]*typed.RegionFlavor {
 	}
 	FlavorMap["42"] = flavor42
 	FlavorMap["1"] = flavor1
+	FlavorMap["2"] = flavor2
 	return FlavorMap
 }

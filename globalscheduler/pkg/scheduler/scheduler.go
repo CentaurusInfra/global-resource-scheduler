@@ -135,8 +135,8 @@ func NewScheduler(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct
 	}
 
 	//build entire FlavorMap map<flovorid, flavorinfo>
-	//sched.UpdateFlavor()
-	sched.siteCacheInfoSnapshot.FlavorMap = config.ReadFlavorConf()
+	sched.UpdateFlavor()
+	//sched.siteCacheInfoSnapshot.FlavorMap = config.ReadFlavorConf()
 	klog.Infof("*** FlavorMap: %v", sched.siteCacheInfoSnapshot.FlavorMap)
 	// init pod informers & cluster informers for scheduler
 	err = sched.initPodClusterInformers(stopEverything)
@@ -795,7 +795,7 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].AllocatableFlavor[flavor.FlavorID] = flavor.TotalCapacity
 			sched.UpdateRegionFlavor(clusterCopy.Spec.Region.Region, flavor.FlavorID)
 		}
-		sched.UpdateSiteDynamicResource_Temp(clusterCopy.Spec.Region.Region, clusterCopy.Spec.Region.AvailabilityZone)
+		//sched.UpdateSiteDynamicResource_Temp(clusterCopy.Spec.Region.Region, clusterCopy.Spec.Region.AvailabilityZone)
 		//klog.Infof("created a site, site , id - site: %v", site.SiteID)
 		klog.Infof("created a site, site id - site: %v", *(sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].Site))
 		klog.Infof("created a site, site id - map: %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID])
@@ -818,7 +818,7 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].AllocatableFlavor[flavor.FlavorID] = flavor.TotalCapacity
 			sched.UpdateRegionFlavor(clusterCopy.Spec.Region.Region, flavor.FlavorID)
 		}
-		sched.UpdateSiteDynamicResource_Temp(clusterCopy.Spec.Region.Region, clusterCopy.Spec.Region.AvailabilityZone)
+		//sched.UpdateSiteDynamicResource_Temp(clusterCopy.Spec.Region.Region, clusterCopy.Spec.Region.AvailabilityZone)
 		klog.Infof("created a site, site id: %v", site.SiteID)
 		break
 	case EventType_Delete:
@@ -866,10 +866,10 @@ func (sched *Scheduler) UpdateSiteDynamicResource(region string, resource *types
 }
 
 //This function updates sites' flavor
-/*func (sched *Scheduler) UpdateFlavor() (error) {
+func (sched *Scheduler) UpdateFlavor() (error) {
 	sched.siteCacheInfoSnapshot.FlavorMap = config.ReadFlavorConf()
 	return nil
-}*/
+}
 
 //This function updates sites' flavor
 func (sched *Scheduler) UpdateRegionFlavor(region string, flavorId string) (err error) {
@@ -884,7 +884,7 @@ func (sched *Scheduler) UpdateRegionFlavor(region string, flavorId string) (err 
 }
 
 //This function updates sites' dynamic resource informaton
-func (sched *Scheduler) UpdateSiteDynamicResource_Temp(region string, az string) (result string, err error) {
+/*func (sched *Scheduler) UpdateSiteDynamicResource_Temp(region string, az string) (result string, err error) {
 	siteID := region + "--" + az
 	sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID].TotalResources[siteID] = &types.CPUAndMemory{VCPU: 3, Memory: 512}
 	sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID].TotalStorage["sas"] = 4086
@@ -892,4 +892,4 @@ func (sched *Scheduler) UpdateSiteDynamicResource_Temp(region string, az string)
 	result = "ok"
 	err = nil
 	return
-}
+}*/

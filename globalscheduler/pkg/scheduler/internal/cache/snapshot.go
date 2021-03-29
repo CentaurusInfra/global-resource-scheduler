@@ -53,26 +53,6 @@ func NewEmptySnapshot() *Snapshot {
 	}
 }
 
-// NewSnapshot initializes a Snapshot struct and returns it.
-/*func NewSnapshot(stacks []*types.Stack, sites []*types.Site) *Snapshot {
-	siteCacheInfoMap := createSiteInfoCacheMap(stacks, sites)
-	siteCacheInfoList := make([]*schedulersitecacheinfo.SiteCacheInfo, 0, len(siteCacheInfoMap))
-	havePodsWithAffinitySiteCacheInfoList := make([]*schedulersitecacheinfo.SiteCacheInfo, 0, len(siteCacheInfoMap))
-	for _, v := range siteCacheInfoMap {
-		siteCacheInfoList = append(siteCacheInfoList, v)
-		if len(v.StackWithAffinity()) > 0 {
-			havePodsWithAffinitySiteCacheInfoList = append(havePodsWithAffinitySiteCacheInfoList, v)
-		}
-	}
-
-	s := NewEmptySnapshot()
-	s.SiteCacheInfoMap = siteCacheInfoMap
-	s.SiteCacheInfoList = siteCacheInfoList
-	s.HavePodsWithAffinitySiteCacheInfoList = havePodsWithAffinitySiteCacheInfoList
-
-	return s
-}*/
-
 // createSiteInfoCacheMap obtains a list of pods and pivots that list into a map
 // where the keys are site names and the values are the aggregated information
 // for that site.
@@ -105,12 +85,6 @@ func (s *Snapshot) Stacks() schedulerlisters.StackLister {
 func (s *Snapshot) SiteCacheInfos() schedulerlisters.SiteCacheInfoLister {
 	return s
 }
-
-// NumSites returns the number of siteIDs in the snapshot.
-/*func (s *Snapshot) NumSites() int {
-	//return len(s.SiteCacheInfoList)
-	return len(s.SiteCacheInfoMap)
-}*/
 
 type stackLister []*schedulersitecacheinfo.SiteCacheInfo
 

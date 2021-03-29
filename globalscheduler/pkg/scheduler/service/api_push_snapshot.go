@@ -26,7 +26,6 @@ import (
 
 // Schedule get snapshot
 func PushSnapshot(req *restful.Request, resp *restful.Response) {
-	//ctx := req.Request.Context()
 	resourceReq := new(types.SiteResourceReq)
 	klog.Infof("*** PushSnapshot1: %v", resourceReq)
 	region := req.PathParameter("regionname")
@@ -39,7 +38,6 @@ func PushSnapshot(req *restful.Request, resp *restful.Response) {
 	}
 	klog.Infof("SiteResourceReq: %s", utils.GetJSONString(resourceReq))
 	resource := resourceReq.SiteResource
-	//result := types.SiteResourceRes{Result: "OK"}
 	sched := scheduler.GetScheduler()
 	if sched == nil {
 		klog.Errorf("Scheduler is not init, please wait...")
@@ -56,9 +54,4 @@ func PushSnapshot(req *restful.Request, resp *restful.Response) {
 	resourceResp := types.SiteResourceRes{Result: "ok"}
 	klog.Infof("PushSnapshot4: %v", resourceResp)
 	resp.WriteHeaderAndEntity(http.StatusCreated, resourceResp)
-}
-
-func Hello(req *restful.Request, resp *restful.Response) {
-	klog.Infof("hello request: %v", req)
-	io.WriteString(resp, "world")
 }
