@@ -147,6 +147,8 @@ func (sc *SchedulerController) CreateSchedulerCRD() error {
 										},
 									},
 								},
+								"ipaddress":  {Type: "string"},
+								"portnumber": {Type: "string"},
 							},
 						},
 					},
