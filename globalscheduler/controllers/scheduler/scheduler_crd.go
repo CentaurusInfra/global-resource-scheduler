@@ -50,7 +50,9 @@ func (sc *SchedulerController) CreateSchedulerCRD() error {
 										"country":  {Type: "string"},
 									},
 								},
-								"tag": {Type: "string"},
+								"tag":        {Type: "string"},
+								"ipaddress":  {Type: "string"},
+								"portnumber": {Type: "string"},
 								"cluster": {
 									Type: "array",
 									Items: &apiextensions.JSONSchemaPropsOrArray{

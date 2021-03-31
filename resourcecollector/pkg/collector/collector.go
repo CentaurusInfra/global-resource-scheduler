@@ -18,10 +18,12 @@ package collector
 
 import (
 	"errors"
+	"k8s.io/klog"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers/internalinterfaces"
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/siteinfo"
 	"sync"
 	"time"
 
-	"k8s.io/klog"
 	schedulercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/cache"
@@ -31,8 +33,9 @@ import (
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/common/config"
 	internalcache "k8s.io/kubernetes/resourcecollector/pkg/collector/internal/cache"
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/region"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/rpcclient"
-	"k8s.io/kubernetes/resourcecollector/pkg/collector/siteinfo"
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/task"
 )
 
 var collector *Collector
@@ -61,6 +64,7 @@ type Collector struct {
 	siteCacheInfoSnapshot *internalcache.Snapshot
 	SiteInfoCache         *siteinfo.SiteInfoCache
 	SchedulerInfoCache    []*schedulercrdv1.Scheduler
+	RegionResourceCache   *region.RegionResourceCache
 
 	clientSetCache *cloudclient.ClientSetCache
 
@@ -75,6 +79,7 @@ func NewCollector(stopCh <-chan struct{}) (*Collector, error) {
 		siteCacheInfoSnapshot: internalcache.NewEmptySnapshot(),
 		SiteInfoCache:         siteinfo.NewSiteInfoCache(),
 		SchedulerInfoCache:    make([]*schedulercrdv1.Scheduler, 0),
+		RegionResourceCache:   region.NewRegionCache(),
 
 		clientSetCache: cloudclient.NewClientSetCache(),
 
@@ -136,6 +141,10 @@ func (c *Collector) GetSiteInfos() *siteinfo.SiteInfoCache {
 
 func (c *Collector) GetClientSet(siteEndpoint string) (*cloudclient.ClientSet, error) {
 	return c.clientSetCache.GetClientSet(siteEndpoint)
+}
+
+func (c *Collector) GetRegionResources() *region.RegionResourceCache {
+	return c.RegionResourceCache
 }
 
 func (c *Collector) GetSnapshot() (*internalcache.Snapshot, error) {
@@ -308,4 +317,26 @@ func convertToSite(siteInfo *typed.SiteInfo, siteResource typed.SiteResource) *t
 
 	result.Hosts = append(result.Hosts, siteResource.Hosts...)
 	return result
+}
+
+func (c *Collector) StartTasks(stopCh <-chan struct{}) {
+	go c.startTask(stopCh, config.GlobalConf.RegionInterval, task.SyncResources)
+}
+
+func (c *Collector) startTask(stopCh <-chan struct{}, interval int, fn func(rc internalinterfaces.ResourceCollector)) {
+	ticker := time.NewTicker(time.Duration(interval) * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-stopCh:
+			return
+		case <-ticker.C:
+			fn(c)
+			klog.Infof("The task is running at %v", time.Now())
+		}
+	}
+}
+
+func (c *Collector) GetSchedulers() []*schedulercrdv1.Scheduler {
+	return c.SchedulerInfoCache
 }
