@@ -24,6 +24,7 @@ import (
 	pb "k8s.io/kubernetes/globalscheduler/grpc/cluster/proto"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector"
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/task"
 )
 
 const (
@@ -58,6 +59,7 @@ func (s *ClusterProtocolServer) SendClusterProfile(ctx context.Context,
 		return getReturnMessageFromError(ns, name, &err), err
 	}
 	siteID := fmt.Sprintf("%s|%s", region, az)
+
 	col, err := collector.GetCollector()
 	if err != nil {
 		klog.Errorf("get new collector failed, err: %s", err.Error())
@@ -66,36 +68,25 @@ func (s *ClusterProtocolServer) SendClusterProfile(ctx context.Context,
 	}
 	switch in.ClusterStatus {
 	case ClusterStatusCreated:
-		klog.Infof("grpc.GrpcSendClusterProfile created- siteID[%s], IP[%s]", siteID, ip)
-		siteInfo := &typed.SiteInfo{
-			SiteID:           siteID,
-			ClusterName:      in.ClusterName,
-			ClusterNamespace: in.ClusterNameSpace,
-			Region:           region,
-			AvailabilityZone: az,
-			Status:           ClusterStatusCreated,
-			City:             in.ClusterSpec.GeoLocation.City,
-			Province:         in.ClusterSpec.GeoLocation.Province,
-			Area:             in.ClusterSpec.GeoLocation.Area,
-			Country:          in.ClusterSpec.GeoLocation.Country,
-			EipNetworkID:     ip,
-			EipTypeName:      "not known",
-			EipCidr:          nil,
-			SiteAttributes:   nil,
+		klog.Infof("grpc.GrpcSendClusterProfile created - region[%s], IP[%s]", region, ip)
+		regionInfo := &typed.RegionResource{
+			RegionName:   region,
+			EipNetworkID: ip,
 		}
-		if in.ClusterSpec.Operator != nil {
-			siteInfo.Operator = &typed.Operator{Name: in.ClusterSpec.Operator.Operator}
-		}
-		col.SiteInfoCache.AddSite(siteInfo)
-		//informers.InformerFac.SyncOnSiteChange()
+		col.GetRegionResources().AddRegionResource(regionInfo)
+		col.GetRegionResources().AddAvailabilityZone(region, az)
+		task.BuildHostAzMap(col)
 	case ClusterStatusDeleted:
-		klog.Infof("grpc.GrpcSendClusterProfile deleted- siteID[%s], IP[%s]", siteID, ip)
-		col.SiteInfoCache.RemoveSite(siteID)
-		err := col.ResourceCache.RemoveSite(siteID)
+		klog.Infof("grpc.GrpcSendClusterProfile deleted - region[%s], IP[%s]", region, ip)
+		err := col.GetRegionResources().RemoveAvailabilityZone(region, az)
 		if err != nil {
-			klog.Errorf("col.ResourceCache.RemoveSite err: %s", err.Error())
+			klog.Errorf("RemoveAvailabilityZone err: %s", err.Error())
 		}
-		//informers.InformerFac.SyncOnSiteChange()
+		col.GetRegionResources().RemoveRegionResource(region)
+		if err != nil {
+			klog.Errorf("RemoveRegionResource err: %s", err.Error())
+		}
+
 	default:
 		klog.Infof("grpc.GrpcSendClusterProfile status error[%s]- siteID[%s], IP[%s]", in.ClusterStatus, siteID, ip)
 		err := errors.New("status error")

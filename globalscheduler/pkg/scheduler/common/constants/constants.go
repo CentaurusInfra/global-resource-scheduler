@@ -97,4 +97,7 @@ const (
 
 	//Post scheduler ipaddress url
 	SchedulerRegisterURL = "/v1/scheduler"
+
+	//Push resource update notification url
+	RegionResourcesURL = "/regionresources"
 )
