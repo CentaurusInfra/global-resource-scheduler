@@ -66,24 +66,24 @@ func SyncResources(collector internalinterfaces.ResourceCollector) {
 		wg.Add(1)
 		go func(client *gophercloud.ServiceClient, regionResource *typed.RegionResource, collector internalinterfaces.ResourceCollector) {
 			defer wg.Done()
-			cpuAndMemResources, err = getRegionCpuAndMemResources(client, info, collector)
+			cpuAndMemResources, err = getRegionCpuAndMemResources(client, regionResource, collector)
 			if err != nil {
-				klog.Errorf("region cpu and mem resource [%s] list failed! err: %s", info.RegionName, err.Error())
+				klog.Errorf("region cpu and mem resource [%s] list failed! err: %s", regionResource.RegionName, err.Error())
 				return
 			}
 		}(clientComputeV2, info, collector)
 		wg.Add(1)
 		go func(client *gophercloud.ServiceClient, regionResource *typed.RegionResource, collector internalinterfaces.ResourceCollector) {
 			defer wg.Done()
-			volumeResources, err = getRegionVolumeResources(client, info, collector)
+			volumeResources, err = getRegionVolumeResources(client, regionResource, collector)
 			if err != nil {
-				klog.Errorf("region volume resource [%s] list failed! err: %s", info.RegionName, err.Error())
+				klog.Errorf("region volume resource [%s] list failed! err: %s", regionResource.RegionName, err.Error())
 				return
 			}
 		}(clientVolumeV3, info, collector)
 		wg.Wait()
 		if len(cpuAndMemResources) > 0 || len(volumeResources) > 0 {
-			regionResource := types.RegionResource{RegionName:info.RegionName}
+			regionResource := types.RegionResource{RegionName: info.RegionName}
 			if len(cpuAndMemResources) > 0 {
 				regionResource.CPUMemResources = cpuAndMemResources
 			}

@@ -59,9 +59,9 @@ func BuildHostAzMap(collector internalinterfaces.ResourceCollector) {
 			aggregates, err := aggregates.ExtractAggregates(aggregatePages)
 
 			for _, aggregate := range aggregates {
-				regionResourceCache.AddHostAz(info.RegionName, aggregate.Hosts, aggregate.AvailabilityZone)
+				regionResourceCache.AddHostAz(regionResource.RegionName, aggregate.Hosts, aggregate.AvailabilityZone)
 			}
-			klog.Infof("The host az map has been added as %v", collector.GetRegionResources().RegionResourceMap[info.RegionName])
+			klog.Infof("The host az map has been added as %v", collector.GetRegionResources().RegionResourceMap[regionResource.RegionName])
 		}(clientComputeV2, info, collector)
 	}
 	wg.Wait()

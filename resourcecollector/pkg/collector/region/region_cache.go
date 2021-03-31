@@ -24,8 +24,8 @@ import (
 
 // Because it needs to be called in Informer, it will not be placed in the internalcache for the time being
 type RegionResourceCache struct {
-	mutex               sync.Mutex
-	RegionResourceMap   map[string]*typed.RegionResource
+	mutex             sync.Mutex
+	RegionResourceMap map[string]*typed.RegionResource
 }
 
 func NewRegionCache() *RegionResourceCache {
@@ -45,10 +45,8 @@ func (r *RegionResourceCache) AddRegionResource(region *typed.RegionResource) {
 func (r *RegionResourceCache) RemoveRegionResource(regionName string) error {
 	r.mutex.Lock()
 	r.mutex.Unlock()
-	if regionResource, ok := r.RegionResourceMap[regionName]; ok {
-		if len(regionResource.CpuAndMemResources) == 0 {
-			delete(r.RegionResourceMap, regionName)
-		}
+	if _, ok := r.RegionResourceMap[regionName]; ok {
+		delete(r.RegionResourceMap, regionName)
 		return nil
 	} else {
 		return fmt.Errorf("Region %v is not found", regionName)
@@ -62,7 +60,7 @@ func (r *RegionResourceCache) AddAvailabilityZone(regionName, availabilityZone s
 		if r.RegionResourceMap[regionName].CpuAndMemResources == nil {
 			r.RegionResourceMap[regionName].CpuAndMemResources = make(map[string]typed.CpuAndMemResource)
 		}
-		r.RegionResourceMap[regionName].CpuAndMemResources[availabilityZone] = typed.CpuAndMemResource{ TotalVCPUs:0, TotalMem: 0}
+		r.RegionResourceMap[regionName].CpuAndMemResources[availabilityZone] = typed.CpuAndMemResource{TotalVCPUs: 0, TotalMem: 0}
 	}
 }
 
@@ -108,11 +106,11 @@ func (r *RegionResourceCache) UpdateVolumeResource(regionName string, newVolumeR
 	return false
 }
 
-func (r *RegionResourceCache) AddHostAz(regionName string, hosts []string, az string)  {
+func (r *RegionResourceCache) AddHostAz(regionName string, hosts []string, az string) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	if _, ok := r.RegionResourceMap[regionName]; !ok {
-		r.RegionResourceMap[regionName] = &typed.RegionResource{RegionName:regionName}
+		r.RegionResourceMap[regionName] = &typed.RegionResource{RegionName: regionName}
 	}
 	if r.RegionResourceMap[regionName].HostAzMap == nil {
 		r.RegionResourceMap[regionName].HostAzMap = make(map[string]string)
@@ -121,4 +119,3 @@ func (r *RegionResourceCache) AddHostAz(regionName string, hosts []string, az st
 		r.RegionResourceMap[regionName].HostAzMap[host] = az
 	}
 }
-
