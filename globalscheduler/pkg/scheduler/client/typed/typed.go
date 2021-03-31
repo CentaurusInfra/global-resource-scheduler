@@ -331,3 +331,21 @@ type SiteResource struct {
 type SiteResources struct {
 	SiteResources []SiteResource `json:"site_resources"`
 }
+
+type RegionResource struct {
+	RegionName         string                       `json:"regionName"`
+	EipNetworkID       string                       `json:"eip_network_id"`
+	HostAzMap          map[string]string            `json:"hostAzMap"`
+	CpuAndMemResources map[string]CpuAndMemResource `json:"cpuAndMemResources"`
+	VolumeResources    []VolumeResource             `json:"volumeResources"`
+}
+
+type CpuAndMemResource struct {
+	TotalVCPUs int `json:"totalVCPUs"`
+	TotalMem   int `json:"totalMem"`
+}
+
+type VolumeResource struct {
+	TotalCapacityGb float64 `json:"totalCapacityGb"`
+	VolumeType      string  `json:"volumeType"`
+}

@@ -75,6 +75,7 @@ type Config struct {
 	VolumePoolInterval   int
 	VolumeTypeInterval   int
 	EipPoolInterval      int
+	RegionInterval       int
 
 	// When the maximum number of unreachable requests is reached,
 	// send the node unreachable status to the ClusterController
@@ -106,6 +107,7 @@ func readConf() *Config {
 		VolumePoolInterval:   DefaultInt("VolumePoolInterval", 60),
 		VolumeTypeInterval:   DefaultInt("VolumeTypeInterval", 60),
 		EipPoolInterval:      DefaultInt("EipPoolInterval", 60),
+		RegionInterval:       DefaultInt("RegionInterval", 60),
 
 		MaxUnreachableNum: DefaultInt("MaxUnreachableNum", 5),
 

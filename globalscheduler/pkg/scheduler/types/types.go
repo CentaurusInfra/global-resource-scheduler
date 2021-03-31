@@ -444,3 +444,13 @@ type SiteResourceReq struct {
 type SiteResourceRes struct {
 	Result string `json:"result",omitempty"`
 }
+
+type RegionResourcesReq struct {
+	RegionResources []RegionResource `json:"regionresources" required:"true"`
+}
+
+type RegionResource struct {
+	RegionName      string     `json:"regionname,omitempty"`
+	CPUMemResources []AzCpuMem `json:"cpumemresources,omitempty"`
+	VolumeResources []Volume   `json:"volumeresources,omitempty"`
+}
