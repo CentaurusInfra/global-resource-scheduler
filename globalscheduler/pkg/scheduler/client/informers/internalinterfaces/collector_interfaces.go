@@ -18,7 +18,9 @@ limitations under the License.
 package internalinterfaces
 
 import (
+	schedulercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/cloudclient"
+	"k8s.io/kubernetes/resourcecollector/pkg/collector/region"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector/siteinfo"
 )
 
@@ -26,6 +28,8 @@ import (
 type ResourceCollector interface {
 	StartInformersAndRun(stopCh <-chan struct{})
 	GetSiteInfos() *siteinfo.SiteInfoCache
+	GetRegionResources() *region.RegionResourceCache
 	RecordSiteUnreacheable(siteID, clusterNamespace, clusterName string)
 	GetClientSet(siteEndpoint string) (*cloudclient.ClientSet, error)
+	GetSchedulers() []*schedulercrdv1.Scheduler
 }
