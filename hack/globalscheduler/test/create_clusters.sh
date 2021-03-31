@@ -57,9 +57,9 @@ for ((i = 0 ; i < $(($1)) ; i++)); do
     ipsIdx=$(($i%ipsLen))
     azsIdx=$(($i%2))
     name="cluster-$(($i))"
-    area="area-$(($i))"
-    city="city-$(($i))"
-    province="province-$(($i))"
+    area="area-$(($ipsIdx))"
+    city="city-$(($ipsIdx))"
+    province="province-$(($ipsIdx))"
     country="US"
     create_cluster $name $area $city $province $country ${openstackips[$ipsIdx]} ${azs[$azsIdx]}
 done
