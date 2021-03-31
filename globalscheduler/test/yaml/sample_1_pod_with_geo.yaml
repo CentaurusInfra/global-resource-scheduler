@@ -6,9 +6,9 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: openstack-pod-with-geo1
-    image: "913908e3-dc24-49b0-89ef-a45e43513c5a"    
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"    
     keyPairName: "demo-keypair"
-    securityGroupId: "69ff6f01-da28-4204-89a0-f5f8d09dc60b"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     flavors:
       - flavorID: "42"
     resourceCommonInfo:
@@ -24,7 +24,7 @@ spec:
            availablityZone:
            - "NW-1"
   nics:
-    - name: "e6b2ec07-960b-4654-8e00-c2a22e108e3a"
+    - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -34,9 +34,9 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: openstack-pod-with-geo2
-    image: "913908e3-dc24-49b0-89ef-a45e43513c5a"    
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"    
     keyPairName: "demo-keypair"
-    securityGroupId: "69ff6f01-da28-4204-89a0-f5f8d09dc60b"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     flavors:
       - flavorID: "42"
     resourceCommonInfo:
@@ -52,4 +52,4 @@ spec:
            availablityZone:
            - "NE-1"
   nics:
-    - name: "e6b2ec07-960b-4654-8e00-c2a22e108e3a"
+    - name: "dac608f2-465f-4856-8aef-9aa406a1139a"

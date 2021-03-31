@@ -6,8 +6,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm1"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -22,7 +22,7 @@ spec:
         regions:
          - region: "NE-1"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -32,8 +32,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm2"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -48,7 +48,7 @@ spec:
         regions:
          - region: "NE-1"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -58,8 +58,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm3"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -74,7 +74,7 @@ spec:
         regions:
          - region: "NE-1"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -84,8 +84,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm4"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -100,7 +100,7 @@ spec:
         regions:
          - region: "NE-2"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -110,8 +110,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm5"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -126,7 +126,7 @@ spec:
         regions:
          - region: "NE-1"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -136,8 +136,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm6"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -152,7 +152,7 @@ spec:
         regions:
          - region: "NE-1"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -162,8 +162,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm7"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -178,7 +178,7 @@ spec:
         regions:
          - region: "NW-1"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -188,8 +188,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm8"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -204,7 +204,7 @@ spec:
         regions:
          - region: "NW-1"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -214,8 +214,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm9"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -230,7 +230,7 @@ spec:
         regions:
          - region: "NW-1"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -240,8 +240,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm10"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -256,7 +256,7 @@ spec:
         regions:
          - region: "NW-2"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -266,8 +266,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm11"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -282,7 +282,7 @@ spec:
         regions:
          - region: "NW-2"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -292,8 +292,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm12"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -308,7 +308,7 @@ spec:
         regions:
          - region: "NW-2"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -318,8 +318,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm13"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -334,7 +334,7 @@ spec:
         regions:
          - region: "SE-1"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -344,8 +344,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm14"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -360,7 +360,7 @@ spec:
         regions:
          - region: "SE-1"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -370,8 +370,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm15"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -386,7 +386,7 @@ spec:
         regions:
          - region: "SE-1"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -396,8 +396,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm16"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -412,7 +412,7 @@ spec:
         regions:
          - region: "SE-2"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -422,8 +422,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm17"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -438,7 +438,7 @@ spec:
         regions:
          - region: "SE-2"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -448,8 +448,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm18"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -464,7 +464,7 @@ spec:
         regions:
          - region: "SE-2"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -474,8 +474,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm19"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -490,7 +490,7 @@ spec:
         regions:
          - region: "NW-1"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
 ---
 apiVersion: v1
 kind: Pod
@@ -500,8 +500,8 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: "demo-vm20"
-    image: "9ecb51b6-f723-4654-bfcd-37459245c9dc"
-    securityGroupId: "ca3a65fb-f304-438d-97bd-171d713f5aa5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
     keyPairName: "demo-keypair"
     flavors:
     - flavorID: "42"
@@ -516,4 +516,4 @@ spec:
         regions:
          - region: "NW-1"
   nics:
-  - name: "211d3389-1c1a-4938-8686-c61ff81b7ff7"
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
