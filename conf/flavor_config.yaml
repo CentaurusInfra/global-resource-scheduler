@@ -1,0 +1,38 @@
+flavor_number: 6
+flavors:
+    flavor_0:
+      id: "42"
+      name: "m1.nano"
+      vcpus: "1"
+      ram: 128
+      disk: "0"
+    flavor_1:
+      id: "1"
+      name: "m1.tiny"
+      vcpus: "1"
+      ram: 512
+      disk: "1"
+    flavor_2:
+      id: "2"
+      name: "m1.small"
+      vcpus: "1"
+      ram: 2048
+      disk: "20"
+    flavor_3:
+      id: "3"
+      name: "m1.medium"
+      vcpus: "2"
+      ram: 4096
+      disk: "40"
+    flavor_4:
+      id: "4"
+      name: "m1.large"
+      vcpus: "4"
+      ram: 8192
+      disk: "80"
+    flavor_5:
+      id: "5"
+      name: "m1.xlarge"
+      vcpus: "8"
+      ram: 16384
+      disk: "160"
