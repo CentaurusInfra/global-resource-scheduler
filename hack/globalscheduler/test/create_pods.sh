@@ -60,13 +60,19 @@ EOM
 }
 
 # locsLen=${#locs[@]}
+azsIdx=0
+
 for ((i = 0 ; i < $(($1)) ; i++)); do
     idx=$(($i%20))
-    azsIdx=$(($i%2))
+    if [ $idx -eq 0 ]
+    then
+      azsIdx=$((azsIdx+1))
+    fi
     name="pod-$(($i))"
     area="area-$(($idx))"
     city="city-$(($idx))"
     province="province-$(($idx))"
     country="US"
-    create_pod $name $area $city $province $country ${azs[$azsIdx]} ${openstackimgs[$idx]} ${openstacksgs[$idx]} ${openstacknwks[$idx]}
+    az="az-$(($azsIdx))"
+    create_pod $name $area $city $province $country $az ${openstackimgs[$idx]} ${openstacksgs[$idx]} ${openstacknwks[$idx]}
 done

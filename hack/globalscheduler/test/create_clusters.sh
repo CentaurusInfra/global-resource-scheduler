@@ -52,14 +52,19 @@ EOM
 }
 
 ipsLen=${#openstackips[@]}
+azsIdx=0
 
 for ((i = 0 ; i < $(($1)) ; i++)); do
     ipsIdx=$(($i%ipsLen))
-    azsIdx=$(($i%2))
+    if [ $ipsIdx -eq 0 ]
+    then
+      azsIdx=$((azsIdx+1))
+    fi
     name="cluster-$(($i))"
     area="area-$(($ipsIdx))"
     city="city-$(($ipsIdx))"
     province="province-$(($ipsIdx))"
     country="US"
-    create_cluster $name $area $city $province $country ${openstackips[$ipsIdx]} ${azs[$azsIdx]}
+    az="az-$(($azsIdx))"
+    create_cluster $name $area $city $province $country ${openstackips[$ipsIdx]} $az
 done
