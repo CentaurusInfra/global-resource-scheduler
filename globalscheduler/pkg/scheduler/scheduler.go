@@ -137,7 +137,7 @@ func NewScheduler(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct
 	//build entire FlavorMap map<flovorid, flavorinfo>
 	sched.UpdateFlavor()
 	//sched.siteCacheInfoSnapshot.FlavorMap = config.ReadFlavorConf()
-	klog.Infof("*** FlavorMap: %v", sched.siteCacheInfoSnapshot.FlavorMap)
+	klog.Infof("FlavorMap: %v", sched.siteCacheInfoSnapshot.FlavorMap)
 	// init pod informers & cluster informers for scheduler
 	err = sched.initPodClusterInformers(stopEverything)
 	if err != nil {
@@ -493,6 +493,7 @@ func (sched *Scheduler) Schedule(ctx context.Context, allocation *types.Allocati
 	///UpdateFlavorMap updates FlavorCache.RegionFlavorMap, FlavorCache.FlavorMap)
 	///FlavorMap is updated when scheduler starts, RegionFlavorMap is updated
 	///when cluster is added/updated. AllocatableFlavor is computed after binding
+	sched.UpdateFlavor() //update sched.siteCacheInfoSnapshot.FlavorMap
 	internalcache.FlavorCache.UpdateFlavorMap(sched.siteCacheInfoSnapshot.RegionFlavorMap, sched.siteCacheInfoSnapshot.FlavorMap)
 
 	// 2. Run "prefilter" plugins.
@@ -867,7 +868,8 @@ func (sched *Scheduler) UpdateSiteDynamicResource(region string, resource *types
 
 //This function updates sites' flavor
 func (sched *Scheduler) UpdateFlavor() error {
-	sched.siteCacheInfoSnapshot.FlavorMap = config.ReadFlavorConf()
+	//sched.siteCacheInfoSnapshot.FlavorMap = config.ReadFlavorConf()
+	sched.siteCacheInfoSnapshot.FlavorMap = config.FlavorMap
 	return nil
 }
 

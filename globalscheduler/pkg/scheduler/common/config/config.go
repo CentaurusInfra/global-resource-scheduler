@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/go-chassis/go-archaius"
+	archaiuscore "github.com/go-chassis/go-archaius/core"
 	"github.com/spf13/cast"
 	"gopkg.in/yaml.v2"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
@@ -34,41 +35,60 @@ import (
 )
 
 var conf archaius.ConfigurationFactory
+var FlavorMap map[string]*typed.RegionFlavor
 
-//var GlobalConf *Config //http server
+type Listener struct {
+	Key string
+}
 
 func Init() {
 	err := archaius.Init()
 	if err != nil {
-		fmt.Printf("[ERROR]archaius init failed\n")
+		klog.Error("[ERROR]archaius init failed\n")
 		os.Exit(1)
 	}
 	conf = archaius.GetConfigFactory()
-
 	confLocation := utils.GetConfigDirectory()
+	klog.Infof("Config file directory: %v\n", confLocation)
 	confFilePath := filepath.Join(confLocation, "conf.yaml")
 	err = archaius.AddFile(confFilePath)
 	if err != nil {
-		fmt.Printf("failed to AddFile %s, error: %+v\n", confFilePath, err.Error())
+		klog.Errorf("failed to AddFile %s, error: %+v\n", confFilePath, err.Error())
 		os.Exit(1)
 	}
+	klog.Infof("Config file %s\n", confFilePath)
 
 	regionFilePath := filepath.Join(confLocation, "region.yaml")
 	err = archaius.AddFile(regionFilePath)
 	if err != nil {
-		fmt.Printf("failed to AddFile %s, error: %+v\n", regionFilePath, err.Error())
+		klog.Errorf("failed to AddFile %s, error: %+v\n", regionFilePath, err.Error())
 		os.Exit(1)
 	}
+	klog.Infof("Region Config File %s\n", regionFilePath)
 
-	//http server
-	//GlobalConf = readConf()
+	flavorConfigFilePath := filepath.Join(confLocation, "flavor_config.yaml")
+	err = archaius.AddFile(flavorConfigFilePath)
+	if err != nil {
+		klog.Errorf("failed to AddFile %s, error: %+v\n", flavorConfigFilePath, err.Error())
+		os.Exit(1)
+	}
+	klog.Infof("Region Config File %s\n", flavorConfigFilePath)
+	ReadFlavorConf()
+	archaius.RegisterListener(&Listener{}, "flavor_number")
+}
+
+func (e Listener) Event(event *archaiuscore.Event) {
+	klog.Infof("Flavor Config Event - event key: %v", event)
+	if event.EventType == archaiuscore.Create || event.EventType == archaiuscore.Update {
+		ReadFlavorConf()
+	}
 }
 
 // String convert key to string
 func String(key string) string {
 	value, err := conf.GetValue(key).ToString()
 	if err != nil {
-		fmt.Printf("get %s from config failed! err: %s\n", key, err.Error())
+		klog.Errorf("get %s from config failed! err: %s\n", key, err.Error())
 		return ""
 	}
 	return value
@@ -94,7 +114,7 @@ func ArrayMapString(key string) []map[string]string {
 	var m = []map[string]string{}
 	value, err := conf.GetValue(key).ToSlice()
 	if err != nil {
-		fmt.Printf("get %s from config failed! err: %s\n", key, err.Error())
+		klog.Infof("get %s from config failed! err: %s\n", key, err.Error())
 		return nil
 	}
 
@@ -124,7 +144,6 @@ func DefaultString(key string, defaultValue string) string {
 	if err != nil {
 		return defaultValue
 	}
-
 	return value
 }
 
@@ -134,7 +153,6 @@ func DefaultBool(key string, defaultVal bool) bool {
 	if err != nil {
 		return defaultVal
 	}
-
 	return value
 }
 
@@ -144,7 +162,6 @@ func DefaultInt(key string, defaultValue int) int {
 	if err != nil {
 		return defaultValue
 	}
-
 	return value
 }
 
@@ -154,7 +171,6 @@ func DefaultInt64(key string, defaultValue int64) int64 {
 	if err != nil {
 		return defaultValue
 	}
-
 	return value
 }
 
@@ -164,7 +180,6 @@ func DefaultFloat64(key string, defaultValue float64) float64 {
 	if err != nil {
 		return defaultValue
 	}
-
 	return value
 }
 
@@ -187,167 +202,33 @@ func InitPolicyFromFile(policyFile string, policy *types.Policy) error {
 	return nil
 }
 
-//http server
-/*type Config struct {
-	// HTTP Server
-	HttpAddr   string
-	HttpPort   int
-	APIVersion string
-}
-
-func readConf() *Config {
-	return &Config{
-		HttpAddr:   DefaultString("HttpAddr", "0.0.0.0"),
-		HttpPort:   DefaultInt("HttpPort", 8661),
-		APIVersion: DefaultString("APIVersion", "v1"),
-	}
-} */
-
 func ReadFlavorConf() map[string]*typed.RegionFlavor {
-	FlavorMap := make(map[string]*typed.RegionFlavor)
-	flavor42 := &typed.RegionFlavor{
-		RegionFlavorID: "42",
-		Region:         "",
-		Flavor: typed.Flavor{
-			ID: "42",
-
-			// Specifies the name of the ECS specifications.
-			Name: "42",
-
-			// Specifies the number of CPU cores in the ECS specifications.
-			Vcpus: "1",
-
-			// Specifies the memory size (MB) in the ECS specifications.
-			Ram: 128,
-
-			// Specifies the system disk size in the ECS specifications.
-			// The value 0 indicates that the disk size is not limited.
-			Disk: "0",
-
-			/*// Specifies shortcut links for ECS flavors.
-			Links []Link `json:"links"`
-
-			// Specifies extended ECS specifications.
-			OsExtraSpecs OsExtraSpecs `json:"os_extra_specs"`
-
-			// Reserved
-			Swap string `json:"swap"`
-
-			// Reserved
-			FlvEphemeral int64 `json:"OS-FLV-EXT-DATA:ephemeral"`
-
-			// Reserved
-			FlvDisabled bool `json:"OS-FLV-DISABLED:disabled"`
-
-			// Reserved
-			RxtxFactor int64 `json:"rxtx_factor"`
-
-			// Reserved
-			RxtxQuota string `json:"rxtx_quota"`
-
-			// Reserved
-			RxtxCap string `json:"rxtx_cap"`
-
-			// Reserved
-			AccessIsPublic bool `json:"os-flavor-access:is_public"`*/
-		},
+	if FlavorMap == nil {
+		FlavorMap = make(map[string]*typed.RegionFlavor)
 	}
-	flavor1 := &typed.RegionFlavor{
-		RegionFlavorID: "1",
-		Region:         "",
-		Flavor: typed.Flavor{
-			ID: "1",
-
-			// Specifies the name of the ECS specifications.
-			Name: "m1.tiny",
-
-			// Specifies the number of CPU cores in the ECS specifications.
-			Vcpus: "1",
-
-			// Specifies the memory size (MB) in the ECS specifications.
-			Ram: 512,
-
-			// Specifies the system disk size in the ECS specifications.
-			// The value 0 indicates that the disk size is not limited.
-			Disk: "1",
-
-			/*// Specifies shortcut links for ECS flavors.
-			Links []Link `json:"links"`
-
-			// Specifies extended ECS specifications.
-			OsExtraSpecs OsExtraSpecs `json:"os_extra_specs"`
-
-			// Reserved
-			Swap string `json:"swap"`
-
-			// Reserved
-			FlvEphemeral int64 `json:"OS-FLV-EXT-DATA:ephemeral"`
-
-			// Reserved
-			FlvDisabled bool `json:"OS-FLV-DISABLED:disabled"`
-
-			// Reserved
-			RxtxFactor int64 `json:"rxtx_factor"`
-
-			// Reserved
-			RxtxQuota string `json:"rxtx_quota"`
-
-			// Reserved
-			RxtxCap string `json:"rxtx_cap"`
-
-			// Reserved
-			AccessIsPublic bool `json:"os-flavor-access:is_public"`*/
-		},
+	flavor_number := archaius.GetInt("flavor_number", 0)
+	var id, name, vcpus, vdisk string
+	var ram int64
+	for i := 0; i < flavor_number; i++ {
+		flavor_index := fmt.Sprintf("flavors.flavor_%v", i)
+		id = archaius.GetString(flavor_index+".id", "42")
+		name = archaius.GetString(flavor_index+".name", "m1.nano")
+		vcpus = archaius.GetString(flavor_index+".vcpus", "1")
+		ram = int64(archaius.GetInt(flavor_index+".ram", 128))
+		vdisk = archaius.GetString(flavor_index+".vdisk", "0")
+		flavor := &typed.RegionFlavor{
+			RegionFlavorID: id,
+			Region:         "",
+			Flavor: typed.Flavor{
+				ID:    id,
+				Name:  name,
+				Vcpus: vcpus,
+				Ram:   ram,
+				Disk:  vdisk,
+			},
+		}
+		FlavorMap[id] = flavor
 	}
-	flavor2 := &typed.RegionFlavor{
-		RegionFlavorID: "2",
-		Region:         "",
-		Flavor: typed.Flavor{
-			ID: "2",
-
-			// Specifies the name of the ECS specifications.
-			Name: "m1.small",
-
-			// Specifies the number of CPU cores in the ECS specifications.
-			Vcpus: "1",
-
-			// Specifies the memory size (MB) in the ECS specifications.
-			Ram: 2048,
-
-			// Specifies the system disk size in the ECS specifications.
-			// The value 0 indicates that the disk size is not limited.
-			Disk: "20",
-
-			/*// Specifies shortcut links for ECS flavors.
-			Links []Link `json:"links"`
-
-			// Specifies extended ECS specifications.
-			OsExtraSpecs OsExtraSpecs `json:"os_extra_specs"`
-
-			// Reserved
-			Swap string `json:"swap"`
-
-			// Reserved
-			FlvEphemeral int64 `json:"OS-FLV-EXT-DATA:ephemeral"`
-
-			// Reserved
-			FlvDisabled bool `json:"OS-FLV-DISABLED:disabled"`
-
-			// Reserved
-			RxtxFactor int64 `json:"rxtx_factor"`
-
-			// Reserved
-			RxtxQuota string `json:"rxtx_quota"`
-
-			// Reserved
-			RxtxCap string `json:"rxtx_cap"`
-
-			// Reserved
-			AccessIsPublic bool `json:"os-flavor-access:is_public"`*/
-		},
-	}
-	FlavorMap["42"] = flavor42
-	FlavorMap["1"] = flavor1
-	FlavorMap["2"] = flavor2
+	klog.Infof("FlavorMap: %v", FlavorMap)
 	return FlavorMap
 }

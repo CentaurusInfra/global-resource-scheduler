@@ -2,7 +2,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "go_default_library",
-    srcs = ["eventsystem.go"],
+    srcs = ["event-system.go"],
     importmap = "k8s.io/kubernetes/vendor/github.com/go-chassis/go-archaius/core/event-system",
     importpath = "github.com/go-chassis/go-archaius/core/event-system",
     visibility = ["//visibility:public"],

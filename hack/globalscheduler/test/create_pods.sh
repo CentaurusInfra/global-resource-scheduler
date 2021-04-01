@@ -36,9 +36,15 @@ spec:
   resourceType: "vm"
   virtualMachine:
     name: vm$1
+<<<<<<< HEAD
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"    
+    keyPairName: "demo-keypair"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
+=======
     image: "$7"
     keyPairName: "demo-keypair"
     securityGroupId: "$8"
+>>>>>>> 90eee1695a72038b0c87212374328f8acf89e7b9
     flavors:
       - flavorID: "42"
     resourceCommonInfo:
@@ -52,11 +58,19 @@ spec:
        regions:
          - region: $2
            availablityZone:
+<<<<<<< HEAD
+           - nova
+
+  nics:
+    - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
+EOF
+=======
            - "$6"
   nics:
     - name: "$9"
 ---
 EOM
+>>>>>>> 90eee1695a72038b0c87212374328f8acf89e7b9
 }
 
 # locsLen=${#locs[@]}
