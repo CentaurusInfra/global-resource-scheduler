@@ -27,7 +27,6 @@ import (
 
 	"github.com/go-chassis/go-archaius"
 	archaiuscore "github.com/go-chassis/go-archaius/core"
-	_ "github.com/go-chassis/go-archaius/core/event-system"
 	"github.com/spf13/cast"
 	"gopkg.in/yaml.v2"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
