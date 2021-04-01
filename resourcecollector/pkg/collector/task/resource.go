@@ -133,21 +133,9 @@ func getRegionCpuAndMemResources(client *gophercloud.ServiceClient, regionResour
 		klog.Errorf("hypervisors ExtractHypervisors failed! err: %s", err.Error())
 		return res, err
 	}
-	// If there is no az configured, we will get all the host resources and assign them to different az
-	if len(regionResource.HostAzMap) == 0 {
-		cmr := typed.CpuAndMemResource{}
-		for _, h := range hs {
-			cmr.TotalVCPUs = cmr.TotalVCPUs + h.VCPUs
-			cmr.TotalMem = cmr.TotalMem + h.MemoryMB
-		}
-		for az := range regionResource.CpuAndMemResources {
-			if collector.GetRegionResources().UpdateCpuAndMemResource(regionResource.RegionName, az, cmr) {
-				klog.Infof("The CpuAndMemResource for region[%s] az[%s] has been updated to the all the region host resources %v", regionResource.RegionName, az, cmr)
-				res = append(res, types.AzCpuMem{AvailabilityZone: az, CpuCapacity: int64(cmr.TotalVCPUs), MemCapacity: int64(cmr.TotalMem)})
-			}
-		}
-		// If there is  az configured, we will get  the host resources per azfrom the az host mapping and assign them to different az
-	} else {
+
+	// If there is  az configured, we will get  the host resources per az from the az host mapping and assign them to different az
+	if regionResource.HostAzMap != nil && len(regionResource.HostAzMap) > 0 {
 		azCpuMemMap := make(map[string]*typed.CpuAndMemResource, 0)
 		for _, h := range hs {
 			if az, ok := regionResource.HostAzMap[h.HypervisorHostname]; ok {
@@ -165,40 +153,55 @@ func getRegionCpuAndMemResources(client *gophercloud.ServiceClient, regionResour
 			}
 		}
 	}
+	// If there is no host az mapping, the system will assign default values for testing
+	defaultCmd := typed.CpuAndMemResource{TotalVCPUs: 3, TotalMem: 512}
+	for az, cmd := range regionResource.CpuAndMemResources {
+		if cmd.TotalMem == 0 && cmd.TotalVCPUs == 0 {
+			collector.GetRegionResources().UpdateCpuAndMemResource(regionResource.RegionName, az, defaultCmd)
+			res = append(res, types.AzCpuMem{AvailabilityZone: az, CpuCapacity: int64(defaultCmd.TotalVCPUs), MemCapacity: int64(defaultCmd.TotalMem)})
+		}
+	}
 	return res, nil
 }
 
 // Get volume resource information for each region
 func getRegionVolumeResources(client *gophercloud.ServiceClient, regionResource *typed.RegionResource, collector internalinterfaces.ResourceCollector) ([]types.Volume, error) {
 	res := make([]types.Volume, 0)
-
-	listOpts := schedulerstats.ListOpts{
-		Detail: true,
-	}
-	allPages, err := schedulerstats.List(client, listOpts).AllPages()
-	if err != nil {
-		klog.Errorf("schedulerstats list failed! err: %s", err.Error())
-		return res, err
-	}
-	allStats, err := schedulerstats.ExtractStoragePools(allPages)
-	if err != nil {
-		klog.Errorf("schedulerstats ExtractStoragePools failed! err: %s", err.Error())
-		return res, err
-	}
-
 	volumeResources := make([]typed.VolumeResource, 0)
-	for _, stat := range allStats {
-		volumeResource := typed.VolumeResource{
-			VolumeType:      stat.Capabilities.VolumeBackendName,
-			TotalCapacityGb: stat.Capabilities.TotalCapacityGB,
+
+	if regionResource.HostAzMap == nil || len(regionResource.HostAzMap) == 0 {
+		// If there is no host az mapping, the system will assign default values for testing
+		volumeResources = []typed.VolumeResource{{VolumeType: "lvmdriver-1", TotalCapacityGb: 22}}
+	} else {
+		listOpts := schedulerstats.ListOpts{
+			Detail: true,
 		}
-		volumeResources = append(volumeResources, volumeResource)
+		allPages, err := schedulerstats.List(client, listOpts).AllPages()
+		if err != nil {
+			klog.Errorf("schedulerstats list failed! err: %s", err.Error())
+			return res, err
+		}
+		allStats, err := schedulerstats.ExtractStoragePools(allPages)
+		if err != nil {
+			klog.Errorf("schedulerstats ExtractStoragePools failed! err: %s", err.Error())
+			return res, err
+		}
+
+		for _, stat := range allStats {
+			volumeResource := typed.VolumeResource{
+				VolumeType:      stat.Capabilities.VolumeBackendName,
+				TotalCapacityGb: stat.Capabilities.TotalCapacityGB,
+			}
+			volumeResources = append(volumeResources, volumeResource)
+		}
 	}
+
 	if collector.GetRegionResources().UpdateVolumeResource(regionResource.RegionName, volumeResources) {
 		klog.Infof("The volumeResources for region[%s]  has been updated to %v", regionResource.RegionName, volumeResources)
 		for _, volumeResource := range volumeResources {
 			res = append(res, types.Volume{TypeId: volumeResource.VolumeType, StorageCapacity: volumeResource.TotalCapacityGb})
 		}
 	}
+
 	return res, nil
 }
