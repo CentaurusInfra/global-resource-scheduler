@@ -135,7 +135,7 @@ func getRegionCpuAndMemResources(client *gophercloud.ServiceClient, regionResour
 	}
 
 	// If there is  az configured, we will get  the host resources per az from the az host mapping and assign them to different az
-	if len(regionResource.HostAzMap) > 0 {
+	if regionResource.HostAzMap != nil && len(regionResource.HostAzMap) > 0 {
 		azCpuMemMap := make(map[string]*typed.CpuAndMemResource, 0)
 		for _, h := range hs {
 			if az, ok := regionResource.HostAzMap[h.HypervisorHostname]; ok {
@@ -169,7 +169,7 @@ func getRegionVolumeResources(client *gophercloud.ServiceClient, regionResource 
 	res := make([]types.Volume, 0)
 	volumeResources := make([]typed.VolumeResource, 0)
 
-	if len(regionResource.HostAzMap) == 0 {
+	if regionResource.HostAzMap == nil || len(regionResource.HostAzMap) == 0 {
 		// If there is no host az mapping, the system will assign default values for testing
 		volumeResources = []typed.VolumeResource{{VolumeType: "lvmdriver-1", TotalCapacityGb: 22}}
 	} else {
