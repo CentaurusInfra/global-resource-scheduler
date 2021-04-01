@@ -11,7 +11,6 @@ go_library(
         "//globalscheduler/pkg/scheduler/utils:go_default_library",
         "//vendor/github.com/go-chassis/go-archaius:go_default_library",
         "//vendor/github.com/go-chassis/go-archaius/core:go_default_library",
-        "//vendor/github.com/go-chassis/go-archaius/core/event-system:go_default_library",
         "//vendor/github.com/spf13/cast:go_default_library",
         "//vendor/gopkg.in/yaml.v2:go_default_library",
         "//vendor/k8s.io/klog:go_default_library",
