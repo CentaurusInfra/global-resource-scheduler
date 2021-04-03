@@ -118,7 +118,7 @@ func NewScheduler(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct
 	stopEverything := stopCh
 	klog.Infof("***stopEverything to check : %v", stopEverything)
 	if stopEverything == nil {
-		stopEverything = wait.NeverStop		
+		stopEverything = wait.NeverStop
 	}
 
 	sched := &Scheduler{
@@ -192,7 +192,7 @@ func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
 // Run begins watching and scheduling. It waits for cache to be synced, then starts scheduling
 // and blocked until the context is done.
 func (sched *Scheduler) Run(clusterWorkers int, podWorkers int, stopCh <-chan struct{}) {
-//func (sched *Scheduler) Run(clusterWorkers int, podWorkers int) {
+	//func (sched *Scheduler) Run(clusterWorkers int, podWorkers int) {
 
 	klog.Infof("Starting scheduler %s", sched.SchedulerName)
 	defer utilruntime.HandleCrash()
@@ -201,7 +201,7 @@ func (sched *Scheduler) Run(clusterWorkers int, podWorkers int, stopCh <-chan st
 	if clusterWorkers > 0 {
 		defer sched.ClusterQueue.ShutDown()
 		klog.Infof("Waiting informer caches to sync")
-//		if ok := cache.WaitForCacheSync(sched.StopEverything, sched.ClusterSynced); !ok {
+		//		if ok := cache.WaitForCacheSync(sched.StopEverything, sched.ClusterSynced); !ok {
 		if ok := cache.WaitForCacheSync(sched.StopEverything, sched.ClusterSynced); !ok {
 			klog.Errorf("failed to wait for caches to sync")
 		}
@@ -248,10 +248,10 @@ func (sched *Scheduler) runPodWorker() {
 func (sched *Scheduler) scheduleOne() bool {
 	// 1.pop queue and generate allocation from scheduler.StackQueue
 	stack, shutdown := sched.NextStack()
-	if (stack == nil) {
+	if stack == nil {
 		return true
 	}
-	if (shutdown != nil) {
+	if shutdown != nil {
 		return false
 	}
 	klog.Infof("*** 1. Stack: %v stack selector: %v***", stack.Selector)
@@ -352,7 +352,7 @@ func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *int
 	klog.Infof("siteID ==> %v", siteID)
 	klog.Infof("sched.siteCacheInfoSnapshot.SiteCacheInfoMap ==> %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
 	allSiteCacheInfos[0] = sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID]
-	if (allSiteCacheInfos[0] == nil) {
+	if allSiteCacheInfos[0] == nil {
 		err := fmt.Errorf("SiteCacheInfoMap of %v is null", siteID)
 		return nil, err
 	}

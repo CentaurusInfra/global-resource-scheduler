@@ -746,15 +746,16 @@ func newNominatedStackMap() *nominatedStackMap {
 
 // MakeNextStackFunc returns a function to retrieve the next stack from a given
 // scheduling queue
-func MakeNextStackFunc(queue SchedulingQueue) func() *types.Stack {
-	return func() *types.Stack {
+///func MakeNextStackFunc(queue SchedulingQueue) func() *types.Stack {
+func MakeNextStackFunc(queue SchedulingQueue) func() (*types.Stack, error) {
+	return func() (*types.Stack, error) {
 		stack, err := queue.Pop()
 		if err == nil {
 			klog.V(4).Infof("About to try and schedule stack %v/%v/%v", stack.Tenant, stack.PodNamespace, stack.PodName)
-			return stack
+			return stack, err
 		}
 		klog.Errorf("Error while retrieving next stack from scheduling queue: %v", err)
-		return nil
+		return nil, err
 	}
 }
 
