@@ -94,7 +94,7 @@ type Scheduler struct {
 	// is available. We don't use a channel for this, because scheduling
 	// a stack may take some amount of time and we don't want pods to get
 	// stale while they sit in a channel.
-	NextStack func() *types.Stack
+	NextStack func() (*types.Stack, error)
 
 	mu sync.RWMutex
 
@@ -116,8 +116,9 @@ var once sync.Once
 
 func NewScheduler(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct{}) (*Scheduler, error) {
 	stopEverything := stopCh
+	klog.Infof("***stopEverything to check : %v", stopEverything)
 	if stopEverything == nil {
-		stopEverything = wait.NeverStop
+		stopEverything = wait.NeverStop		
 	}
 
 	sched := &Scheduler{
@@ -178,18 +179,21 @@ func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
 	// start pod informers
 	if sched.PodInformer != nil && sched.InformerFactory != nil {
 		klog.Infof("Starting scheduler %s informer", sched.SchedulerName)
-		//go sched.PodInformer.Informer().Run(stopCh2)
+		///go sched.PodInformer.Informer().Run(stopCh2)
 		sched.InformerFactory.Start(stopCh) //perform go informer.Run(stopCh) internally
 		// Wait for all caches to sync before scheduling.
 		sched.InformerFactory.WaitForCacheSync(stopCh)
 	}
 	// Do scheduling
-	sched.Run(1, 1)
+	sched.Run(1, 1, stopCh)
+	//sched.Run(1, 1)
 }
 
 // Run begins watching and scheduling. It waits for cache to be synced, then starts scheduling
 // and blocked until the context is done.
-func (sched *Scheduler) Run(clusterWorkers int, podWorkers int) {
+func (sched *Scheduler) Run(clusterWorkers int, podWorkers int, stopCh <-chan struct{}) {
+//func (sched *Scheduler) Run(clusterWorkers int, podWorkers int) {
+
 	klog.Infof("Starting scheduler %s", sched.SchedulerName)
 	defer utilruntime.HandleCrash()
 
@@ -197,6 +201,7 @@ func (sched *Scheduler) Run(clusterWorkers int, podWorkers int) {
 	if clusterWorkers > 0 {
 		defer sched.ClusterQueue.ShutDown()
 		klog.Infof("Waiting informer caches to sync")
+//		if ok := cache.WaitForCacheSync(sched.StopEverything, sched.ClusterSynced); !ok {
 		if ok := cache.WaitForCacheSync(sched.StopEverything, sched.ClusterSynced); !ok {
 			klog.Errorf("failed to wait for caches to sync")
 		}
@@ -208,7 +213,8 @@ func (sched *Scheduler) Run(clusterWorkers int, podWorkers int) {
 	}
 
 	//pod
-	//defer sched.StackQueue.ShutDown()
+	///defer sched.StackQueue.ShutDown()
+	defer sched.StackQueue.Close()
 	klog.Infof("Waiting informer caches to sync")
 	if ok := cache.WaitForCacheSync(sched.StopEverything, sched.PodSynced); !ok {
 		klog.Errorf("failed to wait for caches to sync")
@@ -220,7 +226,8 @@ func (sched *Scheduler) Run(clusterWorkers int, podWorkers int) {
 	}
 	//go wait.Until(sched.scheduleOne, 0, sched.StopEverything)
 	klog.Info("Started cluster & pod workers")
-	<-sched.StopEverything
+	//<-sched.StopEverything //wait until sched.StopEverything is true
+	<-stopCh
 	klog.Infof("Shutting down scheduler %s", sched.SchedulerName)
 	//return nil
 }
@@ -237,12 +244,17 @@ func (sched *Scheduler) runPodWorker() {
 }
 
 // scheduleOne does the entire scheduling workflow for a single pod.
+/// process next work item
 func (sched *Scheduler) scheduleOne() bool {
 	// 1.pop queue and generate allocation from scheduler.StackQueue
-	stack := sched.NextStack()
+	stack, shutdown := sched.NextStack()
+	if (stack == nil) {
+		return true
+	}
+	if (shutdown != nil) {
+		return false
+	}
 	klog.Infof("*** 1. Stack: %v stack selector: %v***", stack.Selector)
-
-	//stack := sched.NextStack()
 	allocation, err := sched.generateAllocationFromStack(stack)
 	klog.Infof("*** 2. Allocation: %v , allocation selector: %v***", allocation.Selector)
 	if err != nil {
@@ -338,11 +350,13 @@ func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *int
 		return nil, nil
 	}
 	klog.Infof("siteID ==> %v", siteID)
+	klog.Infof("sched.siteCacheInfoSnapshot.SiteCacheInfoMap ==> %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
 	allSiteCacheInfos[0] = sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID]
-	/*(if allSiteCacheInfos == nil {
+	if (allSiteCacheInfos[0] == nil) {
+		err := fmt.Errorf("SiteCacheInfoMap of %v is null", siteID)
 		return nil, err
-	}*/
-
+	}
+	klog.Infof("allSiteCacheInfos[0] ==> %v", allSiteCacheInfos[0])
 	// Create filtered list with enough space to avoid growing it
 	// and allow assigning.
 	filtered := make([]*types.Site, len(allSiteCacheInfos))
