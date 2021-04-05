@@ -130,7 +130,7 @@ func (p *Process) Run(quit chan struct{}) {
 			}
 		},
 	})
-	schedulerLW := cache.NewListWatchFromClient(p.schedulerClientset.GlobalschedulerV1(), "schedulers", p.namespace, fields.Everything())
+	schedulerLW := cache.NewListWatchFromClient(p.schedulerClientset.GlobalschedulerV1(), "schedulers", metav1.NamespaceAll, fields.Everything())
 	schedulerInformer := cache.NewSharedIndexInformer(schedulerLW, &schedulerv1.Scheduler{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
 	schedulerInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
