@@ -403,7 +403,11 @@ func (sc *SchedulerController) balance(namespace string, nodes []*ClusterInfoNod
 				}
 			}
 		}
-		return sc.balance(namespace, nextLevelNodes)
+		// Go to the next level from country to area, province, and city to find geoLocation nodes more than schedulers
+		// to balance. If it does not have enough city nodes, assign geoLocation nodes to some schedulers
+		if len(nextLevelNodes) > 0 {
+			return sc.balance(namespace, nextLevelNodes)
+		}
 	}
 
 	nodeIdxBounds := util.EvenlyDivide(schedulersLen, int64(nodesLen-1))
