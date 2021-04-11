@@ -1,0 +1,129 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-1"
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: "demo-vm1"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "42"
+    resourceCommonInfo:
+      count: 1
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+        regions:
+         - region: "NE-1"
+  nics:
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-2"
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: "demo-vm2"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "42"
+    resourceCommonInfo:
+      count: 1
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+        regions:
+         - region: "NE-1"
+  nics:
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-3"
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: "demo-vm3"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "42"
+    resourceCommonInfo:
+      count: 1
+      selector:
+        geoLocation:
+          area: NE-1
+          city: NewYork
+          country: US
+          province: NewYork
+        regions:
+         - region: "NE-1"
+  nics:
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-4"
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: "demo-vm4"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "42"
+    resourceCommonInfo:
+      count: 1
+      selector:
+        geoLocation:
+          area: NE-2
+          city: Boston
+          country: US
+          province: Massachusettes
+        regions:
+         - region: "NE-2"
+  nics:
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-5"
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: "demo-vm5"
+    image: "f6464c02-50aa-4d5f-8f42-edff154c8a3a"
+    securityGroupId: "aa41ff43-7722-428d-b4bf-94b6b94a0dd8"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "42"
+    resourceCommonInfo:
+      count: 1
+      selector:
+        geoLocation:
+          area: NE-1
+          city: Boston
+          country: US
+          province: Massachusettes
+        regions:
+         - region: "NE-1"
+  nics:
+  - name: "dac608f2-465f-4856-8aef-9aa406a1139a"

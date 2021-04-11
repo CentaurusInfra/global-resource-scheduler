@@ -252,7 +252,11 @@ func getStackSelector(selector *v1.ResourceSelector) types.Selector {
 			Region:           value.Region,
 			AvailabilityZone: value.AvailablityZone,
 		})
-		siteID = value.Region + "--" + value.AvailablityZone[0]
+		/// the following check is to avoid an out of index error when pod doesn't have az
+		siteID = value.Region + "--"
+		if len(value.AvailablityZone) > 0 {
+			siteID = siteID + value.AvailablityZone[0]
+		}
 	}
 
 	newSelector := types.Selector{
