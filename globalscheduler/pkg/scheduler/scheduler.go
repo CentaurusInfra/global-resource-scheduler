@@ -21,7 +21,7 @@ import (
 	"fmt"
 	uuid "github.com/satori/go.uuid"
 	"k8s.io/klog"
-	"k8s.io/kubernetes/globalscheduler/cmd/conf"
+	_ "k8s.io/kubernetes/globalscheduler/cmd/conf"
 	"math/rand"
 	"reflect"
 	"sort"
@@ -638,7 +638,7 @@ func (sched *Scheduler) initPodClusterInformers(stopCh <-chan struct{}) error {
 	if err != nil {
 		return err
 	}
-	conf.AddQPSFlags(cfg, conf.GetInstance().Scheduler)
+	//conf.AddQPSFlags(cfg, conf.GetInstance().Scheduler)
 	client, err := clientset.NewForConfig(cfg) //kubeclientset
 	if err != nil {
 		return err
