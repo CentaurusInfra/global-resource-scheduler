@@ -254,9 +254,9 @@ func (sched *Scheduler) scheduleOne() bool {
 	if shutdown != nil {
 		return false
 	}
-	klog.Infof("*** 1. Stack: %v stack selector: %v***", stack.Selector)
+	klog.Infof("1. Stack: %v stack selector: %v", stack.Selector)
 	allocation, err := sched.generateAllocationFromStack(stack)
-	klog.Infof("*** 2. Allocation: %v , allocation selector: %v***", allocation.Selector)
+	klog.Infof("2. Allocation: %v , allocation selector: %v", allocation.Selector)
 	if err != nil {
 		return false
 	}
@@ -276,7 +276,7 @@ func (sched *Scheduler) scheduleOne() bool {
 	end = time.Now().UnixNano()
 	klog.Infof("=== done Scheduling pipline, time consumption: %vms ===", (end-start)/int64(time.Millisecond))
 	klog.Infof("Scheduler result: %v", result) //result is assumed stacks
-	klog.Infof("*** 3. Assumed Stacks: %v", result)
+	klog.Infof("3. Assumed Stacks: %v", result)
 
 	// 3.bind scheduler result to pod
 	start = end
