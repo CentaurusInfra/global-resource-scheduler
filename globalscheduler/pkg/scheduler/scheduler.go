@@ -128,6 +128,7 @@ func NewScheduler(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct
 		siteCacheInfoSnapshot:   internalcache.NewEmptySnapshot(),
 		ConfigFilePath:          gsconfig.ConfigFilePath,
 		deletedClusters:         make(map[string]string),
+		StopEverything:          stopEverything,
 	}
 
 	err := sched.buildFramework()
@@ -140,7 +141,7 @@ func NewScheduler(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct
 	//sched.siteCacheInfoSnapshot.FlavorMap = config.ReadFlavorConf()
 	klog.Infof("FlavorMap: %v", sched.siteCacheInfoSnapshot.FlavorMap)
 	// init pod informers & cluster informers for scheduler
-	err = sched.initPodClusterInformers(stopEverything)
+	err = sched.initPodClusterInformers(sched.StopEverything)
 	if err != nil {
 		return nil, err
 	}
@@ -168,32 +169,31 @@ func GetScheduler() *Scheduler {
 }
 
 // start Scheduler - server.go calls this function to start Scheduler
-func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
+//func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
+func (sched *Scheduler) StartInformersAndRun() {
 	// start cluster informers
 	if sched.ClusterInformer != nil && sched.ClusterInformerFactory != nil {
 		//perform go informer.Run(stopCh) internally
-		sched.ClusterInformerFactory.Start(stopCh) //perform go informer.Run(stopCh) internally
+		sched.ClusterInformerFactory.Start(sched.StopEverything) //perform go informer.Run(stopCh) internally
 		// Wait for all caches to sync before scheduling.
-		sched.ClusterInformerFactory.WaitForCacheSync(stopCh)
+		sched.ClusterInformerFactory.WaitForCacheSync(sched.StopEverything)
 	}
 	// start pod informers
 	if sched.PodInformer != nil && sched.InformerFactory != nil {
 		klog.Infof("Starting scheduler %s informer", sched.SchedulerName)
 		///go sched.PodInformer.Informer().Run(stopCh2)
-		sched.InformerFactory.Start(stopCh) //perform go informer.Run(stopCh) internally
+		sched.InformerFactory.Start(sched.StopEverything) //perform go informer.Run(stopCh) internally
 		// Wait for all caches to sync before scheduling.
-		sched.InformerFactory.WaitForCacheSync(stopCh)
+		sched.InformerFactory.WaitForCacheSync(sched.StopEverything)
 	}
 	// Do scheduling
-	sched.Run(1, 1, stopCh)
-	//sched.Run(1, 1)
+	sched.Run(1, 1)
 }
 
 // Run begins watching and scheduling. It waits for cache to be synced, then starts scheduling
 // and blocked until the context is done.
-func (sched *Scheduler) Run(clusterWorkers int, podWorkers int, stopCh <-chan struct{}) {
-	//func (sched *Scheduler) Run(clusterWorkers int, podWorkers int) {
-
+//func (sched *Scheduler) Run(clusterWorkers int, podWorkers int, stopCh <-chan struct{}) {
+func (sched *Scheduler) Run(clusterWorkers int, podWorkers int) {
 	klog.Infof("Starting scheduler %s", sched.SchedulerName)
 	defer utilruntime.HandleCrash()
 
@@ -201,7 +201,6 @@ func (sched *Scheduler) Run(clusterWorkers int, podWorkers int, stopCh <-chan st
 	if clusterWorkers > 0 {
 		defer sched.ClusterQueue.ShutDown()
 		klog.Infof("Waiting informer caches to sync")
-		//		if ok := cache.WaitForCacheSync(sched.StopEverything, sched.ClusterSynced); !ok {
 		if ok := cache.WaitForCacheSync(sched.StopEverything, sched.ClusterSynced); !ok {
 			klog.Errorf("failed to wait for caches to sync")
 		}
@@ -213,8 +212,6 @@ func (sched *Scheduler) Run(clusterWorkers int, podWorkers int, stopCh <-chan st
 	}
 
 	//pod
-	///defer sched.StackQueue.ShutDown()
-	defer sched.StackQueue.Close()
 	klog.Infof("Waiting informer caches to sync")
 	if ok := cache.WaitForCacheSync(sched.StopEverything, sched.PodSynced); !ok {
 		klog.Errorf("failed to wait for caches to sync")
@@ -224,12 +221,9 @@ func (sched *Scheduler) Run(clusterWorkers int, podWorkers int, stopCh <-chan st
 	for i := 0; i < podWorkers; i++ {
 		go wait.Until(sched.runPodWorker, time.Second, sched.StopEverything)
 	}
-	//go wait.Until(sched.scheduleOne, 0, sched.StopEverything)
 	klog.Info("Started cluster & pod workers")
-	//<-sched.StopEverything //wait until sched.StopEverything is true
-	<-stopCh
+	<-sched.StopEverything //wait until sched.StopEverything is true
 	klog.Infof("Shutting down scheduler %s", sched.SchedulerName)
-	//return nil
 }
 
 // Cache returns the cache in scheduler for test to check the data in scheduler.
@@ -238,9 +232,10 @@ func (sched *Scheduler) Cache() internalcache.Cache {
 }
 
 func (sched *Scheduler) runPodWorker() {
-	klog.Info("Starting a worker")
+	klog.Info("Starting a pod worker")
 	for sched.scheduleOne() {
 	}
+	klog.Info("Ending a pod worker")
 }
 
 // scheduleOne does the entire scheduling workflow for a single pod.
@@ -249,9 +244,11 @@ func (sched *Scheduler) scheduleOne() bool {
 	// 1.pop queue and generate allocation from scheduler.StackQueue
 	stack, shutdown := sched.NextStack()
 	if stack == nil {
+		klog.Info("scheduleOne - stak is null")
 		return true
 	}
 	if shutdown != nil {
+		klog.Info("scheduleOne - shutdown a pod worker")
 		return false
 	}
 	klog.Infof("1. Stack: %v stack selector: %v", stack.Selector)
@@ -342,21 +339,27 @@ func (sched *Scheduler) stackPassesFiltersOnSite(
 // findSitesThatPassFilters finds the site that fit the filter plugins.
 func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *interfaces.CycleState,
 	stack *types.Stack, statuses interfaces.SiteToStatusMap) ([]*types.Site, error) {
-	///allSiteCacheInfos, err := sched.siteCacheInfoSnapshot.SiteCacheInfos().List()
 	siteID := stack.Selector.SiteID
-	var allSiteCacheInfos [1]*schedulersitecacheinfo.SiteCacheInfo
+	var allSiteCacheInfos []*schedulersitecacheinfo.SiteCacheInfo
+	var err error
 	klog.Infof("sched.siteCacheInfoSnapshot.SiteCacheInfoMap ==> %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
 	if sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID] == nil {
-		return nil, nil
+		allSiteCacheInfos, err = sched.siteCacheInfoSnapshot.SiteCacheInfos().List()
+		if err != nil {
+			klog.Errorf("get site info error %v", err)
+			return nil, nil
+		}
+	} else {
+		klog.Infof("siteID ==> %v", siteID)
+		klog.Infof("sched.siteCacheInfoSnapshot.SiteCacheInfoMap ==> %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
+		allSiteCacheInfos = make([]*schedulersitecacheinfo.SiteCacheInfo, 1)
+		allSiteCacheInfos[0] = sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID]
 	}
-	klog.Infof("siteID ==> %v", siteID)
-	klog.Infof("sched.siteCacheInfoSnapshot.SiteCacheInfoMap ==> %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
-	allSiteCacheInfos[0] = sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID]
-	if allSiteCacheInfos[0] == nil {
-		err := fmt.Errorf("SiteCacheInfoMap of %v is null", siteID)
+	if allSiteCacheInfos == nil {
+		err = fmt.Errorf("SiteCacheInfoMap of %v is null", siteID)
 		return nil, err
 	}
-	klog.Infof("allSiteCacheInfos[0] ==> %v", allSiteCacheInfos[0])
+	klog.Infof("allSiteCacheInfos ==> %v", allSiteCacheInfos)
 	// Create filtered list with enough space to avoid growing it
 	// and allow assigning.
 	filtered := make([]*types.Site, len(allSiteCacheInfos))
@@ -698,14 +701,16 @@ func convertClusterToSite(cluster *clusterv1.Cluster) *types.Site {
 }
 
 func (sched *Scheduler) runClusterWorker() {
-	klog.Info("Starting a worker")
+	klog.Info("Starting a cluster worker")
 	for sched.processNextClusterItem() {
 	}
+	klog.Info("Ending a cluster worker")
 }
 
 func (sched *Scheduler) processNextClusterItem() bool {
 	workItem, shutdown := sched.ClusterQueue.Get()
 	if shutdown {
+		klog.Info("processNextClusterItem - shutdown")
 		return false
 	}
 	klog.Infof("Process an item in work queue %v ", workItem)

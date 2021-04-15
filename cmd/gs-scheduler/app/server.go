@@ -81,13 +81,9 @@ func Run(config *types.GSSchedulerConfiguration, stopCh <-chan struct{}) error {
 
 	// start scheduler pod informer and run
 	klog.Infof("Global Scheduler starts informers...")
-	sched.StartInformersAndRun(stopCh)
-
-	select {
-	case <-stopCh:
-		break
-	}
-
+	go sched.StartInformersAndRun()
+	<-stopCh
+	klog.Infof("Global Scheduler server stop ...")
 	return nil
 }
 
