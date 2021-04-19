@@ -20,9 +20,15 @@ import (
 	"context"
 	"fmt"
 	uuid "github.com/satori/go.uuid"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/klog"
+	"k8s.io/kubernetes/globalscheduler/cmd/conf"
 	_ "k8s.io/kubernetes/globalscheduler/cmd/conf"
+	schedulerclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
+	schedulerv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
 	"math/rand"
+	"os"
 	"reflect"
 	"sort"
 	"sync"
@@ -108,6 +114,8 @@ type Scheduler struct {
 	ClusterSynced          cache.InformerSynced
 	ClusterQueue           clusterworkqueue.RateLimitingInterface
 	deletedClusters        map[string]string //<key:namespace/name, value:region--az>
+	schedulerClientset     schedulerclientset.Interface
+	schedulerInformer      cache.SharedIndexInformer
 }
 
 // single scheduler instance
@@ -139,8 +147,8 @@ func NewScheduler(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct
 	sched.UpdateFlavor()
 	//sched.siteCacheInfoSnapshot.FlavorMap = config.ReadFlavorConf()
 	klog.Infof("FlavorMap: %v", sched.siteCacheInfoSnapshot.FlavorMap)
-	// init pod informers & cluster informers for scheduler
-	err = sched.initPodClusterInformers(stopEverything)
+	// init pod, cluster, and scheduler informers for scheduler
+	err = sched.initPodClusterSchedulerInformers(gsconfig, stopEverything)
 	if err != nil {
 		return nil, err
 	}
@@ -183,6 +191,11 @@ func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
 		sched.InformerFactory.Start(stopCh) //perform go informer.Run(stopCh) internally
 		// Wait for all caches to sync before scheduling.
 		sched.InformerFactory.WaitForCacheSync(stopCh)
+	}
+	// start scheduler informer
+	if sched.schedulerInformer != nil {
+		klog.Infof("Starting scheduler informer for scheduler %s", sched.SchedulerName)
+		go sched.schedulerInformer.Run(stopCh)
 	}
 	// Do scheduling
 	sched.Run(1, 1, stopCh)
@@ -629,29 +642,12 @@ func (sched *Scheduler) buildFramework() error {
 }
 
 // initPodInformers init scheduler with podInformer
-func (sched *Scheduler) initPodClusterInformers(stopCh <-chan struct{}) error {
-	masterURL := config.DefaultString("master", "127.0.0.1:8080")
-	kubeconfig := config.DefaultString("kubeconfig", "/var/run/kubernetes/admin.kubeconfig")
-
+func (sched *Scheduler) initPodClusterSchedulerInformers(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct{}) error {
 	// init kubeclient
-	cfg, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
+	cfg, err := clientcmd.BuildConfigFromFlags("", gsconfig.ConfigFilePath)
 	if err != nil {
 		return err
 	}
-	//conf.AddQPSFlags(cfg, conf.GetInstance().Scheduler)
-	client, err := clientset.NewForConfig(cfg) //kubeclientset
-	if err != nil {
-		return err
-	}
-
-	//pod
-	sched.StackQueue = internalqueue.NewSchedulingQueue(stopCh, sched.SchedFrame)
-	sched.InformerFactory = internalinformers.NewSharedInformerFactory(client, 0)
-	sched.PodInformer = sched.InformerFactory.Core().V1().Pods()
-	sched.PodLister = sched.PodInformer.Lister()
-	sched.PodSynced = sched.PodInformer.Informer().HasSynced
-	sched.NextStack = internalqueue.MakeNextStackFunc(sched.StackQueue)
-	sched.Client = client
 
 	///cluster, apiextensions clientset to create crd programmatically
 	apiextensionsClientset, err := apiextensionsclientset.NewForConfig(cfg)
@@ -671,6 +667,37 @@ func (sched *Scheduler) initPodClusterInformers(stopCh <-chan struct{}) error {
 	sched.ClusterSynced = sched.ClusterInformer.Informer().HasSynced
 	sched.ClusterQueue = clusterworkqueue.NewNamedRateLimitingQueue(clusterworkqueue.DefaultControllerRateLimiter(), "Cluster")
 
+	conf.AddQPSFlags(cfg, conf.GetInstance().Scheduler)
+	client, err := clientset.NewForConfig(cfg) //kubeclientset
+	if err != nil {
+		return err
+	}
+
+	//pod
+	sched.StackQueue = internalqueue.NewSchedulingQueue(stopCh, sched.SchedFrame)
+	sched.InformerFactory = internalinformers.NewSharedInformerFactory(client, 0)
+	sched.PodInformer = sched.InformerFactory.Core().V1().Pods()
+	sched.PodLister = sched.PodInformer.Lister()
+	sched.PodSynced = sched.PodInformer.Informer().HasSynced
+	sched.NextStack = internalqueue.MakeNextStackFunc(sched.StackQueue)
+	sched.Client = client
+	schedSelector := fields.ParseSelectorOrDie("metadata.name=" + sched.SchedulerName)
+	sched.schedulerClientset, err = schedulerclientset.NewForConfig(cfg)
+	if err != nil {
+		klog.Fatalf("Failed to build scheduler clientset with the err %v", err)
+	}
+	schedLW := cache.NewListWatchFromClient(sched.schedulerClientset.GlobalschedulerV1(), "schedulers", metav1.NamespaceDefault, schedSelector)
+	sched.schedulerInformer = cache.NewSharedIndexInformer(schedLW, &schedulerv1.Scheduler{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
+	sched.schedulerInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		DeleteFunc: func(obj interface{}) {
+			if sched, ok := obj.(*schedulerv1.Scheduler); ok {
+				klog.Infof("The scheduler %s process is going to be killed...", sched.Name)
+				os.Exit(0)
+			} else {
+				klog.Fatalf("The deleted object %v failed to convert to scheduler", obj)
+			}
+		},
+	})
 	return nil
 }
 

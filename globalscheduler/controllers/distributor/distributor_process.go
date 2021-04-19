@@ -25,6 +25,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog"
+	"k8s.io/kubernetes/globalscheduler/cmd/conf"
 	"k8s.io/kubernetes/globalscheduler/controllers/util"
 	clustercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 	distributortype "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor"
@@ -54,7 +55,6 @@ type Process struct {
 	predicates           []predicateFunc
 	rangeStart           int64
 	rangeEnd             int64
-	pid                  int
 }
 
 // NewProcess creates a process to handle pods whose status phase is pending and resource type is vm
@@ -75,7 +75,7 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 	if err != nil {
 		klog.Fatal(err)
 	}
-
+	conf.AddQPSFlags(config, conf.GetInstance().Distributor)
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		klog.Fatal(err)
@@ -97,7 +97,6 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		},
 		rangeStart: distributor.Spec.Range.Start,
 		rangeEnd:   distributor.Spec.Range.End,
-		pid:        os.Getgid(),
 		schedulers: make([]schedulerv1.Scheduler, 0),
 	}
 }
@@ -110,9 +109,8 @@ func (p *Process) Run(quit chan struct{}) {
 	distributorInformer := cache.NewSharedIndexInformer(distributorLW, &distributorv1.Distributor{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
 	distributorInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		DeleteFunc: func(obj interface{}) {
-			if err := syscall.Kill(-p.pid, 15); err != nil {
-				klog.Fatalf("Fail to exit the current process %v\n", err)
-			}
+			klog.Infof("The distributor %s process is going to be killed...", p.name)
+			os.Exit(0)
 		},
 		UpdateFunc: func(old, new interface{}) {
 
@@ -130,7 +128,7 @@ func (p *Process) Run(quit chan struct{}) {
 			}
 		},
 	})
-	schedulerLW := cache.NewListWatchFromClient(p.schedulerClientset.GlobalschedulerV1(), "schedulers", metav1.NamespaceAll, fields.Everything())
+	schedulerLW := cache.NewListWatchFromClient(p.schedulerClientset.GlobalschedulerV1(), "schedulers", p.namespace, fields.Everything())
 	schedulerInformer := cache.NewSharedIndexInformer(schedulerLW, &schedulerv1.Scheduler{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
 	schedulerInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
@@ -141,7 +139,6 @@ func (p *Process) Run(quit chan struct{}) {
 			}
 			p.schedulers = append(p.schedulers, *scheduler)
 			klog.V(4).Infof("A new scheduler %s has been added", scheduler.Name)
-			klog.V(4).Infof("****current schedulers are %v", p.schedulers)
 		},
 		UpdateFunc: func(oldObject, newObject interface{}) {
 			oldScheduler, ok := oldObject.(*schedulerv1.Scheduler)
@@ -149,20 +146,18 @@ func (p *Process) Run(quit chan struct{}) {
 				klog.Warningf("Failed to convert the object  %+v to an old scheduler", oldScheduler)
 				return
 			}
-			newScheduler, ok := oldObject.(*schedulerv1.Scheduler)
+			newScheduler, ok := newObject.(*schedulerv1.Scheduler)
 			if !ok {
 				klog.Warningf("Failed to convert the object  %+v to a new scheduler", newScheduler)
 				return
 			}
-			if !reflect.DeepEqual(oldScheduler, newScheduler) {
-				for idx, item := range p.schedulers {
-					if reflect.DeepEqual(item, oldScheduler) {
-						p.schedulers[idx] = *newScheduler
-						klog.V(4).Infof("The current scheduler map is %v", p.schedulers)
-						return
-					}
+			for idx, item := range p.schedulers {
+				if item.Name == oldScheduler.Name {
+					p.schedulers[idx] = *newScheduler
+					return
 				}
 			}
+
 		},
 		DeleteFunc: func(obj interface{}) {
 			scheduler, ok := obj.(*schedulerv1.Scheduler)

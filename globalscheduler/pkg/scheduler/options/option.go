@@ -64,6 +64,7 @@ func (s *ServerRunOptions) Config() *types.GSSchedulerConfiguration {
 	}
 	config.IpAddress = s.IpAddress
 	config.PortNumber = s.PortNumber
+	config.ConfigFilePath = s.KubeConfig
 	return config
 }
 

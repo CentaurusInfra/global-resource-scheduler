@@ -22,7 +22,6 @@ import (
 
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
-	"k8s.io/kubernetes/globalscheduler/cmd/conf"
 	process "k8s.io/kubernetes/globalscheduler/controllers/distributor"
 )
 
@@ -41,8 +40,6 @@ func main() {
 	if err != nil {
 		klog.Fatal("Failed to load config %v with errors %v", *configFile, err)
 	}
-
-	conf.AddQPSFlags(config, conf.GetInstance().Distributor)
 
 	quit := make(chan struct{})
 	defer close(quit)
