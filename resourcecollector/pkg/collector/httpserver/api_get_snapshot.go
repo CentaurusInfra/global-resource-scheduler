@@ -22,7 +22,6 @@ import (
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 	"k8s.io/kubernetes/resourcecollector/pkg/collector"
-
 	"github.com/emicklei/go-restful"
 )
 
