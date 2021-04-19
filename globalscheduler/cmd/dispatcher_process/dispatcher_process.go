@@ -20,7 +20,6 @@ import (
 	"flag"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
-	"k8s.io/kubernetes/globalscheduler/cmd/conf"
 	process "k8s.io/kubernetes/globalscheduler/controllers/dispatcher"
 	"k8s.io/kubernetes/globalscheduler/controllers/util"
 )
@@ -30,7 +29,7 @@ func main() {
 	namespace := flag.String("ns", "", "The namespace of the dispatcher process")
 	name := flag.String("n", "", "The name of the dispatcher process")
 	logFile := flag.String("logfile", "/tmp/gs_dispatcher_process.log", "The log file of the dispatcher process")
-	logLevel := flag.String("loglevel", "3", "The log level of the dispatcher process")
+	logLevel := flag.String("loglevel", "2", "The log level of the dispatcher process")
 	flag.Parse()
 	util.InitKlog(*namespace, *name, *logFile, *logLevel)
 	defer util.FlushKlog()
@@ -38,8 +37,6 @@ func main() {
 	if err != nil {
 		klog.Fatal("Failed to load config %v with errors %v", *configFile, err)
 	}
-
-	conf.AddQPSFlags(config, conf.GetInstance().Dispatcher)
 
 	quit := make(chan struct{})
 	defer close(quit)

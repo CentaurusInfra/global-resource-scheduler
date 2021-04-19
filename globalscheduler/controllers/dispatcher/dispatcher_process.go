@@ -22,6 +22,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog"
+	"k8s.io/kubernetes/globalscheduler/cmd/conf"
 	"k8s.io/kubernetes/globalscheduler/controllers/util"
 	"k8s.io/kubernetes/globalscheduler/controllers/util/openstack"
 	clusterclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/client/clientset/versioned"
@@ -45,7 +46,6 @@ type Process struct {
 	clusterIpMap        map[string]string
 	tokenMap            map[string]string
 	clusterRange        dispatcherv1.DispatcherRange
-	pid                 int
 	totalCreateLatency  int64
 	totalDeleteLatency  int64
 	totalPodCreateNum   int
@@ -69,7 +69,7 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 	if err != nil {
 		klog.Fatal(err)
 	}
-
+	conf.AddQPSFlags(config, conf.GetInstance().Dispatcher)
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		klog.Fatal(err)
@@ -84,7 +84,6 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		podQueue:            podQueue,
 		clusterIpMap:        make(map[string]string),
 		tokenMap:            make(map[string]string),
-		pid:                 os.Getgid(),
 		clusterRange:        dispatcher.Spec.ClusterRange,
 		totalCreateLatency:  0,
 		totalDeleteLatency:  0,
@@ -103,9 +102,8 @@ func (p *Process) Run(quit chan struct{}) {
 
 	dispatcherInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		DeleteFunc: func(obj interface{}) {
-			if err := syscall.Kill(-p.pid, 15); err != nil {
-				klog.Fatalf("Fail to exit the current process %v\n", err)
-			}
+			klog.Infof("The dispatcher %s process is going to be killed...", p.name)
+			os.Exit(0)
 		},
 		UpdateFunc: func(old, new interface{}) {
 			newDispatcher, ok := new.(*dispatcherv1.Dispatcher)
