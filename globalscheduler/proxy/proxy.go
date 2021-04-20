@@ -8,7 +8,6 @@ import (
     "net/http"
 	"io/ioutil"
 	"sync"
-	// "reflect"
 	"encoding/json"
 
 	"k8s.io/client-go/kubernetes"
@@ -16,23 +15,11 @@ import (
 	"k8s.io/apimachinery/pkg/types"
     metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/api/core/v1"
-	//appsv1 "k8s.io/api/apps/v1"
-	// v1beta1 "k8s.io/api/extensions/v1beta1"
-	// "k8s.io/apimachinery/pkg/api/errors"
-	//"k8s.io/apimachinery/pkg/runtime"
-	// "k8s.io/apimachinery/pkg/util/diff"
-	//"k8s.io/client-go/kubernetes/scheme"
-	// "k8s.io/kubernetes/pkg/api"
-    // _ "k8s.io/kubernetes/pkg/api/install"
-    // _ "k8s.io/kubernetes/pkg/apis/extensions/install"
-    // "k8s.io/kubernetes/pkg/apis/extensions/v1beta1"
-	//"k8s.io/apimachinery/pkg/labels"
-	//typev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"gopkg.in/yaml.v2"
 )
 
 const (
-	TimeOut = 10 * time.Second
+	TimeOut = 10
 	Success	= "Success"
 	Fail = "Fail"
 	
@@ -45,9 +32,22 @@ const (
 	DELETE 	= "DELETE"
 )
 
-type podHandler struct {
+type PodHandler struct {
 	mu sync.Mutex // guards n
 	n  int
+	clientSet *kubernetes.Clientset
+}
+
+func NewPodHandler() *PodHandler {
+	c, err := getClient()
+	if err != nil {
+		fmt.Printf("create pod handler error : %v", err)
+		return nil
+    }
+	podHandler := &PodHandler {
+		clientSet: c,
+	}
+	return podHandler
 }
 
 func getClient() (*kubernetes.Clientset, error) {
@@ -64,79 +64,72 @@ func getClient() (*kubernetes.Clientset, error) {
 	return clientSet, nil
 }
 
-//src/k8s.io/client-go/kubernetes/typed/core/v1
-func getPod(w http.ResponseWriter, r *http.Request) (result string) {
+func (handler *PodHandler) getPod(w http.ResponseWriter, r *http.Request) (result string) {
 	fmt.Println("server: get pod started")
 	defer fmt.Println("server: get pod ended")
-    ctx := r.Context()
-	var podName string
+ 	podName := ""
 	for k, v := range r.URL.Query() {
 		fmt.Printf("%s: %s\n", k, v)
 		if(k == "name") {
 			podName = v[0]
 		}
     }
-	clientSet, err := getClient()
-    // Get Pod by name
-    options:= metav1.GetOptions{}
-    pod, err := clientSet.CoreV1().Pods(corev1.NamespaceDefault).Get(podName,options)
-    if err != nil {
-        fmt.Println(err)
-		result = Fail
-    }
-	select {
-	case <-time.After(TimeOut):
-		options:= metav1.ListOptions{
-			TimeoutSeconds: TimeOut,
-			Watch: true			
-		}	
-		pod, err := clientSet.CoreV1().Pods(corev1.NamespaceDefault).Get(podName,options)
-		if (pod.Status.Phase == corev1.ClusterScheduled) {
-			fmt.Fprintf(w, "GetPod - Sucess- %v\n", pod.Status.Phase)
-			result = Success
-		} else {
-			fmt.Fprintf(w, "GetPod - Fail- %v\n", pod.Status.Phase)
+   
+	//refer src/k8s.io/client-go/kubernetes/typed/core/v1
+	if (podName == "") {
+		options:= metav1.ListOptions{}
+		pods, err := handler.clientSet.CoreV1().Pods(corev1.NamespaceDefault).List(options)
+    	if err != nil {
+			fmt.Println(err)
 			result = Fail
-		}      	
-	case <-ctx.Done():
-		err := ctx.Err()
-		fmt.Println("server:", err)
-		internalError := http.StatusInternalServerError
-		http.Error(w, err.Error(), internalError)
-		result = Fail
+		}
+		strPods, err := yaml.Marshal(pods)
+		if err != nil {
+			result = Fail
+		}
+		result = string(strPods)
+    } else {
+		options:= metav1.GetOptions{}
+		pod, err := handler.clientSet.CoreV1().Pods(corev1.NamespaceDefault).Get(podName,options)
+		if err != nil {
+			fmt.Println(err)
+			result = Fail
+		}
+		strPod, err := yaml.Marshal(pod)
+		if err != nil {
+			result = Fail
+		}
+		result = string(strPod)
 	}
+
 	return result
 }
 
-func createPod(w http.ResponseWriter, r *http.Request) (result string) {
+func (handler *PodHandler) createPod(w http.ResponseWriter, r *http.Request) (result string) {
 	fmt.Println("server: create pod started")
 	defer fmt.Println("server: create pod ended")
-    ctx := r.Context()
 	reqBody, err := ioutil.ReadAll(r.Body)
+	fmt.Printf("createPod - reqBody: %v", reqBody)	
 	if err != nil {
 		klog.Errorf("request body error: %v", err)
 	}
-	pod := yaml2pod(reqBody)	
-	clientSet, err := getClient()
-    podCreated, err := clientSet.CoreV1().Pods(corev1.NamespaceDefault).Create(&pod)
+	pod := yaml2pod(reqBody)
+	fmt.Printf("createPod - pod: %v", pod)	
+    podCreated, err := handler.clientSet.CoreV1().Pods(corev1.NamespaceDefault).Create(&pod)
     if err != nil {
         fmt.Println(err)
         result = Fail
     }
 
+	duration := int64(TimeOut * time.Second)
 	status := podCreated.Status	
 	options:= metav1.ListOptions{
-		TimeoutSeconds: TimeOut,
+		TimeoutSeconds: &duration,
 		Watch: true,	
 		ResourceVersion: podCreated.ResourceVersion,
-		FieldSelector:   fields.Set{"metadata.name": podName}.AsSelector(),
-		LabelSelector:   labels.Everything(),		
+		FieldSelector: 	 fmt.Sprintf("metadata.name=%s", pod.Name),
 	}	
-	watcher, err := clientSet.CoreV1().Pods(corev1.NamespaceDefault).Watch(podName,options)
-	if (err != nil) {
-		result = Fail
-	}
-	
+	watcher := handler.clientSet.CoreV1().Pods(corev1.NamespaceDefault).Watch(options)
 	func() {
 		for {
 			select {
@@ -150,7 +143,7 @@ func createPod(w http.ResponseWriter, r *http.Request) (result string) {
 				if podCreated.Status.Phase != corev1.ClusterScheduled {
 					watcher.Stop()
 				}
-			case <-time.After(TimeOut):
+			case <-time.After(TimeOut * time.Second):
 				fmt.Println("timeout to wait for pod scheduled")
 				watcher.Stop()
 			}
@@ -161,29 +154,9 @@ func createPod(w http.ResponseWriter, r *http.Request) (result string) {
 		return Fail
 	}
 	return Success
-
-	/*if (podCreated.Status.Phase == corev1.ClusterScheduled) {
-		fmt.Fprintf(w, "GetPod - Sucess- %v\n", podCreated.Status.Phase)
-	} else {
-		select {
-		case <-time.After(10 * time.Second):
-			options:= metav1.ListOptions{}			
-			podGet, _ := clientSet.CoreV1().Pods(corev1.NamespaceDefault).Get(podCreated.Name,options)
-			if (podGet.Status.Phase == corev1.ClusterScheduled) {
-				fmt.Fprintf(w, "GetPod - Sucess- %v\n", podGet.Status.Phase)
-			} else {
-				fmt.Fprintf(w, "GetPod - Fail- %v\n", podGet.Status.Phase)
-			}      	
-		case <-ctx.Done():
-			err := ctx.Err()
-			fmt.Println("server:", err)
-			internalError := http.StatusInternalServerError
-			http.Error(w, err.Error(), internalError)
-		}
-	}*/
 }
 
-func putPod(w http.ResponseWriter, r *http.Request) (result string) {
+func (handler *PodHandler) putPod(w http.ResponseWriter, r *http.Request) (result string) {
 	fmt.Println("server: put pod started")
 	defer fmt.Println("server: put pod ended")
     ctx := r.Context()
@@ -202,8 +175,7 @@ func putPod(w http.ResponseWriter, r *http.Request) (result string) {
 	}
 	pod := yaml2pod(reqBody)
 
-	clientSet, err := getClient()
-    podUpdated, err := clientSet.CoreV1().Pods(corev1.NamespaceDefault).Update(&pod)
+    podUpdated, err := handler.clientSet.CoreV1().Pods(corev1.NamespaceDefault).Update(&pod)
     if err != nil {
         fmt.Println(err)
         return
@@ -212,9 +184,9 @@ func putPod(w http.ResponseWriter, r *http.Request) (result string) {
 		fmt.Fprintf(w, "UpdatePod - Sucess- %v\n", podUpdated.Status.Phase)
 	} else {
 		select {
-		case <-time.After(10 * time.Second):
+		case <-time.After(TimeOut * time.Second):
 			options:= metav1.GetOptions{}
-			podGet, _ := clientSet.CoreV1().Pods(corev1.NamespaceDefault).Get(podUpdated.Name,options)
+			podGet, _ := handler.clientSet.CoreV1().Pods(corev1.NamespaceDefault).Get(podName,options)
 			if (podGet.Status.Phase == corev1.ClusterScheduled) {
 				fmt.Fprintf(w, "UpdatePod - Sucess- %v\n", podGet.Status.Phase)
 			} else {
@@ -227,9 +199,15 @@ func putPod(w http.ResponseWriter, r *http.Request) (result string) {
 			http.Error(w, err.Error(), internalError)
 		}
 	}
+	strPod, err := yaml.Marshal(podUpdated)
+	if err != nil {
+		result = Fail
+	}
+	result = string(strPod)
+	return result
 }
 
-func patchPod(w http.ResponseWriter, r *http.Request) (result string) {
+func (handler *PodHandler) patchPod(w http.ResponseWriter, r *http.Request) (result string) {
 	fmt.Println("server: put pod started")
 	defer fmt.Println("server: put pod ended")
     ctx := r.Context()
@@ -246,25 +224,14 @@ func patchPod(w http.ResponseWriter, r *http.Request) (result string) {
 	if err != nil {
 		klog.Errorf("request body error: %v", err)
 	}
-	pod := yaml2pod(reqBody)
-
-	clientSet, err := getClient()
-	options:= metav1.GetOptions{}
-    podOld, err := clientSet.CoreV1().Pods(corev1.NamespaceDefault).Get(podName, options)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
-	podPatched, err := clientSet.CoreV1().Pods(corev1.NamespaceDefault).Patch(podName, types.ApplyPatchType, reqBody, "Spec", "Status")
-    // Print its creation time
-    fmt.Println(podPatched.GetCreationTimestamp())
+	podPatched, err := handler.clientSet.CoreV1().Pods(corev1.NamespaceDefault).Patch(podName, types.ApplyPatchType, reqBody, "Spec", "Status")
 	if (podPatched.Status.Phase == corev1.ClusterScheduled) {
 		fmt.Fprintf(w, "UpdatePod - Sucess- %v\n", podPatched.Status.Phase)
 	} else {
 		select {
-		case <-time.After(10 * time.Second):
+		case <-time.After(TimeOut * time.Second):
 			options:= metav1.GetOptions{}
-			podGet, _ := clientSet.CoreV1().Pods(corev1.NamespaceDefault).Get(podPatched.Name,options)
+			podGet, _ := handler.clientSet.CoreV1().Pods(corev1.NamespaceDefault).Get(podPatched.Name,options)
 			if (podGet.Status.Phase == corev1.ClusterScheduled) {
 				fmt.Fprintf(w, "UpdatePod - Sucess- %v\n", podGet.Status.Phase)
 			} else {
@@ -277,12 +244,17 @@ func patchPod(w http.ResponseWriter, r *http.Request) (result string) {
 			http.Error(w, err.Error(), internalError)
 		}
 	}
+	strPod, err := yaml.Marshal(podPatched)
+	if err != nil {
+		result = Fail
+	}
+	result = string(strPod)
+	return result
 }
 
-func deletePod(w http.ResponseWriter, r *http.Request) (result string) {
+func (handler *PodHandler) deletePod(w http.ResponseWriter, r *http.Request) (result string) {
 	fmt.Println("server: delete pod started")
 	defer fmt.Println("server: delete pod ended")
-    ctx := r.Context()
 	var podName string
 	for k, v := range r.URL.Query() {
 		fmt.Printf("%s: %s\n", k, v)
@@ -290,10 +262,9 @@ func deletePod(w http.ResponseWriter, r *http.Request) (result string) {
 			podName = v[0]
 		}
     }
-	clientSet, err := getClient()
     // Get Pod by name
     options:= metav1.DeleteOptions{}
-    err = clientSet.CoreV1().Pods(corev1.NamespaceDefault).Delete(podName,&options)
+    err := handler.clientSet.CoreV1().Pods(corev1.NamespaceDefault).Delete(podName,&options)
     if err != nil {
         fmt.Println(err)
         result = Fail  
@@ -322,12 +293,15 @@ func convert(i interface{}) interface{} {
 func yaml2pod(reqBody []byte) (corev1.Pod) {
 	var pod corev1.Pod
 	var body interface{}
-	if err := yaml.Unmarshal([]byte(reqBody), &body); err != nil {
+	fmt.Printf("yaml2pod: %v", reqBody)
+	if err := yaml.Unmarshal((reqBody), &body); err != nil {
         fmt.Println(err)
         return pod
 	}
+
 	//map to json structure
 	jsonBody := convert(body)
+	fmt.Printf("jsonBody: %v", jsonBody)
 	//json structure to json string
 	if b, err := json.Marshal(jsonBody); err != nil { 	
         klog.Errorf("request body marchal error: %v", err)
@@ -338,7 +312,7 @@ func yaml2pod(reqBody []byte) (corev1.Pod) {
 	return pod
 }
 
-func (handler *podHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (handler *PodHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handler.mu.Lock()
 	defer handler.mu.Unlock()
 	handler.n++
@@ -347,17 +321,18 @@ func (handler *podHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	var result string
 	switch r.Method {
 	case GET:
-		result = getPod(w, r)
+		result = handler.getPod(w, r)
     case POST:
-		result = createPod(w, r)
+		result = handler.createPod(w, r)
 	case "PUT":
-        result = putPod(w, r)
+        result = handler.putPod(w, r)
 	case "PATCH":
-        result = patchPod(w, r)
+        result = handler.patchPod(w, r)
 	case "DELETE":
-        result = deletePod(w, r)
+        result = handler.deletePod(w, r)
     default:        
 		result = http.StatusText(http.StatusNotImplemented)
 		w.WriteHeader(http.StatusNotImplemented)
@@ -366,9 +341,21 @@ func (handler *podHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 //go run proxy.go url="localhost:8090"
+//use example: 
+//curl -H "Accept: application/x-yaml" -H "Content-Type: application/x-yaml" -X POST http://localhost:8090/pods --data-binary @sample_1_pod.yaml
+//curl -H "Accept: application/x-yaml" -H "Content-Type: application/x-yaml" -X GET  http://localhost:8090/pods?name=pod-1
+//curl -H "Accept: application/x-yaml" -H "Content-Type: application/x-yaml" -X GET  http://localhost:8090/pods
+//curl -H "Accept: application/x-yaml" -H "Content-Type: application/x-yaml" -X DELETE  http://localhost:8090/pods?name=pod-1
+//curl -H "Accept: application/x-yaml" -H "Content-Type: application/x-yaml" -X PUT  http://localhost:8090/pods?name=pod-1 --data-binary @sample_1_pod.yaml
+//curl -H "Accept: application/x-yaml" -H "Content-Type: application/x-yaml" -X PATCH  http://localhost:8090/pods?name=pod-1 --data-binary @sample_1_pod.yaml
 func main() {
 	url := flag.String("url", ":8090", "proxy url")
 	flag.Parse()
-	http.Handle("/pods", new(podHandler))
-	klog.Fatal(http.ListenAndServe(url, nil))
+	podHandler := NewPodHandler()
+	if(podHandler == nil) {
+		fmt.Println("cannot run http server - http handler is null")
+	} else {
+		http.Handle("/pods", podHandler)
+		klog.Fatal(http.ListenAndServe(*url, nil))
+	}
 }
