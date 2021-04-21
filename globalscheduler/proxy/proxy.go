@@ -101,7 +101,6 @@ func (handler *PodHandler) getPod(w http.ResponseWriter, r *http.Request) (resul
 		}
 		result = string(strPod)
 	}
-
 	return result
 }
 
@@ -353,7 +352,7 @@ func main() {
 	flag.Parse()
 	podHandler := NewPodHandler()
 	if(podHandler == nil) {
-		fmt.Println("cannot run http server - http handler is null")
+		klog.Error("cannot run http server - http handler is null")
 	} else {
 		http.Handle("/pods", podHandler)
 		klog.Fatal(http.ListenAndServe(*url, nil))
