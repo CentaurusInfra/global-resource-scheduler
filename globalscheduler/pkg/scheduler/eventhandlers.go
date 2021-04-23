@@ -300,7 +300,7 @@ func (sched *Scheduler) updatePodInSchedulingQueue(oldObj, newObj interface{}) {
 		return
 	}
 	newPod, ok := newObj.(*v1.Pod)
-	klog.Infof("addPodToSchedulingQueue : %v", newPod)
+	klog.Infof("updatePodToSchedulingQueue : %v", newPod)
 	if !ok {
 		klog.Errorf("cannot convert newObj to *v1.Pod: %v", newObj)
 		return
@@ -322,7 +322,7 @@ func (sched *Scheduler) deletePodFromSchedulingQueue(obj interface{}) {
 	switch t := obj.(type) {
 	case *v1.Pod:
 		pod = obj.(*v1.Pod)
-		klog.Infof("addPodToSchedulingQueue : %v", pod)
+		klog.Infof("deletePodToSchedulingQueue : %v", pod)
 	case cache.DeletedFinalStateUnknown:
 		var ok bool
 		pod, ok = t.Obj.(*v1.Pod)

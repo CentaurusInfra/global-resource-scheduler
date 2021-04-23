@@ -355,21 +355,33 @@ func (sched *Scheduler) stackPassesFiltersOnSite(
 // findSitesThatPassFilters finds the site that fit the filter plugins.
 func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *interfaces.CycleState,
 	stack *types.Stack, statuses interfaces.SiteToStatusMap) ([]*types.Site, error) {
-	///allSiteCacheInfos, err := sched.siteCacheInfoSnapshot.SiteCacheInfos().List()
 	siteID := stack.Selector.SiteID
-	var allSiteCacheInfos [1]*schedulersitecacheinfo.SiteCacheInfo
+	klog.Infof("stack.Selector.SiteID:%v", siteID)
+	var allSiteCacheInfos []*schedulersitecacheinfo.SiteCacheInfo
+	var err error
 	klog.Infof("sched.siteCacheInfoSnapshot.SiteCacheInfoMap ==> %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
 	if sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID] == nil {
-		return nil, nil
+		//allSiteCacheInfos, err = sched.siteCacheInfoSnapshot.SiteCacheInfos().List()
+		allSiteCacheInfos = make([]*schedulersitecacheinfo.SiteCacheInfo, 0, len(sched.siteCacheInfoSnapshot.SiteCacheInfoMap))
+		for _, site := range sched.siteCacheInfoSnapshot.SiteCacheInfoMap {
+			allSiteCacheInfos = append(allSiteCacheInfos, site)
+			klog.Infof("site: %v, len:%v", site, len(allSiteCacheInfos))
+		}
+		if err != nil {
+			klog.Errorf("get site info error %v", err)
+			return nil, nil
+		}
+	} else {
+		klog.Infof("siteID ==> %v", siteID)
+		klog.Infof("sched.siteCacheInfoSnapshot.SiteCacheInfoMap ==> %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
+		allSiteCacheInfos = make([]*schedulersitecacheinfo.SiteCacheInfo, 1)
+		allSiteCacheInfos[0] = sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID]
 	}
-	klog.Infof("siteID ==> %v", siteID)
-	klog.Infof("sched.siteCacheInfoSnapshot.SiteCacheInfoMap ==> %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
-	allSiteCacheInfos[0] = sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID]
-	if allSiteCacheInfos[0] == nil {
-		err := fmt.Errorf("SiteCacheInfoMap of %v is null", siteID)
+	if allSiteCacheInfos == nil {
+		err = fmt.Errorf("SiteCacheInfoMap of %v is null", siteID)
 		return nil, err
 	}
-	klog.Infof("allSiteCacheInfos[0] ==> %v", allSiteCacheInfos[0])
+	klog.Infof("allSiteCacheInfos ==> %v", len(allSiteCacheInfos))
 	// Create filtered list with enough space to avoid growing it
 	// and allow assigning.
 	filtered := make([]*types.Site, len(allSiteCacheInfos))
@@ -402,7 +414,6 @@ func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *int
 			statusesLock.Unlock()
 		}
 	}
-
 	// Stops searching for more site once the configured number of feasible site
 	// are found.
 	workqueue.ParallelizeUntil(ctx, 16, len(allSiteCacheInfos), checkSite)
