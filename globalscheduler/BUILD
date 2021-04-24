@@ -19,6 +19,7 @@ filegroup(
         "//globalscheduler/pkg/apis/distributor:all-srcs",
         "//globalscheduler/pkg/apis/scheduler:all-srcs",
         "//globalscheduler/pkg/scheduler:all-srcs",
+        "//globalscheduler/proxy:all-srcs",
         "//globalscheduler/test/data_createdelete_tool:all-srcs",
         "//globalscheduler/test/latency_test:all-srcs",
     ],
