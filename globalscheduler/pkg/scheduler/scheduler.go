@@ -372,7 +372,7 @@ func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *int
 			return nil, nil
 		}
 	} else {
-		klog.Infof("siteID ==> %v", siteID)
+		klog.Infof("siteID: %v", siteID)
 		klog.Infof("sched.siteCacheInfoSnapshot.SiteCacheInfoMap ==> %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
 		allSiteCacheInfos = make([]*schedulersitecacheinfo.SiteCacheInfo, 1)
 		allSiteCacheInfos[0] = sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID]
