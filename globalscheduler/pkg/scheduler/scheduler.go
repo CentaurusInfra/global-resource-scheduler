@@ -24,7 +24,6 @@ import (
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/cmd/conf"
-	_ "k8s.io/kubernetes/globalscheduler/cmd/conf"
 	schedulerclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
 	schedulerv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
 	"math/rand"
@@ -267,9 +266,9 @@ func (sched *Scheduler) scheduleOne() bool {
 	if shutdown != nil {
 		return false
 	}
-	klog.Infof("1. Stack: %v stack selector: %v", stack.Selector)
+	klog.Infof("1. Stack: %v, stack selector: %v", stack, stack.Selector)
 	allocation, err := sched.generateAllocationFromStack(stack)
-	klog.Infof("2. Allocation: %v , allocation selector: %v", allocation.Selector)
+	klog.Infof("2. Allocation: %v, allocation selector: %v", allocation, allocation.Selector)
 	if err != nil {
 		return false
 	}
@@ -359,10 +358,17 @@ func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *int
 	klog.Infof("stack.Selector.SiteID:%v", siteID)
 	var allSiteCacheInfos []*schedulersitecacheinfo.SiteCacheInfo
 	var err error
-	klog.Infof("sched.siteCacheInfoSnapshot.SiteCacheInfoMap ==> %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
-	if sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID] == nil {
+	klog.Infof("sched.siteCacheInfoSnapshot.SiteCacheInfoMap: %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
+	if siteID != "" && sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID] == nil {
+		klog.Infof("siteID: %v", siteID)
+		klog.Infof("sched.siteCacheInfoSnapshot.SiteCacheInfoMap: %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
+		//allSiteCacheInfos = make([]*schedulersitecacheinfo.SiteCacheInfo)
+		site := sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID]
+		allSiteCacheInfos = append(allSiteCacheInfos, site)
+	} else {
 		//allSiteCacheInfos, err = sched.siteCacheInfoSnapshot.SiteCacheInfos().List()
-		allSiteCacheInfos = make([]*schedulersitecacheinfo.SiteCacheInfo, 0, len(sched.siteCacheInfoSnapshot.SiteCacheInfoMap))
+		//, 0, len(sched.siteCacheInfoSnapshot.SiteCacheInfoMap)*2
+		//allSiteCacheInfos = make([]*schedulersitecacheinfo.SiteCacheInfo)
 		for _, site := range sched.siteCacheInfoSnapshot.SiteCacheInfoMap {
 			allSiteCacheInfos = append(allSiteCacheInfos, site)
 			klog.Infof("site: %v, len:%v", site, len(allSiteCacheInfos))
@@ -371,17 +377,12 @@ func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *int
 			klog.Errorf("get site info error %v", err)
 			return nil, nil
 		}
-	} else {
-		klog.Infof("siteID: %v", siteID)
-		klog.Infof("sched.siteCacheInfoSnapshot.SiteCacheInfoMap ==> %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
-		allSiteCacheInfos = make([]*schedulersitecacheinfo.SiteCacheInfo, 1)
-		allSiteCacheInfos[0] = sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID]
 	}
 	if allSiteCacheInfos == nil {
 		err = fmt.Errorf("SiteCacheInfoMap of %v is null", siteID)
 		return nil, err
 	}
-	klog.Infof("allSiteCacheInfos ==> %v", len(allSiteCacheInfos))
+	klog.Infof("allSiteCacheInfos: %v", len(allSiteCacheInfos))
 	// Create filtered list with enough space to avoid growing it
 	// and allow assigning.
 	filtered := make([]*types.Site, len(allSiteCacheInfos))
