@@ -112,7 +112,7 @@ spec:
         regions:
          - region: "SE-1"
            availablityZone: 
-           - "non-product-az"
+           - "production-az"
   nics:
   - name: "9e29aa2d-6943-4109-bc5c-1a882b086122"
 ---

@@ -26,6 +26,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apitypes "k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog"
 	clusterv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
@@ -253,7 +254,7 @@ func getStackSelector(selector *v1.ResourceSelector) types.Selector {
 			AvailabilityZone: value.AvailablityZone,
 		})
 		/// the following check is to avoid an out of index error when pod doesn't have az
-		siteID = value.Region + "--"
+		siteID = value.Region + constants.SiteDelimiter
 		if len(value.AvailablityZone) > 0 {
 			siteID = siteID + value.AvailablityZone[0]
 		}
@@ -507,7 +508,7 @@ func (sched *Scheduler) deleteCluster(object interface{}) {
 		return
 	}
 	sched.Enqueue(key, EventType_Delete)
-	siteID := clusterCopy.Spec.Region.Region + "--" + clusterCopy.Spec.Region.AvailabilityZone
+	siteID := clusterCopy.Spec.Region.Region + constants.SiteDelimiter + clusterCopy.Spec.Region.AvailabilityZone
 	sched.deletedClusters[key] = siteID
 	klog.Infof("Enqueue Delete Cluster: %v", key)
 }
