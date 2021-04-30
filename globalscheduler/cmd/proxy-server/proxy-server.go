@@ -440,7 +440,7 @@ func (handler *PodHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // go run proxy-server.go url="localhost:8090"
 //use example:
-curl -H "Accept: application/x-yaml" -H "Content-Type: application/x-yaml" -X POST http://localhost:8090/pods --data-binary @sample_1_pod.yaml
+//curl -H "Accept: application/x-yaml" -H "Content-Type: application/x-yaml" -X POST http://localhost:8090/pods --data-binary @sample_1_pod.yaml
 // curl -H "Accept: application/x-yaml" -H "Content-Type: application/x-yaml" -X GET  http://localhost:8080/globalpods?name=pod-1
 // curl -H "Accept: application/x-yaml" -H "Content-Type: application/x-yaml" -X GET  http://localhost:8090/pods
 // curl -H "Accept: application/x-yaml" -H "Content-Type: application/x-yaml" -X PUT  http://localhost:8090/pods?name=pod-1 --data-binary @sample_1_pod.yaml
