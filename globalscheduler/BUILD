@@ -14,6 +14,7 @@ filegroup(
         "//globalscheduler/cmd:all-srcs",
         "//globalscheduler/controllers:all-srcs",
         "//globalscheduler/grpc/cluster:all-srcs",
+        "//globalscheduler/pkg/apis/allocation:all-srcs",
         "//globalscheduler/pkg/apis/cluster:all-srcs",
         "//globalscheduler/pkg/apis/dispatcher:all-srcs",
         "//globalscheduler/pkg/apis/distributor:all-srcs",
