@@ -170,7 +170,10 @@ cleanup()
   [[ -n "${GRPC_SERVER_PID-}" ]] && mapfile -t GRPC_SERVER_PIDS < <(pgrep -P "${GRPC_SERVER_PID}" ; ps -o pid= -p "${GRPC_SERVER_PID}")
   [[ -n "${GRPC_SERVER_PIDS-}" ]] && sudo kill "${GRPC_SERVER_PIDS[@]}" 2>/dev/null
   
-
+  # Check if the pod proxy server is still running
+  [[ -n "${PROXY_SERVER_PID-}" ]] && mapfile -t PROXY_SERVER_PIDS < <(pgrep -P "${PROXY_SERVER_PID}" ; ps -o pid= -p "${PROXY_SERVER_PID}")
+  [[ -n "${PROXY_SERVER_PID-}" ]] && sudo kill "${PROXY_SERVER_PIDS[@]}" 2>/dev/null
+  
   # Check if the kubelet is still running
   [[ -n "${KUBELET_PID-}" ]] && mapfile -t KUBELET_PIDS < <(pgrep -P "${KUBELET_PID}" ; ps -o pid= -p "${KUBELET_PID}")
   [[ -n "${KUBELET_PIDS-}" ]] && sudo kill "${KUBELET_PIDS[@]}" 2>/dev/null

@@ -680,7 +680,7 @@ function kube::common::start_grpc_server {
 
 function kube::common::start_proxy_server {
     CONTROLPLANE_SUDO=$(test -w "${CERT_DIR}" || echo "sudo -E")
-    ${CONTROLPLANE_SUDO} ${GO_OUT}/proxy-server &
-    PROXY_PID=$!
+    ${CONTROLPLANE_SUDO} ${GO_OUT}/proxy-server & 
+    PROXY_SERVER_PID=$!
 }
 

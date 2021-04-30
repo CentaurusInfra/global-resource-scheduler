@@ -49,8 +49,8 @@ const (
 )
 
 type PodHandler struct {
-	mu        sync.Mutex 
-	namespace string	
+	mu        sync.Mutex
+	namespace string
 	clientSet *kubernetes.Clientset
 }
 
@@ -144,7 +144,7 @@ func (handler *PodHandler) createPod(w http.ResponseWriter, r *http.Request) (re
 		TimeoutSeconds:  &duration,
 		Watch:           true,
 		ResourceVersion: podCreated.ResourceVersion,
-		FieldSelector:   fmt.Sprintf("metadata.name=%s,status.phase=%s", pod.Name,corev1.ClusterScheduled), //PodBound, ClusterScheduled
+		FieldSelector:   fmt.Sprintf("metadata.name=%s,status.phase=%s", pod.Name, corev1.ClusterScheduled), //PodBound, ClusterScheduled
 	}
 	watcher := handler.clientSet.CoreV1().Pods(handler.namespace).Watch(options)
 	timer := time.NewTimer(TimeOut * time.Second)
@@ -161,7 +161,6 @@ func (handler *PodHandler) createPod(w http.ResponseWriter, r *http.Request) (re
 						bLoop = false
 					}
 				}
-				break
 			case <-timer.C:
 				klog.Info("timeout to wait for scheduling a pod & delete the pod ")
 				options := metav1.DeleteOptions{}
@@ -171,10 +170,9 @@ func (handler *PodHandler) createPod(w http.ResponseWriter, r *http.Request) (re
 					result = Fail
 				}
 				bLoop = false
-				break
 			case <-ctx.Done():
 				err := ctx.Err()
-				if (err != nil) {
+				if err != nil {
 					klog.Errorf("server error: %v", err)
 				}
 				internalError := http.StatusInternalServerError
@@ -187,11 +185,10 @@ func (handler *PodHandler) createPod(w http.ResponseWriter, r *http.Request) (re
 	if status != string(corev1.ClusterScheduled) {
 		klog.Errorf("Pod scheduling is failed: %v", status)
 		return Fail
-	} 
+	}
 	klog.Infof("Pod scheduling is succeeded: %v", status)
 	return Success
 }
-
 
 func (handler *PodHandler) putPod(w http.ResponseWriter, r *http.Request) (result string) {
 	klog.Info("server: put pod started")
@@ -229,7 +226,7 @@ func (handler *PodHandler) putPod(w http.ResponseWriter, r *http.Request) (resul
 		TimeoutSeconds:  &duration,
 		Watch:           true,
 		ResourceVersion: podUpdated.ResourceVersion,
-		FieldSelector:   fmt.Sprintf("metadata.name=%s,status.phase=%s", podName,corev1.ClusterScheduled), //PodBound, ClusterScheduled
+		FieldSelector:   fmt.Sprintf("metadata.name=%s,status.phase=%s", podName, corev1.ClusterScheduled), //PodBound, ClusterScheduled
 	}
 	watcher := handler.clientSet.CoreV1().Pods(handler.namespace).Watch(options)
 	timer := time.NewTimer(TimeOut * time.Second)
@@ -246,14 +243,12 @@ func (handler *PodHandler) putPod(w http.ResponseWriter, r *http.Request) (resul
 						bLoop = false
 					}
 				}
-				break
 			case <-timer.C:
 				klog.Info("timeout to wait for updating a pod")
 				bLoop = false
-				break
 			case <-ctx.Done():
 				err := ctx.Err()
-				if (err != nil) {
+				if err != nil {
 					klog.Errorf("server error: %v", err)
 				}
 				internalError := http.StatusInternalServerError
@@ -305,7 +300,7 @@ func (handler *PodHandler) patchPod(w http.ResponseWriter, r *http.Request) (res
 		TimeoutSeconds:  &duration,
 		Watch:           true,
 		ResourceVersion: podPatched.ResourceVersion,
-		FieldSelector:   fmt.Sprintf("metadata.name=%s,status.phase=%s", podName,corev1.ClusterScheduled), //PodBound, ClusterScheduled
+		FieldSelector:   fmt.Sprintf("metadata.name=%s,status.phase=%s", podName, corev1.ClusterScheduled), //PodBound, ClusterScheduled
 	}
 	watcher := handler.clientSet.CoreV1().Pods(handler.namespace).Watch(options)
 	timer := time.NewTimer(TimeOut * time.Second)
@@ -322,16 +317,14 @@ func (handler *PodHandler) patchPod(w http.ResponseWriter, r *http.Request) (res
 						bLoop = false
 					}
 				}
-				break
-			case <- timer.C:
+			case <-timer.C:
 				klog.Info("timeout to wait for patching a pod")
 				bLoop = false
-				break
 			case <-ctx.Done():
 				err := ctx.Err()
-				if (err != nil) {
+				if err != nil {
 					klog.Errorf("server error: %v", err)
-				}				
+				}
 				internalError := http.StatusInternalServerError
 				http.Error(w, err.Error(), internalError)
 				bLoop = false
@@ -407,7 +400,7 @@ func yaml2json(reqBody []byte) (str string, err error) {
 	b, err := json.Marshal(jsonBody)
 	if err != nil {
 		klog.Errorf("request body marchalling error: %v", err)
-	} 
+	}
 	str = string(b)
 	return str, err
 }
