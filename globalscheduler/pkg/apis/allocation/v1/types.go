@@ -99,7 +99,6 @@ type Region struct {
 }
 
 type Strategy struct {
-	// Location Strategy（centralize，discrete）
 	LocationStrategy string `json:"location_strategy,omitempty"` // centralize and discrete, default value centralize
 }
 
