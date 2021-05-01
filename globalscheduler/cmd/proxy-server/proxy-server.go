@@ -95,25 +95,27 @@ func (handler *PodHandler) getPod(w http.ResponseWriter, r *http.Request) (resul
 		pods, err := handler.clientSet.CoreV1().Pods(handler.namespace).List(options)
 		if err != nil {
 			klog.Errorf("pod list error: %v", err)
-			result = Fail
+			result = string(Fail) + "- there is no pod"
 		}
 		strPods, err := yaml.Marshal(pods)
 		if err != nil {
 			result = Fail
+		} else {
+			result = string(strPods)
 		}
-		result = string(strPods)
 	} else {
 		options := metav1.GetOptions{}
 		pod, err := handler.clientSet.CoreV1().Pods(handler.namespace).Get(podName, options)
 		if err != nil {
 			klog.Errorf("pod get error: %v", err)
-			result = Fail
+			result = string(Fail) + "- pod get error"
 		}
 		strPod, err := yaml.Marshal(pod)
 		if err != nil {
 			result = Fail
+		} else {
+			result = string(strPod)
 		}
-		result = string(strPod)
 	}
 	return result
 }
@@ -220,7 +222,7 @@ func (handler *PodHandler) putPod(w http.ResponseWriter, r *http.Request) (resul
 		return result
 	}
 
-	duration := int64(TimeOut * time.Second * 2)
+	duration := int64(TimeOut * time.Second)
 	status := string(podUpdated.Status.Phase)
 	options := metav1.ListOptions{
 		TimeoutSeconds:  &duration,
