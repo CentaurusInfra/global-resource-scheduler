@@ -484,7 +484,7 @@ function kube::common::start_kubescheduler {
 function kube::common::start_gs_scheduler {
     CONTROLPLANE_SUDO=$(test -w "${CERT_DIR}" || echo "sudo -E")
     GS_SCHEDULER_LOG=${LOG_DIR}/gs-scheduler$1.log
-    ${CONTROLPLANE_SUDO} "${GO_OUT}/gs-scheduler" --schedulername="$2" --ipAddress="$3" --portNumber="$4" --kubeconfig="${CERT_DIR}/admin.kubeconfig" > "${GS_SCHEDULER_LOG}" 2>&1 &
+    ${CONTROLPLANE_SUDO} "${GO_OUT}/gs-scheduler" --schedulername="$2" --ipAddress="$3" --portNumber="$4" --workerNumber="$5" --kubeconfig="${CERT_DIR}/admin.kubeconfig" > "${GS_SCHEDULER_LOG}" 2>&1 &
     GS_SCHEDULER_PID=$!
 }
 

@@ -416,6 +416,9 @@ type GSSchedulerConfiguration struct {
 
 	// Scheduler PortNumber
 	PortNumber string
+
+	// Scheduler Worker Number
+	Workers int
 }
 
 //Push site resources

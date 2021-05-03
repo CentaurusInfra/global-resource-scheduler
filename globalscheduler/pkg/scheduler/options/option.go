@@ -22,6 +22,10 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 )
 
+const (
+	defaultWorkers = 1
+)
+
 // ServerRunOptions contains required server running options
 type ServerRunOptions struct {
 	KubeConfig string
@@ -37,6 +41,9 @@ type ServerRunOptions struct {
 
 	// Scheduler port number
 	PortNumber string
+
+	// Scheduler port number
+	Workers int
 }
 
 // NewServerRunOptions constructs a new ServerRunOptions if existed.
@@ -52,6 +59,7 @@ func (s *ServerRunOptions) Flags() (fss cliflag.NamedFlagSets) {
 	fs.StringVar(&s.ResourceCollectorApiUrl, "resourcecollectorapiurl", s.ResourceCollectorApiUrl, "Api url of the resource collector, specifying the api of the resource collector.")
 	fs.StringVar(&s.IpAddress, "ipAddress", s.IpAddress, "Scheduler ipAddress.")
 	fs.StringVar(&s.PortNumber, "portNumber", s.PortNumber, "Scheduler port number.")
+	fs.IntVar(&s.Workers, "workerNumber", defaultWorkers, "The number of workers.")
 	return fss
 }
 
@@ -65,6 +73,7 @@ func (s *ServerRunOptions) Config() *types.GSSchedulerConfiguration {
 	config.IpAddress = s.IpAddress
 	config.PortNumber = s.PortNumber
 	config.ConfigFilePath = s.KubeConfig
+	config.Workers = s.Workers
 	return config
 }
 
