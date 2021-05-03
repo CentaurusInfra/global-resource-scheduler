@@ -19,6 +19,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"k8s.io/kubernetes/globalscheduler/controllers"
 	"sync"
 	"time"
 
@@ -91,6 +92,11 @@ func main() {
 		klog.Fatalf("error - building global scheduler cluster apiextensions client: %s", err.Error())
 	}
 
+	//
+	allocationcrd := controllers.CreateAllocationCRD()
+	if err = controllers.CreateCRD(apiextensionsClient, allocationcrd); err != nil {
+		klog.Fatalf("Failed to load allocation crd with the error %v", err)
+	}
 	//6. distributer_server
 	klog.Infof("configure distributor controller")
 	distributorClientset, err := distributorclientset.NewForConfig(config)

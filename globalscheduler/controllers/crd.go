@@ -88,3 +88,134 @@ func waitForCRD(cs clientset.Interface, crd *apiextv1beta1.CustomResourceDefinit
 	}
 	return err
 }
+
+func CreateAllocationCRD() *apiextv1beta1.CustomResourceDefinition {
+	return &apiextv1beta1.CustomResourceDefinition{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "allocations.globalscheduler.com",
+		},
+		Spec: apiextv1beta1.CustomResourceDefinitionSpec{
+			Group:   "globalscheduler.com",
+			Version: "v1",
+			Names: apiextv1beta1.CustomResourceDefinitionNames{
+				Kind:   "Allocation",
+				Plural: "allocations",
+			},
+			Validation: &apiextv1beta1.CustomResourceValidation{
+				OpenAPIV3Schema: &apiextv1beta1.JSONSchemaProps{
+					Type: "object",
+					Properties: map[string]apiextv1beta1.JSONSchemaProps{
+						"spec": {
+							Type: "object",
+							Properties: map[string]apiextv1beta1.JSONSchemaProps{
+								"resource_group": {
+									Type: "object",
+									Properties: map[string]apiextv1beta1.JSONSchemaProps{
+										"name": {Type: "string"},
+										"resources": {
+											Type: "array",
+											Items: &apiextv1beta1.JSONSchemaPropsOrArray{
+												Schema: &apiextv1beta1.JSONSchemaProps{
+													Type: "object",
+													Properties: map[string]apiextv1beta1.JSONSchemaProps{
+														"name":           {Type: "string"},
+														"resourcee_type": {Type: "string"},
+														"resources": {
+															Type: "array",
+															Items: &apiextv1beta1.JSONSchemaPropsOrArray{
+																Schema: &apiextv1beta1.JSONSchemaProps{
+																	Type: "object",
+																	Properties: map[string]apiextv1beta1.JSONSchemaProps{
+																		"name": {Type: "string"},
+																		"flavors": {
+																			Type: "array",
+																			Items: &apiextv1beta1.JSONSchemaPropsOrArray{
+																				Schema: &apiextv1beta1.JSONSchemaProps{
+																					Type: "object",
+																					Properties: map[string]apiextv1beta1.JSONSchemaProps{
+																						"flavor_id": {Type: "string"},
+																						"spot": {
+																							Type: "array",
+																							Items: &apiextv1beta1.JSONSchemaPropsOrArray{
+																								Schema: &apiextv1beta1.JSONSchemaProps{
+																									Type: "object",
+																									Properties: map[string]apiextv1beta1.JSONSchemaProps{
+																										"max_price":           {Type: "string"},
+																										"spot_duration_hours": {Type: "double"},
+																										"spot_duration_count": {Type: "double"},
+																										"interruption_policy": {Type: "string"},
+																									},
+																								},
+																							},
+																						},
+																					},
+																				},
+																			},
+																		},
+																		"storage": {
+																			Type: "object",
+																			Properties: map[string]apiextv1beta1.JSONSchemaProps{
+																				"sata": {Type: "string"},
+																				"sas":  {Type: "integer"},
+																				"ssd":  {Type: "string"},
+																			},
+																		},
+																		"need_eip": {Type: "boolean"},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+								"selector": {
+									Type: "object",
+									Properties: map[string]apiextv1beta1.JSONSchemaProps{
+										"geo_location": {
+											Type: "object",
+											Properties: map[string]apiextv1beta1.JSONSchemaProps{
+												"city":     {Type: "string"},
+												"province": {Type: "string"},
+												"area":     {Type: "string"},
+												"country":  {Type: "string"},
+											},
+										},
+										"region": {
+											Type: "array",
+											Items: &apiextv1beta1.JSONSchemaPropsOrArray{
+												Schema: &apiextv1beta1.JSONSchemaProps{
+													Type: "object",
+													Properties: map[string]apiextv1beta1.JSONSchemaProps{
+														"region": {Type: "string"},
+														"availability_zone": {
+															Type: "array",
+															Items: &apiextv1beta1.JSONSchemaPropsOrArray{
+																Schema: &apiextv1beta1.JSONSchemaProps{Type: "string"},
+															},
+														},
+													},
+												},
+											},
+										},
+										"operator": {Type: "string"},
+										"strategy": {
+											Type: "object",
+											Properties: map[string]apiextv1beta1.JSONSchemaProps{
+												"location_strategy": {Type: "string"},
+											},
+										},
+									},
+								},
+								"replicas": {Type: "integer"},
+							},
+						},
+						"status": {Type: "string"},
+					},
+				},
+			},
+		},
+	}
+}
