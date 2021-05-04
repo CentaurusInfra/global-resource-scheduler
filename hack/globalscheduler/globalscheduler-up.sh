@@ -107,7 +107,7 @@ do
 done
 
 if [ "x${GO_OUT}" == "x" ]; then
-    make -C "${KUBE_ROOT}" WHAT="cmd/kubectl cmd/hyperkube cmd/kube-apiserver cmd/kubelet cmd/kube-proxy cmd/kube-controller-manager globalscheduler/cmd/gs-controllers globalscheduler/cmd/dispatcher_process  globalscheduler/cmd/distributor_process globalscheduler/cmd/grpc-server cmd/gs-scheduler cmd/resource-collector"
+    make -C "${KUBE_ROOT}" WHAT="cmd/kubectl cmd/hyperkube cmd/kube-apiserver cmd/kubelet cmd/kube-proxy cmd/kube-controller-manager globalscheduler/cmd/gs-controllers globalscheduler/cmd/dispatcher_process  globalscheduler/cmd/distributor_process globalscheduler/cmd/grpc-server globalscheduler/cmd/proxy-server cmd/gs-scheduler cmd/resource-collector"
 else
     echo "skipped the build."
 fi
@@ -170,7 +170,10 @@ cleanup()
   [[ -n "${GRPC_SERVER_PID-}" ]] && mapfile -t GRPC_SERVER_PIDS < <(pgrep -P "${GRPC_SERVER_PID}" ; ps -o pid= -p "${GRPC_SERVER_PID}")
   [[ -n "${GRPC_SERVER_PIDS-}" ]] && sudo kill "${GRPC_SERVER_PIDS[@]}" 2>/dev/null
   
-
+  # Check if the pod proxy server is still running
+  [[ -n "${PROXY_SERVER_PID-}" ]] && mapfile -t PROXY_SERVER_PIDS < <(pgrep -P "${PROXY_SERVER_PID}" ; ps -o pid= -p "${PROXY_SERVER_PID}")
+  [[ -n "${PROXY_SERVER_PID-}" ]] && sudo kill "${PROXY_SERVER_PIDS[@]}" 2>/dev/null
+  
   # Check if the kubelet is still running
   [[ -n "${KUBELET_PID-}" ]] && mapfile -t KUBELET_PIDS < <(pgrep -P "${KUBELET_PID}" ; ps -o pid= -p "${KUBELET_PID}")
   [[ -n "${KUBELET_PIDS-}" ]] && sudo kill "${KUBELET_PIDS[@]}" 2>/dev/null
@@ -457,6 +460,11 @@ if [[ "${START_MODE}" != "kubeletonly" ]]; then
   kube::common::start_gs_controllers
   echo "Starting grpc server..."
   kube::common::start_grpc_server
+  if [[ "${START_MODE}" != "nokubeproxy" ]]; then
+    kube::common::start_kubeproxy
+  fi
+  echo "Starting pod proxy server..."
+  kube::common::start_proxy_server
   if [[ "${START_MODE}" != "nokubeproxy" ]]; then
     kube::common::start_kubeproxy
   fi

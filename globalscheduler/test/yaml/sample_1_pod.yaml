@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pod-2"
+spec:
+  resourceType: "vm"
+  virtualMachine:
+    name: "demo-vm2"
+    image: "9ee2592a-ee7c-489d-8e5c-33e3b241f50b"
+    securityGroupId: "3e1c3fff-0DCE-475e-bafc-f49d12eaf101"
+    keyPairName: "demo-keypair"
+    flavors:
+    - flavorID: "42"
+    resourceCommonInfo:
+      count: 1
+      selector:
+        geoLocation:
+          area: NW-1
+          city: Bellevue
+          country: US
+          province: Washington
+        regions:
+         - region: "NW-1"
+           availablityZone:
+           - "production-az"
+  nics:
+  - name: "c8bb8227-4009-470A-b937-618ac106c4e6"

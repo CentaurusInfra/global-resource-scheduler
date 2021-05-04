@@ -382,12 +382,12 @@ func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *int
 	// Create filtered list with enough space to avoid growing it
 	// and allow assigning.
 	filtered := make([]*types.Site, len(allSiteCacheInfos))
-	klog.Infof("findSitesThatPassFilters-HasFilterPlugins(): %v",sched.SchedFrame.HasFilterPlugins())
+	klog.Infof("findSitesThatPassFilters-HasFilterPlugins(): %v", sched.SchedFrame.HasFilterPlugins())
 	if !sched.SchedFrame.HasFilterPlugins() {
 		for i := range filtered {
 			filtered[i] = allSiteCacheInfos[i].GetSite()
 		}
-		klog.Infof("findSitesThatPassFilters-filtered: %v, %d",filtered, len(filtered))
+		klog.Infof("findSitesThatPassFilters-filtered: %v, %d", filtered, len(filtered))
 		return filtered, nil
 	}
 
@@ -397,8 +397,8 @@ func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *int
 	ctx, cancel := context.WithCancel(ctx)
 	checkSite := func(i int) {
 		klog.Infof("checkSite: %d", i)
-		klog.Infof("allSiteCacheInfos: %v",i, allSiteCacheInfos)
-		klog.Infof("allSiteCacheInfos[%d]: %v",i, allSiteCacheInfos[i])
+		klog.Infof("allSiteCacheInfos: %v", i, allSiteCacheInfos)
+		klog.Infof("allSiteCacheInfos[%d]: %v", i, allSiteCacheInfos[i])
 		siteCacheInfo := allSiteCacheInfos[i]
 		klog.Infof("siteCacheInfo: %v", siteCacheInfo)
 		fits, status, err := sched.stackPassesFiltersOnSite(ctx, state, stack, siteCacheInfo)
@@ -419,8 +419,8 @@ func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *int
 	}
 	// Stops searching for more site once the configured number of feasible site
 	// are found.
-	klog.Infof("findSitesThatPassFilters-len(allSiteCacheInfos): %d",len(allSiteCacheInfos))
-	klog.Infof("findSitesThatPassFilters-allSiteCacheInfos[0]: %v",allSiteCacheInfos[0])
+	klog.Infof("findSitesThatPassFilters-len(allSiteCacheInfos): %d", len(allSiteCacheInfos))
+	klog.Infof("findSitesThatPassFilters-allSiteCacheInfos[0]: %v", allSiteCacheInfos[0])
 	workqueue.ParallelizeUntil(ctx, 16, len(allSiteCacheInfos), checkSite)
 
 	filtered = filtered[:filteredLen]

@@ -165,4 +165,3 @@ spec:
   storage:
   - storagecapacity: 22
     typeid: ssd
-    
