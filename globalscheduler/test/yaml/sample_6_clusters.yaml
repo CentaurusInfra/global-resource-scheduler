@@ -14,7 +14,7 @@ spec:
     city: NewYork
     country: US
     province: NewYork
-  ipaddress: 34.220.41.107
+  ipaddress: 18.236.217.191
   memcapacity: 256
   operator:
       operator: globalscheduler
@@ -42,7 +42,7 @@ spec:
     city: Bellevue
     country: US
     province: Washington
-  ipaddress: 34.220.41.107
+  ipaddress: 18.236.217.191
   memcapacity: 256
   operator:
       operator: globalscheduler
@@ -70,7 +70,7 @@ spec:
     city: Orlando
     country: US
     province: Florida
-  ipaddress: 34.220.41.107
+  ipaddress: 18.236.217.191
   memcapacity: 256
   operator:
       operator: globalscheduler
@@ -98,7 +98,7 @@ spec:
     city: Austin
     country: US
     province: Texas
-  ipaddress: 34.220.41.107
+  ipaddress: 18.236.217.191
   memcapacity: 256
   operator:
       operator: globalscheduler
@@ -126,7 +126,7 @@ spec:
     city: Chicago
     country: US
     province: Illinois
-  ipaddress: 34.220.41.107
+  ipaddress: 18.236.217.191
   memcapacity: 256
   operator:
       operator: globalscheduler
@@ -154,7 +154,7 @@ spec:
     city: Boston
     country: US
     province: Massachusettes
-  ipaddress: 34.220.41.107
+  ipaddress: 18.236.217.191
   memcapacity: 256
   operator:
       operator: globalscheduler
@@ -165,4 +165,3 @@ spec:
   storage:
   - storagecapacity: 22
     typeid: ssd
-    

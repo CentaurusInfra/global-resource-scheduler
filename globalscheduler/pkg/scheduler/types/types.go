@@ -86,7 +86,7 @@ type Flavor struct {
 	Spot     *Spot  `json:"spot,omitempty"`
 }
 
-// Resource is reource
+// Resource is resource
 type Resource struct {
 	Name         string           `json:"name" required:"true"`
 	ResourceType string           `json:"resource_type" required:"true"`
@@ -416,9 +416,6 @@ type GSSchedulerConfiguration struct {
 
 	// Scheduler PortNumber
 	PortNumber string
-
-	// Scheduler Worker Number
-	Workers int
 }
 
 //Push site resources

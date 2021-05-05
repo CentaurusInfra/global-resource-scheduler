@@ -403,6 +403,8 @@ func (n *SiteCacheInfo) UpdateSiteWithVolumePool(volumePool *typed.RegionVolumeP
 
 // UpdateSiteWithResInfo update res info
 func (n *SiteCacheInfo) UpdateSiteWithResInfo(resInfo types.AllResInfo) error {
+	klog.Infof("SiteCacheInfo - UpdateSiteWithResInfo - Resource : %v", resInfo)
+	klog.Infof("SiteCacheInfo-RequestedResources : %v", n.RequestedResources)
 	for resType, res := range resInfo.CpuAndMem {
 		for reqType, reqRes := range n.RequestedResources {
 			resTypes := strings.Split(reqType, "||")
@@ -415,7 +417,7 @@ func (n *SiteCacheInfo) UpdateSiteWithResInfo(resInfo types.AllResInfo) error {
 			n.RequestedResources[reqType] = reqRes
 		}
 	}
-
+	klog.Infof("SiteCacheInfo-RequestedStorage : %v", n.RequestedStorage)
 	for volType, used := range resInfo.Storage {
 		reqVol, ok := n.RequestedStorage[volType]
 		if !ok {
@@ -426,6 +428,7 @@ func (n *SiteCacheInfo) UpdateSiteWithResInfo(resInfo types.AllResInfo) error {
 		n.RequestedStorage[volType] = reqVol
 	}
 
+	klog.Infof("SiteCacheInfo : %v", n)
 	n.updateFlavor()
 
 	n.generation = nextGeneration()
@@ -544,4 +547,53 @@ func GetStackKey(stack *types.Stack) (string, error) {
 		return "", errors.New("Cannot get cache key for stack with empty UID")
 	}
 	return uid, nil
+}
+
+// UpdateSiteWithResInfo update res info
+func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo) error {
+	klog.Infof("SiteCacheInfo - UpdateSiteWithResInfo - Resource : %v", resInfo)
+	klog.Infof("SiteCacheInfo-RequestedResources : %v", n.RequestedResources)
+	for resType, res := range resInfo.CpuAndMem {
+		for reqType, reqRes := range n.RequestedResources {
+			resTypes := strings.Split(reqType, "||")
+			if !utils.IsContain(resTypes, resType) {
+				continue
+			}
+
+			reqRes.VCPU += res.VCPU
+			reqRes.Memory += res.Memory
+			n.RequestedResources[reqType] = reqRes
+		}
+	}
+	klog.Infof("SiteCacheInfo-RequestedStorage : %v", n.RequestedStorage)
+	for volType, used := range resInfo.Storage {
+		reqVol, ok := n.RequestedStorage[volType]
+		if !ok {
+			reqVol = 0
+		}
+
+		reqVol += used
+		n.RequestedStorage[volType] = reqVol
+	}
+
+	klog.Infof("SiteCacheInfo : %v", n)
+	n.deductFlavor()
+
+	n.generation = nextGeneration()
+	return nil
+}
+
+func (n *SiteCacheInfo) deductFlavor() {
+	for key, value := range n.AllocatableFlavor {
+		n.AllocatableFlavor[key] = value-1
+		if n.RequestedFlavor == nil {
+			n.RequestedFlavor = make(map[string]int64)
+		}
+		requested,ok := n.RequestedFlavor[key]
+		if !ok {
+			n.RequestedFlavor[key] = 0
+		} else {
+			n.RequestedFlavor[key] = requested+1
+		}		
+	}
 }

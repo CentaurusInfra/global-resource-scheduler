@@ -35,6 +35,9 @@ const (
 
 	// TimeFormat is time str format
 	TimeFormat = "2006-01-02 15:04:05"
+
+	//site delimiter e.g) region--az
+	SiteDelimiter = "--"
 )
 
 // DefaultRegion default region

@@ -72,8 +72,7 @@ function start_scheduler {
   schedulerid=$2
   ipaddress=$3
   port=$4
-  workers=$5
-  kube::common::start_gs_scheduler $tag $schedulerid $ipaddress $port $workers
+  kube::common::start_gs_scheduler $tag $schedulerid $ipaddress $port
   
   echo "Done Starting Scheduler $tag"
 }

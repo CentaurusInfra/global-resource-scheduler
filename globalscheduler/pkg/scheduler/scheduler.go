@@ -66,6 +66,10 @@ import (
 	clusterv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 )
 
+const (
+	defaultWorkers = 1
+)
+
 // ScheduleResult represents the result of one pod scheduled. It will contain
 // the final selected Site, along with the selected intermediate information.
 type ScheduleResult struct {
@@ -137,7 +141,7 @@ func NewScheduler(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct
 		siteCacheInfoSnapshot:   internalcache.NewEmptySnapshot(),
 		ConfigFilePath:          gsconfig.ConfigFilePath,
 		deletedClusters:         make(map[string]string),
-		workerNumber:            gsconfig.Workers,
+		workerNumber:            1,
 	}
 
 	err := sched.buildFramework()
@@ -588,6 +592,10 @@ func (sched *Scheduler) Schedule(ctx context.Context, allocation *types.Allocati
 				return result, err
 			}
 			result.Stacks = append(result.Stacks, newStack)
+			klog.Infof("Schedule - new stack: %v", newStack)
+			if err != nil {
+				klog.Errorf("deduct site resource failed! site: %s", value.SiteID)
+			}
 			count++
 			if count >= allocation.Replicas {
 				break
@@ -906,7 +914,7 @@ func (sched *Scheduler) UpdateFlavor() error {
 
 //This function updates sites' flavor
 func (sched *Scheduler) UpdateRegionFlavor(region string, flavorId string) (err error) {
-	regionFlavorId := region + "--" + flavorId
+	regionFlavorId := region + utils.SiteDelimiter + flavorId
 	flavor := sched.siteCacheInfoSnapshot.FlavorMap[flavorId]
 	if sched.siteCacheInfoSnapshot.RegionFlavorMap == nil {
 		sched.siteCacheInfoSnapshot.RegionFlavorMap = make(map[string]*typed.RegionFlavor)
@@ -916,23 +924,3 @@ func (sched *Scheduler) UpdateRegionFlavor(region string, flavorId string) (err 
 	return
 }
 
-//This function updates sites' dynamic resource informaton
-func (sched *Scheduler) DeductSiteResource(region string, resource *types.SiteResource) (err error) {
-	klog.Infof("UpdateSiteDynamicResource region: %s, resource:%v", region, resource)
-	var siteID string
-	for _, siteresource := range resource.CPUMemResources {
-		siteID = region + "--" + siteresource.AvailabilityZone
-		klog.Infof("UpdateSiteDynamicResource siteID: %s, site:", siteID, siteresource)
-		siteCacheInfo := sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID]
-		if siteCacheInfo == nil {
-			siteCacheInfo = schedulersitecacheinfo.NewSiteCacheInfo()
-			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID] = siteCacheInfo
-		}
-		sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID].TotalResources[siteID] = &types.CPUAndMemory{VCPU: siteresource.CpuCapacity, Memory: siteresource.MemCapacity}
-		for _, storage := range resource.VolumeResources {
-			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID].TotalStorage[storage.TypeId] = storage.StorageCapacity
-			klog.Infof("UpdateSiteDynamicResource storage, site: %v, %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID].TotalStorage[storage.TypeId], sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
-		}
-	}
-	return nil
-}
