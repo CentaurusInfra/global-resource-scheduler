@@ -936,4 +936,3 @@ func (sched *Scheduler) UpdateRegionFlavor(region string, flavorId string) (err 
 	err = nil
 	return
 }
-

@@ -585,15 +585,15 @@ func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo) error {
 
 func (n *SiteCacheInfo) deductFlavor() {
 	for key, value := range n.AllocatableFlavor {
-		n.AllocatableFlavor[key] = value-1
+		n.AllocatableFlavor[key] = value - 1
 		if n.RequestedFlavor == nil {
 			n.RequestedFlavor = make(map[string]int64)
 		}
-		requested,ok := n.RequestedFlavor[key]
+		requested, ok := n.RequestedFlavor[key]
 		if !ok {
 			n.RequestedFlavor[key] = 0
 		} else {
-			n.RequestedFlavor[key] = requested+1
-		}		
+			n.RequestedFlavor[key] = requested + 1
+		}
 	}
 }
