@@ -24,7 +24,6 @@ import (
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/cmd/conf"
-	_ "k8s.io/kubernetes/globalscheduler/cmd/conf"
 	schedulerclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/client/clientset/versioned"
 	schedulerv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/scheduler/v1"
 	"math/rand"
@@ -264,9 +263,9 @@ func (sched *Scheduler) scheduleOne() bool {
 	if shutdown != nil {
 		return false
 	}
-	klog.Infof("1. Stack: %v stack selector: %v", stack.Selector)
+	klog.Infof("1. Stack: %v, stack selector: %v", stack, stack.Selector)
 	allocation, err := sched.generateAllocationFromStack(stack)
-	klog.Infof("2. Allocation: %v , allocation selector: %v", allocation.Selector)
+	klog.Infof("2. Allocation: %v, allocation selector: %v", allocation, allocation.Selector)
 	if err != nil {
 		return false
 	}
@@ -352,28 +351,41 @@ func (sched *Scheduler) stackPassesFiltersOnSite(
 // findSitesThatPassFilters finds the site that fit the filter plugins.
 func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *interfaces.CycleState,
 	stack *types.Stack, statuses interfaces.SiteToStatusMap) ([]*types.Site, error) {
-	///allSiteCacheInfos, err := sched.siteCacheInfoSnapshot.SiteCacheInfos().List()
 	siteID := stack.Selector.SiteID
-	var allSiteCacheInfos [1]*schedulersitecacheinfo.SiteCacheInfo
-	klog.Infof("sched.siteCacheInfoSnapshot.SiteCacheInfoMap ==> %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
-	if sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID] == nil {
-		return nil, nil
+	klog.Infof("stack.Selector.SiteID:%v", siteID)
+	var allSiteCacheInfos []*schedulersitecacheinfo.SiteCacheInfo
+	var err error
+	klog.Infof("sched.siteCacheInfoSnapshot.SiteCacheInfoMap: %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
+	if siteID != "" && sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID] != nil {
+		klog.Infof("siteID: %v", siteID)
+		klog.Infof("sched.siteCacheInfoSnapshot.SiteCacheInfoMap: %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
+		site := sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID]
+		allSiteCacheInfos = append(allSiteCacheInfos, site)
+	} else {
+		//allSiteCacheInfos, err = sched.siteCacheInfoSnapshot.SiteCacheInfos().List()
+		for _, site := range sched.siteCacheInfoSnapshot.SiteCacheInfoMap {
+			allSiteCacheInfos = append(allSiteCacheInfos, site)
+			klog.Infof("site: %v, len:%v", site, len(allSiteCacheInfos))
+		}
+		if err != nil {
+			klog.Errorf("get site info error %v", err)
+			return nil, nil
+		}
 	}
-	klog.Infof("siteID ==> %v", siteID)
-	klog.Infof("sched.siteCacheInfoSnapshot.SiteCacheInfoMap ==> %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap)
-	allSiteCacheInfos[0] = sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID]
-	if allSiteCacheInfos[0] == nil {
-		err := fmt.Errorf("SiteCacheInfoMap of %v is null", siteID)
+	if allSiteCacheInfos == nil {
+		err = fmt.Errorf("SiteCacheInfoMap of %v is null", siteID)
 		return nil, err
 	}
-	klog.Infof("allSiteCacheInfos[0] ==> %v", allSiteCacheInfos[0])
+	klog.Infof("allSiteCacheInfos: %v", len(allSiteCacheInfos))
 	// Create filtered list with enough space to avoid growing it
 	// and allow assigning.
 	filtered := make([]*types.Site, len(allSiteCacheInfos))
+	klog.Infof("findSitesThatPassFilters-HasFilterPlugins(): %v", sched.SchedFrame.HasFilterPlugins())
 	if !sched.SchedFrame.HasFilterPlugins() {
 		for i := range filtered {
 			filtered[i] = allSiteCacheInfos[i].GetSite()
 		}
+		klog.Infof("findSitesThatPassFilters-filtered: %v, %d", filtered, len(filtered))
 		return filtered, nil
 	}
 
@@ -382,7 +394,11 @@ func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *int
 	var filteredLen int32
 	ctx, cancel := context.WithCancel(ctx)
 	checkSite := func(i int) {
+		klog.Infof("checkSite: %d", i)
+		klog.Infof("allSiteCacheInfos: %v", i, allSiteCacheInfos)
+		klog.Infof("allSiteCacheInfos[%d]: %v", i, allSiteCacheInfos[i])
 		siteCacheInfo := allSiteCacheInfos[i]
+		klog.Infof("siteCacheInfo: %v", siteCacheInfo)
 		fits, status, err := sched.stackPassesFiltersOnSite(ctx, state, stack, siteCacheInfo)
 		if err != nil {
 			errCh.SendErrorWithCancel(err, cancel)
@@ -399,9 +415,10 @@ func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *int
 			statusesLock.Unlock()
 		}
 	}
-
 	// Stops searching for more site once the configured number of feasible site
 	// are found.
+	klog.Infof("findSitesThatPassFilters-len(allSiteCacheInfos): %d", len(allSiteCacheInfos))
+	klog.Infof("findSitesThatPassFilters-allSiteCacheInfos[0]: %v", allSiteCacheInfos[0])
 	workqueue.ParallelizeUntil(ctx, 16, len(allSiteCacheInfos), checkSite)
 
 	filtered = filtered[:filteredLen]
@@ -704,7 +721,7 @@ func (sched *Scheduler) initPodClusterSchedulerInformers(gsconfig *types.GSSched
 
 func convertClusterToSite(cluster *clusterv1.Cluster) *types.Site {
 	result := &types.Site{
-		SiteID:           cluster.Spec.Region.Region + "--" + cluster.Spec.Region.AvailabilityZone,
+		SiteID:           cluster.Spec.Region.Region + constants.SiteDelimiter + cluster.Spec.Region.AvailabilityZone,
 		ClusterName:      cluster.ObjectMeta.Name,
 		ClusterNamespace: cluster.ObjectMeta.Namespace,
 		GeoLocation: types.GeoLocation{
@@ -838,10 +855,6 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].AllocatableFlavor[flavor.FlavorID] = flavor.TotalCapacity
 			sched.UpdateRegionFlavor(clusterCopy.Spec.Region.Region, flavor.FlavorID)
 		}
-		//sched.UpdateSiteDynamicResource_Temp(clusterCopy.Spec.Region.Region, clusterCopy.Spec.Region.AvailabilityZone)
-		//klog.Infof("created a site, site , id - site: %v", site.SiteID)
-		klog.Infof("created a site, site id - site: %v", *(sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].Site))
-		klog.Infof("created a site, site id - map: %v", sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID])
 		break
 	case EventType_Update:
 		cluster, err := sched.ClusterLister.Clusters(clusterNameSpace).Get(clusterName)
@@ -861,7 +874,6 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 			sched.siteCacheInfoSnapshot.SiteCacheInfoMap[site.SiteID].AllocatableFlavor[flavor.FlavorID] = flavor.TotalCapacity
 			sched.UpdateRegionFlavor(clusterCopy.Spec.Region.Region, flavor.FlavorID)
 		}
-		//sched.UpdateSiteDynamicResource_Temp(clusterCopy.Spec.Region.Region, clusterCopy.Spec.Region.AvailabilityZone)
 		klog.Infof("created a site, site id: %v", site.SiteID)
 		break
 	case EventType_Delete:
@@ -889,8 +901,9 @@ func (sched *Scheduler) UpdateSiteDynamicResource(region string, resource *types
 	klog.Infof("UpdateSiteDynamicResource region: %s, resource:%v", region, resource)
 	var siteID string
 	for _, siteresource := range resource.CPUMemResources {
-		siteID = region + "--" + siteresource.AvailabilityZone
-		klog.Infof("UpdateSiteDynamicResource siteID: %s, site:", siteID, siteresource)
+		siteID = region + constants.SiteDelimiter + siteresource.AvailabilityZone
+		klog.Infof("UpdateSiteDynamicResource2 siteID: %s", siteID)
+		klog.Infof("UpdateSiteDynamicResource3 site: %v", siteresource)
 		siteCacheInfo := sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteID]
 		if siteCacheInfo == nil {
 			siteCacheInfo = schedulersitecacheinfo.NewSiteCacheInfo()
@@ -914,7 +927,7 @@ func (sched *Scheduler) UpdateFlavor() error {
 
 //This function updates sites' flavor
 func (sched *Scheduler) UpdateRegionFlavor(region string, flavorId string) (err error) {
-	regionFlavorId := region + utils.SiteDelimiter + flavorId
+	regionFlavorId := region + constants.SiteDelimiter + flavorId
 	flavor := sched.siteCacheInfoSnapshot.FlavorMap[flavorId]
 	if sched.siteCacheInfoSnapshot.RegionFlavorMap == nil {
 		sched.siteCacheInfoSnapshot.RegionFlavorMap = make(map[string]*typed.RegionFlavor)

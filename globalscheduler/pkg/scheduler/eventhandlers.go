@@ -29,6 +29,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog"
 	clusterv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"k8s.io/kubernetes/pkg/controller"
 	statusutil "k8s.io/kubernetes/pkg/util/pod"
@@ -253,7 +254,7 @@ func getStackSelector(selector *v1.ResourceSelector) types.Selector {
 			AvailabilityZone: value.AvailablityZone,
 		})
 		/// the following check is to avoid an out of index error when pod doesn't have az
-		siteID = value.Region + "--"
+		siteID = value.Region + constants.SiteDelimiter
 		if len(value.AvailablityZone) > 0 {
 			siteID = siteID + value.AvailablityZone[0]
 		}
@@ -300,7 +301,7 @@ func (sched *Scheduler) updatePodInSchedulingQueue(oldObj, newObj interface{}) {
 		return
 	}
 	newPod, ok := newObj.(*v1.Pod)
-	klog.Infof("addPodToSchedulingQueue : %v", newPod)
+	klog.Infof("updatePodToSchedulingQueue : %v", newPod)
 	if !ok {
 		klog.Errorf("cannot convert newObj to *v1.Pod: %v", newObj)
 		return
@@ -322,7 +323,7 @@ func (sched *Scheduler) deletePodFromSchedulingQueue(obj interface{}) {
 	switch t := obj.(type) {
 	case *v1.Pod:
 		pod = obj.(*v1.Pod)
-		klog.Infof("addPodToSchedulingQueue : %v", pod)
+		klog.Infof("deletePodToSchedulingQueue : %v", pod)
 	case cache.DeletedFinalStateUnknown:
 		var ok bool
 		pod, ok = t.Obj.(*v1.Pod)
@@ -507,7 +508,7 @@ func (sched *Scheduler) deleteCluster(object interface{}) {
 		return
 	}
 	sched.Enqueue(key, EventType_Delete)
-	siteID := clusterCopy.Spec.Region.Region + "--" + clusterCopy.Spec.Region.AvailabilityZone
+	siteID := clusterCopy.Spec.Region.Region + constants.SiteDelimiter + clusterCopy.Spec.Region.AvailabilityZone
 	sched.deletedClusters[key] = siteID
 	klog.Infof("Enqueue Delete Cluster: %v", key)
 }

@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"k8s.io/klog"
+	"strings"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/framework/interfaces"
@@ -43,7 +44,7 @@ func (pl *SiteAvailability) Name() string {
 // Filter invoked at the filter extension point.
 func (pl *SiteAvailability) Filter(ctx context.Context, cycleState *interfaces.CycleState, stack *types.Stack,
 	siteCacheInfo *sitecacheinfo.SiteCacheInfo) *interfaces.Status {
-
+	klog.Infof("Filter- siteCacheInfo: %v", siteCacheInfo)
 	if siteCacheInfo.GetSite().Status == constants.SiteStatusOffline || siteCacheInfo.GetSite().Status == constants.SiteStatusSellout {
 		msg := fmt.Sprintf("Site(%s) status is %s, not available!", siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().Status)
 		klog.Info(msg)
@@ -51,9 +52,13 @@ func (pl *SiteAvailability) Filter(ctx context.Context, cycleState *interfaces.C
 	}
 
 	if stack.Selector.SiteID != "" && stack.Selector.SiteID != siteCacheInfo.GetSite().SiteID {
-		msg := fmt.Sprintf("Site(%s) not suitable!", siteCacheInfo.GetSite().SiteID)
-		klog.Info(msg)
-		return interfaces.NewStatus(interfaces.Unschedulable, msg)
+		bStartWith := strings.HasPrefix(siteCacheInfo.GetSite().SiteID, stack.Selector.SiteID)
+		bRegionOnly := strings.HasSuffix(stack.Selector.SiteID, constants.SiteDelimiter)
+		if !(bStartWith && bRegionOnly) {
+			msg := fmt.Sprintf("Site(%s) not suitable!", siteCacheInfo.GetSite().SiteID)
+			klog.Info(msg)
+			return interfaces.NewStatus(interfaces.Unschedulable, msg)
+		}
 	}
 
 	return nil
