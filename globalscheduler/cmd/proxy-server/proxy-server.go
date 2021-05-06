@@ -21,6 +21,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	restclient "k8s.io/client-go/rest"
 	"k8s.io/klog"
 	"net/http"
 	"sync"
@@ -67,13 +68,27 @@ func NewPodHandler(ns string) *PodHandler {
 	return podHandler
 }
 
+var once sync.Once
+
+var (
+	config *restclient.Config
+)
+
+func getConfig() *restclient.Config {
+	var err error
+	once.Do(func() {
+		kubeconfig := flag.String("kubeconfig", "/var/run/kubernetes/admin.kubeconfig", "Path to a kubeconfig. Only required if out-of-cluster.")
+		masterURL := flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+		config, err = clientcmd.BuildConfigFromFlags(*masterURL, *kubeconfig)
+		if err != nil {
+			klog.Fatalf("Failed to load kubeconfig %s, %s with the error %V", kubeconfig, masterURL, err)
+		}
+	})
+	return config
+}
+
 func getClient() (*kubernetes.Clientset, error) {
-	kubeconfig := flag.String("kubeconfig", "/var/run/kubernetes/admin.kubeconfig", "Path to a kubeconfig. Only required if out-of-cluster.")
-	masterURL := flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
-	config, err := clientcmd.BuildConfigFromFlags(*masterURL, *kubeconfig)
-	if err != nil {
-		return nil, err
-	}
+	config = getConfig()
 	clientSet, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return nil, err
@@ -441,15 +456,18 @@ func (handler *PodHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // curl -H "Accept: application/x-yaml" -H "Content-Type: application/x-yaml" -X PUT  http://localhost:8090/pods?name=pod-1 --data-binary @sample_1_pod.yaml
 // curl -H "Accept: application/x-yaml" -H "Content-Type: application/x-yaml" -X PATCH  http://localhost:8090/pods?name=pod-1 --data-binary @sample_1_pod.yaml
 // curl -H "Accept: application/x-yaml" -H "Content-Type: application/x-yaml" -X DELETE  http://localhost:8090/pods?name=pod-1
+// curl -H "Accept: application/x-yaml" -H "Content-Type: application/x-yaml" -X POST http://localhost:8090/pods --data-binary @sample_1_pod.yaml
 func main() {
 	url := flag.String("url", ":8090", "proxy url")
 	namespace := flag.String("namespace", "default", "namespace")
 	flag.Parse()
+	allocationHandler := NewAllocationHandler()
 	podHandler := NewPodHandler(*namespace)
-	if podHandler == nil {
+	if podHandler == nil || allocationHandler == nil {
 		klog.Error("cannot run http server - http handler is null")
 	} else {
 		http.Handle("/pods", podHandler)
+		http.Handle("/allocations", allocationHandler)
 		klog.Fatal(http.ListenAndServe(*url, nil))
 	}
 }

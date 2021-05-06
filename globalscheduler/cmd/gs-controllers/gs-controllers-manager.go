@@ -92,7 +92,7 @@ func main() {
 		klog.Fatalf("error - building global scheduler cluster apiextensions client: %s", err.Error())
 	}
 
-	//
+	// Added allocation crd schema
 	allocationcrd := controllers.CreateAllocationCRD()
 	if err = controllers.CreateCRD(apiextensionsClient, allocationcrd); err != nil {
 		klog.Fatalf("Failed to load allocation crd with the error %v", err)
