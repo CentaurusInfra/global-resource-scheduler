@@ -19,6 +19,7 @@ package cache
 
 import (
 	"fmt"
+	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	schedulerlisters "k8s.io/kubernetes/globalscheduler/pkg/scheduler/listers"
 	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
@@ -130,4 +131,9 @@ func (s *Snapshot) Get(siteID string) (*schedulersitecacheinfo.SiteCacheInfo, er
 		return v, nil
 	}
 	return nil, fmt.Errorf("sitecacheinfo not found for site ID %q", siteID)
+}
+
+func (s *Snapshot) GetFlavors() (*map[string]*typed.RegionFlavor, bool) {
+	klog.Infof("GetFlavor: %v", s.RegionFlavorMap)
+	return &s.RegionFlavorMap, true
 }

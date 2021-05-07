@@ -17,6 +17,7 @@ limitations under the License.
 package listers
 
 import (
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 )
@@ -41,6 +42,8 @@ type SiteCacheInfoLister interface {
 	HavePodsWithAffinityList() ([]*schedulersitecacheinfo.SiteCacheInfo, error)
 	// Returns the SiteCacheInfo of the given site ID.
 	Get(siteID string) (*schedulersitecacheinfo.SiteCacheInfo, error)
+	// Return flavor map
+	GetFlavors() (*map[string]*typed.RegionFlavor, bool)
 }
 
 // SharedLister groups scheduler-specific listers.

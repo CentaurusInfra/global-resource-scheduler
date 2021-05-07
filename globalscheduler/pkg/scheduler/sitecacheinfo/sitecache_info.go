@@ -34,6 +34,11 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 )
 
+const (
+	//DefaultWorkers = 1
+	DefaultResourceType = "vm" //currently resourceType is vm, but it should support other types
+)
+
 var (
 	generation int64
 )
@@ -549,20 +554,33 @@ func GetStackKey(stack *types.Stack) (string, error) {
 	return uid, nil
 }
 
-// UpdateSiteWithResInfo update res info
-func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo) error {
+// DeductSiteResInfo deduct site's resource info
+func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo, regionFlavorMap map[string]*typed.RegionFlavor) error {
 	klog.Infof("SiteCacheInfo - UpdateSiteWithResInfo - Resource : %v", resInfo)
 	klog.Infof("SiteCacheInfo-RequestedResources : %v", n.RequestedResources)
+	var resourceTypes []string
 	for resType, res := range resInfo.CpuAndMem {
-		for reqType, reqRes := range n.RequestedResources {
-			resTypes := strings.Split(reqType, "||")
-			if !utils.IsContain(resTypes, resType) {
-				continue
+		//binding a pod for the first
+		klog.Infof("resType, res: %v, %v", resType, res)
+		if resType == "" {
+			resType = string(DefaultResourceType)
+			resourceTypes = append(resourceTypes, resType)
+		}
+		if len(n.RequestedResources) == 0 {
+			reqRes := types.CPUAndMemory{VCPU: res.VCPU, Memory: res.Memory}
+			n.RequestedResources[resType] = &reqRes
+		} else {
+			for reqType, reqRes := range n.RequestedResources {
+				resTypes := strings.Split(reqType, "||")
+				if !utils.IsContain(resTypes, resType) {
+					klog.Infof("!utils.IsContain111: %v", !utils.IsContain(resTypes, resType))
+					continue
+				}
+				klog.Infof("!utils.IsContain222: %v", !utils.IsContain(resTypes, resType))
+				reqRes.VCPU += res.VCPU
+				reqRes.Memory += res.Memory
+				n.RequestedResources[resType] = reqRes
 			}
-
-			reqRes.VCPU += res.VCPU
-			reqRes.Memory += res.Memory
-			n.RequestedResources[reqType] = reqRes
 		}
 	}
 	klog.Infof("SiteCacheInfo-RequestedStorage : %v", n.RequestedStorage)
@@ -571,19 +589,77 @@ func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo) error {
 		if !ok {
 			reqVol = 0
 		}
-
 		reqVol += used
 		n.RequestedStorage[volType] = reqVol
 	}
 
 	klog.Infof("SiteCacheInfo : %v", n)
-	n.deductFlavor()
-
+	//n.deductFlavor()
+	n.updateSiteFlavor(resourceTypes, regionFlavorMap)
 	n.generation = nextGeneration()
 	return nil
 }
 
+/*
+updateSiteFlavor() is equal with updateFlavor() functionally.
+But dueto the difference between flavor files and data,
+it is not possible to perform updateFlavor().
+updateFlavor(): /home/ubuntu/go/src/k8s.io/arktos/conf/flavors.json
+global scheduler flavor config file:
+/home/ubuntu/go/src/k8s.io/arktos/conf/flavor_config.yaml
+*/
+func (n *SiteCacheInfo) updateSiteFlavor(resourceTypes []string, regionFlavors map[string]*typed.RegionFlavor) {
+	if n.AllocatableFlavor == nil {
+		n.AllocatableFlavor = map[string]int64{}
+	}
+	supportFlavors := n.AllocatableFlavor
+	klog.Infof("updateSiteFlavor - supportFlavors : %v", supportFlavors)
+	klog.Infof("updateSiteFlavor before- AllocatableFlavor, RequestedFlavor : %v, %v", n.AllocatableFlavor, n.RequestedFlavor)
+	regionName := utils.GetRegionName(n.Site.SiteID)
+	for flavorid := range supportFlavors {
+		regionFalvorKey := regionName + "||" + flavorid
+		flv := regionFlavors[regionFalvorKey]
+		if flv == nil {
+			n.deductFlavor()
+			return
+		}
+		klog.Infof("updateSiteFlavor - flv : %v", flv)
+		vCPUInt, err := strconv.ParseInt(flv.Vcpus, 10, 64)
+		if err != nil {
+			n.deductFlavor()
+			return
+		}
+		for _, resourceType := range resourceTypes {
+			totalRes := n.TotalResources[resourceType]
+			requestRes := n.RequestedResources[resourceType]
+			klog.Infof("updateSiteFlavor - vCPUInt, totalRes, requestRes : %v, %v,%v", vCPUInt, totalRes, requestRes)
+			if totalRes == nil {
+				n.deductFlavor()
+				return
+			} else if requestRes == nil {
+				requestRes = &types.CPUAndMemory{VCPU: 0, Memory: 0}
+			}
+			count := (totalRes.VCPU - requestRes.VCPU) / vCPUInt
+			memCount := (totalRes.Memory - requestRes.Memory) / flv.Ram
+			if count > memCount {
+				count = memCount
+			}
+			if _, ok := n.AllocatableFlavor[flavorid]; !ok {
+				n.AllocatableFlavor[flavorid] = 0
+			}
+			if n.AllocatableFlavor[flavorid] > count {
+				n.AllocatableFlavor[flavorid] = count
+			}
+		}
+	}
+	klog.Infof("updateSiteFlavor after- AllocatableFlavor, RequestedFlavor : %v, %v", n.AllocatableFlavor, n.RequestedFlavor)
+}
+
 func (n *SiteCacheInfo) deductFlavor() {
+	if n.AllocatableFlavor == nil {
+		n.AllocatableFlavor = map[string]int64{}
+	}
+	klog.Infof("deductFlavor before - AllocatableFlavor, RequestedFlavor : %v, %v", n.AllocatableFlavor, n.RequestedFlavor)
 	for key, value := range n.AllocatableFlavor {
 		n.AllocatableFlavor[key] = value - 1
 		if n.RequestedFlavor == nil {
@@ -591,9 +667,11 @@ func (n *SiteCacheInfo) deductFlavor() {
 		}
 		requested, ok := n.RequestedFlavor[key]
 		if !ok {
-			n.RequestedFlavor[key] = 0
+			n.RequestedFlavor[key] = 1
 		} else {
 			n.RequestedFlavor[key] = requested + 1
 		}
 	}
+	klog.Infof("deductFlavor after- AllocatableFlavor, RequestedFlavor : %v, %v", n.AllocatableFlavor, n.RequestedFlavor)
+
 }
