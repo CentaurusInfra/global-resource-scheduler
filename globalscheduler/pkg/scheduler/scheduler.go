@@ -184,14 +184,14 @@ func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
 	// start cluster informers
 	if sched.ClusterInformer != nil && sched.ClusterInformerFactory != nil {
 		//perform go informer.Run(stopCh) internally
-		sched.ClusterInformerFactory.Start(stopCh) 
+		sched.ClusterInformerFactory.Start(stopCh)
 		// Wait for all caches to sync before scheduling.
 		sched.ClusterInformerFactory.WaitForCacheSync(stopCh)
 	}
 	// start pod informers
 	if sched.PodInformer != nil && sched.InformerFactory != nil {
 		klog.Infof("Starting scheduler %s informer", sched.SchedulerName)
-		sched.InformerFactory.Start(stopCh) 
+		sched.InformerFactory.Start(stopCh)
 		// Wait for all caches to sync before scheduling.
 		sched.InformerFactory.WaitForCacheSync(stopCh)
 	}
