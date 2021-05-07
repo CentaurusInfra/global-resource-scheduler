@@ -24,6 +24,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"sync/atomic"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
@@ -91,6 +92,8 @@ type SiteCacheInfo struct {
 	// Whenever SiteCacheInfo changes, generation is bumped.
 	// This is used to avoid cloning it if the object didn't change.
 	generation int64
+
+	mu sync.RWMutex
 }
 
 // GetGeneration returns the generation on this Site.
@@ -556,8 +559,12 @@ func GetStackKey(stack *types.Stack) (string, error) {
 
 // DeductSiteResInfo deduct site's resource info
 func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo, regionFlavorMap map[string]*typed.RegionFlavor) error {
-	klog.Infof("SiteCacheInfo - UpdateSiteWithResInfo - Resource : %v", resInfo)
-	klog.Infof("SiteCacheInfo-RequestedResources : %v", n.RequestedResources)
+	klog.Infof("DeductSiteResInfo - Current Status of RequestedResources : %v", n.RequestedResources)
+	klog.Infof("DeductSiteResInfo - Newly Requested Resource : %v", resInfo)
+	klog.Infof("DeductSiteResInfo - Current RegionFlavorMap : %v", regionFlavorMap)
+	for k, v := range regionFlavorMap {
+		klog.Infof("DeductSiteResInfo - RegionFlavorMap: %v, %v", k, v)
+	}
 	var resourceTypes []string
 	for resType, res := range resInfo.CpuAndMem {
 		//binding a pod for the first
@@ -565,6 +572,7 @@ func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo, regionFlavor
 		if resType == "" {
 			resType = string(DefaultResourceType)
 			resourceTypes = append(resourceTypes, resType)
+			klog.Infof("resTypes: %v", resourceTypes)
 		}
 		if len(n.RequestedResources) == 0 {
 			reqRes := types.CPUAndMemory{VCPU: res.VCPU, Memory: res.Memory}
@@ -580,10 +588,11 @@ func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo, regionFlavor
 				reqRes.VCPU += res.VCPU
 				reqRes.Memory += res.Memory
 				n.RequestedResources[resType] = reqRes
+				klog.Infof("DeductSiteResInfo-RequestedResources : %v", n.RequestedResources)
 			}
 		}
 	}
-	klog.Infof("SiteCacheInfo-RequestedStorage : %v", n.RequestedStorage)
+	klog.Infof("SiteCacheInfo-RequestedStorage Before Update : %v", n.RequestedStorage)
 	for volType, used := range resInfo.Storage {
 		reqVol, ok := n.RequestedStorage[volType]
 		if !ok {
@@ -592,9 +601,9 @@ func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo, regionFlavor
 		reqVol += used
 		n.RequestedStorage[volType] = reqVol
 	}
+	klog.Infof("SiteCacheInfo-RequestedStorage After Update: %v", n.RequestedStorage)
 
 	klog.Infof("SiteCacheInfo : %v", n)
-	//n.deductFlavor()
 	n.updateSiteFlavor(resourceTypes, regionFlavorMap)
 	n.generation = nextGeneration()
 	return nil
@@ -609,6 +618,9 @@ global scheduler flavor config file:
 /home/ubuntu/go/src/k8s.io/arktos/conf/flavor_config.yaml
 */
 func (n *SiteCacheInfo) updateSiteFlavor(resourceTypes []string, regionFlavors map[string]*typed.RegionFlavor) {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+
 	if n.AllocatableFlavor == nil {
 		n.AllocatableFlavor = map[string]int64{}
 	}

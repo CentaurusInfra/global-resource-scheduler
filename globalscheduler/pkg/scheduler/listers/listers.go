@@ -43,7 +43,7 @@ type SiteCacheInfoLister interface {
 	// Returns the SiteCacheInfo of the given site ID.
 	Get(siteID string) (*schedulersitecacheinfo.SiteCacheInfo, error)
 	// Return flavor map
-	GetFlavors() (*map[string]*typed.RegionFlavor, bool)
+	GetFlavors() (map[string]*typed.RegionFlavor, error)
 }
 
 // SharedLister groups scheduler-specific listers.
