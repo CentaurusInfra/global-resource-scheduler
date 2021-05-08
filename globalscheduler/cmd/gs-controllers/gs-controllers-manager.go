@@ -27,6 +27,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
 
+	"k8s.io/kubernetes/globalscheduler/controllers"
 	//dispatcher
 	"k8s.io/kubernetes/globalscheduler/controllers/dispatcher"
 	dispatcherclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/client/clientset/versioned"
@@ -91,6 +92,11 @@ func main() {
 		klog.Fatalf("error - building global scheduler cluster apiextensions client: %s", err.Error())
 	}
 
+	// Added allocation crd schema
+	allocationcrd := controllers.CreateAllocationCRD()
+	if err = controllers.CreateCRD(apiextensionsClient, allocationcrd); err != nil {
+		klog.Fatalf("Failed to load allocation crd with the error %v", err)
+	}
 	//6. distributer_server
 	klog.Infof("configure distributor controller")
 	distributorClientset, err := distributorclientset.NewForConfig(config)

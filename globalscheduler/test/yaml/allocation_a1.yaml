@@ -1,0 +1,37 @@
+apiVersion: globalscheduler.com/v1
+kind: Allocation
+metadata:
+  name: a1
+spec:
+  resource_group:
+    name: v1rg
+    resources:
+    - name: "1"
+      resourcetype: vm
+      flavors:
+      - flavorid: c6.large.2
+        spot:
+          maxprice: "1.5"
+          spotdurationhours: 2
+          spotdurationcount: 3
+          interruptionpolicy: immediate
+      storage:
+        sata: 0
+        sas: 0
+        ssd: 0
+      needeip: true
+  selector:
+    geolocation:
+      city: Bellevue
+      province: WA
+      area: NW
+      country: USA
+    regions:
+    - region: NW
+      availabilityzone: []
+    operator: chinamobile
+    strategy:
+      locationstrategy: ""
+  replicas: 2
+status: "Scheduled"
+

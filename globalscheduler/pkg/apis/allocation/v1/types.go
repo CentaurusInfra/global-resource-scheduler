@@ -62,8 +62,8 @@ type Resources struct {
 }
 
 type Flavor struct {
-	FlavorID string `json:"flavor_id,omitempty"` // default value c6.large.2
-	Spot     int64  `json:"spot,omitempty"`
+	FlavorId string `json:"flavor_id,omitempty"` // default value c6.large.2
+	Spot     Spot   `json:"spot,omitempty"`
 }
 
 type Spot struct {
