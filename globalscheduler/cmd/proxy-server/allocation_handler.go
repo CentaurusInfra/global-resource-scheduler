@@ -55,19 +55,25 @@ func NewAllocationHandler() *AllocationHandler {
 
 func (handler *AllocationHandler) getAllocation(w http.ResponseWriter, r *http.Request) (string, error) {
 	namespace, name := getNamespaceAndName(r)
-	allocation, err := handler.clientset.GlobalschedulerV1().Allocations(namespace).Get(name, metav1.GetOptions{})
-	if err != nil {
-		return "", err
-	}
-	allocstr, err := yaml.Marshal(allocation)
-	if err != nil {
-		return "", err
+	var allocstr []byte
+	if name == "" {
+		allocations, err := handler.clientset.GlobalschedulerV1().Allocations(namespace).List(metav1.ListOptions{})
+		if err != nil {
+			return "", nil
+		}
+		allocstr, err = yaml.Marshal(allocations)
+	} else {
+		allocation, err := handler.clientset.GlobalschedulerV1().Allocations(namespace).Get(name, metav1.GetOptions{})
+		if err != nil {
+			return "", err
+		}
+		allocstr, err = yaml.Marshal(allocation)
 	}
 	return string(allocstr), nil
 }
 
 func (handler *AllocationHandler) createAllocation(w http.ResponseWriter, r *http.Request) error {
-	namespace, name := getNamespaceAndName(r)
+	namespace, _ := getNamespaceAndName(r)
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		klog.Errorf("Failed to read allocations with the error %v", err)
@@ -92,11 +98,11 @@ func (handler *AllocationHandler) createAllocation(w http.ResponseWriter, r *htt
 	}
 	watcher := handler.clientset.GlobalschedulerV1().Allocations(namespace).Watch(options)
 	timer := time.NewTimer(TimeOut * time.Second)
-	return handler.watchAllocationStatus(namespace, name, createdAlloc, r.Context(), watcher, timer)
+	return handler.watchAllocationStatus(namespace, createdAlloc.Name, createdAlloc, r.Context(), watcher, timer)
 }
 
 func (handler *AllocationHandler) putAllocation(w http.ResponseWriter, r *http.Request) error {
-	namespace, name := getNamespaceAndName(r)
+	namespace, _ := getNamespaceAndName(r)
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		klog.Errorf("Failed to read allocations with the error %v", err)
@@ -118,16 +124,15 @@ func (handler *AllocationHandler) putAllocation(w http.ResponseWriter, r *http.R
 		TimeoutSeconds:  &duration,
 		Watch:           true,
 		ResourceVersion: updatedAlloc.ResourceVersion,
-		FieldSelector:   fmt.Sprintf("metadata.name=%s", name),
+		FieldSelector:   fmt.Sprintf("metadata.name=%s", updatedAlloc.Name),
 	}
 	watcher := handler.clientset.GlobalschedulerV1().Allocations(namespace).Watch(options)
 	timer := time.NewTimer(TimeOut * time.Second)
-	return handler.watchAllocationStatus(namespace, name, updatedAlloc, r.Context(), watcher, timer)
+	return handler.watchAllocationStatus(namespace, updatedAlloc.Name, updatedAlloc, r.Context(), watcher, timer)
 }
 
 func (handler *AllocationHandler) patchAllocation(w http.ResponseWriter, r *http.Request) error {
 	namespace, name := getNamespaceAndName(r)
-
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		klog.Errorf("Failed to read allocations with the error %v", err)
@@ -140,7 +145,7 @@ func (handler *AllocationHandler) patchAllocation(w http.ResponseWriter, r *http
 	}
 	patchedAlloc, err := handler.clientset.GlobalschedulerV1().Allocations(namespace).Patch(name, types.MergePatchType, []byte(jsonstr))
 	if err != nil {
-		klog.Errorf("There is an error %v in patch application", err)
+		klog.Errorf("There is an error [%v] in patch application", err)
 		return err
 	}
 
@@ -246,13 +251,13 @@ func yaml2Allocation(reqBody []byte) (alloc v1.Allocation, err error) {
 func getNamespaceAndName(r *http.Request) (string, string) {
 	var name, namespace string
 	namespace = "default"
-
-	for k, v := range r.URL.Query() {
-		if k == "name" {
-			name = v[0]
-		} else if k == "namespace" {
-			namespace = v[0]
-		}
+	names, ok := r.URL.Query()["name"]
+	if ok && len(names[0]) > 0 {
+		name = names[0]
+	}
+	namespaces, ok := r.URL.Query()["namespace"]
+	if ok && len(namespaces[0]) > 0 {
+		namespace = namespaces[0]
 	}
 	return namespace, name
 }

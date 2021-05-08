@@ -19,7 +19,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"k8s.io/kubernetes/globalscheduler/controllers"
 	"sync"
 	"time"
 
@@ -28,6 +27,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
 
+	"k8s.io/kubernetes/globalscheduler/controllers"
 	//dispatcher
 	"k8s.io/kubernetes/globalscheduler/controllers/dispatcher"
 	dispatcherclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/dispatcher/client/clientset/versioned"
