@@ -134,6 +134,5 @@ func (s *Snapshot) Get(siteID string) (*schedulersitecacheinfo.SiteCacheInfo, er
 }
 
 func (s *Snapshot) GetFlavors() (map[string]*typed.RegionFlavor, error) {
-	klog.Infof("GetFlavor: %v", s.RegionFlavorMap)
 	return s.RegionFlavorMap, nil
 }

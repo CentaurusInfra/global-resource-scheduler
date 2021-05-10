@@ -101,7 +101,9 @@ const (
 	//Push resource update notification url
 	RegionResourcesURL = "/regionresources"
 
-	//Site-ID delimiter --, e.g.)Region--AZ
-	SiteDelimiter = "--"
+	//SiteID AvailabilityZone delimiter --, e.g.)NE--az1
+	SiteDelimiter   = "--"
+
+	//Region Flavor delimiter, e.g.)NE||42
 	FlavorDelimiter = "||"
 )

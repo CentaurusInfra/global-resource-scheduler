@@ -27,7 +27,6 @@ import (
 func PushSnapshot(req *restful.Request, resp *restful.Response) {
 	resourceReq := new(types.SiteResourceReq)
 	region := req.PathParameter("regionname")
-	klog.Infof("resource %v of region %v is reuested:",resourceReq, region)
 	err := req.ReadEntity(&resourceReq)
 	if err != nil {
 		klog.Errorf("Failed to unmarshall allocation from request body, err: %s", err)
@@ -49,6 +48,5 @@ func PushSnapshot(req *restful.Request, resp *restful.Response) {
 		return
 	}
 	resourceResp := types.SiteResourceRes{Result: "ok"}
-	klog.Infof("PushSnapshot - resourceResp: %v", resourceResp)
 	resp.WriteHeaderAndEntity(http.StatusCreated, resourceResp)
 }

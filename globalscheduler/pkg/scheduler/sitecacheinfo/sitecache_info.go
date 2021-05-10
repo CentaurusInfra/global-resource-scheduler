@@ -237,7 +237,7 @@ func (n *SiteCacheInfo) getSupportFlavorsBySite() []typed.Flavor {
 				continue
 			}
 			flavorExtraSpecs := regionFlv.OsExtraSpecs
-			resTypes := strings.Split(host.ResourceType, "||")
+			resTypes := strings.Split(host.ResourceType, constants.FlavorDelimiter)
 			if utils.IsContain(resTypes, flavorExtraSpecs.ResourceType) {
 				flavorStatus := flavorExtraSpecs.CondOperationStatus
 				azMaps := n.getCondOperationAz(flavorExtraSpecs.CondOperationAz)
@@ -266,7 +266,7 @@ func (n *SiteCacheInfo) getSupportFlavorsBySite() []typed.Flavor {
 func (n *SiteCacheInfo) getTotalResourceByResType(resType string) types.CPUAndMemory {
 	ret := types.CPUAndMemory{}
 	for tempResType, resInfo := range n.TotalResources {
-		tempResTypes := strings.Split(tempResType, "||")
+		tempResTypes := strings.Split(tempResType, constants.FlavorDelimiter)
 		if utils.IsContain(tempResTypes, resType) {
 			ret.VCPU += resInfo.VCPU
 			ret.Memory += resInfo.Memory
@@ -279,7 +279,7 @@ func (n *SiteCacheInfo) getTotalResourceByResType(resType string) types.CPUAndMe
 func (n *SiteCacheInfo) getRequestResourceByResType(resType string) types.CPUAndMemory {
 	ret := types.CPUAndMemory{}
 	for tempResType, resInfo := range n.RequestedResources {
-		tempResTypes := strings.Split(tempResType, "||")
+		tempResTypes := strings.Split(tempResType, constants.FlavorDelimiter)
 		if utils.IsContain(tempResTypes, resType) {
 			ret.VCPU += resInfo.VCPU
 			ret.Memory += resInfo.Memory
@@ -291,7 +291,7 @@ func (n *SiteCacheInfo) getRequestResourceByResType(resType string) types.CPUAnd
 
 func (n *SiteCacheInfo) updateRequestResourceByResType(resType string, res *types.CPUAndMemory) {
 	for tempResType := range n.RequestedResources {
-		tempResTypes := strings.Split(tempResType, "||")
+		tempResTypes := strings.Split(tempResType, constants.FlavorDelimiter)
 		if utils.IsContain(tempResTypes, resType) {
 			delete(n.RequestedResources, tempResType)
 		}
@@ -413,7 +413,7 @@ func (n *SiteCacheInfo) UpdateSiteWithVolumePool(volumePool *typed.RegionVolumeP
 func (n *SiteCacheInfo) UpdateSiteWithResInfo(resInfo types.AllResInfo) error {
 	for resType, res := range resInfo.CpuAndMem {
 		for reqType, reqRes := range n.RequestedResources {
-			resTypes := strings.Split(reqType, "||")
+			resTypes := strings.Split(reqType, constants.FlavorDelimiter)
 			if !utils.IsContain(resTypes, resType) {
 				continue
 			}
@@ -608,7 +608,7 @@ func (n *SiteCacheInfo) updateSiteFlavor(resourceTypes []string, regionFlavors m
 	supportFlavors := n.AllocatableFlavor
 	regionName := utils.GetRegionName(n.Site.SiteID)
 	for flavorid := range supportFlavors {
-		regionFalvorKey := regionName + "||" + flavorid
+		regionFalvorKey := regionName + constants.FlavorDelimiter + flavorid
 		flv := regionFlavors[regionFalvorKey]
 		if flv == nil {
 			n.deductFlavor()

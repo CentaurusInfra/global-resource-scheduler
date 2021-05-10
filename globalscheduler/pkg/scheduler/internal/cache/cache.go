@@ -24,11 +24,12 @@ import (
 	"time"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
 	schedulerlisters "k8s.io/kubernetes/globalscheduler/pkg/scheduler/listers"
 	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/sets"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/wait"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/wait"	
 )
 
 var (
@@ -58,7 +59,7 @@ func (fc *flavorCache) GetFlavor(flavorID string, region string) (*typed.RegionF
 		return value, true
 	}
 
-	value := fc.RegionFlavorMap[region+"||"+flavorID]
+	value := fc.RegionFlavorMap[region+constants.FlavorDelimiter+flavorID]
 	if value == nil {
 		return value, false
 	}
