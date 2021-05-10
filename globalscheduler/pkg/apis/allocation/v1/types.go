@@ -31,7 +31,7 @@ const (
 	AllocationAssigned  AllocationPhase = "Assigned"
 	AllocationBound     AllocationPhase = "Bound"
 	AllocationScheduled AllocationPhase = "Scheduled"
-	AllocationFailed    AllocationPhase = "Scheduled"
+	AllocationFailed    AllocationPhase = "Failed"
 )
 
 // AllocationPhase is a label for the condition of an allocation at the current time.
@@ -75,6 +75,9 @@ type Resources struct {
 	Storage      Volume   `json:"storage,omitempty"`
 	NeedEip      bool     `json:"need_eip,omitempty"`
 	//Count        int      `json:"count,omitempty"` // It is commented because there is a conflict with replicas
+	Image           string `json:"image"`
+	SecurityGroupId string `json:"security_group_id"`
+	NicName         string `json:"nic_name"`
 }
 
 type Flavor struct {

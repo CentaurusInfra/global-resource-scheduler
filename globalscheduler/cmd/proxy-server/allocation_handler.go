@@ -98,7 +98,7 @@ func (handler *AllocationHandler) createAllocation(w http.ResponseWriter, r *htt
 	}
 	watcher := handler.clientset.GlobalschedulerV1().Allocations(namespace).Watch(options)
 	timer := time.NewTimer(TimeOut * time.Second)
-	return handler.watchAllocationStatus(namespace, createdAlloc.Name, createdAlloc, r.Context(), watcher, timer)
+	return handler.watchAllocationPhase(namespace, createdAlloc.Name, createdAlloc, r.Context(), watcher, timer)
 }
 
 func (handler *AllocationHandler) putAllocation(w http.ResponseWriter, r *http.Request) error {
@@ -128,7 +128,7 @@ func (handler *AllocationHandler) putAllocation(w http.ResponseWriter, r *http.R
 	}
 	watcher := handler.clientset.GlobalschedulerV1().Allocations(namespace).Watch(options)
 	timer := time.NewTimer(TimeOut * time.Second)
-	return handler.watchAllocationStatus(namespace, updatedAlloc.Name, updatedAlloc, r.Context(), watcher, timer)
+	return handler.watchAllocationPhase(namespace, updatedAlloc.Name, updatedAlloc, r.Context(), watcher, timer)
 }
 
 func (handler *AllocationHandler) patchAllocation(w http.ResponseWriter, r *http.Request) error {
@@ -158,7 +158,7 @@ func (handler *AllocationHandler) patchAllocation(w http.ResponseWriter, r *http
 	}
 	watcher := handler.clientset.GlobalschedulerV1().Allocations(namespace).Watch(options)
 	timer := time.NewTimer(TimeOut * time.Second)
-	return handler.watchAllocationStatus(namespace, name, patchedAlloc, r.Context(), watcher, timer)
+	return handler.watchAllocationPhase(namespace, name, patchedAlloc, r.Context(), watcher, timer)
 }
 
 func (handler *AllocationHandler) deleteAllocation(w http.ResponseWriter, r *http.Request) error {
@@ -166,7 +166,7 @@ func (handler *AllocationHandler) deleteAllocation(w http.ResponseWriter, r *htt
 	return handler.clientset.GlobalschedulerV1().Allocations(namespace).Delete(name, &metav1.DeleteOptions{})
 }
 
-func (handler *AllocationHandler) watchAllocationStatus(namespace, name string, alloc *v1.Allocation, ctx context.Context, watcher watch.AggregatedWatchInterface, timer *time.Timer) error {
+func (handler *AllocationHandler) watchAllocationPhase(namespace, name string, alloc *v1.Allocation, ctx context.Context, watcher watch.AggregatedWatchInterface, timer *time.Timer) error {
 	defer watcher.Stop()
 	status := string(alloc.Status.Phase)
 	if status == string(corev1.ClusterScheduled) {

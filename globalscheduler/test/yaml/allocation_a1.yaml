@@ -20,6 +20,9 @@ spec:
         sas: 30
         ssd: 40
       need_eip: true
+      image: "0df07567-87a8-4d01-b7d9-c70f91c86427"
+      security_group_id: "0df07567-87a8-4d01-b7d9-c70f91c86427"
+      nic_name: "0df07567-87a8-4d01-b7d9-c70f91c86427"
   selector:
     geo_location:
       city: Bellevue
