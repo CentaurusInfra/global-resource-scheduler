@@ -67,7 +67,7 @@ func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, s
 	//siteSelectedInfo is type of SiteSelectorInfo at cycle_state.go
 	siteSelectedInfo, err := interfaces.GetSiteSelectorState(state, siteID)
 	if err != nil {
-		klog.Errorf("GetSiteSelectorState failed! err: %s", err)
+		klog.Errorf("Gettng site selector state failed! err: %s", err)
 		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %q info failed: %v", siteID, err))
 	}
 	klog.Errorf("GetSiteSelectorState: %v", siteSelectedInfo)
@@ -101,19 +101,16 @@ func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, s
 		//put them all to resInfo
 		resInfo.CpuAndMem[flv.OsExtraSpecs.ResourceType] = reqRes
 	}
-	klog.Infof("Bind - Resource : %v", resInfo)
 	b.handle.Cache().UpdateSiteWithResInfo(siteID, resInfo)
-
-	klog.Infof("Resource Deduction - siteCacheInfo: %v, %v", siteCacheInfo.Site, siteCacheInfo)
 	regionFlavors, err := b.handle.SnapshotSharedLister().SiteCacheInfos().GetFlavors()
-	klog.Infof("DefaultBinder Bind - regionFlavors: %v, %v", regionFlavors, err)
+	if err != nil {
+		klog.Errorf("There is no region's flavor: %s", err)
+		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %q info failed: %v", siteID, err))
+	}
 	if regionFlavors == nil || err != nil {
 		regionFlavors = map[string]*typed.RegionFlavor{}
 	}
-	for k, v := range regionFlavors {
-		klog.Infof("DefaultBinder - RegionFlavors: %v, %v", k, v)
-	}
 	siteCacheInfo.DeductSiteResInfo(resInfo, regionFlavors)
-	klog.Infof("Resource Deduction After: %v", siteCacheInfo)
+	klog.Infof("Resource state after deduction: %v", siteCacheInfo)
 	return nil
 }

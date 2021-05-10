@@ -103,4 +103,5 @@ const (
 
 	//Site-ID delimiter --, e.g.)Region--AZ
 	SiteDelimiter = "--"
+	FlavorDelimiter = "||"
 )

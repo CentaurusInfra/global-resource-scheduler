@@ -914,7 +914,7 @@ func (sched *Scheduler) UpdateFlavor() error {
 
 //This function updates sites' flavor
 func (sched *Scheduler) UpdateRegionFlavor(region string, flavorId string) (err error) {
-	regionFlavorId := region + "||" + flavorId
+	regionFlavorId := region + constants.FlavorDelimiter + flavorId
 	flavor := sched.siteCacheInfoSnapshot.FlavorMap[flavorId]
 	if sched.siteCacheInfoSnapshot.RegionFlavorMap == nil {
 		sched.siteCacheInfoSnapshot.RegionFlavorMap = make(map[string]*typed.RegionFlavor)

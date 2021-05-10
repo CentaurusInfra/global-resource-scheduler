@@ -411,8 +411,6 @@ func (n *SiteCacheInfo) UpdateSiteWithVolumePool(volumePool *typed.RegionVolumeP
 
 // UpdateSiteWithResInfo update res info
 func (n *SiteCacheInfo) UpdateSiteWithResInfo(resInfo types.AllResInfo) error {
-	klog.Infof("SiteCacheInfo - UpdateSiteWithResInfo - Resource : %v", resInfo)
-	klog.Infof("SiteCacheInfo-RequestedResources : %v", n.RequestedResources)
 	for resType, res := range resInfo.CpuAndMem {
 		for reqType, reqRes := range n.RequestedResources {
 			resTypes := strings.Split(reqType, "||")
@@ -425,7 +423,6 @@ func (n *SiteCacheInfo) UpdateSiteWithResInfo(resInfo types.AllResInfo) error {
 			n.RequestedResources[reqType] = reqRes
 		}
 	}
-	klog.Infof("SiteCacheInfo-RequestedStorage : %v", n.RequestedStorage)
 	for volType, used := range resInfo.Storage {
 		reqVol, ok := n.RequestedStorage[volType]
 		if !ok {
@@ -435,8 +432,6 @@ func (n *SiteCacheInfo) UpdateSiteWithResInfo(resInfo types.AllResInfo) error {
 		reqVol += used
 		n.RequestedStorage[volType] = reqVol
 	}
-
-	klog.Infof("SiteCacheInfo : %v", n)
 	n.updateFlavor()
 
 	n.generation = nextGeneration()
@@ -559,40 +554,29 @@ func GetStackKey(stack *types.Stack) (string, error) {
 
 // DeductSiteResInfo deduct site's resource info
 func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo, regionFlavorMap map[string]*typed.RegionFlavor) error {
-	klog.Infof("DeductSiteResInfo - Current Status of RequestedResources : %v", n.RequestedResources)
-	klog.Infof("DeductSiteResInfo - Newly Requested Resource : %v", resInfo)
-	klog.Infof("DeductSiteResInfo - Current RegionFlavorMap : %v", regionFlavorMap)
-	for k, v := range regionFlavorMap {
-		klog.Infof("DeductSiteResInfo - RegionFlavorMap: %v, %v", k, v)
-	}
 	var resourceTypes []string
 	for resType, res := range resInfo.CpuAndMem {
 		//binding a pod for the first
-		klog.Infof("resType, res: %v, %v", resType, res)
 		if resType == "" {
 			resType = string(DefaultResourceType)
 			resourceTypes = append(resourceTypes, resType)
-			klog.Infof("resTypes: %v", resourceTypes)
 		}
 		if len(n.RequestedResources) == 0 {
 			reqRes := types.CPUAndMemory{VCPU: res.VCPU, Memory: res.Memory}
 			n.RequestedResources[resType] = &reqRes
 		} else {
 			for reqType, reqRes := range n.RequestedResources {
-				resTypes := strings.Split(reqType, "||")
+				resTypes := strings.Split(reqType, constants.FlavorDelimiter)
 				if !utils.IsContain(resTypes, resType) {
-					klog.Infof("!utils.IsContain111: %v", !utils.IsContain(resTypes, resType))
+					klog.Infof("!utils.IsContain: %v", !utils.IsContain(resTypes, resType))
 					continue
 				}
-				klog.Infof("!utils.IsContain222: %v", !utils.IsContain(resTypes, resType))
 				reqRes.VCPU += res.VCPU
 				reqRes.Memory += res.Memory
 				n.RequestedResources[resType] = reqRes
-				klog.Infof("DeductSiteResInfo-RequestedResources : %v", n.RequestedResources)
 			}
 		}
 	}
-	klog.Infof("SiteCacheInfo-RequestedStorage Before Update : %v", n.RequestedStorage)
 	for volType, used := range resInfo.Storage {
 		reqVol, ok := n.RequestedStorage[volType]
 		if !ok {
@@ -601,9 +585,6 @@ func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo, regionFlavor
 		reqVol += used
 		n.RequestedStorage[volType] = reqVol
 	}
-	klog.Infof("SiteCacheInfo-RequestedStorage After Update: %v", n.RequestedStorage)
-
-	klog.Infof("SiteCacheInfo : %v", n)
 	n.updateSiteFlavor(resourceTypes, regionFlavorMap)
 	n.generation = nextGeneration()
 	return nil
@@ -611,7 +592,7 @@ func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo, regionFlavor
 
 /*
 updateSiteFlavor() is equal with updateFlavor() functionally.
-But dueto the difference between flavor files and data,
+But due to the difference between flavor files and data,
 it is not possible to perform updateFlavor().
 updateFlavor(): /home/ubuntu/go/src/k8s.io/arktos/conf/flavors.json
 global scheduler flavor config file:
@@ -625,8 +606,6 @@ func (n *SiteCacheInfo) updateSiteFlavor(resourceTypes []string, regionFlavors m
 		n.AllocatableFlavor = map[string]int64{}
 	}
 	supportFlavors := n.AllocatableFlavor
-	klog.Infof("updateSiteFlavor - supportFlavors : %v", supportFlavors)
-	klog.Infof("updateSiteFlavor before- AllocatableFlavor, RequestedFlavor : %v, %v", n.AllocatableFlavor, n.RequestedFlavor)
 	regionName := utils.GetRegionName(n.Site.SiteID)
 	for flavorid := range supportFlavors {
 		regionFalvorKey := regionName + "||" + flavorid
@@ -635,7 +614,6 @@ func (n *SiteCacheInfo) updateSiteFlavor(resourceTypes []string, regionFlavors m
 			n.deductFlavor()
 			return
 		}
-		klog.Infof("updateSiteFlavor - flv : %v", flv)
 		vCPUInt, err := strconv.ParseInt(flv.Vcpus, 10, 64)
 		if err != nil {
 			n.deductFlavor()
@@ -644,7 +622,6 @@ func (n *SiteCacheInfo) updateSiteFlavor(resourceTypes []string, regionFlavors m
 		for _, resourceType := range resourceTypes {
 			totalRes := n.TotalResources[resourceType]
 			requestRes := n.RequestedResources[resourceType]
-			klog.Infof("updateSiteFlavor - vCPUInt, totalRes, requestRes : %v, %v,%v", vCPUInt, totalRes, requestRes)
 			if totalRes == nil {
 				n.deductFlavor()
 				return
@@ -664,14 +641,12 @@ func (n *SiteCacheInfo) updateSiteFlavor(resourceTypes []string, regionFlavors m
 			}
 		}
 	}
-	klog.Infof("updateSiteFlavor after- AllocatableFlavor, RequestedFlavor : %v, %v", n.AllocatableFlavor, n.RequestedFlavor)
 }
 
 func (n *SiteCacheInfo) deductFlavor() {
 	if n.AllocatableFlavor == nil {
 		n.AllocatableFlavor = map[string]int64{}
 	}
-	klog.Infof("deductFlavor before - AllocatableFlavor, RequestedFlavor : %v, %v", n.AllocatableFlavor, n.RequestedFlavor)
 	for key, value := range n.AllocatableFlavor {
 		n.AllocatableFlavor[key] = value - 1
 		if n.RequestedFlavor == nil {
@@ -684,6 +659,4 @@ func (n *SiteCacheInfo) deductFlavor() {
 			n.RequestedFlavor[key] = requested + 1
 		}
 	}
-	klog.Infof("deductFlavor after- AllocatableFlavor, RequestedFlavor : %v, %v", n.AllocatableFlavor, n.RequestedFlavor)
-
 }

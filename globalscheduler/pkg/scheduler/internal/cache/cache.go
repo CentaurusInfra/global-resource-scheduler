@@ -58,8 +58,6 @@ func (fc *flavorCache) GetFlavor(flavorID string, region string) (*typed.RegionF
 		return value, true
 	}
 
-	// region != ""
-	//value := fc.RegionFlavorMap[region+"--"+flavorID]
 	value := fc.RegionFlavorMap[region+"||"+flavorID]
 	if value == nil {
 		return value, false

@@ -262,7 +262,7 @@ func GetRegionName(siteID string) string {
 	if siteID == "" {
 		return ""
 	}
-	szString := strings.Split(siteID, "--")
+	szString := strings.Split(siteID, constants.SiteDelimiter)
 	if len(szString) == 0 {
 		return ""
 	}
