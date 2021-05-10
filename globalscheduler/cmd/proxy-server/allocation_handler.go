@@ -168,7 +168,7 @@ func (handler *AllocationHandler) deleteAllocation(w http.ResponseWriter, r *htt
 
 func (handler *AllocationHandler) watchAllocationStatus(namespace, name string, alloc *v1.Allocation, ctx context.Context, watcher watch.AggregatedWatchInterface, timer *time.Timer) error {
 	defer watcher.Stop()
-	status := string(alloc.Status)
+	status := string(alloc.Status.Phase)
 	if status == string(corev1.ClusterScheduled) {
 		return nil
 	}
@@ -177,7 +177,7 @@ func (handler *AllocationHandler) watchAllocationStatus(namespace, name string, 
 		case event := <-watcher.ResultChan():
 			allocObj, ok := event.Object.(*v1.Allocation)
 			if ok {
-				status = string(allocObj.Status)
+				status = string(allocObj.Status.Phase)
 				if status == string(corev1.ClusterScheduled) {
 					return nil
 				}

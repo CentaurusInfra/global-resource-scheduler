@@ -21,14 +21,21 @@ import (
 )
 
 const (
-	GroupName string = "globalscheduler.com"
-	Kind      string = "Allocation"
-	Version   string = "v1"
-	Plural    string = "allocations"
-	Singluar  string = "allocation"
-	ShortName string = "alloc"
-	Name      string = Plural + "." + GroupName
+	GroupName           string          = "globalscheduler.com"
+	Kind                string          = "Allocation"
+	Version             string          = "v1"
+	Plural              string          = "allocations"
+	Singluar            string          = "allocation"
+	ShortName           string          = "alloc"
+	Name                string          = Plural + "." + GroupName
+	AllocationAssigned  AllocationPhase = "Assigned"
+	AllocationBound     AllocationPhase = "Bound"
+	AllocationScheduled AllocationPhase = "Scheduled"
+	AllocationFailed    AllocationPhase = "Scheduled"
 )
+
+// AllocationPhase is a label for the condition of an allocation at the current time.
+type AllocationPhase string
 
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -36,8 +43,8 @@ const (
 type Allocation struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              AllocationSpec `json:"spec"`
-	Status            string         `json:"status"`
+	Spec              AllocationSpec   `json:"spec"`
+	Status            AllocationStatus `json:"status"`
 }
 
 // AllocationSpec is the spec for an allocation resource.
@@ -45,6 +52,15 @@ type AllocationSpec struct {
 	ResourceGroup ResourceGroup `json:"resource_group"`
 	Selector      Selector      `json:"selector"`
 	Replicas      int           `json:"replicas"` // min value 1, default value 1
+}
+
+// AllocationStatus is the status for an allocation resource.
+type AllocationStatus struct {
+	Phase           AllocationPhase `json:"phase"`
+	DistributorName string          `json:"distributor_name"`
+	DispatcherName  string          `json:"dispatcher_name"`
+	SchedulerName   string          `json:"scheduler_name"`
+	ClusterNames    []string        `json:"cluster_names"`
 }
 
 type ResourceGroup struct {
