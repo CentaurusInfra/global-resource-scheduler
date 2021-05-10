@@ -29,7 +29,7 @@ import (
 	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/sets"
-	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/wait"	
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils/wait"
 )
 
 var (
