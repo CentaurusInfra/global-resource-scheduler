@@ -345,7 +345,7 @@ func (p *Process) initAllocationInformers(start, end int64) cache.SharedIndexInf
 	return allocInformer
 }
 
-// ScheduleOne is to process pods by assign a scheduler to it
+// ScheduleAllocation is to process an allocation by assigning a scheduler to it
 func (p *Process) ScheduleAllocation(alloc *allocv1.Allocation) {
 	if alloc != nil {
 		klog.V(4).Infof("Found an allocation %v-%v to schedule:", alloc.Namespace, alloc.Name)
@@ -362,6 +362,7 @@ func (p *Process) ScheduleAllocation(alloc *allocv1.Allocation) {
 		alloc.Status.ClusterNames = []string{}
 		if _, err := p.allocClientset.GlobalschedulerV1().Allocations(alloc.Namespace).Update(alloc); err != nil {
 			klog.Warningf("Failed to assign scheduler %v to allocation %v with the error %vs", scheduler, alloc, err)
+			//Just make changes to status to see if the failure is related to status.phase
 			alloc.Status.Phase = allocv1.AllocationFailed
 			if _, err = p.allocClientset.GlobalschedulerV1().Allocations(alloc.Namespace).Update(alloc); err != nil {
 				klog.Warningf("Failed to update allocation %v - %v status to failed", alloc.Namespace, alloc.Name)
@@ -373,12 +374,12 @@ func (p *Process) ScheduleAllocation(alloc *allocv1.Allocation) {
 	}
 }
 
-func (p *Process) findScheduler(alloc *allocv1.Allocation) (string, error) {
+func (p *Process) findScheduler(allocation *allocv1.Allocation) (string, error) {
 	filteredSchedulers := make([]schedulerv1.Scheduler, 0)
 	for _, scheduler := range p.schedulers {
 		klog.V(4).Infof("The current scheduler is %s", scheduler.Name)
 		for _, geoLocation := range scheduler.Spec.Union.GeoLocation {
-			if isAllocationGeoLocationMatched(geoLocation, alloc.Spec.Selector.GeoLocation) {
+			if isAllocationGeoLocationMatched(geoLocation, allocation.Spec.Selector.GeoLocation) {
 				filteredSchedulers = append(filteredSchedulers, scheduler)
 				klog.V(4).Infof("The matched scheduler is %s", scheduler.Name)
 				break
