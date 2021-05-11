@@ -256,3 +256,15 @@ func GetStackFullName(stack *types.Stack) string {
 	// (DNS subdomain format).
 	return stack.PodName + "_" + stack.PodNamespace
 }
+
+// Get Region from SiteID which is Region--AZ
+func GetRegionName(siteID string) string {
+	if siteID == "" {
+		return ""
+	}
+	szString := strings.Split(siteID, constants.SiteDelimiter)
+	if len(szString) == 0 {
+		return ""
+	}
+	return szString[0]
+}

@@ -24,6 +24,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"sync/atomic"
 
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/informers"
@@ -32,6 +33,11 @@ import (
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
+)
+
+const (
+	//DefaultWorkers = 1
+	DefaultResourceType = "vm" //currently resourceType is vm, but it should support other types
 )
 
 var (
@@ -86,6 +92,8 @@ type SiteCacheInfo struct {
 	// Whenever SiteCacheInfo changes, generation is bumped.
 	// This is used to avoid cloning it if the object didn't change.
 	generation int64
+
+	mu sync.RWMutex
 }
 
 // GetGeneration returns the generation on this Site.
@@ -229,7 +237,7 @@ func (n *SiteCacheInfo) getSupportFlavorsBySite() []typed.Flavor {
 				continue
 			}
 			flavorExtraSpecs := regionFlv.OsExtraSpecs
-			resTypes := strings.Split(host.ResourceType, "||")
+			resTypes := strings.Split(host.ResourceType, constants.FlavorDelimiter)
 			if utils.IsContain(resTypes, flavorExtraSpecs.ResourceType) {
 				flavorStatus := flavorExtraSpecs.CondOperationStatus
 				azMaps := n.getCondOperationAz(flavorExtraSpecs.CondOperationAz)
@@ -258,7 +266,7 @@ func (n *SiteCacheInfo) getSupportFlavorsBySite() []typed.Flavor {
 func (n *SiteCacheInfo) getTotalResourceByResType(resType string) types.CPUAndMemory {
 	ret := types.CPUAndMemory{}
 	for tempResType, resInfo := range n.TotalResources {
-		tempResTypes := strings.Split(tempResType, "||")
+		tempResTypes := strings.Split(tempResType, constants.FlavorDelimiter)
 		if utils.IsContain(tempResTypes, resType) {
 			ret.VCPU += resInfo.VCPU
 			ret.Memory += resInfo.Memory
@@ -271,7 +279,7 @@ func (n *SiteCacheInfo) getTotalResourceByResType(resType string) types.CPUAndMe
 func (n *SiteCacheInfo) getRequestResourceByResType(resType string) types.CPUAndMemory {
 	ret := types.CPUAndMemory{}
 	for tempResType, resInfo := range n.RequestedResources {
-		tempResTypes := strings.Split(tempResType, "||")
+		tempResTypes := strings.Split(tempResType, constants.FlavorDelimiter)
 		if utils.IsContain(tempResTypes, resType) {
 			ret.VCPU += resInfo.VCPU
 			ret.Memory += resInfo.Memory
@@ -283,7 +291,7 @@ func (n *SiteCacheInfo) getRequestResourceByResType(resType string) types.CPUAnd
 
 func (n *SiteCacheInfo) updateRequestResourceByResType(resType string, res *types.CPUAndMemory) {
 	for tempResType := range n.RequestedResources {
-		tempResTypes := strings.Split(tempResType, "||")
+		tempResTypes := strings.Split(tempResType, constants.FlavorDelimiter)
 		if utils.IsContain(tempResTypes, resType) {
 			delete(n.RequestedResources, tempResType)
 		}
@@ -405,7 +413,7 @@ func (n *SiteCacheInfo) UpdateSiteWithVolumePool(volumePool *typed.RegionVolumeP
 func (n *SiteCacheInfo) UpdateSiteWithResInfo(resInfo types.AllResInfo) error {
 	for resType, res := range resInfo.CpuAndMem {
 		for reqType, reqRes := range n.RequestedResources {
-			resTypes := strings.Split(reqType, "||")
+			resTypes := strings.Split(reqType, constants.FlavorDelimiter)
 			if !utils.IsContain(resTypes, resType) {
 				continue
 			}
@@ -415,7 +423,6 @@ func (n *SiteCacheInfo) UpdateSiteWithResInfo(resInfo types.AllResInfo) error {
 			n.RequestedResources[reqType] = reqRes
 		}
 	}
-
 	for volType, used := range resInfo.Storage {
 		reqVol, ok := n.RequestedStorage[volType]
 		if !ok {
@@ -425,7 +432,6 @@ func (n *SiteCacheInfo) UpdateSiteWithResInfo(resInfo types.AllResInfo) error {
 		reqVol += used
 		n.RequestedStorage[volType] = reqVol
 	}
-
 	n.updateFlavor()
 
 	n.generation = nextGeneration()
@@ -544,4 +550,113 @@ func GetStackKey(stack *types.Stack) (string, error) {
 		return "", errors.New("Cannot get cache key for stack with empty UID")
 	}
 	return uid, nil
+}
+
+// DeductSiteResInfo deduct site's resource info
+func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo, regionFlavorMap map[string]*typed.RegionFlavor) error {
+	var resourceTypes []string
+	for resType, res := range resInfo.CpuAndMem {
+		//binding a pod for the first
+		if resType == "" {
+			resType = string(DefaultResourceType)
+			resourceTypes = append(resourceTypes, resType)
+		}
+		if len(n.RequestedResources) == 0 {
+			reqRes := types.CPUAndMemory{VCPU: res.VCPU, Memory: res.Memory}
+			n.RequestedResources[resType] = &reqRes
+		} else {
+			for reqType, reqRes := range n.RequestedResources {
+				resTypes := strings.Split(reqType, constants.FlavorDelimiter)
+				if !utils.IsContain(resTypes, resType) {
+					klog.Infof("!utils.IsContain: %v", !utils.IsContain(resTypes, resType))
+					continue
+				}
+				reqRes.VCPU += res.VCPU
+				reqRes.Memory += res.Memory
+				n.RequestedResources[resType] = reqRes
+			}
+		}
+	}
+	for volType, used := range resInfo.Storage {
+		reqVol, ok := n.RequestedStorage[volType]
+		if !ok {
+			reqVol = 0
+		}
+		reqVol += used
+		n.RequestedStorage[volType] = reqVol
+	}
+	n.updateSiteFlavor(resourceTypes, regionFlavorMap)
+	n.generation = nextGeneration()
+	return nil
+}
+
+/*
+updateSiteFlavor() is equal with updateFlavor() functionally.
+But due to the difference between flavor files and data,
+it is not possible to perform updateFlavor().
+updateFlavor(): /home/ubuntu/go/src/k8s.io/arktos/conf/flavors.json
+global scheduler flavor config file:
+/home/ubuntu/go/src/k8s.io/arktos/conf/flavor_config.yaml
+*/
+func (n *SiteCacheInfo) updateSiteFlavor(resourceTypes []string, regionFlavors map[string]*typed.RegionFlavor) {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+
+	if n.AllocatableFlavor == nil {
+		n.AllocatableFlavor = map[string]int64{}
+	}
+	supportFlavors := n.AllocatableFlavor
+	regionName := utils.GetRegionName(n.Site.SiteID)
+	for flavorid := range supportFlavors {
+		regionFalvorKey := regionName + constants.FlavorDelimiter + flavorid
+		flv := regionFlavors[regionFalvorKey]
+		if flv == nil {
+			n.deductFlavor()
+			return
+		}
+		vCPUInt, err := strconv.ParseInt(flv.Vcpus, 10, 64)
+		if err != nil {
+			n.deductFlavor()
+			return
+		}
+		for _, resourceType := range resourceTypes {
+			totalRes := n.TotalResources[resourceType]
+			requestRes := n.RequestedResources[resourceType]
+			if totalRes == nil {
+				n.deductFlavor()
+				return
+			} else if requestRes == nil {
+				requestRes = &types.CPUAndMemory{VCPU: 0, Memory: 0}
+			}
+			count := (totalRes.VCPU - requestRes.VCPU) / vCPUInt
+			memCount := (totalRes.Memory - requestRes.Memory) / flv.Ram
+			if count > memCount {
+				count = memCount
+			}
+			if _, ok := n.AllocatableFlavor[flavorid]; !ok {
+				n.AllocatableFlavor[flavorid] = 0
+			}
+			if n.AllocatableFlavor[flavorid] > count {
+				n.AllocatableFlavor[flavorid] = count
+			}
+		}
+	}
+}
+
+func (n *SiteCacheInfo) deductFlavor() {
+	if n.AllocatableFlavor == nil {
+		n.AllocatableFlavor = map[string]int64{}
+	}
+	for key, value := range n.AllocatableFlavor {
+		n.AllocatableFlavor[key] = value - 1
+		if n.RequestedFlavor == nil {
+			n.RequestedFlavor = make(map[string]int64)
+		}
+		requested, ok := n.RequestedFlavor[key]
+		if !ok {
+			n.RequestedFlavor[key] = 1
+		} else {
+			n.RequestedFlavor[key] = requested + 1
+		}
+	}
 }

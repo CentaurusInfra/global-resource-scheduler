@@ -156,3 +156,7 @@ func (s *Snapshot) Get(siteID string) (*schedulersitecacheinfo.SiteCacheInfo, er
 	}
 	return nil, fmt.Errorf("sitecacheinfo not found for site ID %q", siteID)
 }
+
+func (s *Snapshot) GetFlavors() (map[string]*typed.RegionFlavor, error) {
+	return s.RegionFlavorMap, nil
+}
