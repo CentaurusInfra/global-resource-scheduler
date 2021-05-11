@@ -9,30 +9,31 @@ spec:
       - name: "1"
         resource_type: vm
         flavors:
-          - flavor_id: c6.large.2
+          - flavor_id: "42"
             spot:
               max_price: "1.5"
               spot_duration_hours: 2
               spot_duration_count: 3
               interruption_policy: immediate
-        stroage:
+        storage:
           sata: 50
           sas: 60
           ssd: 70
         need_eip: true
+        image: "0df07567-87a8-4d01-b7d9-c70f91c86427"
+        security_group_id: "0df07567-87a8-4d01-b7d9-c70f91c86427"
+        nic_name: "0df07567-87a8-4d01-b7d9-c70f91c86427"
   selector:
     geo_location:
       city: Bellevue
-      province: WA
-      area: NW
-      country: USA
+      province: Washington
+      area: NW-1
+      country: US
     regions:
-      - region: NW
-        availablity_zone:
-          - nw1
-          - nw2
+      - region: "NW-1"
+        availability_zone: ["production-az"]
     operator: chinamobile
-    stratgy:
+    strategy:
       location_strategy: discrete
   replicas: 2
 ---
@@ -53,23 +54,24 @@ spec:
               spot_duration_hours: 3
               spot_duration_count: 4
               interruption_policy: immediate
-        stroage:
+        storage:
           sata: 80
           sas: 90
           ssd: 100
-        needEip: false
+        need_eip: false
+        image: "0df07567-87a8-4d01-b7d9-c70f91c86427"
+        security_group_id: "0df07567-87a8-4d01-b7d9-c70f91c86427"
+        nic_name: "0df07567-87a8-4d01-b7d9-c70f91c86427"
   selector:
     geo_location:
       city: NewYork
-      province: NY
-      area: NE
-      country: USA
+      province: NewYork
+      area: NE-1
+      country: US
     regions:
-      - region: NE
-        availablity_zone:
-          - ne1
-          - ne2
+      - region: "NE-1"
+        availability_zone: ["production-az"]
     operator: chinatelecom
-    stratgy:
+    strategy:
       location_strategy: centralize
   replicas: 1

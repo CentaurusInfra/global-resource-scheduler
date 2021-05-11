@@ -7,31 +7,38 @@ spec:
     name: v1rg
     resources:
     - name: "1"
-      resourcetype: vm
+      resource_type: vm
       flavors:
-      - flavorid: c6.large.2
+      - flavor_id: c6.large.2
         spot:
-          maxprice: "1.5"
-          spotdurationhours: 2
-          spotdurationcount: 3
-          interruptionpolicy: immediate
+          max_price: "1.5"
+          spot_duration_hours: 2
+          spot_duration_count: 3
+          interruption_policy: immediate
       storage:
-        sata: 0
-        sas: 0
-        ssd: 0
-      needeip: true
+        sata: 20
+        sas: 30
+        ssd: 40
+      need_eip: true
+      image: "0df07567-87a8-4d01-b7d9-c70f91c86427"
+      security_group_id: "0df07567-87a8-4d01-b7d9-c70f91c86427"
+      nic_name: "0df07567-87a8-4d01-b7d9-c70f91c86427"
   selector:
-    geolocation:
+    geo_location:
       city: Bellevue
       province: WA
       area: NW
       country: USA
     regions:
     - region: NW
-      availabilityzone: []
+      availability_zone: ["x", "y"]
     operator: chinamobile
     strategy:
-      locationstrategy: ""
+      location_strategy: "center"
   replicas: 2
-status: "Scheduled"
-
+status: 
+  phase: Scheduled
+  scheduler_name: a
+  distributor_name: b
+  dispatcher_name: c
+  cluster_names: ["d", "e"]

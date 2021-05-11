@@ -124,8 +124,10 @@ type crConverter struct {
 
 func (c *crConverter) ConvertFieldLabel(gvk schema.GroupVersionKind, label, value string) (string, string, error) {
 	// We currently only support metadata.hashkey, metadata.ownerReferences.*(Kind), metadata.namespace and metadata.name.
+	// Added status.phase, status.distributorName, status.schedulerName, status.dispatcherName, and status.clusterName
 	switch {
-	case label == "metadata.name" || label == "metadata.hashkey":
+	case label == "metadata.name" || label == "metadata.hashkey" || label == "status.phase" || label == "status.distributor_name" ||
+		label == "status.scheduler_name" || label == "status.dispatcher_name" || label == "status.cluster_name":
 		return label, value, nil
 	case !c.clusterScoped && !c.tenantScoped && label == "metadata.namespace":
 		return label, value, nil

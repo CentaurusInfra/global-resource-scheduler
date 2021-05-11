@@ -118,53 +118,40 @@ func CreateAllocationCRD() *apiextv1beta1.CustomResourceDefinition {
 												Schema: &apiextv1beta1.JSONSchemaProps{
 													Type: "object",
 													Properties: map[string]apiextv1beta1.JSONSchemaProps{
-														"name":           {Type: "string"},
-														"resourcee_type": {Type: "string"},
-														"resources": {
+														"name":          {Type: "string"},
+														"resource_type": {Type: "string"},
+														"flavors": {
 															Type: "array",
 															Items: &apiextv1beta1.JSONSchemaPropsOrArray{
 																Schema: &apiextv1beta1.JSONSchemaProps{
 																	Type: "object",
 																	Properties: map[string]apiextv1beta1.JSONSchemaProps{
-																		"name": {Type: "string"},
-																		"flavors": {
-																			Type: "array",
-																			Items: &apiextv1beta1.JSONSchemaPropsOrArray{
-																				Schema: &apiextv1beta1.JSONSchemaProps{
-																					Type: "object",
-																					Properties: map[string]apiextv1beta1.JSONSchemaProps{
-																						"flavor_id": {Type: "string"},
-																						"spot": {
-																							Type: "array",
-																							Items: &apiextv1beta1.JSONSchemaPropsOrArray{
-																								Schema: &apiextv1beta1.JSONSchemaProps{
-																									Type: "object",
-																									Properties: map[string]apiextv1beta1.JSONSchemaProps{
-																										"max_price":           {Type: "string"},
-																										"spot_duration_hours": {Type: "double"},
-																										"spot_duration_count": {Type: "double"},
-																										"interruption_policy": {Type: "string"},
-																									},
-																								},
-																							},
-																						},
-																					},
-																				},
-																			},
-																		},
-																		"storage": {
+																		"flavor_id": {Type: "string"},
+																		"spot": {
 																			Type: "object",
 																			Properties: map[string]apiextv1beta1.JSONSchemaProps{
-																				"sata": {Type: "string"},
-																				"sas":  {Type: "integer"},
-																				"ssd":  {Type: "string"},
+																				"max_price":           {Type: "string"},
+																				"spot_duration_hours": {Type: "integer"},
+																				"spot_duration_count": {Type: "integer"},
+																				"interruption_policy": {Type: "string"},
 																			},
 																		},
-																		"need_eip": {Type: "boolean"},
 																	},
 																},
 															},
 														},
+														"storage": {
+															Type: "object",
+															Properties: map[string]apiextv1beta1.JSONSchemaProps{
+																"sata": {Type: "integer"},
+																"sas":  {Type: "integer"},
+																"ssd":  {Type: "integer"},
+															},
+														},
+														"need_eip":          {Type: "boolean"},
+														"image":             {Type: "string"},
+														"security_group_id": {Type: "string"},
+														"nic_name":          {Type: "string"},
 													},
 												},
 											},
@@ -183,7 +170,7 @@ func CreateAllocationCRD() *apiextv1beta1.CustomResourceDefinition {
 												"country":  {Type: "string"},
 											},
 										},
-										"region": {
+										"regions": {
 											Type: "array",
 											Items: &apiextv1beta1.JSONSchemaPropsOrArray{
 												Schema: &apiextv1beta1.JSONSchemaProps{
@@ -212,8 +199,69 @@ func CreateAllocationCRD() *apiextv1beta1.CustomResourceDefinition {
 								"replicas": {Type: "integer"},
 							},
 						},
-						"status": {Type: "string"},
+						"status": {
+							Type: "object",
+							Properties: map[string]apiextv1beta1.JSONSchemaProps{
+								"phase":            {Type: "string"},
+								"distributor_name": {Type: "string"},
+								"dispatcher_name":  {Type: "string"},
+								"scheduler_name":   {Type: "string"},
+								"cluster_names": {
+									Type: "array",
+									Items: &apiextv1beta1.JSONSchemaPropsOrArray{
+										Schema: &apiextv1beta1.JSONSchemaProps{Type: "string"},
+									},
+								},
+							},
+						},
 					},
+				},
+			},
+			AdditionalPrinterColumns: []apiextv1beta1.CustomResourceColumnDefinition{
+				{
+					Name:     "hashkey",
+					Type:     "string",
+					JSONPath: ".metadata.hashKey",
+				},
+				{
+					Name:     "city",
+					Type:     "string",
+					JSONPath: ".spec.selector.geo_location.city",
+				},
+				{
+					Name:     "province",
+					Type:     "string",
+					JSONPath: ".spec.selector.geo_location.province",
+				},
+				{
+					Name:     "area",
+					Type:     "string",
+					JSONPath: ".spec.selector.geo_location.area",
+				},
+				{
+					Name:     "country",
+					Type:     "string",
+					JSONPath: ".spec.selector.geo_location.country",
+				},
+				{
+					Name:     "status",
+					Type:     "string",
+					JSONPath: ".status.phase",
+				},
+				{
+					Name:     "distributor",
+					Type:     "string",
+					JSONPath: ".status.distributor_name",
+				},
+				{
+					Name:     "scheduler",
+					Type:     "string",
+					JSONPath: ".status.scheduler_name",
+				},
+				{
+					Name:     "dispatcher",
+					Type:     "string",
+					JSONPath: ".status.dispatcher_name",
 				},
 			},
 		},
