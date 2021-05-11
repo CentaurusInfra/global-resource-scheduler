@@ -27,6 +27,8 @@ import (
 	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/cmd/conf"
 	"k8s.io/kubernetes/globalscheduler/controllers/util"
+	allocclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/allocation/client/clientset/versioned"
+	allocv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/allocation/v1"
 	clustercrdv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 	distributortype "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor"
 	distributorclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/distributor/client/clientset/versioned"
@@ -47,6 +49,7 @@ type predicateFunc func(scheduler schedulerv1.Scheduler, pod *v1.Pod) bool
 type Process struct {
 	namespace            string
 	name                 string
+	allocClientset       *allocclientset.Clientset
 	distributorClientset *distributorclientset.Clientset
 	schedulerClientset   *schedulerclientset.Clientset
 	schedulers           []schedulerv1.Scheduler
@@ -61,6 +64,10 @@ type Process struct {
 func NewProcess(config *rest.Config, namespace string, name string, quit chan struct{}) Process {
 	podQueue := make(chan *v1.Pod, 300)
 
+	allocClientset, err := allocclientset.NewForConfig(config)
+	if err != nil {
+		klog.Fatal(err)
+	}
 	distributorClientset, err := distributorclientset.NewForConfig(config)
 	if err != nil {
 		klog.Fatal(err)
@@ -89,6 +96,7 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		namespace:            namespace,
 		name:                 name,
 		clientset:            clientset,
+		allocClientset:       allocClientset,
 		distributorClientset: distributorClientset,
 		schedulerClientset:   schedulerClientset,
 		podQueue:             podQueue,
@@ -178,6 +186,8 @@ func (p *Process) Run(quit chan struct{}) {
 	go schedulerInformer.Run(quit)
 	podInformer := p.initPodInformers(p.rangeStart, p.rangeEnd)
 	go podInformer.Run(quit)
+	allocInformer := p.initAllocationInformers(p.rangeStart, p.rangeEnd)
+	go allocInformer.Run(quit)
 	go distributorInformer.Run(quit)
 
 	<-quit
@@ -305,6 +315,98 @@ func matchGeoLocation(geoLocation *clustercrdv1.GeolocationInfo, podLoc v1.Resou
 		return false
 	}
 	if podLoc.City != "" && geoLocation.City != podLoc.City {
+		return false
+	}
+	return true
+}
+
+func (p *Process) initAllocationInformers(start, end int64) cache.SharedIndexInformer {
+	allocSelector := fields.ParseSelectorOrDie(fmt.Sprintf("status.phase=%s,metadata.hashkey=gte:%s,metadata.hashkey=lte:%s",
+		"", strconv.FormatInt(start, 10), strconv.FormatInt(end, 10)))
+
+	lw := cache.NewListWatchFromClient(p.allocClientset.GlobalschedulerV1(), "allocations", metav1.NamespaceAll, allocSelector)
+
+	allocInformer := cache.NewSharedIndexInformer(lw, &allocv1.Allocation{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
+	allocInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			alloc, ok := obj.(*allocv1.Allocation)
+			if !ok {
+				klog.Warningf("Failed to convert  object  %+v to an allocation", obj)
+				return
+			}
+			klog.V(3).Infof("An allocation %s has been added", alloc.GetName())
+
+			util.CheckTime(alloc.GetName(), "distributor", "CreateAllocation-Start", 1)
+			go func() {
+				p.ScheduleAllocation(alloc)
+			}()
+		},
+	})
+	return allocInformer
+}
+
+// ScheduleOne is to process pods by assign a scheduler to it
+func (p *Process) ScheduleAllocation(alloc *allocv1.Allocation) {
+	if alloc != nil {
+		klog.V(4).Infof("Found an allocation %v-%v to schedule:", alloc.Namespace, alloc.Name)
+		scheduler, err := p.findScheduler(alloc)
+		if err != nil {
+			klog.Warningf("Failed to find scheduler that fits scheduler with the error %v", err)
+			return
+		}
+		klog.V(4).Infof("Find a scheduler %s to fit the allocation %s", scheduler, alloc.Name)
+		alloc.Status.Phase = allocv1.AllocationAssigned
+		alloc.Status.DistributorName = p.name
+		alloc.Status.SchedulerName = scheduler
+		alloc.Status.DispatcherName = ""
+		alloc.Status.ClusterNames = []string{}
+		if _, err := p.allocClientset.GlobalschedulerV1().Allocations(alloc.Namespace).Update(alloc); err != nil {
+			klog.Warningf("Failed to assign scheduler %v to allocation %v with the error %vs", scheduler, alloc, err)
+			alloc.Status.Phase = allocv1.AllocationFailed
+			if _, err = p.allocClientset.GlobalschedulerV1().Allocations(alloc.Namespace).Update(alloc); err != nil {
+				klog.Warningf("Failed to update allocation %v - %v status to failed", alloc.Namespace, alloc.Name)
+			}
+			return
+		}
+		klog.V(2).Infof("Assigned allocation [%s/%s] on %s\n", alloc.Namespace, alloc.Name, scheduler)
+		util.CheckTime(alloc.Name, "distributor", "CreateAllocation-End", 2)
+	}
+}
+
+func (p *Process) findScheduler(alloc *allocv1.Allocation) (string, error) {
+	filteredSchedulers := make([]schedulerv1.Scheduler, 0)
+	for _, scheduler := range p.schedulers {
+		klog.V(4).Infof("The current scheduler is %s", scheduler.Name)
+		for _, geoLocation := range scheduler.Spec.Union.GeoLocation {
+			if isAllocationGeoLocationMatched(geoLocation, alloc.Spec.Selector.GeoLocation) {
+				filteredSchedulers = append(filteredSchedulers, scheduler)
+				klog.V(4).Infof("The matched scheduler is %s", scheduler.Name)
+				break
+			}
+		}
+	}
+	seed := len(filteredSchedulers)
+	if seed == 0 {
+		return "", errors.New("failed to find a scheduler that fits allocation")
+	}
+	return filteredSchedulers[rand.Intn(seed)].Name, nil
+}
+
+func isAllocationGeoLocationMatched(geoLocation *clustercrdv1.GeolocationInfo, allocGeoLocation allocv1.GeoLocation) bool {
+	klog.V(4).Infof("The scheduler loc is %v and the allocation loc is %v", geoLocation, allocGeoLocation)
+	if allocGeoLocation.Area == "" && allocGeoLocation.City == "" && allocGeoLocation.Province == "" && allocGeoLocation.Country == "" {
+		return true
+	}
+	if allocGeoLocation.Country != "" && geoLocation.Country != allocGeoLocation.Country {
+		return false
+	}
+	if allocGeoLocation.Area != "" && geoLocation.Area != allocGeoLocation.Area {
+		return false
+	}
+	if allocGeoLocation.Province != "" && geoLocation.Province != allocGeoLocation.Province {
+		return false
+	}
+	if allocGeoLocation.City != "" && geoLocation.City != allocGeoLocation.City {
 		return false
 	}
 	return true
