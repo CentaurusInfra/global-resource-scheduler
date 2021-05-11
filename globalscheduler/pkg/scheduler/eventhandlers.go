@@ -429,7 +429,7 @@ func (sched *Scheduler) bindToSite(clusterName string, assumedStack *types.Stack
 	klog.Infof("Attempting to bind %v to %v", binding.Name, binding.Target.Name)
 	err := sched.Client.CoreV1().PodsWithMultiTenancy(binding.Namespace, binding.Tenant).Bind(binding)
 	if err != nil {
-		klog.Infof("Failed to bind stack: %v/%v/%v", assumedStack.Tenant, assumedStack.PodNamespace,
+		klog.Errorf("Failed to bind stack: %v/%v/%v", assumedStack.Tenant, assumedStack.PodNamespace,
 			assumedStack.PodName)
 		if err := sched.SchedulerCache.ForgetStack(assumedStack); err != nil {
 			klog.Errorf("scheduler cache ForgetStack failed: %v", err)
@@ -526,7 +526,7 @@ func (sched *Scheduler) verifyClusterInfo(cluster *clusterv1.Cluster) (verified 
 	az := cluster.Spec.Region.AvailabilityZone
 	clusterName := cluster.Name
 	if ipAddress == "" || region == "" || az == "" || clusterName == "" {
-		klog.Infof("cluster ipAddress:%s, region:%s, az:%s, or custer name:%s is null", ipAddress, region, az, clusterName)
+		klog.Errorf("cluster ipAddress:%s, region:%s, az:%s, or custer name:%s is null", ipAddress, region, az, clusterName)
 		return verified
 	}
 	verified = true

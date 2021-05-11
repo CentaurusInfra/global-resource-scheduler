@@ -26,16 +26,14 @@ import (
 // Schedule get snapshot
 func PushSnapshot(req *restful.Request, resp *restful.Response) {
 	resourceReq := new(types.SiteResourceReq)
-	klog.Infof("*** PushSnapshot1: %v", resourceReq)
 	region := req.PathParameter("regionname")
-	klog.Infof("*** PushSnapshot2: %v", region)
 	err := req.ReadEntity(&resourceReq)
 	if err != nil {
 		klog.Errorf("Failed to unmarshall allocation from request body, err: %s", err)
 		utils.WriteFailedJSONResponse(resp, http.StatusBadRequest, utils.RequestBodyParamInvalid(err.Error()))
 		return
 	}
-	klog.Infof("SiteResourceReq: %s", utils.GetJSONString(resourceReq))
+	klog.Infof("Site's requested resource: %s", utils.GetJSONString(resourceReq))
 	resource := resourceReq.SiteResource
 	sched := scheduler.GetScheduler()
 	if sched == nil {
@@ -44,13 +42,11 @@ func PushSnapshot(req *restful.Request, resp *restful.Response) {
 		return
 	}
 	err = sched.UpdateSiteDynamicResource(region, &resource)
-	klog.Infof("PushSnapshot3: %v", err)
 	if err != nil {
 		klog.Errorf("Schedule failed!, err: %s", err)
 		utils.WriteFailedJSONResponse(resp, http.StatusInternalServerError, utils.InternalServerWithError(err.Error()))
 		return
 	}
 	resourceResp := types.SiteResourceRes{Result: "ok"}
-	klog.Infof("PushSnapshot4: %v", resourceResp)
 	resp.WriteHeaderAndEntity(http.StatusCreated, resourceResp)
 }
