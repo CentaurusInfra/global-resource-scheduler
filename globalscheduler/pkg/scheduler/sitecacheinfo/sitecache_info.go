@@ -568,7 +568,7 @@ func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo, regionFlavor
 			for reqType, reqRes := range n.RequestedResources {
 				resTypes := strings.Split(reqType, constants.FlavorDelimiter)
 				if !utils.IsContain(resTypes, resType) {
-					klog.Infof("!utils.IsContain: %v", !utils.IsContain(resTypes, resType))
+					klog.V(4).Infof("!utils.IsContain: %v", !utils.IsContain(resTypes, resType))
 					continue
 				}
 				reqRes.VCPU += res.VCPU

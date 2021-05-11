@@ -70,7 +70,7 @@ func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, s
 		klog.Errorf("Gettng site selector state failed! err: %s", err)
 		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %q info failed: %v", siteID, err))
 	}
-	klog.Errorf("GetSiteSelectorState: %v", siteSelectedInfo)
+	klog.Errorf("site selector info: %v", siteSelectedInfo)
 	if len(stack.Resources) != len(siteSelectedInfo.Flavors) {
 		klog.Errorf("flavor count not equal to server count! err: %s", err)
 		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("siteID(%s) flavor count not equal to "+
@@ -85,7 +85,7 @@ func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, s
 			klog.Warningf("flavor %s not found in region(%s)", flavorID, region)
 			continue
 		}
-		klog.Infof("flavor %s : %v", flavorID, flv)
+		klog.V(4).Infof("flavor %s : %v", flavorID, flv)
 		vCPUInt, err := strconv.ParseInt(flv.Vcpus, 10, 64)
 		if err != nil || vCPUInt <= 0 {
 			klog.Warningf("flavor %s is invalid in region(%s)", flavorID, region)
@@ -111,6 +111,6 @@ func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, s
 		regionFlavors = map[string]*typed.RegionFlavor{}
 	}
 	siteCacheInfo.DeductSiteResInfo(resInfo, regionFlavors)
-	klog.Infof("Resource state after deduction: %v", siteCacheInfo)
+	klog.V(4).Infof("Resource state after deduction: %v", siteCacheInfo)
 	return nil
 }

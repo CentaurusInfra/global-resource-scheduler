@@ -128,7 +128,7 @@ var once sync.Once
 
 func NewScheduler(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct{}) (*Scheduler, error) {
 	stopEverything := stopCh
-	klog.Infof("stopEverything to check : %v", stopEverything)
+	klog.V(4).Infof("stopEverything to check : %v", stopEverything)
 	if stopEverything == nil {
 		stopEverything = wait.NeverStop
 	}
@@ -150,7 +150,7 @@ func NewScheduler(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct
 
 	//build entire FlavorMap map<flovorid, flavorinfo>
 	sched.UpdateFlavor()
-	klog.Infof("FlavorMap: %v", sched.siteCacheInfoSnapshot.FlavorMap)
+	klog.V(4).Infof("FlavorMap: %v", sched.siteCacheInfoSnapshot.FlavorMap)
 	// init pod, cluster, and scheduler informers for scheduler
 	err = sched.initPodClusterSchedulerInformers(gsconfig, stopEverything)
 	if err != nil {
@@ -190,14 +190,14 @@ func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
 	}
 	// start pod informers
 	if sched.PodInformer != nil && sched.InformerFactory != nil {
-		klog.Infof("Starting scheduler %s informer", sched.SchedulerName)
+		klog.V(4).Infof("Starting scheduler %s informer", sched.SchedulerName)
 		sched.InformerFactory.Start(stopCh)
 		// Wait for all caches to sync before scheduling.
 		sched.InformerFactory.WaitForCacheSync(stopCh)
 	}
 	// start scheduler informer
 	if sched.schedulerInformer != nil {
-		klog.Infof("Starting scheduler informer for scheduler %s", sched.SchedulerName)
+		klog.V(4).Infof("Starting scheduler informer for scheduler %s", sched.SchedulerName)
 		go sched.schedulerInformer.Run(stopCh)
 	}
 	// Do scheduling
@@ -207,13 +207,13 @@ func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
 // Run begins watching and scheduling. It waits for cache to be synced, then starts scheduling
 // and blocked until the context is done.
 func (sched *Scheduler) Run(clusterWorkers int, podWorkers int, stopCh <-chan struct{}) {
-	klog.Infof("Starting scheduler %s", sched.SchedulerName)
+	klog.V(4).Infof("Starting scheduler %s", sched.SchedulerName)
 	defer utilruntime.HandleCrash()
 
 	//cluster
 	if clusterWorkers > 0 {
 		defer sched.ClusterQueue.ShutDown()
-		klog.Infof("Waiting informer caches to sync")
+		klog.V(4).Infof("Waiting informer caches to sync")
 		if ok := cache.WaitForCacheSync(sched.StopEverything, sched.ClusterSynced); !ok {
 			klog.Errorf("failed to wait for caches to sync")
 		}
@@ -225,7 +225,7 @@ func (sched *Scheduler) Run(clusterWorkers int, podWorkers int, stopCh <-chan st
 	}
 
 	defer sched.StackQueue.Close()
-	klog.Infof("Waiting informer caches to sync")
+	klog.V(4).Infof("Waiting informer caches to sync")
 	if ok := cache.WaitForCacheSync(sched.StopEverything, sched.PodSynced); !ok {
 		klog.Errorf("failed to wait for caches to sync")
 	}
@@ -236,7 +236,7 @@ func (sched *Scheduler) Run(clusterWorkers int, podWorkers int, stopCh <-chan st
 	}
 	klog.Info("Started cluster & pod workers")
 	<-stopCh
-	klog.Infof("Shutting down scheduler %s", sched.SchedulerName)
+	klog.V(4).Infof("Shutting down scheduler %s", sched.SchedulerName)
 }
 
 // Cache returns the cache in scheduler for test to check the data in scheduler.
@@ -261,15 +261,15 @@ func (sched *Scheduler) scheduleOne() bool {
 	if shutdown != nil {
 		return false
 	}
-	klog.Infof("1. Stack: %v, stack selector: %v", stack, stack.Selector)
+	klog.V(4).Infof("1. Stack: %v, stack selector: %v", stack, stack.Selector)
 	allocation, err := sched.generateAllocationFromStack(stack)
-	klog.Infof("2. Allocation: %v, allocation selector: %v", allocation, allocation.Selector)
+	klog.V(4).Infof("2. Allocation: %v, allocation selector: %v", allocation, allocation.Selector)
 	if err != nil {
 		return false
 	}
 	start := stack.CreateTime
 	end := time.Now().UnixNano()
-	klog.Infof("=== done pop queue, time consumption: %v ms ===", (end-start)/int64(time.Millisecond))
+	klog.V(4).Infof("=== done pop queue, time consumption: %v ms ===", (end-start)/int64(time.Millisecond))
 
 	// 2.do scheduling process
 	start = end
@@ -281,21 +281,21 @@ func (sched *Scheduler) scheduleOne() bool {
 		return true
 	}
 	end = time.Now().UnixNano()
-	klog.Infof("=== done Scheduling pipline, time consumption: %vms ===", (end-start)/int64(time.Millisecond))
-	klog.Infof("Schedule result: %v", result) //result is assumed stacks
-	klog.Infof("3. Assumed Stacks: %v", result)
+	klog.V(4).Infof("=== done Scheduling pipline, time consumption: %vms ===", (end-start)/int64(time.Millisecond))
+	klog.V(4).Infof("Schedule result: %v", result) //result is assumed stacks
+	klog.V(4).Infof("3. Assumed Stacks: %v", result)
 
 	// 3.bind scheduler result to pod
 	start = end
-	klog.Infof("Try to bind to site, stacks:%v", result.Stacks)
+	klog.V(4).Infof("Try to bind to site, stacks:%v", result.Stacks)
 	sched.bindStacks(result.Stacks)
 	end = time.Now().UnixNano()
-	klog.Infof("=== done bind pod to cluster, time consumption: %vms ===", (end-start)/int64(time.Millisecond))
+	klog.V(4).Infof("=== done bind pod to cluster, time consumption: %vms ===", (end-start)/int64(time.Millisecond))
 
 	// log the elapsed time for the entire schedule
 	if stack.CreateTime != 0 {
 		spendTime := time.Now().UnixNano() - stack.CreateTime
-		klog.Infof("@@@ Finished Schedule, time consumption: %vms @@@", spendTime/int64(time.Millisecond))
+		klog.V(4).Infof("@@@ Finished Schedule, time consumption: %vms @@@", spendTime/int64(time.Millisecond))
 	}
 	return true
 }
@@ -368,7 +368,7 @@ func (sched *Scheduler) findSitesThatPassFilters(ctx context.Context, state *int
 		err = fmt.Errorf("SiteCacheInfoMap of %v is null", siteID)
 		return nil, err
 	}
-	klog.Infof("allSiteCacheInfos: %v", len(allSiteCacheInfos))
+	klog.V(4).Infof("allSiteCacheInfos: %v", len(allSiteCacheInfos))
 	// Create filtered list with enough space to avoid growing it
 	// and allow assigning.
 	filtered := make([]*types.Site, len(allSiteCacheInfos))
@@ -454,7 +454,7 @@ func (sched *Scheduler) prioritizeSites(
 
 	// sort by score.
 	sort.Sort(sort.Reverse(result))
-	klog.Infof("score sites: %v", result)
+	klog.V(4).Infof("score sites: %v", result)
 	return result, nil
 }
 
@@ -502,14 +502,14 @@ func (sched *Scheduler) bind(ctx context.Context, stack *types.Stack, targetSite
 // Schedule Run begins watching and scheduling. It waits for cache to be synced ,
 // then starts scheduling and blocked until the context is done.
 func (sched *Scheduler) Schedule(ctx context.Context, allocation *types.Allocation) (result ScheduleResult, err error) {
-	klog.Infof("Attempting to schedule allocation: %v", allocation.ID)
+	klog.V(4).Infof("Attempting to schedule allocation: %v", allocation.ID)
 	state := interfaces.NewCycleState()
 	schedulingCycleCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	// 1. Snapshot site resource cache
 	start := time.Now()
-	klog.Infof("[START] snapshot site...")
+	klog.V(4).Infof("[START] snapshot site...")
 
 	///UpdateFlavorMap updates FlavorCache.RegionFlavorMap, FlavorCache.FlavorMap)
 	///FlavorMap is updated when scheduler starts, RegionFlavorMap is updated
@@ -519,16 +519,16 @@ func (sched *Scheduler) Schedule(ctx context.Context, allocation *types.Allocati
 
 	// 2. Run "prefilter" plugins.
 	start = time.Now()
-	klog.Infof("[START] Running prefilter plugins...")
+	klog.V(4).Infof("[START] Running prefilter plugins...")
 	preFilterStatus := sched.SchedFrame.RunPreFilterPlugins(schedulingCycleCtx, state, &allocation.Stack)
 	if !preFilterStatus.IsSuccess() {
 		return result, preFilterStatus.AsError()
 	}
-	klog.Infof("[DONE] Running prefilter plugins, use_time: %s", time.Since(start).String())
+	klog.V(4).Infof("[DONE] Running prefilter plugins, use_time: %s", time.Since(start).String())
 
 	// 3. Run "filter" plugins.
 	start = time.Now()
-	klog.Infof("[START] Running filter plugins...")
+	klog.V(4).Infof("[START] Running filter plugins...")
 	filteredSitesStatuses := make(interfaces.SiteToStatusMap)
 	allocation.Stack.Selector = allocation.Selector
 	filteredSites, err := sched.findSitesThatPassFilters(ctx, state, &allocation.Stack, filteredSitesStatuses)
@@ -536,9 +536,9 @@ func (sched *Scheduler) Schedule(ctx context.Context, allocation *types.Allocati
 		klog.Errorf("findSitesThatPassFilters failed! err: %s", err)
 		return result, err
 	}
-	klog.Infof("[DONE] Running filter plugins, use_time: %s", time.Since(start).String())
+	klog.V(4).Infof("[DONE] Running filter plugins, use_time: %s", time.Since(start).String())
 
-	klog.Infof("filteredSitesStatuses = %v", filteredSitesStatuses.ToString())
+	klog.V(4).Infof("filteredSitesStatuses = %v", filteredSitesStatuses.ToString())
 	if len(filteredSites) <= 0 {
 		err := fmt.Errorf("filter none site. resultStatus: %s", filteredSitesStatuses.ToString())
 		klog.Error(err)
@@ -547,33 +547,33 @@ func (sched *Scheduler) Schedule(ctx context.Context, allocation *types.Allocati
 
 	// 4. Run "prescore" plugins.
 	start = time.Now()
-	klog.Infof("[START] Running preScore plugins...")
+	klog.V(4).Infof("[START] Running preScore plugins...")
 	prescoreStatus := sched.SchedFrame.RunPreScorePlugins(ctx, state, &allocation.Stack, filteredSites)
 	if !prescoreStatus.IsSuccess() {
 		return result, prescoreStatus.AsError()
 	}
-	klog.Infof("[DONE] Running preScore plugins, use_time: %s", time.Since(start).String())
+	klog.V(4).Infof("[DONE] Running preScore plugins, use_time: %s", time.Since(start).String())
 
 	// 5. Run "prioritizeSites" plugins.
 	start = time.Now()
-	klog.Infof("[START] Running prioritizeSites plugins...")
+	klog.V(4).Infof("[START] Running prioritizeSites plugins...")
 	priorityList, err := sched.prioritizeSites(ctx, state, &allocation.Stack, filteredSites)
 	if err != nil {
 		klog.Errorf("prioritizeSites failed! err: %s", err)
 		return result, err
 	}
-	klog.Infof("[DONE] Running prioritizeSites plugins, use_time: %s", time.Since(start).String())
+	klog.V(4).Infof("[DONE] Running prioritizeSites plugins, use_time: %s", time.Since(start).String())
 
 	// 6. Run "strategy" plugins.
 	start = time.Now()
-	klog.Infof("[START] Running strategy plugins...")
+	klog.V(4).Infof("[START] Running strategy plugins...")
 	siteCount, strategyStatus := sched.SchedFrame.RunStrategyPlugins(ctx, state, allocation, priorityList)
 	if !strategyStatus.IsSuccess() {
 		klog.Errorf("RunStrategyPlugins failed! err: %s", err)
 		return result, err
 	}
-	klog.Infof("[DONE] Running StrategyPlugins plugins, use_time: %s", time.Since(start).String())
-	klog.Infof("selected Hosts : %#v", siteCount)
+	klog.V(4).Infof("[DONE] Running StrategyPlugins plugins, use_time: %s", time.Since(start).String())
+	klog.V(4).Infof("selected Hosts : %#v", siteCount)
 
 	// 7. reserve resource
 	start = time.Now()
@@ -605,7 +605,7 @@ func (sched *Scheduler) Schedule(ctx context.Context, allocation *types.Allocati
 		klog.Errorf("not find suit host")
 		return result, fmt.Errorf("not find suit host")
 	}
-	klog.Infof("reserve resource(%s) success, use_time: %s", allocation.ID, time.Since(start).String())
+	klog.V(4).Infof("reserve resource(%s) success, use_time: %s", allocation.ID, time.Since(start).String())
 	return
 }
 
@@ -686,7 +686,7 @@ func (sched *Scheduler) initPodClusterSchedulerInformers(gsconfig *types.GSSched
 	sched.schedulerInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		DeleteFunc: func(obj interface{}) {
 			if sched, ok := obj.(*schedulerv1.Scheduler); ok {
-				klog.Infof("The scheduler %s process is going to be killed...", sched.Name)
+				klog.V(4).Infof("The scheduler %s process is going to be killed...", sched.Name)
 				os.Exit(0)
 			} else {
 				klog.Fatalf("The deleted object %v failed to convert to scheduler", obj)
@@ -730,7 +730,7 @@ func (sched *Scheduler) processNextClusterItem() bool {
 	if shutdown {
 		return false
 	}
-	klog.Infof("Process an item in work queue %v ", workItem)
+	klog.V(4).Infof("Process an item in work queue %v ", workItem)
 	eventKey := workItem.(KeyWithEventType)
 	key := eventKey.Key
 	defer sched.ClusterQueue.Done(key)
@@ -739,7 +739,7 @@ func (sched *Scheduler) processNextClusterItem() bool {
 		utilruntime.HandleError(fmt.Errorf("Handle %v of key %v failed with %v", "serivce", key, err))
 	}
 	sched.ClusterQueue.Forget(key)
-	klog.Infof("Successfully processed & synced %s", key)
+	klog.V(4).Infof("Successfully processed & synced %s", key)
 	return true
 }
 
@@ -749,7 +749,7 @@ func (sched *Scheduler) clusterSyncHandler(keyWithEventType KeyWithEventType) er
 		return err
 	}
 	key := keyWithEventType.Key
-	klog.Infof("sync cache for key %v", key)
+	klog.V(4).Infof("sync cache for key %v", key)
 	startTime := time.Now()
 	defer func() {
 		klog.V(4).Infof("Finished syncing  %q (%v)", key, time.Since(startTime))
@@ -757,16 +757,16 @@ func (sched *Scheduler) clusterSyncHandler(keyWithEventType KeyWithEventType) er
 	nameSpace, clusterName, err := cache.SplitMetaNamespaceKey(key)
 
 	//This performs controller logic - create site's static info
-	klog.Infof("cluster processing - event: %v, cluster name: %v", keyWithEventType.EventType, clusterName)
+	klog.V(4).Infof("cluster processing - event: %v, cluster name: %v", keyWithEventType.EventType, clusterName)
 	result, err := sched.updateStaticSiteResourceInfo(key, keyWithEventType.EventType, nameSpace, clusterName)
 	if !result {
 		klog.Errorf("Failed a cluster processing - event: %v, key: %v, error: %v", keyWithEventType, key, err)
 		sched.ClusterQueue.AddRateLimited(keyWithEventType)
 	} else {
-		klog.Infof(" Processed a cluster: %v", key)
+		klog.V(4).Infof(" Processed a cluster: %v", key)
 		sched.ClusterQueue.Forget(key)
 	}
-	klog.Infof("Cluster was handled by ClusterController - event: %v, cluster name: %v", keyWithEventType.EventType, clusterName)
+	klog.V(4).Infof("Cluster was handled by ClusterController - event: %v, cluster name: %v", keyWithEventType.EventType, clusterName)
 	if keyWithEventType.EventType != EventType_Delete {
 		cluster, err := sched.ClusterLister.Clusters(nameSpace).Get(clusterName)
 		clusterCopy := cluster.DeepCopy()
@@ -821,7 +821,7 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 			klog.Errorf("Failed to retrieve cluster in local cache by cluster name: %s", clusterName)
 			return false, err
 		}
-		klog.Infof("create a site static info, cluster profile: %v", clusterCopy)
+		klog.V(4).Infof("create a site static info, cluster profile: %v", clusterCopy)
 		clusterCopy.Status = ClusterStatusCreated
 		site := convertClusterToSite(clusterCopy)
 		siteCacheInfo := schedulersitecacheinfo.NewSiteCacheInfo()
@@ -839,7 +839,7 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 			klog.Errorf("Failed to retrieve cluster in local cache by cluster name - %s", clusterName)
 			return false, err
 		}
-		klog.Infof("update a site static info, cluster profile: %v", clusterCopy)
+		klog.V(4).Infof("update a site static info, cluster profile: %v", clusterCopy)
 		clusterCopy.Status = ClusterStatusUpdated
 		site := convertClusterToSite(clusterCopy)
 		siteCacheInfo := schedulersitecacheinfo.NewSiteCacheInfo()
@@ -871,7 +871,7 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 //This function updates sites' dynamic resource informaton
 func (sched *Scheduler) UpdateSiteDynamicResource(region string, resource *types.SiteResource) (err error) {
 	//reset total(available) resource
-	klog.Infof("UpdateSiteDynamicResource region: %s, resource:%v", region, resource)
+	klog.V(4).Infof("UpdateSiteDynamicResource region: %s, resource:%v", region, resource)
 	var siteID string
 	for _, siteresource := range resource.CPUMemResources {
 		siteID = region + constants.SiteDelimiter + siteresource.AvailabilityZone
