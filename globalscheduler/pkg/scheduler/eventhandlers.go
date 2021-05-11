@@ -421,7 +421,6 @@ func (sched *Scheduler) bindToSite(clusterName string, assumedStack *types.Stack
 			Name: clusterName,
 		},
 	}
-
 	klog.V(4).Infof("binding: %v", binding)
 	// do api server update here
 	klog.V(4).Infof("Attempting to bind %v to %v", binding.Name, binding.Target.Name)
@@ -432,7 +431,6 @@ func (sched *Scheduler) bindToSite(clusterName string, assumedStack *types.Stack
 		if err := sched.SchedulerCache.ForgetStack(assumedStack); err != nil {
 			klog.Errorf("scheduler cache ForgetStack failed: %v", err)
 		}
-
 		return err
 	}
 	return nil

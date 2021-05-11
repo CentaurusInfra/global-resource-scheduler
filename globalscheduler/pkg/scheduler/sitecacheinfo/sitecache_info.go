@@ -556,7 +556,7 @@ func GetStackKey(stack *types.Stack) (string, error) {
 func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo, regionFlavorMap map[string]*typed.RegionFlavor) error {
 	var resourceTypes []string
 	for resType, res := range resInfo.CpuAndMem {
-		//binding a pod for the first
+		//resource type is null, assign default resource type (e.g. when binding a pod for the first time)
 		if resType == "" {
 			resType = string(DefaultResourceType)
 			resourceTypes = append(resourceTypes, resType)
@@ -564,17 +564,17 @@ func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo, regionFlavor
 		if len(n.RequestedResources) == 0 {
 			reqRes := types.CPUAndMemory{VCPU: res.VCPU, Memory: res.Memory}
 			n.RequestedResources[resType] = &reqRes
-		} else {
-			for reqType, reqRes := range n.RequestedResources {
-				resTypes := strings.Split(reqType, constants.FlavorDelimiter)
-				if !utils.IsContain(resTypes, resType) {
-					klog.V(4).Infof("!utils.IsContain: %v", !utils.IsContain(resTypes, resType))
-					continue
-				}
-				reqRes.VCPU += res.VCPU
-				reqRes.Memory += res.Memory
-				n.RequestedResources[resType] = reqRes
+			continue
+		}
+		for reqType, reqRes := range n.RequestedResources {
+			resTypes := strings.Split(reqType, constants.FlavorDelimiter)
+			if !utils.IsContain(resTypes, resType) {
+				klog.V(4).Infof("!utils.IsContain: %v", !utils.IsContain(resTypes, resType))
+				continue
 			}
+			reqRes.VCPU += res.VCPU
+			reqRes.Memory += res.Memory
+			n.RequestedResources[resType] = reqRes
 		}
 	}
 	for volType, used := range resInfo.Storage {
@@ -625,7 +625,8 @@ func (n *SiteCacheInfo) updateSiteFlavor(resourceTypes []string, regionFlavors m
 			if totalRes == nil {
 				n.deductFlavor()
 				return
-			} else if requestRes == nil {
+			}
+			if requestRes == nil {
 				requestRes = &types.CPUAndMemory{VCPU: 0, Memory: 0}
 			}
 			count := (totalRes.VCPU - requestRes.VCPU) / vCPUInt
