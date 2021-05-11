@@ -104,7 +104,7 @@ func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, s
 	b.handle.Cache().UpdateSiteWithResInfo(siteID, resInfo)
 	regionFlavors, err := b.handle.SnapshotSharedLister().SiteCacheInfos().GetFlavors()
 	if err != nil {
-		klog.Errorf("There is no region's flavor: %s", err)
+		klog.Errorf("Getting region's flavor failed: %s", err)
 		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %q info failed: %v", siteID, err))
 	}
 	if regionFlavors == nil || err != nil {
