@@ -19,6 +19,7 @@ package customresource
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/go-openapi/validate"
@@ -189,7 +190,33 @@ func (a customResourceStrategy) GetAttrs(obj runtime.Object) (labels.Set, fields
 	if err != nil {
 		return nil, nil, err
 	}
-	return labels.Set(accessor.GetLabels()), objectMetaFieldsSet(accessor, a.namespaceScoped, a.tenantScoped), nil
+	crdObj := obj.(*unstructured.Unstructured)
+	crdRes := crdObj.UnstructuredContent()
+	fieldSet := objectMetaFieldsSet(accessor, a.namespaceScoped, a.tenantScoped)
+	if statusVal, ok := crdRes["status"]; ok {
+		if statusRes, ok := statusVal.(map[string]interface{}); ok {
+			if phase, ok := statusRes["phase"]; ok {
+				fieldSet["status.phase"] = fmt.Sprintf("%v", phase)
+			}
+			if distributorname, ok := statusRes["distributor_name"]; ok {
+				fieldSet["status.distributor_name"] = fmt.Sprintf("%v", distributorname)
+			}
+			if schedulername, ok := statusRes["scheduler_name"]; ok {
+				fieldSet["status.scheduler_name"] = fmt.Sprintf("%v", schedulername)
+			}
+			if dispatchername, ok := statusRes["dispatcher_name"]; ok {
+				fieldSet["status.dispatcher_name"] = fmt.Sprintf("%v", dispatchername)
+			}
+			if clusternames, ok := statusRes["cluster_names"]; ok {
+				if clusters, ok := clusternames.([]interface{}); ok {
+					if len(clusters) > 0 {
+						fieldSet["status.cluster_name"] = fmt.Sprintf("%v", clusters[0])
+					}
+				}
+			}
+		}
+	}
+	return labels.Set(accessor.GetLabels()), fieldSet, nil
 }
 
 // objectMetaFieldsSet returns a fields that represent the ObjectMeta.

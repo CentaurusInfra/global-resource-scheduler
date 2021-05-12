@@ -1,0 +1,77 @@
+apiVersion: globalscheduler.com/v1
+kind: Allocation
+metadata:
+  name: a1
+spec:
+  resource_group:
+    name: v1rg
+    resources:
+      - name: "1"
+        resource_type: vm
+        flavors:
+          - flavor_id: "42"
+            spot:
+              max_price: "1.5"
+              spot_duration_hours: 2
+              spot_duration_count: 3
+              interruption_policy: immediate
+        storage:
+          sata: 50
+          sas: 60
+          ssd: 70
+        need_eip: true
+        image: "0df07567-87a8-4d01-b7d9-c70f91c86427"
+        security_group_id: "0df07567-87a8-4d01-b7d9-c70f91c86427"
+        nic_name: "0df07567-87a8-4d01-b7d9-c70f91c86427"
+  selector:
+    geo_location:
+      city: Bellevue
+      province: Washington
+      area: NW-1
+      country: US
+    regions:
+      - region: "NW-1"
+        availability_zone: ["production-az"]
+    operator: chinamobile
+    strategy:
+      location_strategy: discrete
+  replicas: 2
+---
+apiVersion: globalscheduler.com/v1
+kind: Allocation
+metadata:
+  name: a2
+spec:
+  resource_group:
+    name: v2rg
+    resources:
+      - name: "2"
+        resource_type: vm
+        flavors:
+          - flavor_id: "42"
+            spot:
+              max_price: "2.3"
+              spot_duration_hours: 3
+              spot_duration_count: 4
+              interruption_policy: immediate
+        storage:
+          sata: 80
+          sas: 90
+          ssd: 100
+        need_eip: false
+        image: "0df07567-87a8-4d01-b7d9-c70f91c86427"
+        security_group_id: "0df07567-87a8-4d01-b7d9-c70f91c86427"
+        nic_name: "0df07567-87a8-4d01-b7d9-c70f91c86427"
+  selector:
+    geo_location:
+      city: NewYork
+      province: NewYork
+      area: NE-1
+      country: US
+    regions:
+      - region: "NE-1"
+        availability_zone: ["production-az"]
+    operator: chinatelecom
+    strategy:
+      location_strategy: centralize
+  replicas: 1

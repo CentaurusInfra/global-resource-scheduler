@@ -12,6 +12,8 @@ go_library(
         "//globalscheduler/cmd/conf:go_default_library",
         "//globalscheduler/controllers:go_default_library",
         "//globalscheduler/controllers/util:go_default_library",
+        "//globalscheduler/pkg/apis/allocation/client/clientset/versioned:go_default_library",
+        "//globalscheduler/pkg/apis/allocation/v1:go_default_library",
         "//globalscheduler/pkg/apis/cluster/v1:go_default_library",
         "//globalscheduler/pkg/apis/distributor:go_default_library",
         "//globalscheduler/pkg/apis/distributor/client/clientset/versioned:go_default_library",
