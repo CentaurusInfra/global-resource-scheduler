@@ -10,6 +10,8 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//globalscheduler/cmd/conf:go_default_library",
+        "//globalscheduler/pkg/apis/allocation/client/clientset/versioned:go_default_library",
+        "//globalscheduler/pkg/apis/allocation/v1:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/clientset/versioned:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/clientset/versioned/scheme:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/informers/externalversions:go_default_library",

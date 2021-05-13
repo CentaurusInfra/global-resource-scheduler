@@ -22,9 +22,9 @@ import (
 )
 
 type Testcase struct {
-	SchedulerGeoLocation           clustercrdv1.GeolocationInfo
-	AllocationGeoLocation          allocv1.GeoLocation
-	ExpectedResult bool
+	SchedulerGeoLocation  clustercrdv1.GeolocationInfo
+	AllocationGeoLocation allocv1.GeoLocation
+	ExpectedResult        bool
 }
 
 func createSchedulerGeoLocation(city, province, area, country string) clustercrdv1.GeolocationInfo {
@@ -106,7 +106,7 @@ func TestIsAllocationGeoLocationMatched(t *testing.T) {
 		res := isAllocationGeoLocationMatched(&testcase.SchedulerGeoLocation, testcase.AllocationGeoLocation)
 		if res != testcase.ExpectedResult {
 			t.Errorf("The isAllocationGeoLocationMatched test result %v is not empty as expected with geoLocations %v, %v",
-				res, testcase.SchedulerGeoLocation, testcase.AllocationGeoLocation )
+				res, testcase.SchedulerGeoLocation, testcase.AllocationGeoLocation)
 		}
 	}
 }
