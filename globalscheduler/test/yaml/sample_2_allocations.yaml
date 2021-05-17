@@ -32,7 +32,7 @@ spec:
     regions:
       - region: "NW-1"
         availability_zone: ["production-az"]
-    operator: chinamobile
+    operator: globalscheduler
     strategy:
       location_strategy: discrete
   replicas: 2
@@ -71,7 +71,7 @@ spec:
     regions:
       - region: "NE-1"
         availability_zone: ["production-az"]
-    operator: chinatelecom
+    operator: globalscheduler
     strategy:
       location_strategy: centralize
   replicas: 1
