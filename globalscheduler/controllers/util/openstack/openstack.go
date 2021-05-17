@@ -211,13 +211,13 @@ func ServerCreateResources(host, authToken, clusterName string, manifest *allocv
 	serverCreateRequestURL := "http://" + host + "/compute/v2.1/servers"
 	serverStruct := server{
 		Name:      manifest.Name,
-		ImageRef:  manifest.Image,
+		ImageRef:  manifest.VirtualMachine.Image,
 		FlavorRef: manifest.Flavors[0].FlavorId,
 		Networks: []map[string]string{
-			{"uuid": manifest.NicName},
+			{"uuid": manifest.VirtualMachine.NicName},
 		},
 		SecurityGroups: []map[string]string{
-			{"name": manifest.SecurityGroupId},
+			{"name": manifest.VirtualMachine.SecurityGroupId},
 		},
 		Metadata: map[string]string{
 			"ClusterName": clusterName,

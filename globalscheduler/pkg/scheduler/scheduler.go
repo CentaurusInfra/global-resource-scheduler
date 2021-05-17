@@ -969,10 +969,14 @@ func (sched *Scheduler) scheduleAllocation(alloc *allocv1.Allocation) {
 				return
 			}
 			klog.Infof("Try to bind to a cluster, stacks %v ", result.Stacks)
-			alloc.Spec.ResourceGroup.Resources[idx].ClusterInstances = make(map[string]string)
+			if alloc.Spec.ResourceGroup.Resources[idx].VirtualMachine.ClusterInstances == nil {
+				alloc.Spec.ResourceGroup.Resources[idx].VirtualMachine.ClusterInstances = make([]allocv1.ClusterInstance, 0)
+			}
 
 			for _, stack := range result.Stacks {
-				alloc.Spec.ResourceGroup.Resources[idx].ClusterInstances[stack.Selected.ClusterName] = ""
+				alloc.Spec.ResourceGroup.Resources[idx].VirtualMachine.ClusterInstances =
+					append(alloc.Spec.ResourceGroup.Resources[idx].VirtualMachine.ClusterInstances,
+						allocv1.ClusterInstance{stack.Selected.ClusterName, ""})
 				clusterNames = append(clusterNames, stack.Selected.ClusterName)
 			}
 		}

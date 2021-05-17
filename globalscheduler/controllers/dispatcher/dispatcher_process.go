@@ -143,7 +143,7 @@ func (p *Process) Run(quit chan struct{}) {
 				klog.Warningf("Failed to convert  object  %+v to an allocation", obj)
 				return
 			}
-			klog.V(2).Infof("An allocation %s has been added", alloc.Name)
+			klog.V(4).Infof("An allocation %s has been added", alloc.Name)
 
 			util.CheckTime(alloc.GetName(), "dispatcher", "CreateAllocation-Start", 1)
 			go func() {
@@ -160,10 +160,9 @@ func (p *Process) Run(quit chan struct{}) {
 				klog.Warningf("Failed to convert an deleted object  %+v to an allocation", obj)
 				return
 			}
-			klog.V(2).Infof("An allocation %s has been deleted", alloc.Name)
+			klog.V(4).Infof("An allocation %s has been deleted", alloc.Name)
 			if alloc.ObjectMeta.DeletionTimestamp == nil {
 				alloc.ObjectMeta.SetDeletionTimestamp(&metav1.Time{})
-				klog.V(2).Infof("An allocation %s has set up deletetimestamp", alloc.GetObjectMeta().GetDeletionTimestamp())
 			}
 			util.CheckTime(alloc.Name, "dispatcher", "DeleteAllocation-Start", 1)
 			go func() {
@@ -405,10 +404,10 @@ func (p *Process) SendAllocationToCluster(alloc *allocv1.Allocation) {
 }
 func (p *Process) isAllAllocationResourcesCreated(alloc *allocv1.Allocation) bool {
 	for idx, resource := range alloc.Spec.ResourceGroup.Resources {
-		for clustername := range resource.ClusterInstances {
-			host, err := p.getHostIP(clustername)
+		for ciIdx, clusterInstance := range resource.VirtualMachine.ClusterInstances {
+			host, err := p.getHostIP(clusterInstance.ClusterName)
 			if err != nil {
-				klog.Warningf("Failed to get host from the cluster %v", clustername)
+				klog.Warningf("Failed to get host from the cluster %v", clusterInstance.ClusterName)
 				return false
 			}
 			token, err := p.getToken(host)
@@ -416,12 +415,12 @@ func (p *Process) isAllAllocationResourcesCreated(alloc *allocv1.Allocation) boo
 				klog.Warningf("Failed to get token from host %v", host)
 				return false
 			}
-			instanceId, err := openstack.ServerCreateResources(host, token, clustername, &resource)
+			instanceId, err := openstack.ServerCreateResources(host, token, clusterInstance.ClusterName, &resource)
 			if err == nil {
-				alloc.Spec.ResourceGroup.Resources[idx].ClusterInstances[clustername] = instanceId
-				klog.V(3).Infof("The openstack vm for the allocation %s resource %s has been deleted at the host %v", alloc.Name, resource.Name, host)
+				alloc.Spec.ResourceGroup.Resources[idx].VirtualMachine.ClusterInstances[ciIdx].InstanceId = instanceId
+				klog.V(3).Infof("The openstack vm for the allocation %s resource %s has been created at the host %v as instance %s", alloc.Name, resource.Name, host, instanceId)
 			} else {
-				klog.Warningf("The openstack vm for the allocation %s resource %s failed to delete with the error %v", alloc.Name, resource.Name, err)
+				klog.Warningf("The openstack vm for the allocation %s resource %s failed to create with the error %v", alloc.Name, resource.Name, err)
 				return false
 			}
 		}
@@ -432,7 +431,9 @@ func (p *Process) isAllAllocationResourcesCreated(alloc *allocv1.Allocation) boo
 func (p *Process) deleteAllocationResources(alloc *allocv1.Allocation) {
 	var wg sync.WaitGroup
 	for _, resource := range alloc.Spec.ResourceGroup.Resources {
-		for clustername, instanceid := range resource.ClusterInstances {
+		for _, clusterInstance := range resource.VirtualMachine.ClusterInstances {
+			instanceid := clusterInstance.InstanceId
+			clustername := clusterInstance.ClusterName
 			if instanceid != "" {
 				wg.Add(1)
 				host, err := p.getHostIP(clustername)
