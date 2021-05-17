@@ -15,6 +15,8 @@ go_library(
         "//globalscheduler/controllers:go_default_library",
         "//globalscheduler/controllers/util:go_default_library",
         "//globalscheduler/controllers/util/openstack:go_default_library",
+        "//globalscheduler/pkg/apis/allocation/client/clientset/versioned:go_default_library",
+        "//globalscheduler/pkg/apis/allocation/v1:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/clientset/versioned:go_default_library",
         "//globalscheduler/pkg/apis/cluster/client/informers/externalversions/cluster/v1:go_default_library",
         "//globalscheduler/pkg/apis/cluster/v1:go_default_library",

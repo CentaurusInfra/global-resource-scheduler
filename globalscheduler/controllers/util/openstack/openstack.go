@@ -23,6 +23,7 @@ import (
 	"io/ioutil"
 	"k8s.io/api/core/v1"
 	"k8s.io/klog"
+	allocv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/allocation/v1"
 	"net/http"
 )
 
@@ -194,4 +195,65 @@ func RequestToken(host string) (string, error) {
 	klog.V(3).Infof("HTTP Post Token: %v", respHeader["X-Subject-Token"][0])
 
 	return respHeader["X-Subject-Token"][0], nil
+}
+
+/*
+	ServerCreateResources: create openstack server
+	Input:
+		host: Private IPv4 addresses
+		authToken: the given token string
+        clusterrName: the given cluster name string
+		manifest: allocation resource spec structure
+	Output:
+		return instanceID if no error, otherwise return error
+*/
+func ServerCreateResources(host, authToken, clusterName string, manifest *allocv1.Resources) (string, error) {
+	serverCreateRequestURL := "http://" + host + "/compute/v2.1/servers"
+	serverStruct := server{
+		Name:      manifest.Name,
+		ImageRef:  manifest.Image,
+		FlavorRef: manifest.Flavors[0].FlavorId,
+		Networks: []map[string]string{
+			{"uuid": manifest.NicName},
+		},
+		SecurityGroups: []map[string]string{
+			{"name": manifest.SecurityGroupId},
+		},
+		Metadata: map[string]string{
+			"ClusterName": clusterName,
+		},
+	}
+	serverJson := map[string]server{}
+	serverJson["server"] = serverStruct
+	finalData, _ := json.Marshal(serverJson)
+	req, _ := http.NewRequest("POST", serverCreateRequestURL, bytes.NewBuffer(finalData))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Auth-Token", authToken)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		klog.V(3).Infof("HTTP Post Instance Request Failed: %v", err)
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	var instanceResponse map[string]interface{}
+	if err := json.Unmarshal(body, &instanceResponse); err != nil {
+		klog.V(3).Infof("Instance Create Response Unmarshal Failed")
+		return "", err
+	}
+
+	// http.StatusForbidden = 403
+	if resp.StatusCode == http.StatusForbidden {
+		return "", fmt.Errorf("instance capacity has reached its limit")
+	}
+
+	if instanceResponse["server"] == nil {
+		return "", fmt.Errorf("bad request for server create")
+	}
+	serverResponse := instanceResponse["server"].(map[string]interface{})
+	instanceID := serverResponse["id"].(string)
+
+	return instanceID, nil
 }

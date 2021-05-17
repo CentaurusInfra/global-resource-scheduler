@@ -21,8 +21,8 @@ spec:
           ssd: 70
         need_eip: true
         image: "0df07567-87a8-4d01-b7d9-c70f91c86427"
-        security_group_id: "0df07567-87a8-4d01-b7d9-c70f91c86427"
-        nic_name: "0df07567-87a8-4d01-b7d9-c70f91c86427"
+        security_group_id: "58b9fbbf-6f04-49ca-8c7e-ac797c6d236c"
+        nic_name: "9e29aa2d-6943-4109-bc5c-1a882b086122"
   selector:
     geo_location:
       city: Bellevue
@@ -60,8 +60,8 @@ spec:
           ssd: 100
         need_eip: false
         image: "0df07567-87a8-4d01-b7d9-c70f91c86427"
-        security_group_id: "0df07567-87a8-4d01-b7d9-c70f91c86427"
-        nic_name: "0df07567-87a8-4d01-b7d9-c70f91c86427"
+        security_group_id: "58b9fbbf-6f04-49ca-8c7e-ac797c6d236c"
+        nic_name: "9e29aa2d-6943-4109-bc5c-1a882b086122"
   selector:
     geo_location:
       city: NewYork

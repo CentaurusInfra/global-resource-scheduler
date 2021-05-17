@@ -210,15 +210,12 @@ func (in *Resources) DeepCopyInto(out *Resources) {
 		copy(*out, *in)
 	}
 	out.Storage = in.Storage
-	if in.ClusterNames != nil {
-		in, out := &in.ClusterNames, &out.ClusterNames
-		*out = make([]string, len(*in))
-		copy(*out, *in)
-	}
-	if in.ClusterNamespaces != nil {
-		in, out := &in.ClusterNamespaces, &out.ClusterNamespaces
-		*out = make([]string, len(*in))
-		copy(*out, *in)
+	if in.ClusterInstances != nil {
+		in, out := &in.ClusterInstances, &out.ClusterInstances
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
 	}
 	return
 }

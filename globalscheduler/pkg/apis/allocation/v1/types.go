@@ -76,11 +76,10 @@ type Resources struct {
 	Storage      Volume   `json:"storage,omitempty"`
 	NeedEip      bool     `json:"need_eip,omitempty"`
 	//Count        int      `json:"count,omitempty"` // It is commented because there is a conflict with replicas
-	Image             string   `json:"image"`
-	SecurityGroupId   string   `json:"security_group_id"`
-	NicName           string   `json:"nic_name"`
-	ClusterNames      []string `json:"cluster_names"`
-	ClusterNamespaces []string `json:"cluster_namespaces"`
+	Image            string            `json:"image"`
+	SecurityGroupId  string            `json:"security_group_id"`
+	NicName          string            `json:"nic_name"`
+	ClusterInstances map[string]string `json:"cluster_instances"`
 }
 
 type Flavor struct {
