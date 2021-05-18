@@ -67,7 +67,7 @@ func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, s
 	//siteSelectedInfo is type of SiteSelectorInfo at cycle_state.go
 	siteSelectedInfo, err := interfaces.GetSiteSelectorState(state, siteID)
 	if err != nil {
-		klog.Errorf("Gettng site selector state failed! err: %s", err)
+		klog.Errorf("Getting site selector state failed! err: %s", err)
 		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %q info failed: %v", siteID, err))
 	}
 	klog.V(4).Infof("site selector info: %v", siteSelectedInfo)
@@ -102,22 +102,6 @@ func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, s
 		resInfo.CpuAndMem[flv.OsExtraSpecs.ResourceType] = reqRes
 	}
 	b.handle.Cache().UpdateSiteWithResInfo(siteID, resInfo)
-	/*regionFlavors, err := b.handle.SnapshotSharedLister().SiteCacheInfos().GetFlavors()
-	if err != nil {
-		klog.Errorf("Getting region's flavor failed: %s", err)
-		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %q info failed: %v", siteID, err))
-	}
-	if regionFlavors == nil || err != nil {
-		regionFlavors = map[string]*typed.RegionFlavor{}
-	}*/
-	/*siteCacheInfo.DeductSiteResInfo(resInfo, regionFlavors)
-	klog.V(4).Infof("Resource state after deduction: %v", siteCacheInfo)
-	return nil*/
-
-	/*klog.V(4).Infof("111 Resource state before deduction: %#v", siteCacheInfo)
-	klog.V(4).Infof("222 resInfo: %#v, regionFlavors:%#v", resInfo, regionFlavors)
-	siteCacheInfo.DeductSiteResInfo(resInfo, regionFlavors)
-	klog.V(4).Infof("333 Resource state after deduction: %#v", siteCacheInfo)*/
 	return nil
 }
 
@@ -140,12 +124,12 @@ func (b DefaultBinder) BindResource(ctx context.Context, state *interfaces.Cycle
 	//siteSelectedInfo is type of SiteSelectorInfo at cycle_state.go
 	siteSelectedInfo, err := interfaces.GetSiteSelectorState(state, siteID)
 	if err != nil {
-		klog.Errorf("Gettng site selector state failed! err: %s", err)
+		klog.Errorf("Gettng site selector state failed! err: %v", err)
 		status := interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %q info failed: %v", siteID, err))
 		return status, siteID, flavorID, &resInfo
 	}
 	if len(stack.Resources) != len(siteSelectedInfo.Flavors) {
-		klog.Errorf("flavor count not equal to server count! err: %s", err)
+		klog.Errorf("flavor count not equal to server count! err: %v", err)
 		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("siteID(%s) flavor count not equal to "+
 			"server count!", siteID)), siteID, flavorID, nil
 	}

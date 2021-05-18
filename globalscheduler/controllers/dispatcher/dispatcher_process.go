@@ -100,7 +100,7 @@ func (p *Process) Run(quit chan struct{}) {
 
 	dispatcherInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		DeleteFunc: func(obj interface{}) {
-			klog.Infof("The dispatcher %s process is going to be killed...", p.name)
+			klog.V(3).Infof("The dispatcher %s process is going to be killed...", p.name)
 			os.Exit(0)
 		},
 		UpdateFunc: func(old, new interface{}) {
@@ -215,12 +215,12 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 			go func() {
 				instanceId, err := openstack.ServerCreate(host, token, &pod.Spec)
 				if err == nil {
-					klog.Infof("The openstack vm for the pod %v has been created at the host %v", pod.ObjectMeta.Name, host)
+					klog.V(3).Infof("The openstack vm for the pod %v has been created at the host %v", pod.ObjectMeta.Name, host)
 					pod.Status.ClusterInstanceId = instanceId
 					pod.Status.Phase = v1.ClusterScheduled
 					updatedPod, err := p.clientset.CoreV1().Pods(pod.ObjectMeta.Namespace).UpdateStatus(pod)
 					if err == nil {
-						klog.Infof("The pod %v has been updated its apiserver database status to scheduled successfully with the instance id %v", updatedPod, instanceId)
+						klog.V(3).Infof("The pod %v has been updated its apiserver database status to scheduled successfully with the instance id %v", updatedPod, instanceId)
 
 					} else {
 						klog.Warningf("The pod %v failed to update its apiserver database status to scheduled with the error %v", pod.ObjectMeta.Name, err)
