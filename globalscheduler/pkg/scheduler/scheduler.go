@@ -165,15 +165,9 @@ func NewScheduler(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct
 
 	//build entire FlavorMap map<flovorid, flavorinfo>
 	sched.UpdateFlavor()
-<<<<<<< HEAD
-	klog.V(4).Infof("FlavorMap: %v", sched.siteCacheInfoSnapshot.FlavorMap)
-	// init pod, cluster, and scheduler informers for scheduler
-	err = sched.initPodClusterSchedulerInformers(gsconfig, stopEverything)
-=======
 	klog.Infof("FlavorMap: %v", sched.siteCacheInfoSnapshot.FlavorMap)
 	// init pod, cluster, scheduler, and allocation informers for scheduler
 	err = sched.initPodClusterSchedulerAllocationInformers(gsconfig, stopEverything)
->>>>>>> f1c13358f172faaa2a74119bbf5395594ebea393
 	if err != nil {
 		return nil, err
 	}
