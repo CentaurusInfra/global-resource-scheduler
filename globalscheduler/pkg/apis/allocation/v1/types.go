@@ -21,17 +21,18 @@ import (
 )
 
 const (
-	GroupName           string          = "globalscheduler.com"
-	Kind                string          = "Allocation"
-	Version             string          = "v1"
-	Plural              string          = "allocations"
-	Singluar            string          = "allocation"
-	ShortName           string          = "alloc"
-	Name                string          = Plural + "." + GroupName
-	AllocationAssigned  AllocationPhase = "Assigned"
-	AllocationBound     AllocationPhase = "Bound"
-	AllocationScheduled AllocationPhase = "Scheduled"
-	AllocationFailed    AllocationPhase = "Failed"
+	GroupName              string          = "globalscheduler.com"
+	Kind                   string          = "Allocation"
+	Version                string          = "v1"
+	Plural                 string          = "allocations"
+	Singluar               string          = "allocation"
+	ShortName              string          = "alloc"
+	Name                   string          = Plural + "." + GroupName
+	AllocationAssigned     AllocationPhase = "Assigned"
+	AllocationBound        AllocationPhase = "Bound"
+	AllocationScheduled    AllocationPhase = "Scheduled"
+	AllocationFailed       AllocationPhase = "Failed"
+	AllocationNotScheduled AllocationPhase = "NotScheduled"
 )
 
 // AllocationPhase is a label for the condition of an allocation at the current time.
@@ -75,9 +76,11 @@ type Resources struct {
 	Storage      Volume   `json:"storage,omitempty"`
 	NeedEip      bool     `json:"need_eip,omitempty"`
 	//Count        int      `json:"count,omitempty"` // It is commented because there is a conflict with replicas
-	Image           string `json:"image"`
-	SecurityGroupId string `json:"security_group_id"`
-	NicName         string `json:"nic_name"`
+	Image             string   `json:"image"`
+	SecurityGroupId   string   `json:"security_group_id"`
+	NicName           string   `json:"nic_name"`
+	ClusterNames      []string `json:"cluster_names"`
+	ClusterNamespaces []string `json:"cluster_namespaces"`
 }
 
 type Flavor struct {
@@ -93,9 +96,9 @@ type Spot struct {
 }
 
 type Volume struct {
-	SATA int `json:"sata,omitempty"` // default value 40
-	SAS  int `json:"sas,omitempty"`  // default value 10
-	SSD  int `json:"ssd,omitempty"`  // default value 10
+	SATA int64 `json:"sata,omitempty"` // default value 40
+	SAS  int64 `json:"sas,omitempty"`  // default value 10
+	SSD  int64 `json:"ssd,omitempty"`  // default value 10
 }
 
 type Selector struct {

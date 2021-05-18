@@ -42,6 +42,8 @@ import (
 	corelisters "k8s.io/client-go/listers/core/v1"
 	cache "k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
+	allocclientset "k8s.io/kubernetes/globalscheduler/pkg/apis/allocation/client/clientset/versioned"
+	allocv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/allocation/v1"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/algorithmprovider"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/config"
@@ -118,6 +120,8 @@ type Scheduler struct {
 	//KubeClientset          clientset.Interface //kubernetes.Interface
 	KubeClientset          *clientset.Clientset
 	ApiextensionsClientset apiextensionsclientset.Interface
+	allocationClientset    allocclientset.Interface
+	allocationInformer     cache.SharedIndexInformer
 	ClusterClientset       clusterclientset.Interface
 	ClusterInformerFactory externalinformers.SharedInformerFactory
 	ClusterInformer        clusterinformers.ClusterInformer
@@ -161,9 +165,15 @@ func NewScheduler(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct
 
 	//build entire FlavorMap map<flovorid, flavorinfo>
 	sched.UpdateFlavor()
+<<<<<<< HEAD
 	klog.V(4).Infof("FlavorMap: %v", sched.siteCacheInfoSnapshot.FlavorMap)
 	// init pod, cluster, and scheduler informers for scheduler
 	err = sched.initPodClusterSchedulerInformers(gsconfig, stopEverything)
+=======
+	klog.Infof("FlavorMap: %v", sched.siteCacheInfoSnapshot.FlavorMap)
+	// init pod, cluster, scheduler, and allocation informers for scheduler
+	err = sched.initPodClusterSchedulerAllocationInformers(gsconfig, stopEverything)
+>>>>>>> f1c13358f172faaa2a74119bbf5395594ebea393
 	if err != nil {
 		return nil, err
 	}
@@ -210,6 +220,11 @@ func (sched *Scheduler) StartInformersAndRun(stopCh <-chan struct{}) {
 	if sched.schedulerInformer != nil {
 		klog.V(4).Infof("Starting scheduler informer for scheduler %s", sched.SchedulerName)
 		go sched.schedulerInformer.Run(stopCh)
+	}
+	// start allocation informer
+	if sched.allocationInformer != nil {
+		klog.Infof("Starting allocation informer for scheduler %s", sched.SchedulerName)
+		go sched.allocationInformer.Run(stopCh)
 	}
 	// Do scheduling
 	sched.Run(sched.workerNumber, sched.workerNumber, stopCh)
@@ -655,13 +670,35 @@ func (sched *Scheduler) buildFramework() error {
 	return nil
 }
 
-// initPodInformers init scheduler with podInformer
-func (sched *Scheduler) initPodClusterSchedulerInformers(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct{}) error {
+// initPodClusterSchedulerAllocationInformers init scheduler with podInformer, clusterInformer, schedulerInformer, and allocationInformer
+func (sched *Scheduler) initPodClusterSchedulerAllocationInformers(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct{}) error {
 	// init kubeclient
 	cfg, err := clientcmd.BuildConfigFromFlags("", gsconfig.ConfigFilePath)
 	if err != nil {
 		return err
 	}
+
+	allocClientset, err := allocclientset.NewForConfig(cfg)
+	if err != nil {
+		return err
+	}
+	sched.allocationClientset = allocClientset
+	allocSelector := fields.ParseSelectorOrDie(fmt.Sprintf("status.phase=%s,status.scheduler_name=%s",
+		allocv1.AllocationAssigned, sched.SchedulerName))
+	allocLw := cache.NewListWatchFromClient(allocClientset.GlobalschedulerV1(), "allocations", metav1.NamespaceDefault, allocSelector)
+
+	sched.allocationInformer = cache.NewSharedIndexInformer(allocLw, &allocv1.Allocation{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
+	sched.allocationInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			alloc, ok := obj.(*allocv1.Allocation)
+			if !ok {
+				klog.Warningf("Failed to convert  object  %+v to an allocation", obj)
+				return
+			}
+			sched.scheduleAllocation(alloc)
+			sched.bindAllocation(alloc)
+		},
+	})
 
 	///cluster, apiextensions clientset to create crd programmatically
 	apiextensionsClientset, err := apiextensionsclientset.NewForConfig(cfg)
@@ -924,4 +961,137 @@ func (sched *Scheduler) UpdateRegionFlavor(region string, flavorId string) (err 
 	sched.siteCacheInfoSnapshot.RegionFlavorMap[regionFlavorId] = flavor
 	err = nil
 	return
+}
+
+// scheduleAllocation is to scheduler an allocv1.Allocation
+func (sched *Scheduler) scheduleAllocation(alloc *allocv1.Allocation) {
+	klog.Infof("Start to schedule the allocation %v.", alloc)
+	defer klog.Infof("End to schedule the allocation %v.", alloc)
+	clusterNames := make([]string, 0)
+	for idx, resource := range alloc.Spec.ResourceGroup.Resources {
+		if resource.ResourceType == "vm" {
+			stack := &types.Stack{
+				PodName:      resource.Name,
+				Tenant:       alloc.Tenant,
+				PodNamespace: alloc.Namespace,
+				UID:          uuid.NewV4().String(),
+				Selector:     getStackSelectorFromAllocation(&alloc.Spec.Selector),
+				Resources:    getStackResourcesFromAllocationResource(&resource),
+			}
+			allocation := &types.Allocation{
+				ID:       string(alloc.UID),
+				Stack:    *stack,
+				Replicas: alloc.Spec.Replicas,
+				Selector: stack.Selector,
+			}
+
+			//Schedule a converted allocation
+			tmpContext := context.Background()
+			result, err := sched.Schedule(tmpContext, allocation)
+			if err != nil {
+				klog.Errorf("Schedule failed, err: %s", err)
+				alloc.Status.Phase = allocv1.AllocationNotScheduled
+				return
+			}
+			klog.Infof("Try to bind to a cluster, stacks %v ", result.Stacks)
+			alloc.Spec.ResourceGroup.Resources[idx].ClusterNames = make([]string, 0)
+			alloc.Spec.ResourceGroup.Resources[idx].ClusterNamespaces = make([]string, 0)
+
+			for _, stack := range result.Stacks {
+				alloc.Spec.ResourceGroup.Resources[idx].ClusterNames =
+					append(alloc.Spec.ResourceGroup.Resources[idx].ClusterNames, stack.Selected.ClusterName)
+				alloc.Spec.ResourceGroup.Resources[idx].ClusterNamespaces =
+					append(alloc.Spec.ResourceGroup.Resources[idx].ClusterNamespaces, stack.Selected.ClusterNamespace)
+				clusterNames = append(clusterNames, stack.Selected.ClusterName)
+			}
+		}
+	}
+	alloc.Status.Phase = allocv1.AllocationScheduled
+	alloc.Status.ClusterNames = clusterNames
+}
+
+// getStackSelectorFromAllocation change allocation selector to stack selector
+func getStackSelectorFromAllocation(selector *allocv1.Selector) types.Selector {
+	// depress empty slice warning
+	var siteID string
+	newRegions := make([]types.CloudRegion, 0)
+	for _, region := range selector.Regions {
+		newRegions = append(newRegions, types.CloudRegion{
+			Region:           region.Region,
+			AvailabilityZone: region.AvailabilityZone,
+		})
+		/// the following check is to avoid an out of index error when allocation selector doesn't have az
+		siteID = region.Region + constants.SiteDelimiter
+		if len(region.AvailabilityZone) > 0 {
+			siteID = siteID + region.AvailabilityZone[0]
+		}
+	}
+
+	newSelector := types.Selector{
+		GeoLocation: types.GeoLocation{
+			Country:  selector.GeoLocation.Country,
+			Area:     selector.GeoLocation.Area,
+			Province: selector.GeoLocation.Province,
+			City:     selector.GeoLocation.City,
+		},
+		Regions:  newRegions,
+		Operator: selector.Operator,
+		SiteID:   siteID,
+		Strategy: types.Strategy{
+			LocationStrategy: selector.Strategy.LocationStrategy,
+		},
+	}
+	return newSelector
+}
+
+// getStackResourcesFromAllocationResource changes allocation resources to stack resource
+func getStackResourcesFromAllocationResource(allocRes *allocv1.Resources) []*types.Resource {
+	flavors := make([]types.Flavor, 0)
+	for _, flavor := range allocRes.Flavors {
+		flavors = append(flavors, types.Flavor{
+			FlavorID: flavor.FlavorId,
+			// Copied the following line from eventhandler.go
+			Spot: nil,
+			// Have to comment the following code segment since spot flavors are always empty
+			//Spot: &types.Spot{
+			//	flavor.Spot.MaxPrice,
+			//	flavor.Spot.SpotDurationCount,
+			//	flavor.Spot.SpotDurationHours,
+			//	flavor.Spot.InterruptionPolicy,
+			//	},
+		})
+	}
+	// Have to comment the following code segment since the test openstack does not support it.
+	//storageMap := make(map[string]int64)
+	//if allocRes.Storage.SAS > 0 {
+	//	storageMap["sas"] = allocRes.Storage.SAS
+	//}
+	//if allocRes.Storage.SATA > 0 {
+	//	storageMap["sata"] = allocRes.Storage.SATA
+	//}
+	//if allocRes.Storage.SSD > 0 {
+	//	storageMap["ssd"] = allocRes.Storage.SSD
+	//}
+	resource := &types.Resource{
+		Name:         allocRes.Name,
+		ResourceType: allocRes.ResourceType,
+		// Copied the following line from eventhandler.go
+		Storage: nil,
+		// Have to comment the following code segment since the test openstack does not support it.
+		//Storage:      storageMap,
+		Flavors: flavors,
+		NeedEip: allocRes.NeedEip,
+		// It is no longer used
+		Count: 1,
+	}
+	return []*types.Resource{resource}
+}
+
+// Update allocation status and bound cluster information
+func (sched *Scheduler) bindAllocation(alloc *allocv1.Allocation) {
+	if _, err := sched.allocationClientset.GlobalschedulerV1().AllocationsWithMultiTenancy(alloc.Namespace, alloc.Tenant).Update(alloc); err != nil {
+		klog.Errorf("Failed to update the allocation %v with the error %v", alloc, err)
+	} else {
+		klog.Infof("Updated allocation %s to the status phase %v successfully.", alloc.Name, alloc.Status.Phase)
+	}
 }
