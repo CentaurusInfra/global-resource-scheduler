@@ -565,7 +565,6 @@ func (sched *Scheduler) verifyClusterInfo(cluster *clusterv1.Cluster) (verified 
 func (sched *Scheduler) verifyPodInfo(pod *v1.Pod) (verified bool) {
 	verified = false
 	name := pod.Name
-	flavors := pod.Spec.VirtualMachine.Flavors
 	if pod.Name == "" {
 		klog.Errorf("pod name:%s is null", name)
 		return verified
