@@ -59,9 +59,14 @@ filegroup(
 
 go_test(
     name = "go_default_test",
-    srcs = ["distributor_controller_test.go"],
+    srcs = [
+        "distributor_controller_test.go",
+        "distributor_test.go",
+    ],
     embed = [":go_default_library"],
     deps = [
+        "//globalscheduler/pkg/apis/allocation/v1:go_default_library",
+        "//globalscheduler/pkg/apis/cluster/v1:go_default_library",
         "//globalscheduler/pkg/apis/distributor/client/clientset/versioned/fake:go_default_library",
         "//globalscheduler/pkg/apis/distributor/client/informers/externalversions:go_default_library",
         "//globalscheduler/pkg/apis/distributor/v1:go_default_library",

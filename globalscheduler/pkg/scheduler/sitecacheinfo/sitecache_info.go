@@ -552,8 +552,54 @@ func GetStackKey(stack *types.Stack) (string, error) {
 	return uid, nil
 }
 
+//deduct or add 
+func (n *SiteCacheInfo) UpdateSiteResInfo(resInfo types.AllResInfo, regionFlavorMap map[string]*typed.RegionFlavor, deduct bool) error {
+	var resourceTypes []string
+	klog.Infof("444 UpdateSiteResInfo -  resInfo: %#v, regionFlavors:%#v", resInfo, regionFlavorMap)
+	for resType, res := range resInfo.CpuAndMem {
+		//resource type is null, assign default resource type (e.g. when binding a pod for the first time)
+		if resType == "" {
+			resType = string(DefaultResourceType)
+			resourceTypes = append(resourceTypes, resType)
+		}
+		if len(n.RequestedResources) == 0 {
+			reqRes := types.CPUAndMemory{VCPU: res.VCPU, Memory: res.Memory}
+			n.RequestedResources[resType] = &reqRes
+			continue
+		}
+		for reqType, reqRes := range n.RequestedResources {
+			klog.Infof("555 UpdateSiteResInfo -  reqType: %#v, reqRes:%#v", reqType, reqRes)
+			resTypes := strings.Split(reqType, constants.FlavorDelimiter)
+			if !utils.IsContain(resTypes, resType) {
+				klog.Infof("!utils.IsContain: %v", !utils.IsContain(resTypes, resType))
+				continue
+			}
+			reqRes.VCPU += res.VCPU
+			reqRes.Memory += res.Memory
+			klog.Infof("666 UpdateSiteResInfo Before -  RequestedResources[%#v]: %#v", resType, n.RequestedResources[resType])
+			n.RequestedResources[resType] = reqRes
+			klog.Infof("777 UpdateSiteResInfo After -  RequestedResources[%#v]: %#v", resType, n.RequestedResources[resType])
+
+		}
+	}
+	for volType, used := range resInfo.Storage {
+		klog.Infof("888 UpdateSiteResInfo Before -  RequestedStorage[%#v]: %#v", volType, n.RequestedStorage[volType])
+		reqVol, ok := n.RequestedStorage[volType]
+		if !ok {
+			reqVol = 0
+		}
+		reqVol += used
+		n.RequestedStorage[volType] = reqVol
+		klog.Infof("888 UpdateSiteResInfo After -  RequestedStorage[%#v]: %#v", volType, n.RequestedStorage[volType])
+
+	}
+	n.updateSiteFlavor(resourceTypes, regionFlavorMap, deduct)
+	n.generation = nextGeneration()
+	return nil
+}
+
 // DeductSiteResInfo deduct site's resource info
-func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo, regionFlavorMap map[string]*typed.RegionFlavor) error {
+/*func (n *SiteCacheInfo) DeductSiteResInfo2(resInfo types.AllResInfo, regionFlavorMap map[string]*typed.RegionFlavor) error {
 	var resourceTypes []string
 	for resType, res := range resInfo.CpuAndMem {
 		//resource type is null, assign default resource type (e.g. when binding a pod for the first time)
@@ -588,6 +634,72 @@ func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo, regionFlavor
 	n.updateSiteFlavor(resourceTypes, regionFlavorMap)
 	n.generation = nextGeneration()
 	return nil
+}*/
+
+func (n *SiteCacheInfo) updateSiteFlavor(resourceTypes []string, regionFlavors map[string]*typed.RegionFlavor, deduct bool) {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+
+	klog.Infof("999 updateSiteFlavor Before -  resourceTypes: %#v, regionFlavors:%#v", resourceTypes, regionFlavors)
+	for k, v := range regionFlavors {
+		klog.Infof("updateSiteFlavor Before -  key: %#v, regionFlavor:%#v", k, v)
+	}
+
+	if n.AllocatableFlavor == nil {
+		n.AllocatableFlavor = map[string]int64{}
+	}
+	supportFlavors := n.AllocatableFlavor
+	regionName := utils.GetRegionName(n.Site.SiteID)
+	for flavorid := range supportFlavors {
+		regionFalvorKey := regionName + constants.FlavorDelimiter + flavorid
+		flv := regionFlavors[regionFalvorKey]
+		klog.Infof("000 updateSiteFlavor  -  flv: %#v", flv)
+		if flv == nil {
+			n.deductFlavor()
+			klog.Infof("n.AllocatableFlavor After -  n.AllocatableFlavor[%#v]: %#v", flavorid, n.AllocatableFlavor[flavorid])
+			return
+		}
+		vCPUInt, err := strconv.ParseInt(flv.Vcpus, 10, 64)
+		if err != nil {
+			n.deductFlavor()
+			klog.Infof("n.AllocatableFlavor After -  n.AllocatableFlavor[%#v]: %#v", flavorid, n.AllocatableFlavor[flavorid])
+			return
+		}
+		for _, resourceType := range resourceTypes {
+			klog.Infof("121 updateSiteFlavor Before -  resourceType:%#v, n.TotalResources: %#v, RequestedResources: %#v", resourceType, n.TotalResources[resourceType], n.RequestedResources[resourceType])
+			totalRes := n.TotalResources[resourceType]
+			requestRes := n.RequestedResources[resourceType]
+			if totalRes == nil {
+				klog.Infof("updateSiteFlavor  -  totalRes is nil")
+				n.deductFlavor()
+				klog.Infof("n.AllocatableFlavor After -  n.AllocatableFlavor[%#v]: %#v", flavorid, n.AllocatableFlavor[flavorid])
+				return
+			}
+			if requestRes == nil {
+				klog.Infof("updateSiteFlavor  -  requestRes is nil")
+				requestRes = &types.CPUAndMemory{VCPU: 0, Memory: 0}
+			}
+			if(deduct == true) {
+				count := (totalRes.VCPU - requestRes.VCPU) / vCPUInt
+				memCount := (totalRes.Memory - requestRes.Memory) / flv.Ram
+			} else {
+				count := (totalRes.VCPU + requestRes.VCPU) / vCPUInt
+				memCount := (totalRes.Memory + requestRes.Memory) / flv.Ram
+			}
+			if count > memCount {
+				count = memCount
+			}
+			if _, ok := n.AllocatableFlavor[flavorid]; !ok {
+				n.AllocatableFlavor[flavorid] = 0
+			}
+			klog.Infof("121 n.AllocatableFlavor Before -  n.AllocatableFlavor[%#v]: %#v", flavorid, n.AllocatableFlavor[flavorid])
+			if n.AllocatableFlavor[flavorid] > count {
+				n.AllocatableFlavor[flavorid] = count
+			}
+			klog.Infof("121 n.AllocatableFlavor After -  n.AllocatableFlavor[%#v]: %#v", flavorid, n.AllocatableFlavor[flavorid])
+			klog.Infof("121 updateSiteFlavor After -  resourceType:%#v, n.TotalResources: %#v, RequestedResources: %#v", resourceType, n.TotalResources[resourceType], n.RequestedResources[resourceType])
+		}
+	}
 }
 
 /*
@@ -598,7 +710,7 @@ updateFlavor(): /home/ubuntu/go/src/k8s.io/arktos/conf/flavors.json
 global scheduler flavor config file:
 /home/ubuntu/go/src/k8s.io/arktos/conf/flavor_config.yaml
 */
-func (n *SiteCacheInfo) updateSiteFlavor(resourceTypes []string, regionFlavors map[string]*typed.RegionFlavor) {
+func (n *SiteCacheInfo) updateSiteFlavor2(resourceTypes []string, regionFlavors map[string]*typed.RegionFlavor) {
 	n.mu.Lock()
 	defer n.mu.Unlock()
 
@@ -660,4 +772,72 @@ func (n *SiteCacheInfo) deductFlavor() {
 			n.RequestedFlavor[key] = requested + 1
 		}
 	}
+}
+
+func (n *SiteCacheInfo) updateFlavor(deduct bool) {
+	n := -1
+	if deduct == true {
+		n=1
+	}
+	if n.AllocatableFlavor == nil {
+		n.AllocatableFlavor = map[string]int64{}
+	}
+	for key, value := range n.AllocatableFlavor {
+		n.AllocatableFlavor[key] = value - 1
+		if n.RequestedFlavor == nil {
+			n.RequestedFlavor = make(map[string]int64)
+		}
+		requested, ok := n.RequestedFlavor[key]
+		if !ok {
+			n.RequestedFlavor[key] = 1
+		} else {
+			n.RequestedFlavor[key] = requested + 1
+		}
+	}
+}
+
+//revoke bound site's resource to pod because pod creation failed
+func (n *SiteCacheInfo) WithdrawSiteResInfo(resInfo types.AllResInfo, regionFlavorMap map[string]*typed.RegionFlavor) error {
+	var resourceTypes []string
+	klog.Infof("444 WithdrawSiteResInfo -  resInfo: %#v, regionFlavors:%#v", resInfo, regionFlavorMap)
+	for resType, res := range resInfo.CpuAndMem {
+		//resource type is null, assign default resource type (e.g. when binding a pod for the first time)
+		if resType == "" {
+			resType = string(DefaultResourceType)
+			resourceTypes = append(resourceTypes, resType)
+		}
+		if len(n.RequestedResources) == 0 {
+			reqRes := types.CPUAndMemory{VCPU: res.VCPU, Memory: res.Memory}
+			n.RequestedResources[resType] = &reqRes
+			continue
+		}
+		for reqType, reqRes := range n.RequestedResources {
+			klog.Infof("555 WithdrawSiteResInfo -  reqType: %#v, reqRes:%#v", reqType, reqRes)
+			resTypes := strings.Split(reqType, constants.FlavorDelimiter)
+			if !utils.IsContain(resTypes, resType) {
+				klog.Infof("!utils.IsContain: %v", !utils.IsContain(resTypes, resType))
+				continue
+			}
+			reqRes.VCPU += res.VCPU
+			reqRes.Memory += res.Memory
+			klog.Infof("666 WithdrawSiteResInfo Before -  RequestedResources[%#v]: %#v", resType, n.RequestedResources[resType])
+			n.RequestedResources[resType] = reqRes
+			klog.Infof("777 WithdrawSiteResInfo After -  RequestedResources[%#v]: %#v", resType, n.RequestedResources[resType])
+
+		}
+	}
+	for volType, used := range resInfo.Storage {
+		klog.Infof("888 WithdrawSiteResInfo Before -  RequestedStorage[%#v]: %#v", volType, n.RequestedStorage[volType])
+		reqVol, ok := n.RequestedStorage[volType]
+		if !ok {
+			reqVol = 0
+		}
+		reqVol += used
+		n.RequestedStorage[volType] = reqVol
+		klog.Infof("888 WithdrawSiteResInfo After -  RequestedStorage[%#v]: %#v", volType, n.RequestedStorage[volType])
+
+	}
+	n.updateSiteFlavor(resourceTypes, regionFlavorMap)
+	n.generation = nextGeneration()
+	return nil
 }

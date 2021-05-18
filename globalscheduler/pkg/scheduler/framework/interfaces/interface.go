@@ -386,6 +386,7 @@ type BindPlugin interface {
 	// it must return Skip in its Status code. If a bind plugin returns an Error, the
 	// pod is rejected and will not be bound.
 	Bind(ctx context.Context, state *CycleState, p *types.Stack, siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) *Status
+	BindResource(ctx context.Context, state *CycleState, p *types.Stack, siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) (*Status, string, string, *types.AllResInfo)
 }
 
 // StrategyPlugin is an interface that must be implemented by "strategy" plugins. strategy
@@ -461,6 +462,9 @@ type Framework interface {
 	// or "Success". If none of the plugins handled binding, RunBindPlugins returns code=5("skip") status.
 	RunBindPlugins(ctx context.Context, state *CycleState, stack *types.Stack,
 		siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) *Status
+
+	RunBindResourcePlugins(ctx context.Context, state *CycleState, stack *types.Stack,
+		siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) (*Status, string, string, *types.AllResInfo)
 
 	//RunStrategyPlugins runs the set of configured strategy plugins.
 	RunStrategyPlugins(ctx context.Context, state *CycleState,
