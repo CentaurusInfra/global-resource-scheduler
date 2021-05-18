@@ -72,15 +72,6 @@ func AddAllEventHandlers(sched *Scheduler) {
 			FilterFunc: func(obj interface{}) bool {
 				switch t := obj.(type) {
 				case *v1.Pod:
-					//klog.Infof("###111Pod: %#v", t)
-					klog.Infof("###111PodStatus: %#v", t.Status)
-					pod := obj.(*v1.Pod)
-					klog.Infof("#: %#v", pod.Name)
-					ppp, err := sched.Client.CoreV1().Pods("default").Get(pod.Name, metav1.GetOptions{})
-					if err == nil {
-						//klog.Infof("###pppPod: %#v", ppp)
-						klog.Infof("###pppPodStatus: %#v", ppp.Status)
-					}
 					return assignedPod(t) && responsibleForPod(t, sched.SchedulerName)
 				case cache.DeletedFinalStateUnknown:
 					if pod, ok := t.Obj.(*v1.Pod); ok {
@@ -105,16 +96,6 @@ func AddAllEventHandlers(sched *Scheduler) {
 			FilterFunc: func(obj interface{}) bool {
 				switch t := obj.(type) {
 				case *v1.Pod:
-					//klog.Infof("###222Pod: %#v", t)
-					klog.Infof("###222PodStatus: %#v", t.Status)
-					pod := obj.(*v1.Pod)
-					klog.Infof("##: %#v", pod.Name)
-
-					pp, err := sched.Client.CoreV1().Pods("default").Get(pod.Name, metav1.GetOptions{})
-					if err == nil {
-						//klog.Infof("###222ppPod: %#v", pp)
-						klog.Infof("###222ppPodStatus: %#v", pp.Status)
-					}
 					return needToSchedule(t) && responsibleForPod(t, sched.SchedulerName)
 				case cache.DeletedFinalStateUnknown:
 					if pod, ok := t.Obj.(*v1.Pod); ok {
@@ -140,17 +121,6 @@ func AddAllEventHandlers(sched *Scheduler) {
 			FilterFunc: func(obj interface{}) bool {
 				switch t := obj.(type) {
 				case *v1.Pod:
-					pod := obj.(*v1.Pod)
-					klog.Infof("###: %#v", pod.Name)
-					p, err := sched.Client.CoreV1().Pods("default").Get(pod.Name, metav1.GetOptions{})
-					klog.Infof("###333Pod: %#v", err)
-					//klog.Infof("###333Pod: %#v", t)
-					klog.Infof("###333PodStatus: %#v", t.Status)
-					//p := sched.clientset.CoreV1().Pods(pod.ObjectMeta.Namespace).Get(pod.Name, metav1.GetOptions{})
-					if err == nil {
-						//klog.Infof("###pppPod: %#v", p)
-						klog.Infof("###pppPodStatus: %#v", p.Status)
-					}
 					return failedToSchedule(t) && responsibleForPod(t, sched.SchedulerName)
 				case cache.DeletedFinalStateUnknown:
 					if pod, ok := t.Obj.(*v1.Pod); ok {
@@ -179,36 +149,28 @@ func AddAllEventHandlers(sched *Scheduler) {
 
 // needToSchedule selects pods that need to be scheduled
 func needToSchedule(pod *v1.Pod) bool {
-	klog.Infof("$$$$$$$needToSchedule: %v", pod.Name)
-	klog.Infof("$$$$$$$needToSchedule: %v", pod.Spec.VirtualMachine != nil && pod.Status.Phase == v1.PodAssigned)
 	return pod.Spec.VirtualMachine != nil && pod.Status.Phase == v1.PodAssigned
 }
 
 // assignedPod selects pods that are assigned (scheduled and running).
 func assignedPod(pod *v1.Pod) bool {
-	klog.Infof("$$$$$$$assignedPod: %v", pod.Name)
-	klog.Infof("$$$$$$$assignedPod: %v", pod.Spec.VirtualMachine != nil && pod.Status.Phase == v1.PodBound)
 	return pod.Spec.VirtualMachine != nil && pod.Status.Phase == v1.PodBound
 }
 
 // responsibleForPod returns true if the pod has asked to be scheduled by the given scheduler.
 func responsibleForPod(pod *v1.Pod, schedulerName string) bool {
-	klog.Infof("$$$$$$$responsibleForPod: %v", pod.Name)
-	klog.Infof("$$$$$$$responsibleForPod: %v", schedulerName == pod.Status.AssignedScheduler.Name)
 	return schedulerName == pod.Status.AssignedScheduler.Name
 }
 
 // failedToSchedule selects pods that scheduled but failed to create vm
 func failedToSchedule(pod *v1.Pod) bool {
-	klog.Infof("$$$$$$$failedToSchedule: %v", pod.Name)
-	klog.Infof("$$$$$$$failedToSchedule: %v", pod.Spec.VirtualMachine != nil && pod.Status.Phase == v1.PodFailed)
-	return pod.Spec.VirtualMachine != nil && pod.Status.Phase == v1.PodFailed
+	return pod.Status.Phase == v1.PodFailed
 }
 
 // addPodToCache add pod to the stack cache of the scheduler
 func (sched *Scheduler) addPodToCache(obj interface{}) {
 	pod, ok := obj.(*v1.Pod)
-	klog.Infof("Add a pod: %v", pod.Name)
+	klog.V(4).Infof("Add a pod: %v", pod.Name)
 	if !ok {
 		klog.Errorf("cannot convert to *v1.Pod: %v", obj)
 		return
@@ -614,14 +576,14 @@ func (sched *Scheduler) verifyPodInfo(pod *v1.Pod) (verified bool) {
 
 func (sched *Scheduler) addPodWithdrawResource(object interface{}) {
 	pod, ok := object.(*v1.Pod)
-	klog.Infof("Add a pod to withdraw resource: %v", pod.Name)
+	klog.V(4).Infof("Add a pod to withdraw resource: %v", pod.Name)
 	if !ok {
 		klog.Errorf("cannot convert to *v1.Pod: %v", object)
 		return
 	}
 	podCopy := pod.DeepCopy()
 	if sched.verifyPodInfo(podCopy) == false {
-		klog.Infof(" Pod data is not correct: %v", podCopy)
+		klog.V(4).Infof(" Pod data is not correct: %v", podCopy)
 	}
 	err := sched.withdrawResource(pod.Name)
 	if err != nil {
@@ -636,7 +598,7 @@ func (sched *Scheduler) updatePodWithdrawResource(oldObj, newObj interface{}) {
 		return
 	}
 	newPod, ok := newObj.(*v1.Pod)
-	klog.Infof("Update a pod: %v", newPod)
+	klog.V(4).Infof("Update a pod: %v", newPod)
 	if !ok {
 		klog.Errorf("cannot convert newObj to *v1.Pod: %v", newObj)
 		return
@@ -656,7 +618,7 @@ func (sched *Scheduler) deletePodWithdrawResource(obj interface{}) {
 	switch t := obj.(type) {
 	case *v1.Pod:
 		pod = t
-		klog.Infof("Delete a pod: %v", pod.Name)
+		klog.V(4).Infof("Delete a pod: %v", pod.Name)
 	case cache.DeletedFinalStateUnknown:
 		var ok bool
 		pod, ok = t.Obj.(*v1.Pod)
@@ -678,9 +640,8 @@ func (sched *Scheduler) deletePodWithdrawResource(obj interface{}) {
 //withdraw reserved resources to a pod & add it to cash to other pods
 func (sched *Scheduler) withdrawResource(podName string) error {
 	resource := sched.ResourceAllocationMap[podName]
-	//allResInfo := types.AllResInfo{CpuAndMem: resource.CpuMem, Storage: resource.Storage, eipNum: 0}
-	if (resource == nil){
-		klog.Infof("there is no preserved resource for pod: %s", podName)
+	if resource == nil {
+		klog.V(4).Infof("there is no preserved resource for pod: %s", podName)
 		return nil
 	}
 	allResInfo := resource.Resource
@@ -691,7 +652,7 @@ func (sched *Scheduler) withdrawResource(podName string) error {
 		return err
 	}
 	siteCacheInfo := sched.siteCacheInfoSnapshot.SiteCacheInfoMap[resource.SiteID]
-	siteCacheInfo.WithdrawSiteResInfo(allResInfo, regionFlavor)
+	siteCacheInfo.UpdateSiteResInfo(allResInfo, regionFlavor, false)
 	delete(sched.ResourceAllocationMap, podName)
 	return nil
 }

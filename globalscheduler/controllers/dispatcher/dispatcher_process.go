@@ -19,11 +19,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/kubernetes/scheme"
-	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/tools/record"
 	"k8s.io/klog"
 	"k8s.io/kubernetes/globalscheduler/cmd/conf"
 	"k8s.io/kubernetes/globalscheduler/controllers/util"
@@ -53,7 +50,6 @@ type Process struct {
 	totalDeleteLatency  int64
 	totalPodCreateNum   int
 	totalPodDeleteNum   int
-	recorder            record.EventRecorder
 }
 
 func NewProcess(config *rest.Config, namespace string, name string, quit chan struct{}) Process {
@@ -78,12 +74,6 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 	if err != nil {
 		klog.Fatal(err)
 	}
-	eventBroadcaster := record.NewBroadcaster()
-	eventBroadcaster.StartLogging(klog.Infof)
-	eventBroadcaster.StartRecordingToSink(
-		&typedcorev1.EventSinkImpl{Interface: clientset.CoreV1().Events("")})
-	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, v1.EventSource{Component: name})
-
 	return Process{
 		namespace:           namespace,
 		name:                name,
@@ -98,7 +88,6 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 		totalDeleteLatency:  0,
 		totalPodCreateNum:   0,
 		totalPodDeleteNum:   0,
-		recorder:            recorder,
 	}
 }
 
@@ -107,7 +96,6 @@ func (p *Process) Run(quit chan struct{}) {
 
 	dispatcherSelector := fields.ParseSelectorOrDie("metadata.name=" + p.name)
 	dispatcherLW := cache.NewListWatchFromClient(p.dispatcherClientset.GlobalschedulerV1(), "dispatchers", p.namespace, dispatcherSelector)
-
 	dispatcherInformer := cache.NewSharedIndexInformer(dispatcherLW, &dispatcherv1.Dispatcher{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
 
 	dispatcherInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -229,8 +217,7 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 				if err == nil {
 					klog.Infof("The openstack vm for the pod %v has been created at the host %v", pod.ObjectMeta.Name, host)
 					pod.Status.ClusterInstanceId = instanceId
-					//pod.Status.Phase = v1.ClusterScheduled
-					pod.Status.Phase = v1.PodFailed
+					pod.Status.Phase = v1.ClusterScheduled
 					updatedPod, err := p.clientset.CoreV1().Pods(pod.ObjectMeta.Namespace).UpdateStatus(pod)
 					if err == nil {
 						klog.Infof("The pod %v has been updated its apiserver database status to scheduled successfully with the instance id %v", updatedPod, instanceId)
@@ -245,17 +232,6 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 						klog.Warningf("The pod %v failed to update its apiserver dtatbase status to failed with the error %v", pod.ObjectMeta.Name, err)
 					}
 				}
-				///for test
-				klog.Warningf("The openstack vm for the  pod %v failed to create with the error", pod.ObjectMeta.Name)
-				pod.Status.Phase = v1.PodFailed
-				if _, err := p.clientset.CoreV1().Pods(pod.ObjectMeta.Namespace).UpdateStatus(pod); err != nil {
-					klog.Warningf("The pod %v failed to update its apiserver dtatbase status to failed with the error %v", pod.ObjectMeta.Name, err)
-				}
-				klog.Infof("+++ The pod info %s, %#v, %#v", pod.ObjectMeta.Name, pod.Status)
-				//p.recorder.Event(pod, corev1.EventTypeNormal, SuccessSynched, MessageResourceSynched)
-				//p.recorder.Event(pod, v1.EventTypeWarning, "Failed", "Failed to create vm")
-
-				// util.CheckTime(pod.Name, "dispatcher", "CreatePod-End", 2)
 			}()
 		}
 	}

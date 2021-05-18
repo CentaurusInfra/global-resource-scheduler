@@ -70,7 +70,7 @@ func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, s
 		klog.Errorf("Gettng site selector state failed! err: %s", err)
 		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %q info failed: %v", siteID, err))
 	}
-	klog.Infof("site selector info: %v", siteSelectedInfo)
+	klog.V(4).Infof("site selector info: %v", siteSelectedInfo)
 	if len(stack.Resources) != len(siteSelectedInfo.Flavors) {
 		klog.Errorf("flavor count not equal to server count! err: %s", err)
 		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("siteID(%s) flavor count not equal to "+
@@ -114,10 +114,10 @@ func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, s
 	klog.V(4).Infof("Resource state after deduction: %v", siteCacheInfo)
 	return nil*/
 
-	/*klog.Infof("111 Resource state before deduction: %#v", siteCacheInfo)
-	klog.Infof("222 resInfo: %#v, regionFlavors:%#v", resInfo, regionFlavors)
+	/*klog.V(4).Infof("111 Resource state before deduction: %#v", siteCacheInfo)
+	klog.V(4).Infof("222 resInfo: %#v, regionFlavors:%#v", resInfo, regionFlavors)
 	siteCacheInfo.DeductSiteResInfo(resInfo, regionFlavors)
-	klog.Infof("333 Resource state after deduction: %#v", siteCacheInfo)*/
+	klog.V(4).Infof("333 Resource state after deduction: %#v", siteCacheInfo)*/
 	return nil
 }
 
@@ -144,9 +144,6 @@ func (b DefaultBinder) BindResource(ctx context.Context, state *interfaces.Cycle
 		status := interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %q info failed: %v", siteID, err))
 		return status, siteID, flavorID, &resInfo
 	}
-	klog.Infof("site selector info: %v", siteSelectedInfo)
-	klog.Infof("stack.Resources: %#v", stack.Resources)
-	klog.Infof("siteSelectedInfo.Flavors: %#v", siteSelectedInfo.Flavors)
 	if len(stack.Resources) != len(siteSelectedInfo.Flavors) {
 		klog.Errorf("flavor count not equal to server count! err: %s", err)
 		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("siteID(%s) flavor count not equal to "+
@@ -155,13 +152,13 @@ func (b DefaultBinder) BindResource(ctx context.Context, state *interfaces.Cycle
 	for i := 0; i < len(stack.Resources); i++ {
 		flavorID = siteSelectedInfo.Flavors[i].FlavorID
 		stack.Resources[i].FlavorIDSelected = flavorID
-		klog.Infof("GetFlavor - flavorID: %s, region: %s", flavorID, region)
+		klog.V(4).Infof("GetFlavor - flavorID: %s, region: %s", flavorID, region)
 		flv, ok := cache.FlavorCache.GetFlavor(flavorID, region)
 		if !ok {
 			klog.Warningf("flavor %s not found in region(%s)", flavorID, region)
 			continue
 		}
-		klog.Infof("flavor %s : %v", flavorID, flv)
+		klog.V(4).Infof("flavor %s : %v", flavorID, flv)
 		vCPUInt, err := strconv.ParseInt(flv.Vcpus, 10, 64)
 		if err != nil || vCPUInt <= 0 {
 			klog.Warningf("flavor %s is invalid in region(%s)", flavorID, region)
@@ -178,21 +175,7 @@ func (b DefaultBinder) BindResource(ctx context.Context, state *interfaces.Cycle
 		resInfo.CpuAndMem[flv.OsExtraSpecs.ResourceType] = reqRes
 		break
 	}
-	klog.Infof("UpdateSiteWithResInfo - siteID: %s, resInfo: %#v", siteID, resInfo)
+	klog.V(4).Infof("UpdateSiteWithResInfo - siteID: %s, resInfo: %#v", siteID, resInfo)
 	b.handle.Cache().UpdateSiteWithResInfo(siteID, resInfo)
-	/*regionFlavors, err := b.handle.SnapshotSharedLister().SiteCacheInfos().GetFlavors()
-	if err != nil {
-		klog.Errorf("Getting region's flavor failed: %s", err)
-		return interfaces.NewStatus(interfaces.Error, fmt.Sprintf("getting site %q info failed: %v", siteID, err)), siteID, flavorID, nil
-	}
-	if regionFlavors == nil || err != nil {
-		regionFlavors = map[string]*typed.RegionFlavor{}
-	}
-
-	klog.Infof("111 Resource state before deduction: %#v", siteCacheInfo)
-	klog.Infof("222 resInfo: %#v, regionFlavors:%#v", resInfo, regionFlavors)
-	siteCacheInfo.DeductSiteResInfo(resInfo, regionFlavors)
-	klog.Infof("333 Resource state after deduction: %#v", siteCacheInfo)*/
-	klog.Infof("UpdateSiteWithResInfo - return")
 	return nil, siteID, flavorID, &resInfo
 }
