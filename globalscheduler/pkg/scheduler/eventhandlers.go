@@ -638,7 +638,7 @@ func (sched *Scheduler) deletePodWithdrawResource(obj interface{}) {
 
 //withdraw reserved resources to a pod & add it to cash to other pods
 func (sched *Scheduler) withdrawResource(podName string) error {
-	resource := sched.ResourceAllocationMap[podName]
+	resource := sched.PodSiteResourceMap[podName]
 	if resource == nil {
 		klog.V(4).Infof("there is no preserved resource for pod: %s", podName)
 		return nil
@@ -652,6 +652,6 @@ func (sched *Scheduler) withdrawResource(podName string) error {
 	}
 	siteCacheInfo := sched.siteCacheInfoSnapshot.SiteCacheInfoMap[resource.SiteID]
 	siteCacheInfo.UpdateSiteResInfo(allResInfo, regionFlavor, false)
-	delete(sched.ResourceAllocationMap, podName)
+	delete(sched.PodSiteResourceMap, podName)
 	return nil
 }

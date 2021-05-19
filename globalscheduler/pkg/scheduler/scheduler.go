@@ -80,7 +80,8 @@ type ScheduleResult struct {
 	FeasibleSites  int // Number of feasible site on one stack scheduled
 }
 
-type PodSiteResourceAllocation struct {
+//perserved site resource for pod
+type PodSiteResource struct {
 	PodName  string
 	SiteID   string
 	Flavor   string
@@ -134,7 +135,7 @@ type Scheduler struct {
 	workerNumber           int
 
 	//<pod-name, Stack> table to withdraw site resource
-	ResourceAllocationMap map[string]*PodSiteResourceAllocation
+	PodSiteResourceMap map[string]*PodSiteResource
 }
 
 // single scheduler instance
@@ -156,7 +157,7 @@ func NewScheduler(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct
 		ConfigFilePath:          gsconfig.ConfigFilePath,
 		deletedClusters:         make(map[string]string),
 		workerNumber:            1,
-		ResourceAllocationMap:   make(map[string]*PodSiteResourceAllocation),
+		PodSiteResourceMap:      make(map[string]*PodSiteResource),
 	}
 	err := sched.buildFramework()
 	if err != nil {
@@ -509,8 +510,8 @@ func (sched *Scheduler) bind(ctx context.Context, stack *types.Stack, targetSite
 	bindStatus, siteId, flavorId, resInfo := sched.SchedFrame.RunBindResourcePlugins(ctx, state, stack,
 		sched.siteCacheInfoSnapshot.SiteCacheInfoMap[targetSiteID])
 	if bindStatus.IsSuccess() {
-		podResporceAlloc := PodSiteResourceAllocation{stack.PodName, siteId, flavorId, *resInfo}
-		sched.ResourceAllocationMap[stack.PodName] = &podResporceAlloc
+		podResource := PodSiteResource{stack.PodName, siteId, flavorId, *resInfo}
+		sched.PodSiteResourceMap[stack.PodName] = &podResource
 		region := utils.GetRegionName(siteId)
 		regionFlavors, err := sched.siteCacheInfoSnapshot.GetRegionFlavors(region)
 		if err != nil {
