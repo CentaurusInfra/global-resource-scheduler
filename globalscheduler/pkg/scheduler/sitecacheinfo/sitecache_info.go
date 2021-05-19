@@ -487,17 +487,14 @@ func (n *SiteCacheInfo) UpdateSiteWithRatio(ratios []types.AllocationRatio) erro
 		var usedMem = int64(float64(totalRes.Memory) * memRatio)
 		n.updateRequestResourceByResType(resType, &types.CPUAndMemory{VCPU: usedCpu, Memory: usedMem})
 	}
-
 	n.updateFlavor()
 	n.generation = nextGeneration()
-
 	return nil
 }
 
 //UpdateSpotResources update spot resources
 func (n *SiteCacheInfo) UpdateSpotResources(spotRes map[string]types.SpotResource) error {
 	n.AllocatableSpotFlavor = spotRes
-
 	n.generation = nextGeneration()
 	return nil
 }
