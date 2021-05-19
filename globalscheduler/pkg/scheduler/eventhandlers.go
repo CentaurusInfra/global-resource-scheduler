@@ -629,7 +629,6 @@ func (sched *Scheduler) deletePodWithdrawResource(obj interface{}) {
 		klog.Errorf("cannot convert to *v1.Pod: %v", t)
 		return
 	}
-
 	err := sched.withdrawResource(pod.Name)
 	if err != nil {
 		klog.Errorf("withdraw resource of pod %s failed", pod.Name)
@@ -655,3 +654,4 @@ func (sched *Scheduler) withdrawResource(podName string) error {
 	delete(sched.PodSiteResourceMap, podName)
 	return nil
 }
+
