@@ -148,7 +148,6 @@ func NewScheduler(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct
 	if stopEverything == nil {
 		stopEverything = wait.NeverStop
 	}
-
 	sched := &Scheduler{
 		SchedulerName:           gsconfig.SchedulerName,
 		ResourceCollectorApiUrl: gsconfig.ResourceCollectorApiUrl,
@@ -163,7 +162,6 @@ func NewScheduler(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct
 	if err != nil {
 		return nil, fmt.Errorf("buildFramework by %s failed! err: %v", types.SchedulerDefaultProviderName, err)
 	}
-
 	//build entire FlavorMap map<flovorid, flavorinfo>
 	sched.UpdateFlavor()
 	klog.Infof("FlavorMap: %v", sched.siteCacheInfoSnapshot.FlavorMap)
@@ -172,7 +170,6 @@ func NewScheduler(gsconfig *types.GSSchedulerConfiguration, stopCh <-chan struct
 	if err != nil {
 		return nil, err
 	}
-
 	// add event handler
 	AddAllEventHandlers(sched)
 	return sched, nil
