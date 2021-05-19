@@ -654,4 +654,3 @@ func (sched *Scheduler) withdrawResource(podName string) error {
 	delete(sched.PodSiteResourceMap, podName)
 	return nil
 }
-
