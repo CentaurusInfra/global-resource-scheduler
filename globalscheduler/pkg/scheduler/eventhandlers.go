@@ -306,7 +306,6 @@ func getStackSelector(selector *v1.ResourceSelector) types.Selector {
 			LocationStrategy: selector.Strategy.LocalStrategy,
 		},
 	}
-
 	return newSelector
 }
 
