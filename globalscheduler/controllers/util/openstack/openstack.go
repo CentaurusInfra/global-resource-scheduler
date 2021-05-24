@@ -244,7 +244,6 @@ func ServerCreateResources(host, authToken, clusterName string, manifest *allocv
 		return "", err
 	}
 
-	// http.StatusForbidden = 403
 	if resp.StatusCode == http.StatusForbidden {
 		return "", fmt.Errorf("instance capacity has reached its limit")
 	}
