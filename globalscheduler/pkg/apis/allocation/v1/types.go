@@ -70,12 +70,11 @@ type ResourceGroup struct {
 }
 
 type Resources struct {
-	Name         string   `json:"name"`
-	ResourceType string   `json:"resource_type"` // vm
-	Flavors      []Flavor `json:"flavors"`
-	Storage      Volume   `json:"storage,omitempty"`
-	NeedEip      bool     `json:"need_eip,omitempty"`
-	//Count        int      `json:"count,omitempty"` // It is commented because there is a conflict with replicas
+	Name           string         `json:"name"`
+	ResourceType   string         `json:"resource_type"` // vm
+	Flavors        []Flavor       `json:"flavors"`
+	Storage        Volume         `json:"storage,omitempty"`
+	NeedEip        bool           `json:"need_eip,omitempty"`
 	VirtualMachine VirtualMachine `json:"virtual_machine,omitempty"`
 }
 

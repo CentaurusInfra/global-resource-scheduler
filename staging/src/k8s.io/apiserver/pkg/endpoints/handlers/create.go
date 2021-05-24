@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"net/http"
 	"strings"
 	"time"
@@ -181,6 +182,10 @@ func createHandler(r rest.NamedCreater, scope *RequestScope, admit admission.Int
 		if defaultGVK.Kind == "Pod" {
 			if pod, ok := result.(*core.Pod); ok {
 				util.CheckTime(pod.Name, "api", "CreatePod-CreateHandler", 2)
+			}
+		} else if defaultGVK.Kind == "Allocation" {
+			if allocation, ok := result.(*unstructured.Unstructured); ok {
+				util.CheckTime(allocation.GetName(), "api", "CreateAllocation-CreateHandler", 2)
 			}
 		} //LatencyLog - end
 

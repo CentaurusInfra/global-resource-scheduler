@@ -376,9 +376,9 @@ func (p *Process) SendAllocationToCluster(alloc *allocv1.Allocation) {
 			util.CheckTime(alloc.Name, "dispatcher", "CreateAllocation-End", 2)
 			p.totalAllocationCreateNum += 1
 			// Calculate create latency
-			podCreateTime := alloc.CreationTimestamp
+			allocCreateTime := alloc.CreationTimestamp
 			currentTime := time.Now().UTC()
-			duration := (currentTime.UnixNano() - podCreateTime.UnixNano()) / 1000000
+			duration := (currentTime.UnixNano() - allocCreateTime.UnixNano()) / 1000000
 			p.totalCreateLatency += duration
 			createLatency := int(duration)
 			klog.V(2).Infof("************************************ Allocation Name: %s, Create Latency: %d Millisecond ************************************", alloc.Name, createLatency)

@@ -670,8 +670,10 @@ func (sched *Scheduler) initPodClusterSchedulerAllocationInformers(gsconfig *typ
 				klog.Warningf("Failed to convert  object  %+v to an allocation", obj)
 				return
 			}
+			startTime := time.Now().UnixNano()
 			sched.scheduleAllocation(alloc)
 			sched.bindAllocation(alloc)
+			klog.Infof("@@@ Finished Scheduling allocation %s, time consumption: %vms @@@", alloc.Name, (time.Now().UnixNano()-startTime)/int64(time.Millisecond))
 		},
 	})
 
@@ -952,6 +954,7 @@ func (sched *Scheduler) scheduleAllocation(alloc *allocv1.Allocation) {
 				UID:          uuid.NewV4().String(),
 				Selector:     getStackSelectorFromAllocation(&alloc.Spec.Selector),
 				Resources:    getStackResourcesFromAllocationResource(&resource),
+				CreateTime:   time.Now().UnixNano(),
 			}
 			allocation := &types.Allocation{
 				ID:       string(alloc.UID),
@@ -978,6 +981,11 @@ func (sched *Scheduler) scheduleAllocation(alloc *allocv1.Allocation) {
 					append(alloc.Spec.ResourceGroup.Resources[idx].VirtualMachine.ClusterInstances,
 						allocv1.ClusterInstance{stack.Selected.ClusterName, ""})
 				clusterNames = append(clusterNames, stack.Selected.ClusterName)
+			}
+			// log the elapsed time for the entire schedule
+			if stack.CreateTime != 0 {
+				spendTime := time.Now().UnixNano() - stack.CreateTime
+				klog.Infof("@@@ Finished Schedule, time consumption: %vms @@@", spendTime/int64(time.Millisecond))
 			}
 		}
 	}
