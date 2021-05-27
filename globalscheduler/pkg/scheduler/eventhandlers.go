@@ -170,7 +170,6 @@ func failedToSchedule(pod *v1.Pod) bool {
 // addPodToCache add pod to the stack cache of the scheduler
 func (sched *Scheduler) addPodToCache(obj interface{}) {
 	pod, ok := obj.(*v1.Pod)
-	klog.V(4).Infof("Add a pod: %v", pod.Name)
 	if !ok {
 		klog.Errorf("cannot convert to *v1.Pod: %v", obj)
 		return
@@ -566,7 +565,7 @@ func (sched *Scheduler) verifyPodInfo(pod *v1.Pod) (verified bool) {
 	verified = false
 	name := pod.Name
 	if pod.Name == "" {
-		klog.Errorf("pod name:%s is null", name)
+		klog.Errorf("pod name:%s is empty", name)
 		return verified
 	}
 	verified = true
@@ -635,7 +634,7 @@ func (sched *Scheduler) deletePodWithdrawResource(obj interface{}) {
 	}
 }
 
-//withdraw reserved resources to a pod & add it to cash to other pods
+//withdraw reserved resources to a pod & add it to cache to other pods
 func (sched *Scheduler) withdrawResource(podName string) error {
 	resource := sched.PodSiteResourceMap[podName]
 	if resource == nil {

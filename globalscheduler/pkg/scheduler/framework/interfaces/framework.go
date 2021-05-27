@@ -425,7 +425,6 @@ func (f *framework) RunBindPlugins(ctx context.Context, state *CycleState, stack
 	return status
 }
 
-//resource
 func (f *framework) runBindPlugin(ctx context.Context, bp BindPlugin, state *CycleState, stack *types.Stack,
 	siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) *Status {
 	return bp.Bind(ctx, state, stack, siteCacheInfo)

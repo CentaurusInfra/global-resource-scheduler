@@ -110,11 +110,8 @@ func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, s
 func (b DefaultBinder) BindResource(ctx context.Context, state *interfaces.CycleState, stack *types.Stack,
 	siteCacheInfo *sitecacheinfo.SiteCacheInfo) (*interfaces.Status, string, string, *types.AllResInfo) {
 	region := siteCacheInfo.GetSite().RegionAzMap.Region
-
-	//eipNum : private data
 	resInfo := types.AllResInfo{CpuAndMem: map[string]types.CPUAndMemory{}, Storage: map[string]float64{}}
 	siteID := siteCacheInfo.Site.SiteID
-
 	stack.Selected.SiteID = siteID
 	stack.Selected.Region = region
 	stack.Selected.AvailabilityZone = siteCacheInfo.GetSite().RegionAzMap.AvailabilityZone
