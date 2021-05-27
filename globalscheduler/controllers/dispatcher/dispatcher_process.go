@@ -61,11 +61,6 @@ type Process struct {
 func NewProcess(config *rest.Config, namespace string, name string, quit chan struct{}) Process {
 	podQueue := make(chan *v1.Pod, 300)
 
-	allocationClientset, err := allocclientset.NewForConfig(config)
-	if err != nil {
-		klog.Fatal(err)
-	}
-
 	dispatcherClientset, err := dispatcherclientset.NewForConfig(config)
 	if err != nil {
 		klog.Fatal(err)
@@ -80,7 +75,14 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 	if err != nil {
 		klog.Fatal(err)
 	}
-	conf.AddQPSFlags(config, conf.GetInstance().Dispatcher)
+
+	conf.AddQPSFlags(config, conf.GetInstance().Dispatcher.Allocation)
+	allocationClientset, err := allocclientset.NewForConfig(config)
+	if err != nil {
+		klog.Fatal(err)
+	}
+
+	conf.AddQPSFlags(config, conf.GetInstance().Dispatcher.Pod)
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		klog.Fatal(err)
@@ -373,7 +375,6 @@ func (p *Process) SendAllocationToCluster(alloc *allocv1.Allocation) {
 			klog.V(2).Infof("%%%%%%%%%%%%%%%%%%%%%%%%%% Total Number of Allocation Deleted: %d, Average Delete Latency: %d Millisecond %%%%%%%%%%%%%%%%%%%%%%%%%%", p.totalAllocationDeleteNum, averageDeleteLatency)
 			p.totalAllocationCreateNum += 1
 		} else {
-			util.CheckTime(alloc.Name, "dispatcher", "CreateAllocation-End", 2)
 			p.totalAllocationCreateNum += 1
 			// Calculate create latency
 			allocCreateTime := alloc.CreationTimestamp
@@ -398,6 +399,7 @@ func (p *Process) SendAllocationToCluster(alloc *allocv1.Allocation) {
 			} else {
 				klog.Infof("The allocation %s updated its  status phase to %v successfully", alloc.Name, alloc.Status.Phase)
 			}
+			util.CheckTime(alloc.Name, "dispatcher", "CreateAllocation-End", 2)
 		}
 
 	}

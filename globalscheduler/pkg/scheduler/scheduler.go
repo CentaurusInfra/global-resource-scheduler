@@ -653,6 +653,25 @@ func (sched *Scheduler) initPodClusterSchedulerAllocationInformers(gsconfig *typ
 		return err
 	}
 
+	///cluster, apiextensions clientset to create crd programmatically
+	apiextensionsClientset, err := apiextensionsclientset.NewForConfig(cfg)
+	if err != nil {
+		klog.Fatalf("error - building global scheduler apiextensions client: %s", err.Error())
+	}
+	clusterClientset, err := clusterclientset.NewForConfig(cfg)
+	if err != nil {
+		klog.Fatalf("Error building clusterclientset: %s", err.Error())
+	}
+	utilruntime.Must(clusterscheme.AddToScheme(clusterscheme.Scheme))
+	sched.ClusterInformerFactory = externalinformers.NewSharedInformerFactory(clusterClientset, 0)
+	sched.ClusterInformer = sched.ClusterInformerFactory.Globalscheduler().V1().Clusters()
+	sched.ApiextensionsClientset = apiextensionsClientset
+	sched.ClusterClientset = clusterClientset
+	sched.ClusterLister = sched.ClusterInformer.Lister()
+	sched.ClusterSynced = sched.ClusterInformer.Informer().HasSynced
+	sched.ClusterQueue = clusterworkqueue.NewNamedRateLimitingQueue(clusterworkqueue.DefaultControllerRateLimiter(), "Cluster")
+
+	conf.AddQPSFlags(cfg, conf.GetInstance().Scheduler.Allocation)
 	allocClientset, err := allocclientset.NewForConfig(cfg)
 	if err != nil {
 		return err
@@ -677,25 +696,7 @@ func (sched *Scheduler) initPodClusterSchedulerAllocationInformers(gsconfig *typ
 		},
 	})
 
-	///cluster, apiextensions clientset to create crd programmatically
-	apiextensionsClientset, err := apiextensionsclientset.NewForConfig(cfg)
-	if err != nil {
-		klog.Fatalf("error - building global scheduler apiextensions client: %s", err.Error())
-	}
-	clusterClientset, err := clusterclientset.NewForConfig(cfg)
-	if err != nil {
-		klog.Fatalf("Error building clusterclientset: %s", err.Error())
-	}
-	utilruntime.Must(clusterscheme.AddToScheme(clusterscheme.Scheme))
-	sched.ClusterInformerFactory = externalinformers.NewSharedInformerFactory(clusterClientset, 0)
-	sched.ClusterInformer = sched.ClusterInformerFactory.Globalscheduler().V1().Clusters()
-	sched.ApiextensionsClientset = apiextensionsClientset
-	sched.ClusterClientset = clusterClientset
-	sched.ClusterLister = sched.ClusterInformer.Lister()
-	sched.ClusterSynced = sched.ClusterInformer.Informer().HasSynced
-	sched.ClusterQueue = clusterworkqueue.NewNamedRateLimitingQueue(clusterworkqueue.DefaultControllerRateLimiter(), "Cluster")
-
-	conf.AddQPSFlags(cfg, conf.GetInstance().Scheduler)
+	conf.AddQPSFlags(cfg, conf.GetInstance().Scheduler.Pod)
 	client, err := clientset.NewForConfig(cfg) //kubeclientset
 	if err != nil {
 		return err

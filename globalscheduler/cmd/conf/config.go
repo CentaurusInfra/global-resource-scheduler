@@ -25,9 +25,9 @@ import (
 var configInstance *Config
 
 type Config struct {
-	Scheduler   QpsConfig
-	Distributor QpsConfig
-	Dispatcher  QpsConfig
+	Scheduler   ResourceConfig
+	Distributor ResourceConfig
+	Dispatcher  ResourceConfig
 }
 
 func init() {
@@ -61,7 +61,9 @@ func GetInstance() *Config {
 func AddQPSFlags(config *restclient.Config, qpsConfig QpsConfig) {
 	kubeConfigs := config.GetAllConfigs()
 	for _, kubeConfig := range kubeConfigs {
-		kubeConfig.ContentType = qpsConfig.ContentType
+		if qpsConfig.ContentType != "" {
+			kubeConfig.ContentType = qpsConfig.ContentType
+		}
 		kubeConfig.QPS = qpsConfig.Qps
 		kubeConfig.Burst = qpsConfig.Burst
 	}
