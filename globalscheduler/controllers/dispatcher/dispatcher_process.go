@@ -118,7 +118,7 @@ func (p *Process) Run(quit chan struct{}) {
 
 	dispatcherInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		DeleteFunc: func(obj interface{}) {
-			klog.Infof("The dispatcher %s process is going to be killed...", p.name)
+			klog.V(3).Infof("The dispatcher %s process is going to be killed...", p.name)
 			os.Exit(0)
 		},
 		UpdateFunc: func(old, new interface{}) {
@@ -397,7 +397,7 @@ func (p *Process) SendAllocationToCluster(alloc *allocv1.Allocation) {
 			if _, err := p.allocClientset.GlobalschedulerV1().AllocationsWithMultiTenancy(alloc.Namespace, alloc.ObjectMeta.Tenant).Update(alloc); err != nil {
 				klog.Warningf("The allocation %v failed to update its status phase to %v with the error %v", alloc.Name, alloc.Status.Phase, err)
 			} else {
-				klog.Infof("The allocation %s updated its  status phase to %v successfully", alloc.Name, alloc.Status.Phase)
+				klog.V(3).Infof("The allocation %s updated its  status phase to %v successfully", alloc.Name, alloc.Status.Phase)
 			}
 			util.CheckTime(alloc.Name, "dispatcher", "CreateAllocation-End", 2)
 		}
