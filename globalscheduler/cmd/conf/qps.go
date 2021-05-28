@@ -21,3 +21,8 @@ type QpsConfig struct {
 	Burst       int
 	ContentType string
 }
+
+type ResourceConfig struct {
+	Allocation QpsConfig
+	Pod        QpsConfig
+}

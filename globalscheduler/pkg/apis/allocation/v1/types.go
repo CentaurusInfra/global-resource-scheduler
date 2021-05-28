@@ -70,17 +70,12 @@ type ResourceGroup struct {
 }
 
 type Resources struct {
-	Name         string   `json:"name"`
-	ResourceType string   `json:"resource_type"` // vm
-	Flavors      []Flavor `json:"flavors"`
-	Storage      Volume   `json:"storage,omitempty"`
-	NeedEip      bool     `json:"need_eip,omitempty"`
-	//Count        int      `json:"count,omitempty"` // It is commented because there is a conflict with replicas
-	Image             string   `json:"image"`
-	SecurityGroupId   string   `json:"security_group_id"`
-	NicName           string   `json:"nic_name"`
-	ClusterNames      []string `json:"cluster_names"`
-	ClusterNamespaces []string `json:"cluster_namespaces"`
+	Name           string         `json:"name"`
+	ResourceType   string         `json:"resource_type"` // vm
+	Flavors        []Flavor       `json:"flavors"`
+	Storage        Volume         `json:"storage,omitempty"`
+	NeedEip        bool           `json:"need_eip,omitempty"`
+	VirtualMachine VirtualMachine `json:"virtual_machine,omitempty"`
 }
 
 type Flavor struct {
@@ -122,6 +117,18 @@ type Region struct {
 
 type Strategy struct {
 	LocationStrategy string `json:"location_strategy,omitempty"` // centralize and discrete, default value centralize
+}
+
+type VirtualMachine struct {
+	Image            string            `json:"image"`
+	SecurityGroupId  string            `json:"security_group_id"`
+	NicName          string            `json:"nic_name"`
+	ClusterInstances []ClusterInstance `json:"cluster_instances"`
+}
+
+type ClusterInstance struct {
+	ClusterName string `json:"cluster_name"`
+	InstanceId  string `json:"instance_id"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

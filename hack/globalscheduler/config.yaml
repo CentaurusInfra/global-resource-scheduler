@@ -1,13 +1,24 @@
 Dispatcher:
-  qps: 20
-  burst: 40
-  contentType: application/vnd.kubernetes.protobuf
+  Allocation:
+     qps: 20
+     burst: 40
+  Pod:
+     qps: 20
+     burst: 40
+     contentType: application/vnd.kubernetes.protobuf
 Distributor:
-  qps: 20
-  burst: 40
-  contentType: application/vnd.kubernetes.protobuf
+  Allocation:
+     qps: 20
+     burst: 40
+  Pod:
+     qps: 20
+     burst: 40
+     contentType: application/vnd.kubernetes.protobuf
 Scheduler:
-  qps: 20
-  burst: 40
-  contentType: application/vnd.kubernetes.protobuf
-
+  Allocation:
+     qps: 20
+     burst: 40
+  Pod:
+     qps: 20
+     burst: 40
+     contentType: application/vnd.kubernetes.protobuf

@@ -64,10 +64,6 @@ type Process struct {
 func NewProcess(config *rest.Config, namespace string, name string, quit chan struct{}) Process {
 	podQueue := make(chan *v1.Pod, 300)
 
-	allocClientset, err := allocclientset.NewForConfig(config)
-	if err != nil {
-		klog.Fatal(err)
-	}
 	distributorClientset, err := distributorclientset.NewForConfig(config)
 	if err != nil {
 		klog.Fatal(err)
@@ -82,7 +78,14 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 	if err != nil {
 		klog.Fatal(err)
 	}
-	conf.AddQPSFlags(config, conf.GetInstance().Distributor)
+
+	conf.AddQPSFlags(config, conf.GetInstance().Distributor.Allocation)
+	allocClientset, err := allocclientset.NewForConfig(config)
+	if err != nil {
+		klog.Fatal(err)
+	}
+
+	conf.AddQPSFlags(config, conf.GetInstance().Distributor.Pod)
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		klog.Fatal(err)

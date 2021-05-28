@@ -13,9 +13,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-openstackips=("18.236.217.191" "54.185.103.249" "54.149.22.83" "18.237.167.235" "34.220.133.183" "54.212.231.62" "18.236.245.207" "34.211.110.194" "54.189.196.126" "35.165.106.249" "34.210.104.15" "34.220.41.107" "52.34.63.99" "54.184.175.142" "34.221.41.172" "54.189.234.9" "18.237.126.53" "18.236.244.165" "35.166.177.124" "18.236.217.216")
+openstackips=("18.236.217.191" "34.219.215.27" "34.216.194.0" "18.237.132.54" "34.219.98.84" "18.237.126.169" "34.217.135.219" "34.219.85.67" "35.163.74.249" "54.185.103.249" "35.165.187.214" "34.211.111.114" "35.160.19.193" "54.191.208.66" "54.149.37.227" "34.211.4.11" "18.237.203.189" "18.237.63.170" "54.202.231.12" "54.244.161.7")
 azs=("non-production-az" "production-az")
-FILE="/home/ubuntu/go/src/k8s.io/arktos/globalscheduler/test/yaml/sample_1000_clusters_new.yaml"
+FILE="/home/ubuntu/go/src/k8s.io/kubernetes/globalscheduler/test/yaml/sample_1000_clusters_new.yaml"
 
 function create_cluster {
 # Create multiple YAML objects from stdin
