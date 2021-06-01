@@ -18,12 +18,12 @@ limitations under the License.
 package scheduler
 
 import (
-	"testing"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
 	internalcache "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache"
 	fakecache "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache/fake"
 	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
+	"testing"
 )
 
 func TestSkipStackUpdate(t *testing.T) {
@@ -144,7 +144,6 @@ func TestWithdrawResource(t *testing.T) {
 		Qos:                   make(map[string]float64),
 	}
 	SiteCacheInfoMap := make(map[string]*schedulersitecacheinfo.SiteCacheInfo)
-
 	RegionFlavorMap := make(map[string]*typed.RegionFlavor)
 	FlavorMap := make(map[string]*typed.RegionFlavor)
 	FlavorMap[id] = flavor
@@ -155,12 +154,14 @@ func TestWithdrawResource(t *testing.T) {
 		siteCacheInfoMap map[string]*schedulersitecacheinfo.SiteCacheInfo
 		regionFlavorMap  map[string]*typed.RegionFlavor
 		flavorMap        map[string]*typed.RegionFlavor
+		expected         bool
 	}{
 		{
 			podName:          "pod1",
 			siteCacheInfoMap: SiteCacheInfoMap,
 			regionFlavorMap:  RegionFlavorMap,
 			flavorMap:        FlavorMap,
+			expected:         true,
 		},
 	}
 	for _, test := range table {
@@ -173,11 +174,22 @@ func TestWithdrawResource(t *testing.T) {
 					FlavorMap:        test.flavorMap,
 				},
 			}
+			var nAllocatableFlavorBefore int64
+			nAllocatableFlavorBefore = int64(0)
+			siteInfoBefore, ok := sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteId]
+			if ok {
+				nAllocatableFlavorBefore = siteInfoBefore.AllocatableFlavor[id]
+			}
 			err := sched.withdrawResource(test.podName)
 			if err != nil {
 				t.Errorf("TestWithdrawResource() = %t, expected = %t", err, nil)
 			}
-
+			siteInfoAfter := sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteId]
+			nAllocatableFlavorAfter := siteInfoAfter.AllocatableFlavor[id]
+			if testResult := nAllocatableFlavorAfter >= nAllocatableFlavorBefore; testResult != test.expected {
+				t.Errorf("nAllocatableFlavorAfter = %d, nAllocatableFlavorBefore = %d", nAllocatableFlavorAfter, nAllocatableFlavorBefore)
+				t.Errorf("TestWithdrawResource() = %v, expected = %v", testResult, test.expected)
+			}
 		})
 	}
 }
