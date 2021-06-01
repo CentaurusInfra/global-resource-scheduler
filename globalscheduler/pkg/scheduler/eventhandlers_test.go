@@ -19,9 +19,7 @@ package scheduler
 
 import (
 	"testing"
-
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
-	//internalcache "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache"
 	internalcache "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache"
 	fakecache "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache/fake"
 	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
@@ -99,7 +97,6 @@ func TestWithdrawResource(t *testing.T) {
 	allRes := types.AllResInfo{
 		CpuAndMem: cpuAndMemMap,
 		Storage:   storageMap,
-		//eipNum:    1,
 	}
 
 	podSiteResource := &PodSiteResource{
@@ -129,31 +126,10 @@ func TestWithdrawResource(t *testing.T) {
 			Disk:  disk,
 		},
 	}
-	/*type Site struct {
-		SiteID           string `json:"site_id"
-		ClusterName      string `json:"cluster_name"`
-		ClusterNamespace string `json:"cluster_namespace"`
-		GeoLocation      GeoLocation
-		RegionAzMap      RegionAzMap
-		Operator         string                  `json:"operator"`
-		Status           string                  `json:"status"`
-		SiteAttribute    []*typed.SiteAttribute  `json:"site_attributes"`
-		EipTypeName      string                  `json:"eiptype_name"`
-		SpotResources    map[string]SpotResource `json:"spot_resources"`
-		Hosts            []*typed.Host           `json:"-"`
-	}*/
 	site := &types.Site{
 		SiteID:           siteId,
 		ClusterNamespace: "default",
 		ClusterName:      "cluster1",
-		// GeoLocation:      GeoLocation
-		// RegionAzMap:      RegionAzMap
-		// Operator:         string                  `json:"operator"`
-		// Status           string                  `json:"status"`
-		// SiteAttribute    []*typed.SiteAttribute  `json:"site_attributes"`
-		// EipTypeName      string                  `json:"eiptype_name"`
-		// SpotResources    map[string]SpotResource `json:"spot_resources"`
-		// Hosts            []*typed.Host           `json:"-"`
 	}
 
 	siteCacheInfo := &schedulersitecacheinfo.SiteCacheInfo{
@@ -168,6 +144,7 @@ func TestWithdrawResource(t *testing.T) {
 		Qos:                   make(map[string]float64),
 	}
 	SiteCacheInfoMap := make(map[string]*schedulersitecacheinfo.SiteCacheInfo)
+
 	RegionFlavorMap := make(map[string]*typed.RegionFlavor)
 	FlavorMap := make(map[string]*typed.RegionFlavor)
 	FlavorMap[id] = flavor
@@ -200,6 +177,7 @@ func TestWithdrawResource(t *testing.T) {
 			if err != nil {
 				t.Errorf("TestWithdrawResource() = %t, expected = %t", err, nil)
 			}
+
 		})
 	}
 }
