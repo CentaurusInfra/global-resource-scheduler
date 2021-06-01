@@ -134,7 +134,7 @@ type Scheduler struct {
 	schedulerInformer      cache.SharedIndexInformer
 	workerNumber           int
 
-	//<pod-name, Stack> table to withdraw site resource
+	//<pod-name, PodSiteResource> table to withdraw site resource
 	PodSiteResourceMap map[string]*PodSiteResource
 }
 
