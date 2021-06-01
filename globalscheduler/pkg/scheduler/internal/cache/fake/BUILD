@@ -2,18 +2,13 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "go_default_library",
-    srcs = [
-        "fake_cache.go",
-        "fake_snapshot.go",
-    ],
+    srcs = ["fake_cache.go"],
     importpath = "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache/fake",
     visibility = ["//globalscheduler/pkg/scheduler:__subpackages__"],
     deps = [
         "//globalscheduler/pkg/scheduler/client/typed:go_default_library",
-        "//globalscheduler/pkg/scheduler/common/constants:go_default_library",
         "//globalscheduler/pkg/scheduler/internal/cache:go_default_library",
         "//globalscheduler/pkg/scheduler/listers:go_default_library",
-        "//globalscheduler/pkg/scheduler/sitecacheinfo:go_default_library",
         "//globalscheduler/pkg/scheduler/types:go_default_library",
     ],
 )
