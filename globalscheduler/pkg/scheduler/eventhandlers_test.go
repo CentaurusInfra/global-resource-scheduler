@@ -91,7 +91,7 @@ func TestWithdrawResource(t *testing.T) {
 		Memory: 128,
 	}
 	cpuAndMemMap := make(map[string]types.CPUAndMemory)
-	cpuAndMemMap["deafult"] = cm
+	cpuAndMemMap["default"] = cm
 	storageMap := make(map[string]float64)
 	storageMap["ssd"] = float64(128)
 	allRes := types.AllResInfo{
