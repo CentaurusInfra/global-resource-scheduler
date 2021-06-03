@@ -187,7 +187,6 @@ func TestWithdrawResource(t *testing.T) {
 			siteInfoAfter := sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteId]
 			nAllocatableFlavorAfter := siteInfoAfter.AllocatableFlavor[id]
 			if testResult := nAllocatableFlavorAfter >= nAllocatableFlavorBefore; testResult != test.expected {
-				t.Errorf("nAllocatableFlavorAfter = %d, nAllocatableFlavorBefore = %d", nAllocatableFlavorAfter, nAllocatableFlavorBefore)
 				t.Errorf("TestWithdrawResource() = %v, expected = %v", testResult, test.expected)
 			}
 		})
