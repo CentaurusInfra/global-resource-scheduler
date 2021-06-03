@@ -442,7 +442,7 @@ func (f *framework) RunBindResourcePlugins(ctx context.Context, state *CycleStat
 			continue
 		}
 		if !status.IsSuccess() {
-			msg := fmt.Sprintf("plugin %q failed to bind pod \"%v\": %v", bp.Name(), stack.PodName, status.Message())
+			msg := fmt.Sprintf("plugin %q failed to bind pod %q: %v", bp.Name(), stack.PodName, status.Message())
 			klog.Errorf("%s", msg)
 			status = NewStatus(Error, msg)
 			return status, siteId, flavor, resInfo

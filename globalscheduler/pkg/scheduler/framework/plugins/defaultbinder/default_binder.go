@@ -54,7 +54,6 @@ func (b DefaultBinder) Bind(ctx context.Context, state *interfaces.CycleState, s
 	siteCacheInfo *sitecacheinfo.SiteCacheInfo) *interfaces.Status {
 	region := siteCacheInfo.GetSite().RegionAzMap.Region
 
-	//eipNum : private data
 	resInfo := types.AllResInfo{CpuAndMem: map[string]types.CPUAndMemory{}, Storage: map[string]float64{}}
 	siteID := siteCacheInfo.Site.SiteID
 

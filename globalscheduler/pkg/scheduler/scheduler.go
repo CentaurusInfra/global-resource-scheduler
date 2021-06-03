@@ -921,6 +921,11 @@ func (sched *Scheduler) updateStaticSiteResourceInfo(key string, event EventType
 
 //This function updates sites' dynamic resource informaton
 func (sched *Scheduler) UpdateSiteDynamicResource(region string, resource *types.SiteResource) (err error) {
+	//empty PodSiteResourceMap because this map is ony for time gap (60 seconds)
+	//because resource collector will update DynamicResource every 60 seconds.
+	for key := range sched.PodSiteResourceMap {
+		delete(sched.PodSiteResourceMap, key)
+	}
 	//reset total(available) resource
 	klog.V(4).Infof("UpdateSiteDynamicResource region: %s, resource:%v", region, resource)
 	var siteID string
