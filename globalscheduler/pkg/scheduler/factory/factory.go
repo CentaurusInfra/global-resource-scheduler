@@ -44,7 +44,8 @@ func (i *podInformer) Lister() corelisters.PodLister {
 // NewPodInformer creates a shared index informer that returns only non-terminal pods.
 func NewPodInformer(schedulerName string, client clientset.Interface,
 	resyncPeriod time.Duration) coreinformers.PodInformer {
-	//This selector is to avoid to receive all pods event so that it improves scheduling performance.	//
+	//This selector is to avoid to receive unneccesary pods event (e.g. scheduled) so that it improves scheduling performance.	//
+	//This receives pod events only their status is one of failed, assigned, and bound
 	selector := fields.ParseSelectorOrDie(
 		"status.phase != " + string(v1.PodScheduled) +
 			",status.assignedScheduler.name=" + schedulerName)
