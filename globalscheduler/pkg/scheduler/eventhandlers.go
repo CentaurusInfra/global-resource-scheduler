@@ -173,7 +173,6 @@ func (sched *Scheduler) addPodToCache(obj interface{}) {
 		klog.Errorf("cannot convert to *v1.Pod: %v", obj)
 		return
 	}
-
 	// add pod resource to a stack
 	stack := getStackFromPod(pod)
 
