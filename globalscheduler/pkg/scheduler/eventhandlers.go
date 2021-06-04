@@ -189,7 +189,6 @@ func (sched *Scheduler) updatePodInCache(oldObj, newObj interface{}) {
 		return
 	}
 	newPod, ok := newObj.(*v1.Pod)
-	klog.V(4).Infof("Update a pod: %v", newPod)
 	if !ok {
 		klog.Errorf("cannot convert newObj to *v1.Pod: %v", newObj)
 		return

@@ -47,8 +47,9 @@ func NewPodInformer(schedulerName string, client clientset.Interface,
 	//This selector is to avoid to receive unneccesary pods event (e.g. scheduled) so that it improves scheduling performance.
 	//This receives pod events only their status is one of failed, assigned, and bound
 	selector := fields.ParseSelectorOrDie(
-		"status.phase != " + string(v1.PodScheduled) +
-			",status.assignedScheduler.name=" + schedulerName)
+		"status.phase = " + string(v1.PodAssigned) +
+			",status.phase = " + string(v1.PodFailed) +
+			",status.assignedScheduler.name = " + schedulerName)
 	lw := cache.NewListWatchFromClient(client.CoreV1(), string(v1.ResourcePods), metav1.NamespaceAll, selector)
 	return &podInformer{
 		informer: cache.NewSharedIndexInformer(lw, &v1.Pod{}, resyncPeriod,
