@@ -182,7 +182,7 @@ func TestWithdrawResource(t *testing.T) {
 			}
 			err := sched.withdrawResource(test.podName)
 			if err != nil {
-				t.Errorf("TestWithdrawResource() = %t, expected = %t", err, nil)
+				t.Errorf("TestWithdrawResource() = %v, expected = %v", err, nil)
 			}
 			siteInfoAfter := sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteId]
 			nAllocatableFlavorAfter := siteInfoAfter.AllocatableFlavor[id]

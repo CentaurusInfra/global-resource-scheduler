@@ -156,6 +156,8 @@ func (b DefaultBinder) BindResource(ctx context.Context, state *interfaces.Cycle
 		break
 	}
 	klog.V(4).Infof("UpdateSiteWithResInfo - siteID: %s, resInfo: %#v", siteID, resInfo)
-	b.handle.Cache().UpdateSiteWithResInfo(siteID, resInfo)
+	if b.handle != nil {
+		b.handle.Cache().UpdateSiteWithResInfo(siteID, resInfo)
+	}
 	return nil, siteID, flavorID, &resInfo
 }
