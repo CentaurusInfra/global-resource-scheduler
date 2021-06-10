@@ -564,6 +564,7 @@ func (n *SiteCacheInfo) UpdateSiteResInfo(resInfo types.AllResInfo, regionFlavor
 		if len(n.RequestedResources) == 0 {
 			reqRes := types.CPUAndMemory{VCPU: res.VCPU, Memory: res.Memory}
 			n.RequestedResources[resType] = &reqRes
+			resourceTypes = append(resourceTypes, resType)
 			continue
 		}
 		for reqType, reqRes := range n.RequestedResources {
@@ -575,6 +576,7 @@ func (n *SiteCacheInfo) UpdateSiteResInfo(resInfo types.AllResInfo, regionFlavor
 			reqRes.VCPU += res.VCPU
 			reqRes.Memory += res.Memory
 			n.RequestedResources[resType] = reqRes
+			resourceTypes = append(resourceTypes, resType)
 		}
 	}
 	for volType, used := range resInfo.Storage {
@@ -584,6 +586,7 @@ func (n *SiteCacheInfo) UpdateSiteResInfo(resInfo types.AllResInfo, regionFlavor
 		}
 		reqVol += used
 		n.RequestedStorage[volType] = reqVol
+		resourceTypes = append(resourceTypes, volType)
 	}
 	n.updateSiteFlavor(resourceTypes, regionFlavorMap, deduct)
 	n.generation = nextGeneration()

@@ -60,7 +60,6 @@ go_test(
     deps = [
         "//globalscheduler/pkg/scheduler/client/typed:go_default_library",
         "//globalscheduler/pkg/scheduler/internal/cache:go_default_library",
-        "//globalscheduler/pkg/scheduler/internal/cache/fake:go_default_library",
         "//globalscheduler/pkg/scheduler/sitecacheinfo:go_default_library",
         "//globalscheduler/pkg/scheduler/types:go_default_library",
     ],
