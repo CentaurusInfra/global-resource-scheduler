@@ -20,9 +20,8 @@ package scheduler
 import (
 	"fmt"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
-	//"k8s.io/kubernetes/globalscheduler/pkg/scheduler/options"
 	internalcache "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache"
-	//fakecache "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache/fake"
+	fakecache "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache/fake"
 	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
 	"testing"
