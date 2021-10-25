@@ -6,6 +6,7 @@ go_library(
     importpath = "k8s.io/kubernetes/globalscheduler/controllers/util/openstack",
     visibility = ["//visibility:public"],
     deps = [
+        "//globalscheduler/pkg/apis/allocation/v1:go_default_library",
         "//staging/src/k8s.io/api/core/v1:go_default_library",
         "//vendor/k8s.io/klog:go_default_library",
     ],

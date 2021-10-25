@@ -673,28 +673,6 @@ func (sched *Scheduler) initPodClusterSchedulerAllocationInformers(gsconfig *typ
 		return err
 	}
 
-	allocClientset, err := allocclientset.NewForConfig(cfg)
-	if err != nil {
-		return err
-	}
-	sched.allocationClientset = allocClientset
-	allocSelector := fields.ParseSelectorOrDie(fmt.Sprintf("status.phase=%s,status.scheduler_name=%s",
-		allocv1.AllocationAssigned, sched.SchedulerName))
-	allocLw := cache.NewListWatchFromClient(allocClientset.GlobalschedulerV1(), "allocations", metav1.NamespaceDefault, allocSelector)
-
-	sched.allocationInformer = cache.NewSharedIndexInformer(allocLw, &allocv1.Allocation{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
-	sched.allocationInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: func(obj interface{}) {
-			alloc, ok := obj.(*allocv1.Allocation)
-			if !ok {
-				klog.Warningf("Failed to convert  object  %+v to an allocation", obj)
-				return
-			}
-			sched.scheduleAllocation(alloc)
-			sched.bindAllocation(alloc)
-		},
-	})
-
 	///cluster, apiextensions clientset to create crd programmatically
 	apiextensionsClientset, err := apiextensionsclientset.NewForConfig(cfg)
 	if err != nil {
@@ -713,7 +691,32 @@ func (sched *Scheduler) initPodClusterSchedulerAllocationInformers(gsconfig *typ
 	sched.ClusterSynced = sched.ClusterInformer.Informer().HasSynced
 	sched.ClusterQueue = clusterworkqueue.NewNamedRateLimitingQueue(clusterworkqueue.DefaultControllerRateLimiter(), "Cluster")
 
-	conf.AddQPSFlags(cfg, conf.GetInstance().Scheduler)
+	conf.AddQPSFlags(cfg, conf.GetInstance().Scheduler.Allocation)
+	allocClientset, err := allocclientset.NewForConfig(cfg)
+	if err != nil {
+		return err
+	}
+	sched.allocationClientset = allocClientset
+	allocSelector := fields.ParseSelectorOrDie(fmt.Sprintf("status.phase=%s,status.scheduler_name=%s",
+		allocv1.AllocationAssigned, sched.SchedulerName))
+	allocLw := cache.NewListWatchFromClient(allocClientset.GlobalschedulerV1(), "allocations", metav1.NamespaceDefault, allocSelector)
+
+	sched.allocationInformer = cache.NewSharedIndexInformer(allocLw, &allocv1.Allocation{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
+	sched.allocationInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			alloc, ok := obj.(*allocv1.Allocation)
+			if !ok {
+				klog.Warningf("Failed to convert  object  %+v to an allocation", obj)
+				return
+			}
+			startTime := time.Now().UnixNano()
+			sched.scheduleAllocation(alloc)
+			sched.bindAllocation(alloc)
+			klog.Infof("@@@ Finished Scheduling allocation %s, time consumption: %vms @@@", alloc.Name, (time.Now().UnixNano()-startTime)/int64(time.Millisecond))
+		},
+	})
+
+	conf.AddQPSFlags(cfg, conf.GetInstance().Scheduler.Pod)
 	client, err := clientset.NewForConfig(cfg) //kubeclientset
 	if err != nil {
 		return err
@@ -977,6 +980,7 @@ func (sched *Scheduler) scheduleAllocation(alloc *allocv1.Allocation) {
 				UID:          uuid.NewV4().String(),
 				Selector:     getStackSelectorFromAllocation(&alloc.Spec.Selector),
 				Resources:    getStackResourcesFromAllocationResource(&resource),
+				CreateTime:   time.Now().UnixNano(),
 			}
 			allocation := &types.Allocation{
 				ID:       string(alloc.UID),
@@ -994,19 +998,24 @@ func (sched *Scheduler) scheduleAllocation(alloc *allocv1.Allocation) {
 				return
 			}
 			klog.Infof("Try to bind to a cluster, stacks %v ", result.Stacks)
-			alloc.Spec.ResourceGroup.Resources[idx].ClusterNames = make([]string, 0)
-			alloc.Spec.ResourceGroup.Resources[idx].ClusterNamespaces = make([]string, 0)
+			if alloc.Spec.ResourceGroup.Resources[idx].VirtualMachine.ClusterInstances == nil {
+				alloc.Spec.ResourceGroup.Resources[idx].VirtualMachine.ClusterInstances = make([]allocv1.ClusterInstance, 0)
+			}
 
 			for _, stack := range result.Stacks {
-				alloc.Spec.ResourceGroup.Resources[idx].ClusterNames =
-					append(alloc.Spec.ResourceGroup.Resources[idx].ClusterNames, stack.Selected.ClusterName)
-				alloc.Spec.ResourceGroup.Resources[idx].ClusterNamespaces =
-					append(alloc.Spec.ResourceGroup.Resources[idx].ClusterNamespaces, stack.Selected.ClusterNamespace)
+				alloc.Spec.ResourceGroup.Resources[idx].VirtualMachine.ClusterInstances =
+					append(alloc.Spec.ResourceGroup.Resources[idx].VirtualMachine.ClusterInstances,
+						allocv1.ClusterInstance{stack.Selected.ClusterName, ""})
 				clusterNames = append(clusterNames, stack.Selected.ClusterName)
+			}
+			// log the elapsed time for the entire schedule
+			if stack.CreateTime != 0 {
+				spendTime := time.Now().UnixNano() - stack.CreateTime
+				klog.Infof("@@@ Finished Schedule, time consumption: %vms @@@", spendTime/int64(time.Millisecond))
 			}
 		}
 	}
-	alloc.Status.Phase = allocv1.AllocationScheduled
+	alloc.Status.Phase = allocv1.AllocationBound
 	alloc.Status.ClusterNames = clusterNames
 }
 

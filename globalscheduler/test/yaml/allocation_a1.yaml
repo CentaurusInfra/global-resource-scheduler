@@ -9,7 +9,7 @@ spec:
     - name: "1"
       resource_type: vm
       flavors:
-      - flavor_id: c6.large.2
+      - flavor_id: "42"
         spot:
           max_price: "1.5"
           spot_duration_hours: 2
@@ -20,25 +20,20 @@ spec:
         sas: 30
         ssd: 40
       need_eip: true
-      image: "0df07567-87a8-4d01-b7d9-c70f91c86427"
-      security_group_id: "0df07567-87a8-4d01-b7d9-c70f91c86427"
-      nic_name: "0df07567-87a8-4d01-b7d9-c70f91c86427"
+      virtual_machine:
+        image: "0df07567-87a8-4d01-b7d9-c70f91c86427"
+        security_group_id: "58b9fbbf-6f04-49ca-8c7e-ac797c6d236c"
+        nic_name: "9e29aa2d-6943-4109-bc5c-1a882b086122"
   selector:
     geo_location:
-      city: Bellevue
-      province: WA
-      area: NW
-      country: USA
+      city: NewYork
+      province: NewYork
+      area: NE-1
+      country: US
     regions:
-    - region: NW
-      availability_zone: ["x", "y"]
-    operator: chinamobile
+      - region: "NE-1"
+        availability_zone: ["production-az"]
+    operator: globalscheduler
     strategy:
-      location_strategy: "center"
+      location_strategy: centralize
   replicas: 2
-status: 
-  phase: Scheduled
-  scheduler_name: a
-  distributor_name: b
-  dispatcher_name: c
-  cluster_names: ["d", "e"]
