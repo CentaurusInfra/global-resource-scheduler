@@ -14,7 +14,10 @@ Global Scheduler aims to address key scheduling challenges of compute units (e.g
 a large number of DC clouds and edge clouds---large scalability, low scheduling latency, global resource sharing, high resource utilization, 
 application-performance-aware, etc.  
 
-----
+
+The following graph is the global resource scheduler high level architecture.
+
+<img src="images/high_level_arch.png" width="100%" align="center"/>
 
 ## Key Features of Global Scheduler
 
@@ -29,6 +32,10 @@ It achieves large scalability through an end-to-end dynamic geolocation and reso
 Global Scheduler achieves low shceduling latency through the use of lock-free concurrent scheduling design.
 It supports full parallelism without any inter-scheduler head of line blocking.  All the Schedulers operate completely in parallel and do not have to wait for each other.
 Each scheduler has its own local cache for fast information retrieval.
+
+The following graph shows the performance improvement over the latency metrix. For more details, please refer to the [performance test result](https://github.com/CentaurusInfra/global-resource-scheduler/blob/master/docs/misc/Scheduler_Performance.xlsx).
+
+<img src="images/perf_improvement.png" width="100%" align="center"/>
 
 ### Intelligent Scheduling Algorithm
 
@@ -70,10 +77,10 @@ hack/global-scheduler-up.sh
 
 ## Documents and Support
 
-The [design document folder](https://github.com/futurewei-cloud/global-resource-scheduler/tree/master/docs/design-proposals/) contains the detailed design of already implemented features, and also some thoughts for planned features.
+The [design document folder](https://github.com/CentaurusInfra/global-resource-scheduler/tree/master/docs/design-proposals/) contains the detailed design of already implemented features, and also some thoughts for planned features.
 
-The [user guide folder](https://github.com/futurewei-cloud/global-resource-scheduler/tree/master/docs/user-guide/) provides information about these features from users' perspective.
+The [user guide folder](https://github.com/CentaurusInfra/global-resource-scheduler/tree/master/docs/user-guide/) provides information about these features from users' perspective.
 
-To report a problem, please [create an issue](https://github.com/futurewei-cloud/global-resource-scheduler/issues) in the project repo. 
+To report a problem, please [create an issue](https://github.com/CentaurusInfra/global-resource-scheduler/issues) in the project repo.
 
 To ask a question, here is [the invitation](https://join.slack.com/t/arktosworkspace/shared_invite/zt-cmak5gjq-rBxX4vX2TGMyNeU~jzAMLQ) to join [Arktos slack channels](http://arktosworkspace.slack.com/). You can also post in the [email group](https://groups.google.com/forum/#!forum/arktos-user), or [create an issue](https://github.com/futurewei-cloud/arktos/issues) of question type in the repo.
