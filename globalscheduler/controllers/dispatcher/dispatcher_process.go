@@ -87,7 +87,6 @@ func NewProcess(config *rest.Config, namespace string, name string, quit chan st
 	if err != nil {
 		klog.Fatal(err)
 	}
-
 	return Process{
 		namespace:                namespace,
 		name:                     name,
@@ -113,7 +112,6 @@ func (p *Process) Run(quit chan struct{}) {
 
 	dispatcherSelector := fields.ParseSelectorOrDie("metadata.name=" + p.name)
 	dispatcherLW := cache.NewListWatchFromClient(p.dispatcherClientset.GlobalschedulerV1(), "dispatchers", p.namespace, dispatcherSelector)
-
 	dispatcherInformer := cache.NewSharedIndexInformer(dispatcherLW, &dispatcherv1.Dispatcher{}, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
 
 	dispatcherInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -297,7 +295,6 @@ func (p *Process) SendPodToCluster(pod *v1.Pod) {
 						klog.Warningf("The pod %v failed to update its apiserver dtatbase status to failed with the error %v", pod.ObjectMeta.Name, err)
 					}
 				}
-				// util.CheckTime(pod.Name, "dispatcher", "CreatePod-End", 2)
 			}()
 		}
 	}

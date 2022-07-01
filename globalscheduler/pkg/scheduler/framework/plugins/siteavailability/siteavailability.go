@@ -44,7 +44,7 @@ func (pl *SiteAvailability) Name() string {
 // Filter invoked at the filter extension point.
 func (pl *SiteAvailability) Filter(ctx context.Context, cycleState *interfaces.CycleState, stack *types.Stack,
 	siteCacheInfo *sitecacheinfo.SiteCacheInfo) *interfaces.Status {
-	klog.Infof("Filter- siteCacheInfo: %v", siteCacheInfo)
+	klog.V(4).Infof("Filter- siteCacheInfo: %v", siteCacheInfo)
 	if siteCacheInfo.GetSite().Status == constants.SiteStatusOffline || siteCacheInfo.GetSite().Status == constants.SiteStatusSellout {
 		msg := fmt.Sprintf("Site(%s) status is %s, not available!", siteCacheInfo.GetSite().SiteID, siteCacheInfo.GetSite().Status)
 		klog.Info(msg)

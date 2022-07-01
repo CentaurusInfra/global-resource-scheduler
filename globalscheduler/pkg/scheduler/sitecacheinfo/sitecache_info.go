@@ -552,11 +552,11 @@ func GetStackKey(stack *types.Stack) (string, error) {
 	return uid, nil
 }
 
-// DeductSiteResInfo deduct site's resource info
-func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo, regionFlavorMap map[string]*typed.RegionFlavor) error {
+//deduct or add
+func (n *SiteCacheInfo) UpdateSiteResInfo(resInfo types.AllResInfo, regionFlavorMap map[string]*typed.RegionFlavor, deduct bool) error {
 	var resourceTypes []string
 	for resType, res := range resInfo.CpuAndMem {
-		//binding a pod for the first
+		//resource type is null, assign default resource type (e.g. when binding a pod for the first time)
 		if resType == "" {
 			resType = string(DefaultResourceType)
 			resourceTypes = append(resourceTypes, resType)
@@ -564,17 +564,17 @@ func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo, regionFlavor
 		if len(n.RequestedResources) == 0 {
 			reqRes := types.CPUAndMemory{VCPU: res.VCPU, Memory: res.Memory}
 			n.RequestedResources[resType] = &reqRes
-		} else {
-			for reqType, reqRes := range n.RequestedResources {
-				resTypes := strings.Split(reqType, constants.FlavorDelimiter)
-				if !utils.IsContain(resTypes, resType) {
-					klog.Infof("!utils.IsContain: %v", !utils.IsContain(resTypes, resType))
-					continue
-				}
-				reqRes.VCPU += res.VCPU
-				reqRes.Memory += res.Memory
-				n.RequestedResources[resType] = reqRes
+			continue
+		}
+		for reqType, reqRes := range n.RequestedResources {
+			resTypes := strings.Split(reqType, constants.FlavorDelimiter)
+			if !utils.IsContain(resTypes, resType) {
+				klog.V(4).Infof("!utils.IsContain: %v", !utils.IsContain(resTypes, resType))
+				continue
 			}
+			reqRes.VCPU += res.VCPU
+			reqRes.Memory += res.Memory
+			n.RequestedResources[resType] = reqRes
 		}
 	}
 	for volType, used := range resInfo.Storage {
@@ -585,7 +585,7 @@ func (n *SiteCacheInfo) DeductSiteResInfo(resInfo types.AllResInfo, regionFlavor
 		reqVol += used
 		n.RequestedStorage[volType] = reqVol
 	}
-	n.updateSiteFlavor(resourceTypes, regionFlavorMap)
+	n.updateSiteFlavor(resourceTypes, regionFlavorMap, deduct)
 	n.generation = nextGeneration()
 	return nil
 }
@@ -598,10 +598,14 @@ updateFlavor(): /home/ubuntu/go/src/k8s.io/arktos/conf/flavors.json
 global scheduler flavor config file:
 /home/ubuntu/go/src/k8s.io/arktos/conf/flavor_config.yaml
 */
-func (n *SiteCacheInfo) updateSiteFlavor(resourceTypes []string, regionFlavors map[string]*typed.RegionFlavor) {
+func (n *SiteCacheInfo) updateSiteFlavor(resourceTypes []string, regionFlavors map[string]*typed.RegionFlavor, deduct bool) {
 	n.mu.Lock()
 	defer n.mu.Unlock()
 
+	var count, memCount int64
+	for k, v := range regionFlavors {
+		klog.V(4).Infof("updateSiteFlavor Before -  key: %#v, regionFlavor:%#v", k, v)
+	}
 	if n.AllocatableFlavor == nil {
 		n.AllocatableFlavor = map[string]int64{}
 	}
@@ -611,25 +615,31 @@ func (n *SiteCacheInfo) updateSiteFlavor(resourceTypes []string, regionFlavors m
 		regionFalvorKey := regionName + constants.FlavorDelimiter + flavorid
 		flv := regionFlavors[regionFalvorKey]
 		if flv == nil {
-			n.deductFlavor()
+			n.updateFlavorCount(deduct)
 			return
 		}
 		vCPUInt, err := strconv.ParseInt(flv.Vcpus, 10, 64)
 		if err != nil {
-			n.deductFlavor()
+			n.updateFlavorCount(deduct)
 			return
 		}
 		for _, resourceType := range resourceTypes {
 			totalRes := n.TotalResources[resourceType]
 			requestRes := n.RequestedResources[resourceType]
 			if totalRes == nil {
-				n.deductFlavor()
+				n.updateFlavorCount(deduct)
 				return
-			} else if requestRes == nil {
+			}
+			if requestRes == nil {
 				requestRes = &types.CPUAndMemory{VCPU: 0, Memory: 0}
 			}
-			count := (totalRes.VCPU - requestRes.VCPU) / vCPUInt
-			memCount := (totalRes.Memory - requestRes.Memory) / flv.Ram
+			if deduct == true {
+				count = (totalRes.VCPU - requestRes.VCPU) / vCPUInt
+				memCount = (totalRes.Memory - requestRes.Memory) / flv.Ram
+			} else {
+				count = (totalRes.VCPU + requestRes.VCPU) / vCPUInt
+				memCount = (totalRes.Memory + requestRes.Memory) / flv.Ram
+			}
 			if count > memCount {
 				count = memCount
 			}
@@ -643,20 +653,28 @@ func (n *SiteCacheInfo) updateSiteFlavor(resourceTypes []string, regionFlavors m
 	}
 }
 
-func (n *SiteCacheInfo) deductFlavor() {
+func (n *SiteCacheInfo) updateFlavorCount(deduct bool) {
+	var m int64
+	m = 1 //add
+	if deduct == true {
+		m = -1 //deduct
+	}
 	if n.AllocatableFlavor == nil {
 		n.AllocatableFlavor = map[string]int64{}
 	}
 	for key, value := range n.AllocatableFlavor {
-		n.AllocatableFlavor[key] = value - 1
+		n.AllocatableFlavor[key] = value + m
 		if n.RequestedFlavor == nil {
 			n.RequestedFlavor = make(map[string]int64)
 		}
 		requested, ok := n.RequestedFlavor[key]
 		if !ok {
-			n.RequestedFlavor[key] = 1
+			n.RequestedFlavor[key] = 0
+			if deduct == true {
+				n.RequestedFlavor[key] = 1
+			}
 		} else {
-			n.RequestedFlavor[key] = requested + 1
+			n.RequestedFlavor[key] = requested - m
 		}
 	}
 }
