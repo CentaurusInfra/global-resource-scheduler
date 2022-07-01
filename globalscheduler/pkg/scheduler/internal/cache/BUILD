@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "go_default_library",
@@ -38,4 +38,14 @@ filegroup(
     ],
     tags = ["automanaged"],
     visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["snapshot_test.go"],
+    embed = [":go_default_library"],
+    deps = [
+        "//globalscheduler/pkg/scheduler/client/typed:go_default_library",
+        "//globalscheduler/pkg/scheduler/common/constants:go_default_library",
+    ],
 )

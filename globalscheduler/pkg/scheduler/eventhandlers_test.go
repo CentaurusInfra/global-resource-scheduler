@@ -18,10 +18,13 @@ limitations under the License.
 package scheduler
 
 import (
-	"testing"
-
+	"fmt"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
+	internalcache "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache"
 	fakecache "k8s.io/kubernetes/globalscheduler/pkg/scheduler/internal/cache/fake"
+	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
+	"testing"
 )
 
 func TestSkipStackUpdate(t *testing.T) {
@@ -77,6 +80,127 @@ func TestSkipStackUpdate(t *testing.T) {
 			got := sched.skipStackUpdate(test.stack)
 			if got != test.expected {
 				t.Errorf("TestSkipStackUpdate() = %t, expected = %t", got, false)
+			}
+		})
+	}
+}
+
+func TestWithdrawResource(t *testing.T) {
+	siteId := "SW--az1"
+	fmt.Printf("%s", siteId)
+	cm := types.CPUAndMemory{
+		VCPU:   1,
+		Memory: 128,
+	}
+	cpuAndMemMap := make(map[string]types.CPUAndMemory)
+	cpuAndMemMap["vm"] = cm
+	storageMap := make(map[string]float64)
+	storageMap["ssd"] = float64(128)
+	allRes := types.AllResInfo{
+		CpuAndMem: cpuAndMemMap,
+		Storage:   storageMap,
+	}
+
+	podSiteResource := &PodSiteResource{
+		PodName:  "pod1",
+		SiteID:   siteId,
+		Flavor:   "42",
+		Resource: allRes,
+	}
+	podSiteResourceMap := make(map[string]*PodSiteResource)
+	podSiteResourceMap["pod1"] = podSiteResource
+
+	region := "SW"
+	id := "42"
+	name := "m1.nano"
+	vcpus := "1"
+	ram := int64(128)
+	disk := "0"
+	regionFlavorID := region + "||" + id
+	flavor := &typed.RegionFlavor{
+		RegionFlavorID: regionFlavorID,
+		Region:         region,
+		Flavor: typed.Flavor{
+			ID:    id,
+			Name:  name,
+			Vcpus: vcpus,
+			Ram:   ram,
+			Disk:  disk,
+		},
+	}
+	site := &types.Site{
+		SiteID:           siteId,
+		ClusterNamespace: "default",
+		ClusterName:      "cluster1",
+	}
+
+	siteCacheInfo := &schedulersitecacheinfo.SiteCacheInfo{
+		Site:                  site,
+		RequestedResources:    make(map[string]*types.CPUAndMemory),
+		TotalResources:        make(map[string]*types.CPUAndMemory),
+		RequestedStorage:      make(map[string]float64),
+		TotalStorage:          make(map[string]float64),
+		RequestedFlavor:       make(map[string]int64),
+		AllocatableFlavor:     make(map[string]int64),
+		AllocatableSpotFlavor: make(map[string]types.SpotResource),
+		Qos:                   make(map[string]float64),
+	}
+	siteCacheInfo.AllocatableFlavor["42"] = int64(10)
+	siteCacheInfo.AllocatableFlavor["1"] = int64(10)
+	siteCacheInfo.AllocatableFlavor["2"] = int64(10)
+	SiteCacheInfoMap := make(map[string]*schedulersitecacheinfo.SiteCacheInfo)
+	RegionFlavorMap := make(map[string]*typed.RegionFlavor)
+	FlavorMap := make(map[string]*typed.RegionFlavor)
+	FlavorMap[id] = flavor
+	RegionFlavorMap[regionFlavorID] = flavor
+	SiteCacheInfoMap[siteId] = siteCacheInfo
+	table := []struct {
+		podName          string
+		siteCacheInfoMap map[string]*schedulersitecacheinfo.SiteCacheInfo
+		regionFlavorMap  map[string]*typed.RegionFlavor
+		flavorMap        map[string]*typed.RegionFlavor
+		expected         bool
+	}{
+		{
+			podName:          "pod1",
+			siteCacheInfoMap: SiteCacheInfoMap,
+			regionFlavorMap:  RegionFlavorMap,
+			flavorMap:        FlavorMap,
+			expected:         true,
+		},
+		{
+			podName:          "pod2",
+			siteCacheInfoMap: SiteCacheInfoMap,
+			regionFlavorMap:  RegionFlavorMap,
+			flavorMap:        FlavorMap,
+			expected:         false,
+		},
+	}
+	for _, test := range table {
+		t.Run(test.podName, func(t *testing.T) {
+			t.Logf("pod:%s", test.podName)
+			sched := &Scheduler{
+				PodSiteResourceMap: podSiteResourceMap,
+				siteCacheInfoSnapshot: &internalcache.Snapshot{
+					SiteCacheInfoMap: test.siteCacheInfoMap,
+					RegionFlavorMap:  test.regionFlavorMap,
+					FlavorMap:        test.flavorMap,
+				},
+			}
+			var nAllocatableFlavorBefore int64
+			nAllocatableFlavorBefore = int64(0)
+			siteInfoBefore, ok := sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteId]
+			if ok {
+				nAllocatableFlavorBefore = siteInfoBefore.AllocatableFlavor[id]
+			}
+			err := sched.withdrawResource(test.podName)
+			if err != nil {
+				t.Errorf("TestWithdrawResource() = %v, expected = %v", err, nil)
+			}
+			siteInfoAfter := sched.siteCacheInfoSnapshot.SiteCacheInfoMap[siteId]
+			nAllocatableFlavorAfter := siteInfoAfter.AllocatableFlavor[id]
+			if testResult := nAllocatableFlavorAfter > nAllocatableFlavorBefore; testResult != test.expected {
+				t.Errorf("TestWithdrawResource() = %v, expected = %v", testResult, test.expected)
 			}
 		})
 	}

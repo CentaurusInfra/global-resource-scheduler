@@ -20,6 +20,7 @@ package cache
 import (
 	"fmt"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/client/typed"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
 	schedulerlisters "k8s.io/kubernetes/globalscheduler/pkg/scheduler/listers"
 	schedulersitecacheinfo "k8s.io/kubernetes/globalscheduler/pkg/scheduler/sitecacheinfo"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
@@ -134,4 +135,16 @@ func (s *Snapshot) Get(siteID string) (*schedulersitecacheinfo.SiteCacheInfo, er
 
 func (s *Snapshot) GetFlavors() (map[string]*typed.RegionFlavor, error) {
 	return s.RegionFlavorMap, nil
+}
+
+func (s *Snapshot) GetRegionFlavors(region string) (map[string]*typed.RegionFlavor, error) {
+	regionFlavorMap := make(map[string]*typed.RegionFlavor)
+	for flavorId := range s.FlavorMap {
+		key := region + constants.FlavorDelimiter + flavorId
+		regionFlavor := s.RegionFlavorMap[key]
+		if regionFlavor != nil {
+			regionFlavorMap[key] = regionFlavor
+		}
+	}
+	return regionFlavorMap, nil
 }

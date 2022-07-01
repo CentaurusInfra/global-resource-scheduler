@@ -31,6 +31,7 @@ import (
 	clusterv1 "k8s.io/kubernetes/globalscheduler/pkg/apis/cluster/v1"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/common/constants"
 	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/types"
+	"k8s.io/kubernetes/globalscheduler/pkg/scheduler/utils"
 	"k8s.io/kubernetes/pkg/controller"
 	statusutil "k8s.io/kubernetes/pkg/util/pod"
 )
@@ -113,6 +114,31 @@ func AddAllEventHandlers(sched *Scheduler) {
 			},
 		},
 	)
+	// failed pod queue
+	sched.PodInformer.Informer().AddEventHandler(
+		cache.FilteringResourceEventHandler{
+			FilterFunc: func(obj interface{}) bool {
+				switch t := obj.(type) {
+				case *v1.Pod:
+					return failedToSchedule(t) && responsibleForPod(t, sched.SchedulerName)
+				case cache.DeletedFinalStateUnknown:
+					if pod, ok := t.Obj.(*v1.Pod); ok {
+						return failedToSchedule(pod) && responsibleForPod(pod, sched.SchedulerName)
+					}
+					utilruntime.HandleError(fmt.Errorf("unable to convert object %T to *v1.Pod in %T", obj, sched))
+					return false
+				default:
+					utilruntime.HandleError(fmt.Errorf("unable to handle object in %T: %T", sched, obj))
+					return false
+				}
+			},
+			Handler: cache.ResourceEventHandlerFuncs{
+				AddFunc:    sched.addPodWithdrawResource,
+				UpdateFunc: sched.updatePodWithdrawResource,
+				DeleteFunc: sched.deletePodWithdrawResource,
+			},
+		},
+	)
 	sched.ClusterInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    sched.addCluster,
 		UpdateFunc: sched.updateCluster,
@@ -135,15 +161,18 @@ func responsibleForPod(pod *v1.Pod, schedulerName string) bool {
 	return schedulerName == pod.Status.AssignedScheduler.Name
 }
 
+// failedToSchedule selects pods that scheduled but failed to create vm
+func failedToSchedule(pod *v1.Pod) bool {
+	return pod.Status.Phase == v1.PodFailed
+}
+
 // addPodToCache add pod to the stack cache of the scheduler
 func (sched *Scheduler) addPodToCache(obj interface{}) {
 	pod, ok := obj.(*v1.Pod)
-	klog.Infof("Add a pod: %v", pod)
 	if !ok {
 		klog.Errorf("cannot convert to *v1.Pod: %v", obj)
 		return
 	}
-
 	// add pod resource to a stack
 	stack := getStackFromPod(pod)
 
@@ -160,7 +189,6 @@ func (sched *Scheduler) updatePodInCache(oldObj, newObj interface{}) {
 		return
 	}
 	newPod, ok := newObj.(*v1.Pod)
-	klog.Infof("Update a pod: %v", newPod)
 	if !ok {
 		klog.Errorf("cannot convert newObj to *v1.Pod: %v", newObj)
 		return
@@ -178,7 +206,7 @@ func (sched *Scheduler) deletePodFromCache(obj interface{}) {
 	switch t := obj.(type) {
 	case *v1.Pod:
 		pod = t
-		klog.Infof("Delete a pod: %v", pod)
+		klog.V(4).Infof("Delete a pod: %v", pod.Name)
 	case cache.DeletedFinalStateUnknown:
 		var ok bool
 		pod, ok = t.Obj.(*v1.Pod)
@@ -301,15 +329,13 @@ func (sched *Scheduler) updatePodInSchedulingQueue(oldObj, newObj interface{}) {
 		return
 	}
 	newPod, ok := newObj.(*v1.Pod)
-	klog.Infof("updatePodToSchedulingQueue : %v", newPod)
+	klog.V(4).Infof("updatePodToSchedulingQueue : %v", newPod)
 	if !ok {
 		klog.Errorf("cannot convert newObj to *v1.Pod: %v", newObj)
 		return
 	}
-
 	oldStack := getStackFromPod(oldPod)
 	newStack := getStackFromPod(newPod)
-
 	if sched.skipStackUpdate(newStack) {
 		return
 	}
@@ -323,7 +349,7 @@ func (sched *Scheduler) deletePodFromSchedulingQueue(obj interface{}) {
 	switch t := obj.(type) {
 	case *v1.Pod:
 		pod = obj.(*v1.Pod)
-		klog.Infof("deletePodToSchedulingQueue : %v", pod)
+		klog.V(4).Infof("deletePodToSchedulingQueue : %v", pod.Name)
 	case cache.DeletedFinalStateUnknown:
 		var ok bool
 		pod, ok = t.Obj.(*v1.Pod)
@@ -372,14 +398,14 @@ func (sched *Scheduler) skipStackUpdate(stack *types.Stack) bool {
 	if !reflect.DeepEqual(assumedStackCopy, stackCopy) {
 		return false
 	}
-	klog.V(3).Infof("Skipping stack %s/%s/%s update", stack.Tenant, stack.PodNamespace, stack.PodName)
+	klog.V(4).Infof("Skipping stack %s/%s/%s update", stack.Tenant, stack.PodNamespace, stack.PodName)
 	return true
 }
 
 func (sched *Scheduler) bindStacks(assumedStacks []types.Stack) {
-	klog.Infof("assumedStacks: %v", assumedStacks)
+	klog.V(4).Infof("assumedStacks: %v", assumedStacks)
 	for _, newStack := range assumedStacks {
-		klog.Infof("newStack: %v", newStack)
+		klog.V(4).Infof("newStack: %v", newStack)
 		clusterName := newStack.Selected.ClusterName
 		sched.bindToSite(clusterName, &newStack)
 	}
@@ -398,7 +424,7 @@ func (sched *Scheduler) setPodScheduleErr(reqStack *types.Stack) error {
 	newStatus := v1.PodStatus{
 		Phase: v1.PodNoSchedule,
 	}
-	klog.Infof("Attempting to update pod status from %v to %v", pod.Status, newStatus)
+	klog.V(4).Infof("Attempting to update pod status from %v to %v", pod.Status, newStatus)
 	_, _, err = statusutil.PatchPodStatus(sched.Client, reqStack.Tenant, reqStack.PodNamespace, reqStack.PodName, pod.Status, newStatus)
 	if err != nil {
 		klog.Warningf("PatchPodStatus for pod %q: %v", reqStack.PodName+"/"+reqStack.PodNamespace+"/"+
@@ -406,7 +432,7 @@ func (sched *Scheduler) setPodScheduleErr(reqStack *types.Stack) error {
 		return err
 	}
 
-	klog.Infof("Update pod status from %v to %v success", pod.Status, newStatus)
+	klog.V(4).Infof("Update pod status from %v to %v success", pod.Status, newStatus)
 	return nil
 }
 
@@ -423,10 +449,9 @@ func (sched *Scheduler) bindToSite(clusterName string, assumedStack *types.Stack
 			Name: clusterName,
 		},
 	}
-
-	klog.V(3).Infof("binding: %v", binding)
+	klog.V(4).Infof("binding: %v", binding)
 	// do api server update here
-	klog.Infof("Attempting to bind %v to %v", binding.Name, binding.Target.Name)
+	klog.V(4).Infof("Attempting to bind %v to %v", binding.Name, binding.Target.Name)
 	err := sched.Client.CoreV1().PodsWithMultiTenancy(binding.Namespace, binding.Tenant).Bind(binding)
 	if err != nil {
 		klog.Errorf("Failed to bind stack: %v/%v/%v", assumedStack.Tenant, assumedStack.PodNamespace,
@@ -434,7 +459,6 @@ func (sched *Scheduler) bindToSite(clusterName string, assumedStack *types.Stack
 		if err := sched.SchedulerCache.ForgetStack(assumedStack); err != nil {
 			klog.Errorf("scheduler cache ForgetStack failed: %v", err)
 		}
-
 		return err
 	}
 	return nil
@@ -444,7 +468,7 @@ func (sched *Scheduler) addCluster(object interface{}) {
 	resource := object.(*clusterv1.Cluster)
 	clusterCopy := resource.DeepCopy()
 	if sched.verifyClusterInfo(clusterCopy) == false {
-		klog.Infof(" Cluster data is not correct: %v", clusterCopy)
+		klog.V(4).Infof(" Cluster data is not correct: %v", clusterCopy)
 	}
 	key, err := controller.KeyFunc(object)
 	if err != nil {
@@ -452,7 +476,7 @@ func (sched *Scheduler) addCluster(object interface{}) {
 		return
 	}
 	sched.Enqueue(key, EventType_Create)
-	klog.Infof("Enqueue Create cluster: %v", key)
+	klog.V(4).Infof("Enqueue Create cluster: %v", key)
 }
 
 func (sched *Scheduler) updateCluster(oldObject, newObject interface{}) {
@@ -461,7 +485,7 @@ func (sched *Scheduler) updateCluster(oldObject, newObject interface{}) {
 	oldClusterCopy := oldResource.DeepCopy()
 	newClusterCopy := newResource.DeepCopy()
 	if sched.verifyClusterInfo(newClusterCopy) {
-		klog.Infof(" Cluster data is not correct: %v", newResource)
+		klog.V(4).Infof(" Cluster data is not correct: %v", newResource)
 	}
 	key1, err1 := controller.KeyFunc(oldObject)
 	key2, err2 := controller.KeyFunc(newObject)
@@ -478,13 +502,13 @@ func (sched *Scheduler) updateCluster(oldObject, newObject interface{}) {
 	switch eventType {
 	case ClusterUpdateNo:
 		{
-			klog.Infof("No actual change in clusters, discarding: %v", newClusterCopy.Name)
+			klog.V(4).Infof("No actual change in clusters, discarding: %v", newClusterCopy.Name)
 			break
 		}
 	case ClusterUpdateYes:
 		{
 			sched.Enqueue(key2, EventType_Update)
-			klog.Infof("Enqueue Update Cluster: %v", key2)
+			klog.V(4).Infof("Enqueue Update Cluster: %v", key2)
 			break
 		}
 	default:
@@ -499,7 +523,7 @@ func (sched *Scheduler) deleteCluster(object interface{}) {
 	resource := object.(*clusterv1.Cluster)
 	clusterCopy := resource.DeepCopy()
 	if sched.verifyClusterInfo(clusterCopy) == false {
-		klog.Infof(" Cluster data is not correct: %v", clusterCopy)
+		klog.V(4).Infof(" Cluster data is not correct: %v", clusterCopy)
 		return
 	}
 	key, err := controller.KeyFunc(object)
@@ -510,7 +534,7 @@ func (sched *Scheduler) deleteCluster(object interface{}) {
 	sched.Enqueue(key, EventType_Delete)
 	siteID := clusterCopy.Spec.Region.Region + constants.SiteDelimiter + clusterCopy.Spec.Region.AvailabilityZone
 	sched.deletedClusters[key] = siteID
-	klog.Infof("Enqueue Delete Cluster: %v", key)
+	klog.V(4).Infof("Enqueue Delete Cluster: %v", key)
 }
 
 // Enqueue puts key of the cluster object in the work queue
@@ -531,4 +555,97 @@ func (sched *Scheduler) verifyClusterInfo(cluster *clusterv1.Cluster) (verified 
 	}
 	verified = true
 	return verified
+}
+
+func (sched *Scheduler) verifyPodInfo(pod *v1.Pod) (verified bool) {
+	verified = false
+	name := pod.Name
+	if pod.Name == "" {
+		klog.Errorf("pod name:%s is empty", name)
+		return verified
+	}
+	verified = true
+	return verified
+}
+
+func (sched *Scheduler) addPodWithdrawResource(object interface{}) {
+	pod, ok := object.(*v1.Pod)
+	klog.V(4).Infof("Add a pod to withdraw resource: %v", pod.Name)
+	if !ok {
+		klog.Errorf("cannot convert to *v1.Pod: %v", object)
+		return
+	}
+	podCopy := pod.DeepCopy()
+	if sched.verifyPodInfo(podCopy) == false {
+		klog.V(4).Infof(" Pod data is not correct: %v", podCopy)
+	}
+	err := sched.withdrawResource(pod.Name)
+	if err != nil {
+		klog.Errorf("withdraw resource of pod %s failed", pod.Name)
+	}
+}
+
+func (sched *Scheduler) updatePodWithdrawResource(oldObj, newObj interface{}) {
+	oldPod, ok := oldObj.(*v1.Pod)
+	if !ok {
+		klog.Errorf("cannot convert oldObj to *v1.Pod: %v", oldObj)
+		return
+	}
+	newPod, ok := newObj.(*v1.Pod)
+	klog.V(4).Infof("Update a pod: %v", newPod)
+	if !ok {
+		klog.Errorf("cannot convert newObj to *v1.Pod: %v", newObj)
+		return
+	}
+	if oldPod.Name != newPod.Name {
+		klog.Errorf("old pod name and new pod name should be equal: %s, %s", oldPod.Name, newPod.Name)
+		return
+	}
+	err := sched.withdrawResource(newPod.Name)
+	if err != nil {
+		klog.Errorf("withdraw resource of pod %s failed", oldPod.Name)
+	}
+}
+
+func (sched *Scheduler) deletePodWithdrawResource(obj interface{}) {
+	var pod *v1.Pod
+	switch t := obj.(type) {
+	case *v1.Pod:
+		pod = t
+		klog.V(4).Infof("Delete a pod: %v", pod.Name)
+	case cache.DeletedFinalStateUnknown:
+		var ok bool
+		pod, ok = t.Obj.(*v1.Pod)
+		if !ok {
+			klog.Errorf("cannot convert to *v1.Pod: %v", t.Obj)
+			return
+		}
+	default:
+		klog.Errorf("cannot convert to *v1.Pod: %v", t)
+		return
+	}
+	err := sched.withdrawResource(pod.Name)
+	if err != nil {
+		klog.Errorf("withdraw resource of pod %s failed", pod.Name)
+	}
+}
+
+//withdraw reserved resources to a pod & add it to cache to other pods
+func (sched *Scheduler) withdrawResource(podName string) error {
+	resource := sched.PodSiteResourceMap[podName]
+	if resource == nil {
+		klog.V(4).Infof("there is no preserved resource for pod: %s", podName)
+		return nil
+	}
+	allResInfo := resource.Resource
+	regionName := utils.GetRegionName(resource.SiteID)
+	regionFlavor, err := sched.siteCacheInfoSnapshot.GetRegionFlavors(regionName)
+	if err != nil {
+		klog.Errorf("there is no valid flavor for region: %s", regionName)
+		return err
+	}
+	siteCacheInfo := sched.siteCacheInfoSnapshot.SiteCacheInfoMap[resource.SiteID]
+	siteCacheInfo.UpdateSiteResInfo(allResInfo, regionFlavor, false)
+	delete(sched.PodSiteResourceMap, podName)
+	return nil
 }

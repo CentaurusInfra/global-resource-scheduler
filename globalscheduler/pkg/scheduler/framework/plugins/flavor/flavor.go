@@ -310,7 +310,7 @@ func (f *Flavor) Filter(ctx context.Context, cycleState *interfaces.CycleState, 
 		var isCommonMatch, _ = isComFlavorMatch(flavorMap, siteCacheInfo)
 		var isSpotMatch, _ = isSpotFlavorMatch(spotFlavorMap, siteCacheInfo)
 		if isCommonMatch && isSpotMatch {
-			klog.Infof("*** isCommonMatch:%v, isSpotMatch:%v ", isCommonMatch, isSpotMatch)
+			klog.Infof("isCommonMatch:%v, isSpotMatch:%v ", isCommonMatch, isSpotMatch)
 			return nil
 		}
 	}

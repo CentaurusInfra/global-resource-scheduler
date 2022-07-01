@@ -430,6 +430,34 @@ func (f *framework) runBindPlugin(ctx context.Context, bp BindPlugin, state *Cyc
 	return bp.Bind(ctx, state, stack, siteCacheInfo)
 }
 
+/// RunBindResourcePlugins runs the set of configured bind plugins until one returns a non `Skip` status.
+func (f *framework) RunBindResourcePlugins(ctx context.Context, state *CycleState, stack *types.Stack,
+	siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) (status *Status, siteId string, flavor string, resInfo *types.AllResInfo) {
+	if len(f.bindPlugins) == 0 {
+		return NewStatus(Skip, ""), "", "", nil
+	}
+	for _, bp := range f.bindPlugins {
+		status, siteId, flavor, resInfo = f.runBindResourcePlugin(ctx, bp, state, stack, siteCacheInfo)
+		if status != nil && status.Code() == Skip {
+			continue
+		}
+		if !status.IsSuccess() {
+			msg := fmt.Sprintf("plugin %q failed to bind pod %q: %v", bp.Name(), stack.PodName, status.Message())
+			klog.Errorf("%s", msg)
+			status = NewStatus(Error, msg)
+			return status, siteId, flavor, resInfo
+		}
+		return status, siteId, flavor, resInfo
+	}
+	return status, siteId, flavor, resInfo
+}
+
+///added for resource bind & revoke
+func (f *framework) runBindResourcePlugin(ctx context.Context, bp BindPlugin, state *CycleState, stack *types.Stack,
+	siteCacheInfo *schedulersitecacheinfo.SiteCacheInfo) (*Status, string, string, *types.AllResInfo) {
+	return bp.BindResource(ctx, state, stack, siteCacheInfo)
+}
+
 // RunPostBindPlugins runs the set of configured postbind plugins.
 func (f *framework) RunPostBindPlugins(ctx context.Context, state *CycleState, stack *types.Stack, siteID string) {
 	for _, pl := range f.postBindPlugins {
